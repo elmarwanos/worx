@@ -628,3 +628,248 @@
   color: var(--muted);
   margin-top: 16px;
 }
+
+/* ---- Quick contact dock ---------------------------------------
+   A floating button that travels with the viewport on every page,
+   plus the panel it opens. Built by static/js/contact-widget.js
+   from a single data object. */
+
+.qc-dock {
+  position: fixed;
+  right: clamp(16px, 4vw, 32px);
+  bottom: clamp(16px, 4vw, 32px);
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+/* Floating action button — hidden until the page is scrolled */
+.qc-fab {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 22px 0 18px;
+  border-radius: 999px;
+  background: var(--gradient);
+  color: var(--on-accent);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 12px 30px rgba(229, 125, 35, 0.32);
+  transform: translateY(14px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.25s ease;
+}
+
+.qc-dock.is-ready .qc-fab {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.qc-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(250, 167, 25, 0.42);
+}
+
+.qc-fab svg {
+  width: 20px;
+  height: 20px;
+}
+
+.qc-fab-label {
+  white-space: nowrap;
+}
+
+/* Panel */
+.qc-panel {
+  width: min(360px, calc(100vw - 32px));
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transform-origin: bottom right;
+  transform: translateY(16px) scale(0.96);
+  opacity: 0;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+}
+
+.qc-dock.is-open .qc-panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.qc-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 22px 16px;
+  background: var(--panel);
+}
+
+.qc-panel-head h3 {
+  font-size: 1.15rem;
+}
+
+.qc-panel-head p {
+  margin-top: 6px;
+  font-size: 0.86rem;
+}
+
+.qc-close {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.qc-close:hover {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+}
+
+.qc-channels {
+  padding: 8px 12px;
+}
+
+.qc-channel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.qc-channel:hover {
+  background: var(--surface-2);
+}
+
+.qc-channel .qc-ico {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  background: rgba(229, 125, 35, 0.12);
+  border: 1px solid rgba(229, 125, 35, 0.25);
+}
+
+.qc-channel-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.qc-channel .qc-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.qc-channel .qc-value {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.qc-form {
+  padding: 16px 22px 22px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 12px;
+}
+
+.qc-form label {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.qc-form input,
+.qc-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.qc-form input:focus,
+.qc-form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(229, 125, 35, 0.18);
+}
+
+.qc-form .btn {
+  width: 100%;
+  justify-content: center;
+  padding-block: 12px;
+}
+
+.qc-note {
+  min-height: 1.1em;
+  font-size: 0.8rem;
+  color: var(--accent-2);
+}
+
+/* Phones: full-width bottom sheet */
+@media (max-width: 480px) {
+  .qc-dock {
+    left: 16px;
+    right: 16px;
+    align-items: stretch;
+  }
+
+  .qc-panel {
+    width: 100%;
+  }
+
+  .qc-fab {
+    align-self: flex-end;
+    padding: 0;
+    width: 56px;
+    justify-content: center;
+  }
+
+  .qc-fab-label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qc-fab,
+  .qc-panel {
+    transition: opacity 0.15s ease;
+    transform: none;
+  }
+
+  .qc-dock.is-open .qc-panel,
+  .qc-dock.is-ready .qc-fab {
+    transform: none;
+  }
+}
