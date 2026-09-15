@@ -73,6 +73,28 @@
   margin-top: 40px;
 }
 
+/* Three.js layered-ridge backdrop (static/js/hero-background.js).
+   The CSS blobs below stay visible — and keep doing their own GSAP
+   scroll parallax — until this script confirms WebGL is ready, so a
+   blocked CDN or unsupported browser never shows an empty hero. */
+.hero-bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1s ease;
+  pointer-events: none;
+}
+
+.hero.hero-bg-ready .hero-bg-canvas {
+  opacity: 1;
+}
+
+.hero.hero-bg-ready .hero-blob {
+  opacity: 0;
+}
+
 /* Animated gradient blobs behind the hero */
 .hero-blob {
   position: absolute;
@@ -80,6 +102,7 @@
   filter: blur(90px);
   opacity: 0.45;
   pointer-events: none;
+  transition: opacity 1s ease;
 }
 
 .hero-blob--amber {
@@ -131,6 +154,40 @@
   transform: rotate(4deg);
 }
 
+/* Three.js gem — sits in the same tilted frame as the fallback tile.
+   The PNG stays underneath and visible until hero-scene.js confirms
+   WebGL initialised, so a blocked CDN / no-WebGL browser never shows
+   an empty frame. */
+.hero-art--3d {
+  aspect-ratio: 1 / 1;
+}
+
+.hero-art--3d .hero-art-fallback,
+.hero-art--3d .hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.6s ease;
+}
+
+.hero-art--3d .hero-canvas {
+  opacity: 0;
+  border-radius: 14%;
+  transform: rotate(-6deg);
+  box-shadow:
+    0 40px 90px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(254, 238, 207, 0.08);
+}
+
+.hero-art--3d.is-ready .hero-art-fallback {
+  opacity: 0;
+}
+
+.hero-art--3d.is-ready .hero-canvas {
+  opacity: 1;
+}
+
 @media (max-width: 980px) {
   .hero {
     padding-top: 120px;
@@ -145,6 +202,10 @@
   }
 
   .hero-art img {
+    transform: rotate(-4deg);
+  }
+
+  .hero-art--3d .hero-canvas {
     transform: rotate(-4deg);
   }
 
@@ -533,52 +594,7 @@
   margin: 18px auto 34px;
 }
 
-/* ---- Contact form ------------------------------------------ */
-
-.contact-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 60px;
-}
-
-@media (max-width: 860px) {
-  .contact-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.form-field {
-  margin-bottom: 22px;
-}
-
-.form-field label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-
-.form-field input,
-.form-field textarea {
-  width: 100%;
-  padding: 14px 16px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  color: var(--text);
-  font: inherit;
-  transition: border-color 0.25s ease;
-}
-
-.form-field input:focus,
-.form-field textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(229, 125, 35, 0.18);
-}
+/* ---- Contact details (below the questionnaire) -------------- */
 
 .contact-detail {
   display: flex;
@@ -871,5 +887,458 @@
   .qc-dock.is-open .qc-panel,
   .qc-dock.is-ready .qc-fab {
     transform: none;
+  }
+}
+
+/* ---- Contact planner ------------------------------------------
+   Built by static/js/contact.js into #contact-wizard: five short
+   questions, one at a time, answered with interactive cards and
+   plain language rather than a technical spec sheet. Reuses the
+   tokens above; .cw-* is self-contained so it never leaks into
+   the rest of the site. */
+
+.cw-fallback {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.cw-fallback a {
+  color: var(--accent-2);
+}
+
+.cw {
+  margin-top: 4px;
+}
+
+/* Header: progress + step counter + start over */
+.cw-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.cw-progress i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--gradient);
+  transition: width 0.4s ease;
+}
+
+.cw-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.cw-step-count {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--accent-2);
+}
+
+.cw-startover {
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cw-startover:hover {
+  color: var(--text);
+}
+
+/* Screen-reader live region */
+.cw-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Resume banner */
+.cw-resume {
+  margin-top: 24px;
+  padding: 20px 22px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+}
+
+.cw-resume p {
+  color: var(--text);
+  font-size: 0.96rem;
+}
+
+.cw-resume-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.cw-resume-actions .btn {
+  padding: 10px 22px;
+  font-size: 0.9rem;
+}
+
+/* One question at a time, in a single centred column */
+.cw-stage {
+  max-width: 640px;
+  margin-top: 32px;
+}
+
+/* Question 1 only: let its card row use the full page width. */
+.cw-stage--wide {
+  max-width: none;
+}
+
+.cw-form {
+  min-width: 0;
+}
+
+.cw-step {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  animation: cw-fade 0.4s ease both;
+}
+
+@keyframes cw-fade {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.cw-legend {
+  padding: 0;
+  margin-bottom: 18px;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.cw-legend:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.cw-hint {
+  margin: 10px 0 22px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* Interactive answer cards, used in place of plain radio buttons */
+.cw-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* When a card group has an odd number of options, don't leave the
+   last one dangling alone on the left — let it span the full row. */
+.cw-options .cw-option:nth-child(odd):last-child {
+  grid-column: 1 / -1;
+}
+
+/* Question 2 (what it should achieve): a little extra breathing room
+   between its cards. */
+.cw-options--goal {
+  gap: 16px;
+}
+
+@media (max-width: 560px) {
+  .cw-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Question 1: four cards across the full width, "Not sure yet" on its
+   own row underneath, aligned left at the same width as the cards above. */
+.cw-options--build {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.cw-options--build .cw-option:last-child {
+  grid-column: 1 / -1;
+  justify-self: start;
+  width: calc(25% - 9px);
+}
+
+@media (max-width: 860px) {
+  .cw-options--build {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cw-options--build .cw-option:last-child {
+    width: calc(50% - 6px);
+  }
+}
+
+@media (max-width: 560px) {
+  .cw-options--build {
+    grid-template-columns: 1fr;
+  }
+
+  .cw-options--build .cw-option:last-child {
+    grid-column: auto;
+    width: 100%;
+  }
+}
+
+.cw-option {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.cw-option:hover {
+  border-color: rgba(229, 125, 35, 0.5);
+  transform: translateY(-1px);
+}
+
+.cw-option:focus-within {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+.cw-option.is-selected {
+  border-color: var(--accent);
+  background: rgba(229, 125, 35, 0.08);
+}
+
+.cw-option input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.cw-option-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cw-option-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--text);
+}
+
+.cw-option-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* Soft panel for the open idea field. Capped at a comfortable reading/
+   typing width even when it sits inside the wide Q1 stage. */
+.cw-followup {
+  max-width: 640px;
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.cw-followup-title {
+  margin-bottom: 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cw-followup .cw-hint {
+  margin-top: 0;
+}
+
+/* A lightweight conditional reveal (e.g. the "Something else" detail) */
+.cw-reveal {
+  margin-top: 18px;
+  animation: cw-fade 0.3s ease both;
+}
+
+/* Company / Personal field groups on the final step */
+.cw-field-group + .cw-field-group {
+  margin-top: 28px;
+}
+
+.cw-field-group-title {
+  margin-bottom: 14px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.cw-field + .cw-field {
+  margin-top: 14px;
+}
+
+.cw-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cw-input {
+  width: 100%;
+  padding: 13px 15px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cw-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(229, 125, 35, 0.18);
+}
+
+.cw-textarea-lg {
+  min-height: 180px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.cw-req {
+  margin-left: 4px;
+  color: var(--muted);
+}
+
+.cw-error {
+  margin-top: 16px;
+  font-size: 0.88rem;
+  color: #ff8a6b;
+}
+
+/* Nav */
+.cw-nav {
+  display: flex;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.cw-nav [data-next] {
+  margin-left: auto;
+}
+
+.cw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+/* Budget slider */
+.cw-budget-value {
+  margin-bottom: 18px;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cw-range {
+  width: 100%;
+  margin: 0;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line-strong);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.cw-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--ink);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.cw-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--ink);
+}
+
+.cw-range:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 6px;
+}
+
+.cw-range-scale {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* Success screen */
+.cw-success-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 24px;
+  border-radius: 50%;
+  background: rgba(229, 125, 35, 0.12);
+  border: 1px solid rgba(229, 125, 35, 0.25);
+  color: var(--accent-2);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cw-step,
+  .cw-reveal {
+    animation: none;
+  }
+
+  .cw-progress i {
+    transition: none;
   }
 }

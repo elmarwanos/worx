@@ -26,7 +26,10 @@ Worx/
 │   ├── performance-seo.html
 │   ├── choosing-your-stack.html
 │   └── ar-activations.html
-├── contact/index.html      Contact form (opens mail client) + details
+├── contact/index.html      Project planner: a 5-step wizard that
+│                           personalises from ?service= / referrer /
+│                           returning-visitor memory, builds a brief +
+│                           service recommendation, hands off via mailto
 └── static/
     ├── css/
     │   ├── base.css        Design tokens, reset, typography, utilities
@@ -34,9 +37,12 @@ Worx/
     │   ├── components.css  Buttons, cards, FAQ, forms, marquee…
     │   └── animations.css  Reveal states + CSS fallbacks
     ├── js/
-    │   ├── nav.js          Header scroll state, mobile menu, active link
-    │   ├── animations.js   GSAP: hero stagger, scroll reveals, counters, marquee
-    │   └── main.js         FAQ accordion, contact form, footer year
+    │   ├── nav.js            Header scroll state, mobile menu, active link
+    │   ├── animations.js     GSAP: hero stagger, scroll reveals, counters, marquee
+    │   ├── main.js           FAQ accordion, footer year
+    │   ├── contact-widget.js Floating "quick contact" dock — loaded on every
+    │   │                     page except /contact (which has the full planner)
+    │   └── contact.js        The /contact project planner wizard
     └── assets/
         ├── Dark Logo.png / Light Logo.png   Source logos (full stacked lockup)
         ├── favicon.png                       Source square mark
