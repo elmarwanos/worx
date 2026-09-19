@@ -540,59 +540,62 @@
 
         <svg class="mars-worx-flag" viewBox="0 0 337 360" role="img" aria-hidden="true" focusable="false">
           <defs>
+            <!-- fabric shading -- the exact orange sampled from logo-dark.png's
+                 badge background (#e77d11), with subtle fold shading so it
+                 still reads as cloth instead of a flat digital rectangle.
+                 Static: no wave/turbulence filter is applied anywhere below. -->
             <linearGradient id="worxClothShade" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#000000" />
-              <stop offset="16%" stop-color="#161616" />
-              <stop offset="32%" stop-color="#000000" />
-              <stop offset="52%" stop-color="#1a1a1a" />
-              <stop offset="70%" stop-color="#000000" />
-              <stop offset="86%" stop-color="#141414" />
-              <stop offset="100%" stop-color="#000000" />
+              <stop offset="0%" stop-color="#e77d11" />
+              <stop offset="18%" stop-color="#cf6d0d" />
+              <stop offset="40%" stop-color="#f08d29" />
+              <stop offset="65%" stop-color="#d0700e" />
+              <stop offset="100%" stop-color="#e77d11" />
             </linearGradient>
-            <filter id="worxFlagWave" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
-              <feTurbulence type="fractalNoise" numOctaves="2" seed="7" baseFrequency="0.009 0.05" result="worxNoise">
-                <animate attributeName="baseFrequency" dur="7s" repeatCount="indefinite" calcMode="spline"
-                  keySplines="0.45 0 0.55 1;0.45 0 0.55 1" values="0.009 0.05;0.013 0.05;0.009 0.05" />
-              </feTurbulence>
-              <feDisplacementMap in="SourceGraphic" in2="worxNoise" xChannelSelector="R" yChannelSelector="G" scale="9">
-                <animate attributeName="scale" dur="5s" repeatCount="indefinite" calcMode="spline"
-                  keySplines="0.45 0 0.55 1;0.45 0 0.55 1" values="7;10;7" />
-              </feDisplacementMap>
-            </filter>
+
+            <!-- flag-eye-solid.png is a mask here too (alpha, not luminance --
+                 the shape is painted solid black, which a default luminance mask
+                 would treat as fully-hidden): clips the crescent so it can slide
+                 left/right without ever spilling outside the eye's own outline. -->
+            <mask id="worxEyeClip" maskUnits="userSpaceOnUse" x="153.65" y="86" width="86.7" height="42"
+              style="mask-type:alpha">
+              <image x="153.65" y="86" width="86.7" height="42"
+                href="../static/assets/portfolio/astronaut/flag-eye-solid.png" />
+            </mask>
           </defs>
 
-          <!-- flagpole: cropped straight from the original artwork, unfiltered (poles don't wave) -->
+          <!-- flagpole: cropped straight from the original artwork -->
           <image x="-2" y="48" width="88" height="298"
             href="../static/assets/portfolio/astronaut/worx-flag-pole.png" />
 
-          <!-- cloth + branding: one filtered group, so the WORX mark waves WITH the fabric -->
-          <g class="worx-flag-wave">
-            <rect x="72" y="44" width="253" height="211" fill="url(#worxClothShade)" />
+          <!-- cloth: a single static rect, no filter/animation -- the fabric
+               itself no longer moves. -->
+          <rect x="78" y="42" width="238" height="132" fill="url(#worxClothShade)" />
 
-            <image x="148.5" y="55" width="100" height="67"
-              href="../static/assets/portfolio/astronaut/worx-flag-crown.png" />
+          <!-- branding -->
+          <image x="173.71" y="50" width="46.58" height="30"
+            href="../static/assets/portfolio/astronaut/flag-swoosh.png" />
 
-            <!-- original eye silhouette, solid-filled white (static "sclera" layer) -->
-            <image x="141" y="135" width="115" height="56.8"
-              href="../static/assets/portfolio/astronaut/worx-flag-eye-white.png" />
-
-            <!-- the logo's existing crescent, used as the pupil: slides left/center/right -->
-            <g class="worx-eye-crescent">
-              <image x="141" y="135" width="115" height="56.8"
-                href="../static/assets/portfolio/astronaut/worx-flag-crescent-black.png" />
+          <!-- Worx eye: solid black almond (authentic logo-dark.png shape, no
+               synthetic white sclera) + the real orange crescent as a living
+               pupil that slides within it and blinks by squashing the whole
+               eye vertically -- the natural lens silhouette tapers to a line
+               at full closure, so there's no separate mask edge to seam. This
+               is the ONLY moving part of the flag. -->
+          <g class="worx-eye">
+            <image x="153.65" y="86" width="86.7" height="42"
+              href="../static/assets/portfolio/astronaut/flag-eye-solid.png" />
+            <g mask="url(#worxEyeClip)">
+              <g class="worx-eye-crescent">
+                <image x="153.65" y="86" width="86.7" height="42"
+                  href="../static/assets/portfolio/astronaut/flag-crescent.png" />
+              </g>
             </g>
-
-            <!-- same eye silhouette again, black: scales down over the eye to blink -->
-            <g class="worx-eye-lid">
-              <image x="141" y="135" width="115" height="56.8"
-                href="../static/assets/portfolio/astronaut/worx-flag-eyelid-black.png" />
-            </g>
-
-            <text x="198.5" y="222" text-anchor="middle" font-family="Jost, sans-serif" font-weight="700"
-              font-size="26" letter-spacing="2" fill="#ffffff">WORX</text>
-            <text x="198.5" y="241" text-anchor="middle" font-family="Jost, sans-serif" font-weight="500"
-              font-size="10" letter-spacing="3" fill="#ffffff">&lt;like/magic&gt;</text>
           </g>
+
+          <text x="197" y="144" text-anchor="middle" font-family="Jost, sans-serif" font-weight="700"
+            font-size="16" letter-spacing="2" fill="#150905">WORX</text>
+          <text x="197" y="158" text-anchor="middle" font-family="Jost, sans-serif" font-weight="500"
+            font-size="8.5" letter-spacing="2.4" fill="#150905">&lt;like/magic&gt;</text>
         </svg>
         <canvas id="mars3d" class="mars-3d-canvas" aria-hidden="true"></canvas>
         <div class="mars-ember-glow"></div>
