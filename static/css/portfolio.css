@@ -1,0 +1,3340 @@
+/* ============================================================
+   Worx by Glimpse - portfolio.css
+   Portfolio page only (portfolio/index.html).
+
+   1. .folio-hero      - cinematic Mars hero (image slot + CSS
+                         atmosphere + canvas particles)
+   2. .folio-grid      - 3x4 project grid, varied "scenes"
+   3. .folio-card--*   - composition variants (laptop / tablet /
+                         phone / monitor / duo / crop / full)
+
+   Builds on the shared :root tokens in base.css. Touches no
+   global stylesheet. Companion script: static/js/portfolio.js.
+   Remove by deleting this file, portfolio.js, their two tags in
+   portfolio/index.html and the .folio-* markup.
+   ============================================================ */
+
+/* ============================================================
+   1. MARS HERO
+   ============================================================ */
+
+.folio-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: clamp(520px, 82vh, 780px);
+  display: flex;
+  align-items: flex-end;
+  padding: clamp(140px, 22vh, 240px) 0 clamp(56px, 9vw, 110px);
+  background: #0f0603;
+}
+
+/* --- Image slot -------------------------------------------------
+   Drop the Mars photo in as:
+   <img class="folio-hero-img" src="../static/assets/portfolio/mars-hero.jpg" alt="">
+   Until then this layered gradient stands in as a cinematic
+   placeholder (Worx ember / cocoa palette). */
+.folio-hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(115% 78% at 74% 4%, #e57d23 0%, rgba(192, 69, 39, 0.55) 24%, transparent 58%),
+    radial-gradient(85% 60% at 12% 104%, rgba(192, 69, 39, 0.4), transparent 62%),
+    radial-gradient(60% 40% at 50% 58%, rgba(250, 167, 25, 0.14), transparent 70%),
+    linear-gradient(180deg, #1c0c06 0%, #2b1209 46%, #0d0503 100%);
+}
+
+.folio-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+/* Atmospheric horizon haze */
+.folio-hero-media::after {
+  content: "";
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: 44%;
+  height: 34%;
+  background: linear-gradient(180deg, transparent, rgba(229, 125, 35, 0.22) 45%, transparent);
+  filter: blur(34px);
+}
+
+/* Drifting-particle canvas (static frame under reduced motion) */
+.folio-hero-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Left scrim for text contrast + bottom fade into the page */
+.folio-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    linear-gradient(92deg, rgba(13, 5, 3, 0.82) 0%, rgba(13, 5, 3, 0.35) 42%, transparent 68%),
+    linear-gradient(0deg, var(--ink) 1%, transparent 26%);
+}
+
+/* Vignette */
+.folio-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: inset 0 0 200px 40px rgba(8, 3, 1, 0.6);
+}
+
+.folio-hero-inner {
+  position: relative;
+  z-index: 3;
+  max-width: 760px;
+}
+
+.folio-hero-inner .eyebrow {
+  color: var(--brand-cream);
+  opacity: 0.9;
+}
+
+.folio-hero-inner h1 {
+  font-size: clamp(2.9rem, 7vw, 5.4rem);
+  line-height: 1.04;
+  text-shadow: 0 2px 40px rgba(0, 0, 0, 0.45);
+}
+
+.folio-hero-lead {
+  margin-top: 22px;
+  max-width: 46ch;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  color: var(--brand-cream);
+  opacity: 0.92;
+  text-shadow: 0 1px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================================
+   2. GRID
+   ============================================================ */
+
+.folio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* desktop */
+  gap: clamp(26px, 3vw, 44px) clamp(20px, 2.2vw, 32px);
+}
+
+@media (max-width: 980px) {
+  .folio-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* tablet */
+}
+
+@media (max-width: 640px) {
+  .folio-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* mobile */
+}
+
+/* ============================================================
+   3. CARD
+   ============================================================ */
+
+.folio-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Whole card is one link (see ::after); the CTA text is decorative */
+.folio-link {
+  color: inherit;
+}
+
+.folio-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border-radius: var(--radius);
+}
+
+.folio-link:focus-visible::after {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 4px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ---- Scene (the visual area) ------------------------------- */
+
+.folio-scene {
+  --glow: 72% 12%;
+  --scene-ratio: 4 / 3;
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: var(--scene-ratio);
+  overflow: hidden;
+  /* nothing spills the card */
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.folio-card:hover .folio-scene {
+  border-color: rgba(250, 167, 25, 0.4);
+  box-shadow: 0 30px 60px -26px rgba(0, 0, 0, 0.6);
+}
+
+/* Directional brand glow - angle/intensity varies per variant */
+.folio-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(58% 58% at var(--glow), rgba(229, 125, 35, 0.24), transparent 72%);
+}
+
+/* Fine cinematic grain, shared */
+.folio-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+
+/* Soft contact shadow under a device */
+.folio-scene .folio-floor {
+  position: absolute;
+  left: 50%;
+  bottom: 7%;
+  width: 66%;
+  height: 26px;
+  z-index: 1;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.55), transparent);
+  filter: blur(8px);
+}
+
+/* ---- Reusable device frame -------------------------------- */
+
+.folio-device {
+  position: absolute;
+  z-index: 2;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.folio-device__screen {
+  position: relative;
+  background: linear-gradient(150deg, #202027, #121216);
+  border: 1px solid rgba(254, 238, 207, 0.1);
+  overflow: hidden;
+}
+
+/* screen glare */
+.folio-device__screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(118deg, transparent 44%, rgba(255, 255, 255, 0.1) 50%, transparent 57%);
+}
+
+.folio-device__base {
+  position: relative;
+  margin-inline: auto;
+  background: linear-gradient(180deg, #26262d, #101014);
+}
+
+.folio-viewport {
+  position: relative;
+  overflow: hidden;
+  background: #efe7d9;
+}
+
+/* Depth inside the screen so a placeholder still reads as glass */
+.folio-viewport::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  box-shadow: inset 0 0 44px rgba(43, 28, 16, 0.16);
+}
+
+/* The scrolling screenshot (portfolio.js duplicates it for a
+   seamless -50% loop; only runs on [data-scroll] cards that
+   have a real <img>). */
+.folio-shot {
+  position: absolute;
+  inset: 0 0 auto 0;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  will-change: transform;
+  background:
+    radial-gradient(80% 60% at 50% 0%, rgba(255, 252, 244, 0.7), transparent 70%),
+    linear-gradient(180deg, #e7dfd0 0%, #cbbda4 55%, #bcae92 100%);
+}
+
+.folio-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.folio-card.is-live .folio-shot {
+  animation: folio-scroll 52s linear infinite;
+}
+
+.folio-card.is-live .folio-device--phone .folio-shot {
+  animation-duration: 40s;
+}
+
+@keyframes folio-scroll {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+/* Clearly-marked placeholder shown until a screenshot is supplied */
+.folio-shot__label,
+.folio-fill__label {
+  position: relative;
+  z-index: 1;
+  padding: 6px 14px;
+  border: 1px solid rgba(43, 38, 34, 0.28);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(43, 38, 34, 0.5);
+  white-space: nowrap;
+}
+
+/* Once a real screenshot is in place the label is redundant */
+.folio-shot:has(img) .folio-shot__label,
+.folio-fill:has(img) .folio-fill__label {
+  display: none;
+}
+
+/* ---- Variant: LAPTOP -------------------------------------- */
+
+.folio-card--laptop .folio-scene {
+  --glow: 78% 10%;
+}
+
+.folio-card--laptop .folio-device--laptop {
+  left: 50%;
+  top: 42%;
+  width: 78%;
+  transform: translate(-50%, -50%) rotate(-0.6deg);
+}
+
+.folio-card:hover .folio-device--laptop {
+  transform: translate(-50%, -50%) rotate(0) scale(1.02);
+}
+
+.folio-device--laptop .folio-device__screen {
+  padding: 6px 6px 0;
+  border-radius: 10px 10px 2px 2px;
+  box-shadow: 0 34px 60px -24px rgba(0, 0, 0, 0.7);
+}
+
+.folio-device--laptop .folio-viewport {
+  aspect-ratio: 16 / 10;
+  border-radius: 3px;
+}
+
+.folio-device--laptop .folio-device__base {
+  width: 122%;
+  height: 15px;
+  border-radius: 2px 2px 11px 11px;
+  background: linear-gradient(180deg, #34343c 0%, #202026 12%, #16161a 60%, #0c0c0f 100%);
+  box-shadow:
+    0 1px 0 rgba(254, 238, 207, 0.14) inset,
+    0 18px 26px -12px rgba(0, 0, 0, 0.7);
+}
+
+/* hinge notch */
+.folio-device--laptop .folio-device__base::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 18%;
+  height: 5px;
+  transform: translateX(-50%);
+  border-radius: 0 0 6px 6px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* front-edge highlight - reads as an open lid's lower deck */
+.folio-device--laptop .folio-device__base::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgba(254, 238, 207, 0.12) 30%, rgba(254, 238, 207, 0.12) 70%, transparent);
+}
+
+/* ---- Variant: MONITOR ------------------------------------- */
+
+.folio-card--monitor .folio-scene {
+  --glow: 50% 8%;
+}
+
+.folio-card--monitor .folio-device--monitor {
+  left: 50%;
+  top: 40%;
+  width: 82%;
+  transform: translate(-50%, -50%);
+}
+
+.folio-card--monitor .folio-device__screen {
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 38px 70px -26px rgba(0, 0, 0, 0.72);
+}
+
+.folio-card--monitor .folio-viewport {
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+}
+
+.folio-card--monitor .folio-device__base {
+  width: 12%;
+  height: 34px;
+  background: linear-gradient(180deg, #26262d, #17171b);
+}
+
+.folio-card--monitor .folio-device__base::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  width: 420%;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #24242b, #101014);
+}
+
+/* ---- Variant: TABLET ------------------------------------- */
+
+.folio-card--tablet .folio-scene {
+  --glow: 24% 14%;
+}
+
+.folio-card--tablet .folio-device--tablet {
+  left: 52%;
+  top: 50%;
+  width: 50%;
+  transform: translate(-50%, -50%) rotate(6deg);
+}
+
+.folio-card:hover .folio-device--tablet {
+  transform: translate(-50%, -50%) rotate(3deg) scale(1.03);
+}
+
+.folio-card--tablet .folio-device__screen {
+  padding: 8px;
+  border-radius: 20px;
+  box-shadow: 0 30px 55px -22px rgba(0, 0, 0, 0.7);
+}
+
+.folio-card--tablet .folio-viewport {
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+}
+
+/* ---- Variant: PHONE ------------------------------------- */
+
+.folio-card--phone .folio-scene {
+  --glow: 30% 88%;
+}
+
+.folio-card--phone .folio-device--phone {
+  left: 56%;
+  top: 50%;
+  width: 30%;
+  transform: translate(-50%, -50%) rotate(-4deg);
+}
+
+.folio-card:hover .folio-device--phone {
+  transform: translate(-50%, -50%) rotate(-2deg) scale(1.03);
+}
+
+.folio-card--phone .folio-device__screen {
+  padding: 5px;
+  border-radius: 22px;
+  box-shadow: 0 26px 46px -18px rgba(0, 0, 0, 0.72);
+}
+
+.folio-card--phone .folio-device__screen::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 26%;
+  height: 4px;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  background: rgba(254, 238, 207, 0.25);
+  z-index: 5;
+}
+
+.folio-card--phone .folio-viewport {
+  aspect-ratio: 9 / 19.5;
+  border-radius: 17px;
+}
+
+/* ---- Variant: DUO (laptop + phone) ---------------------- */
+
+.folio-card--duo .folio-scene {
+  --glow: 80% 84%;
+}
+
+.folio-card--duo .folio-device--laptop {
+  left: 44%;
+  top: 40%;
+  width: 74%;
+  transform: translate(-50%, -50%) rotate(-1deg);
+}
+
+.folio-card--duo .folio-device--phone {
+  left: auto;
+  right: 5%;
+  bottom: 8%;
+  top: auto;
+  width: 21%;
+  transform: rotate(3deg);
+  z-index: 3;
+}
+
+.folio-card--duo .folio-device--laptop .folio-device__screen {
+  padding: 6px 6px 0;
+  border-radius: 10px 10px 2px 2px;
+  box-shadow: 0 30px 55px -24px rgba(0, 0, 0, 0.7);
+}
+
+.folio-card--duo .folio-device--laptop .folio-viewport {
+  aspect-ratio: 16 / 10;
+  border-radius: 3px;
+}
+
+.folio-card--duo .folio-device--laptop .folio-device__base {
+  width: 114%;
+  height: 12px;
+  border-radius: 0 0 11px 11px;
+}
+
+.folio-card--duo .folio-device--phone .folio-device__screen {
+  padding: 4px;
+  border-radius: 18px;
+  box-shadow: 0 22px 40px -16px rgba(0, 0, 0, 0.75);
+}
+
+.folio-card--duo .folio-device--phone .folio-viewport {
+  aspect-ratio: 9 / 19.5;
+  border-radius: 14px;
+}
+
+/* ---- Variant: CROP (close-up of a screen corner) -------- */
+
+.folio-card--crop .folio-scene {
+  --glow: 90% 88%;
+  --scene-ratio: 4 / 3;
+}
+
+/* Big device pushed off-frame so only a screen corner + bezel shows */
+.folio-card--crop .folio-device--laptop {
+  left: 74%;
+  top: 70%;
+  width: 168%;
+  transform: translate(-50%, -50%) rotate(-3deg);
+}
+
+.folio-card--crop .folio-device--laptop .folio-device__screen {
+  padding: 16px;
+  border-radius: 22px;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.7);
+}
+
+.folio-card--crop .folio-device--laptop .folio-viewport {
+  aspect-ratio: 16 / 10;
+  border-radius: 6px;
+}
+
+.folio-card--crop .folio-device--laptop .folio-device__base {
+  display: none;
+}
+
+/* ---- Variant: FULL (edge-to-edge project scene) --------- */
+
+.folio-card--full .folio-scene {
+  --glow: 60% 6%;
+}
+
+.folio-fill {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(70% 55% at 50% 12%, rgba(255, 250, 240, 0.55), transparent 70%),
+    linear-gradient(180deg, #ddd0bb 0%, #b8a888 100%);
+}
+
+.folio-fill img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* gradient depth + bottom scrim over a full scene */
+.folio-card--full .folio-scene>.folio-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(70% 50% at 50% 0%, rgba(255, 240, 214, 0.25), transparent 60%),
+    linear-gradient(0deg, rgba(21, 9, 5, 0.55), transparent 45%);
+}
+
+/* ---- Card body / typography ----------------------------- */
+
+.folio-body {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 0 2px;
+}
+
+.folio-cat {
+  font-family: var(--font-display);
+  font-size: 0.73rem;
+  font-weight: 500;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.folio-name {
+  font-size: clamp(1.2rem, 1.9vw, 1.5rem);
+  margin: 1px 0 0;
+}
+
+.folio-desc {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.folio-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.folio-cta-label {
+  position: relative;
+}
+
+.folio-cta-label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 1px;
+  background: var(--gradient);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.folio-cta-arrow {
+  color: var(--accent-2);
+  transition: transform 0.3s ease;
+}
+
+.folio-card:hover .folio-cta {
+  color: var(--accent-2);
+}
+
+.folio-card:hover .folio-cta-label::after {
+  transform: scaleX(1);
+}
+
+.folio-card:hover .folio-cta-arrow {
+  transform: translateX(4px);
+}
+
+/* ============================================================
+   Reduced motion
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-card .folio-shot {
+    animation: none !important;
+  }
+
+  .folio-card:hover .folio-device {
+    transform: translate(-50%, -50%);
+  }
+
+  .folio-card--tablet:hover .folio-device--tablet {
+    transform: translate(-50%, -50%) rotate(6deg);
+  }
+
+  .folio-card--phone:hover .folio-device--phone {
+    transform: translate(-50%, -50%) rotate(-4deg);
+  }
+
+  .folio-card--duo:hover .folio-device--phone {
+    transform: rotate(3deg);
+  }
+}
+
+/* ============================================================
+   Small screens
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .folio-scene {
+    --scene-ratio: 3 / 2;
+  }
+
+  .folio-card--tablet .folio-device--tablet {
+    width: 46%;
+  }
+
+  .folio-card--phone .folio-device--phone {
+    width: 27%;
+  }
+}
+
+/* ============================================================
+   PORTFOLIO VISUAL CARD REDESIGN
+   Full-bleed background image + existing mockup device
+   ============================================================ */
+
+.folio-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(64px, 5vw, 88px) clamp(28px, 2.8vw, 44px);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.folio-card {
+  gap: 0;
+  min-width: 0;
+}
+
+/* Larger, cleaner visual block like the reference */
+.folio-scene {
+  --scene-ratio: 1.10 / 1;
+  width: 100%;
+  overflow: hidden;
+  border: 0;
+  border-radius: 24px;
+  margin-bottom: 28px;
+  background: #111;
+  box-shadow: none;
+}
+
+/* Main project background image */
+.folio-card-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.01);
+  filter: saturate(0.92) contrast(1.03);
+  transition:
+    transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.4s ease;
+}
+
+.folio-card:hover .folio-card-bg {
+  transform: scale(1.055);
+  filter: saturate(1.04) contrast(1.05);
+}
+
+/* Dark cinematic overlay so mockups remain readable */
+.folio-scene::before {
+  z-index: 1;
+  opacity: 1;
+  background:
+    linear-gradient(180deg, rgba(12, 8, 6, 0.04), rgba(12, 8, 6, 0.24)),
+    radial-gradient(70% 70% at 70% 15%, rgba(229, 125, 35, 0.13), transparent 70%);
+}
+
+/* Keep a very small amount of texture */
+.folio-scene::after {
+  z-index: 5;
+  opacity: 0.08;
+}
+
+/* Device stays above background */
+.folio-device,
+.folio-fill,
+.folio-floor {
+  z-index: 2;
+}
+
+/* Stronger contact shadow so devices feel physically placed */
+.folio-scene .folio-floor {
+  opacity: 0.85;
+}
+
+/* For the full-image cards, use the new background image rather than the old beige fill */
+.folio-card--full .folio-fill {
+  background: transparent;
+}
+
+.folio-card--full .folio-fill::after {
+  background:
+    linear-gradient(180deg, transparent 45%, rgba(12, 7, 5, 0.2) 100%);
+}
+
+.folio-fill__label,
+.folio-shot__label {
+  display: none;
+}
+
+/* Give devices a little more contrast against photography */
+.folio-device__screen {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 30px 65px -22px rgba(0, 0, 0, 0.78);
+}
+
+/* Content below the card */
+.folio-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0;
+}
+
+.folio-cat {
+  display: none !important;
+}
+
+.folio-name {
+  margin: 0 0 18px;
+  font-size: clamp(2rem, 2.55vw, 2.9rem);
+  line-height: 1.12;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+
+.folio-link {
+  color: var(--text);
+  text-decoration: none;
+  transition: opacity 0.25s ease;
+}
+
+.folio-link:hover {
+  opacity: 0.74;
+}
+
+.folio-desc {
+  margin: 0;
+  max-width: 95%;
+  font-size: clamp(0.98rem, 1.08vw, 1.08rem);
+  line-height: 1.65;
+  color: var(--muted);
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+}
+
+.folio-cta {
+  margin-top: 23px;
+}
+
+/* Remove decorative line before Our Work */
+.folio-hero .eyebrow::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* Slightly different framing per project type */
+.folio-card--phone .folio-card-bg,
+.folio-card--tablet .folio-card-bg {
+  object-position: center;
+}
+
+.folio-card--crop .folio-card-bg {
+  object-position: center 60%;
+}
+
+.folio-card--full .folio-card-bg {
+  filter: saturate(0.96) contrast(1.04);
+}
+
+@media (max-width: 980px) {
+  .folio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 60px 30px;
+  }
+
+  .folio-name {
+    font-size: clamp(2rem, 4vw, 2.6rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .folio-grid {
+    grid-template-columns: 1fr;
+    gap: 54px;
+  }
+
+  .folio-scene {
+    --scene-ratio: 1.10 / 1;
+    border-radius: 18px;
+    margin-bottom: 22px;
+  }
+
+  .folio-name {
+    font-size: clamp(1.9rem, 8vw, 2.45rem);
+    margin-bottom: 14px;
+  }
+
+  .folio-desc {
+    max-width: 100%;
+    font-size: 1rem;
+  }
+}
+
+
+
+/* ============================================================
+   SCREEN-RECORD SHOWCASE STYLE
+   3-up cinematic project cards using the Worx cream / ember theme
+   ============================================================ */
+
+.folio-showcase-section {
+  padding-top: clamp(70px, 8vw, 120px);
+  padding-bottom: clamp(80px, 9vw, 140px);
+}
+
+/* Three large visual tiles, like the supplied screen recording */
+.folio-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: clamp(24px, 3vw, 54px);
+  row-gap: clamp(72px, 7vw, 120px);
+}
+
+/* Clean editorial card */
+.folio-card {
+  gap: 0;
+  min-width: 0;
+}
+
+/* Main rounded visual */
+.folio-scene {
+  --scene-ratio: 1.08 / 1;
+  position: relative;
+  margin-bottom: 30px;
+  overflow: hidden;
+  border: 1px solid rgba(254, 238, 207, 0.10);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 75% 12%, rgba(250, 167, 25, 0.18), transparent 32%),
+    linear-gradient(145deg, #2d1209 0%, #160905 52%, #0d0604 100%);
+  box-shadow: none;
+  transform: translateZ(0);
+}
+
+/* Existing project image becomes the environmental background */
+.folio-card-bg {
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.72;
+  filter: saturate(0.78) contrast(1.08) brightness(0.72);
+  transform: scale(1.025);
+  transition:
+    transform 800ms cubic-bezier(.2, .75, .2, 1),
+    opacity 500ms ease,
+    filter 500ms ease;
+}
+
+/* Worx warm overlay instead of the blue/purple reference treatment */
+.folio-scene::before {
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(21, 9, 5, 0.03), rgba(21, 9, 5, 0.28)),
+    radial-gradient(70% 75% at 75% 10%, rgba(250, 167, 25, 0.17), transparent 65%),
+    radial-gradient(70% 70% at 10% 100%, rgba(192, 69, 39, 0.16), transparent 70%);
+}
+
+.folio-scene::after {
+  z-index: 6;
+  opacity: 0.055;
+}
+
+.folio-card:hover .folio-scene {
+  border-color: rgba(250, 167, 25, 0.34);
+  box-shadow: 0 34px 80px -42px rgba(250, 167, 25, 0.32);
+}
+
+.folio-card:hover .folio-card-bg {
+  opacity: 0.82;
+  filter: saturate(0.92) contrast(1.06) brightness(0.78);
+  transform: scale(1.07);
+}
+
+/* Devices sit prominently inside the photography */
+.folio-device,
+.folio-fill,
+.folio-floor {
+  z-index: 3;
+}
+
+.folio-scene .folio-floor {
+  bottom: 5%;
+  width: 72%;
+  opacity: 0.72;
+}
+
+/* WHITE / CREAM MOCKUPS requested for the Worx theme */
+.folio-device__screen {
+  background: linear-gradient(145deg, #fffaf0, #e8d8bd);
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  box-shadow:
+    0 28px 55px -20px rgba(0, 0, 0, 0.68),
+    0 0 0 1px rgba(254, 238, 207, 0.16);
+}
+
+.folio-device__screen::after {
+  background: linear-gradient(118deg,
+      transparent 42%,
+      rgba(255, 255, 255, 0.18) 50%,
+      transparent 58%);
+}
+
+.folio-device__base,
+.folio-card--duo .folio-device--laptop .folio-device__base,
+.folio-card--monitor .folio-device__base,
+.folio-card--monitor .folio-device__base::after {
+  background: linear-gradient(180deg, #fff8eb 0%, #d7c3a4 42%, #9f8868 100%);
+}
+
+.folio-device--laptop .folio-device__base {
+  background: linear-gradient(180deg, #fffaf0 0%, #ddc9aa 24%, #b49b77 70%, #806b50 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, .85) inset,
+    0 18px 28px -13px rgba(0, 0, 0, .60);
+}
+
+.folio-device--laptop .folio-device__base::before {
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, .55) 30%,
+      rgba(255, 255, 255, .55) 70%,
+      transparent);
+}
+
+.folio-device--laptop .folio-device__base::after {
+  background: rgba(82, 58, 37, 0.28);
+}
+
+/* Browser bar, including the real project URL already in the HTML */
+.folio-browserbar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 22px;
+  padding: 0 8px;
+  overflow: hidden;
+  background: #f8edda;
+  border-bottom: 1px solid rgba(76, 53, 35, 0.12);
+  color: #4f3b2c;
+}
+
+.folio-browserdots {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 3px;
+}
+
+.folio-browserdots i {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #c04527;
+}
+
+.folio-browserdots i:nth-child(2) {
+  background: #faa719;
+}
+
+.folio-browserdots i:nth-child(3) {
+  background: #bda17b;
+}
+
+.folio-browserurl {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.43rem;
+  letter-spacing: -0.01em;
+  opacity: 0.78;
+}
+
+/* Website screenshots should completely fill the device display */
+.folio-viewport,
+.folio-shot {
+  background: #fff;
+}
+
+.folio-live-shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* Keep the slow website movement from the existing implementation */
+.folio-card.is-live .folio-shot {
+  animation-duration: 34s;
+}
+
+.folio-card.is-live .folio-device--phone .folio-shot {
+  animation-duration: 30s;
+}
+
+/* Bigger mockups, matching the visual dominance in the recording */
+.folio-card--laptop .folio-device--laptop {
+  top: 51%;
+  width: 88%;
+}
+
+.folio-card--monitor .folio-device--monitor {
+  top: 48%;
+  width: 88%;
+}
+
+.folio-card--tablet .folio-device--tablet {
+  left: 53%;
+  top: 51%;
+  width: 61%;
+}
+
+.folio-card--phone .folio-device--phone {
+  left: 55%;
+  top: 51%;
+  width: 37%;
+}
+
+.folio-card--duo .folio-device--laptop {
+  left: 43%;
+  top: 47%;
+  width: 80%;
+}
+
+.folio-card--duo .folio-device--phone {
+  right: 3%;
+  bottom: 5%;
+  width: 25%;
+}
+
+.folio-card--crop .folio-device--laptop {
+  left: 70%;
+  top: 65%;
+  width: 155%;
+}
+
+/* Full-image projects still use the project image edge to edge */
+.folio-card--full .folio-fill {
+  background: transparent;
+}
+
+.folio-card--full .folio-live-full {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(.9) contrast(1.04);
+  transition: transform 800ms cubic-bezier(.2, .75, .2, 1);
+}
+
+.folio-card--full:hover .folio-live-full {
+  transform: scale(1.055);
+}
+
+.folio-card--full .folio-fill::after {
+  background:
+    linear-gradient(180deg, rgba(21, 9, 5, .02), rgba(21, 9, 5, .20)),
+    radial-gradient(70% 70% at 70% 10%, rgba(250, 167, 25, .10), transparent 70%);
+}
+
+/* Typography under each visual */
+.folio-body {
+  align-items: flex-start;
+}
+
+.folio-name {
+  margin: 0 0 15px;
+  font-size: clamp(2rem, 2.5vw, 2.8rem);
+  line-height: 1.08;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: var(--brand-cream);
+}
+
+.folio-desc {
+  max-width: 94%;
+  color: rgba(254, 238, 207, 0.68);
+  font-size: clamp(.96rem, 1vw, 1.05rem);
+  line-height: 1.62;
+}
+
+.folio-cta {
+  margin-top: 22px;
+  padding: 11px 17px;
+  border: 1px solid rgba(250, 167, 25, .38);
+  border-radius: 999px;
+  color: var(--brand-cream);
+  background: rgba(250, 167, 25, .07);
+  transition:
+    background .3s ease,
+    border-color .3s ease,
+    transform .3s ease;
+}
+
+.folio-card:hover .folio-cta {
+  color: #150905;
+  border-color: #faa719;
+  background: #faa719;
+  transform: translateY(-2px);
+}
+
+.folio-cta-label::after {
+  display: none;
+}
+
+.folio-cta-arrow {
+  color: currentColor;
+}
+
+/* No line before Our Work */
+.folio-hero .eyebrow::before {
+  display: none !important;
+  content: none !important;
+}
+
+@media (max-width: 1100px) {
+  .folio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .folio-grid {
+    grid-template-columns: 1fr;
+    row-gap: 58px;
+  }
+
+  .folio-scene {
+    --scene-ratio: 1.08 / 1;
+    border-radius: 20px;
+    margin-bottom: 22px;
+  }
+
+  .folio-card--laptop .folio-device--laptop,
+  .folio-card--monitor .folio-device--monitor {
+    width: 86%;
+  }
+
+  .folio-card--tablet .folio-device--tablet {
+    width: 58%;
+  }
+
+  .folio-card--phone .folio-device--phone {
+    width: 35%;
+  }
+}
+
+
+
+/* ============================================================
+   FULL-WIDTH PORTFOLIO + UNIFORM CARD SIZING
+   ============================================================ */
+
+/* Full-width showcase with exactly 60px left/right padding */
+.folio-showcase-section.container {
+  width: 100%;
+  max-width: none;
+  padding-left: 60px;
+  padding-right: 60px;
+}
+
+/* Bigger cards while keeping the 3-column reference layout */
+.folio-grid {
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 32px;
+  row-gap: 84px;
+}
+
+/* Every visual is exactly the same proportion */
+.folio-scene {
+  width: 100%;
+  aspect-ratio: 1.18 / 1;
+  min-height: 0;
+  margin-bottom: 24px;
+}
+
+/* Uniform body spacing */
+.folio-body {
+  width: 100%;
+  min-height: 190px;
+}
+
+/* Smaller project names, same sizing across every card */
+.folio-name {
+  width: 100%;
+  margin: 0 0 12px;
+  font-size: clamp(1.55rem, 1.65vw, 2rem);
+  line-height: 1.12;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+
+/* Keep descriptions visually consistent */
+.folio-desc {
+  width: 100%;
+  max-width: 100%;
+  min-height: 3.25em;
+  font-size: 0.96rem;
+  line-height: 1.62;
+}
+
+/* Keep CTA aligned consistently */
+.folio-cta {
+  margin-top: 20px;
+}
+
+/* Tablet */
+@media (max-width: 1100px) {
+  .folio-showcase-section.container {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .folio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 28px;
+  }
+
+  .folio-name {
+    font-size: 1.65rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 680px) {
+  .folio-showcase-section.container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .folio-grid {
+    grid-template-columns: 1fr;
+    row-gap: 58px;
+  }
+
+  .folio-body {
+    min-height: 0;
+  }
+
+  .folio-name {
+    font-size: 1.55rem;
+  }
+}
+
+
+
+/* ============================================================
+   REAL MARS HERO
+   NASA/JPL-Caltech/MSSS PIA19928
+   Mount Sharp + Bagnold Dunes
+   ============================================================ */
+
+.folio-hero {
+  position: relative;
+  min-height: clamp(620px, 82vh, 900px);
+  overflow: hidden;
+  background: #150905;
+}
+
+.folio-hero-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background: #150905;
+}
+
+/* Real NASA Mars landscape, not a geometric CSS illustration */
+.mars-photo {
+  position: absolute;
+  z-index: 0;
+  inset: -3%;
+  background-image:
+    url("https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia19/pia19928/PIA19928.jpg");
+  background-size: cover;
+  background-position: center 54%;
+  background-repeat: no-repeat;
+  filter:
+    saturate(.88) contrast(1.08) brightness(.72) sepia(.08);
+  transform: scale(1.035);
+}
+
+/* Worx color grading only. The landscape itself remains photographic. */
+.mars-photo-grade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg,
+      rgba(21, 9, 5, .74) 0%,
+      rgba(21, 9, 5, .42) 38%,
+      rgba(21, 9, 5, .14) 68%,
+      rgba(21, 9, 5, .26) 100%),
+    linear-gradient(180deg,
+      rgba(21, 9, 5, .28) 0%,
+      transparent 36%,
+      rgba(21, 9, 5, .16) 70%,
+      rgba(21, 9, 5, .58) 100%),
+    radial-gradient(ellipse at 68% 54%,
+      rgba(229, 125, 35, .08),
+      transparent 52%);
+}
+
+/* Existing subtle animation remains above the photograph */
+.folio-hero-particles {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: .42;
+}
+
+/* Hero copy remains above the landscape */
+.folio-hero-inner {
+  position: relative;
+  z-index: 4;
+}
+
+/* Remove the old artificial sun / mountain / dune layers completely */
+.mars-sun,
+.mars-sky,
+.mars-mountain,
+.mars-sand,
+.mars-haze {
+  display: none !important;
+}
+
+/* No extra geometric overlay */
+.folio-hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .mars-photo {
+    background-position: 61% 52%;
+  }
+}
+
+@media (max-width: 680px) {
+  .folio-hero {
+    min-height: 650px;
+  }
+
+  .mars-photo {
+    inset: 0;
+    background-position: 64% center;
+    transform: scale(1.02);
+  }
+
+  .mars-photo-grade {
+    background:
+      linear-gradient(90deg,
+        rgba(21, 9, 5, .72),
+        rgba(21, 9, 5, .30)),
+      linear-gradient(180deg,
+        rgba(21, 9, 5, .18),
+        transparent 42%,
+        rgba(21, 9, 5, .62));
+  }
+}
+
+
+
+/* ============================================================
+   MARS HERO COVER + WORX ORANGE ATMOSPHERE
+   ============================================================ */
+
+/* Hero begins directly under the transparent site header */
+.folio-hero {
+  min-height: clamp(680px, 100vh, 980px);
+  margin-top: 0;
+  padding-top: 0;
+  background: #150905;
+}
+
+/* Fill every pixel of the hero. No exposed strip at the top. */
+.folio-hero-media {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #150905;
+}
+
+/* Force the NASA landscape to behave exactly like a full-bleed cover image */
+.mars-photo {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: none;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  filter:
+    sepia(.30) saturate(1.35) contrast(1.08) brightness(.74);
+}
+
+/* Restore the richer Worx orange / cocoa treatment */
+.mars-photo-grade {
+  z-index: 1;
+  background:
+    linear-gradient(90deg,
+      rgba(21, 9, 5, .74) 0%,
+      rgba(39, 13, 5, .46) 36%,
+      rgba(84, 29, 8, .18) 68%,
+      rgba(21, 9, 5, .28) 100%),
+    linear-gradient(180deg,
+      rgba(21, 9, 5, .24) 0%,
+      rgba(79, 25, 7, .04) 32%,
+      rgba(192, 69, 39, .12) 66%,
+      rgba(21, 9, 5, .64) 100%);
+}
+
+/* Soft atmospheric orange light, organic rather than geometric */
+.mars-ember-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 48% at 72% 58%,
+      rgba(250, 167, 25, .20) 0%,
+      rgba(229, 125, 35, .11) 34%,
+      transparent 72%),
+    radial-gradient(ellipse 62% 45% at 28% 74%,
+      rgba(192, 69, 39, .18),
+      transparent 70%);
+  mix-blend-mode: screen;
+}
+
+/* Bring the original moving particle / dust animation back over the photo */
+.folio-hero-particles {
+  z-index: 3;
+  opacity: .88;
+  mix-blend-mode: screen;
+}
+
+/* Text above all effects */
+.folio-hero-inner {
+  z-index: 5;
+}
+
+/* Prevent the old hero pseudo layers from creating the dark diagonal cap */
+.folio-hero::before,
+.folio-hero::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Keep header floating over the Mars image instead of visually cutting it */
+body[data-page="portfolio"] .site-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: linear-gradient(180deg,
+      rgba(21, 9, 5, .72) 0%,
+      rgba(21, 9, 5, .24) 68%,
+      transparent 100%);
+  border-bottom: 0;
+  box-shadow: none;
+}
+
+/* Add breathing room because header now overlays the hero */
+.folio-hero-inner {
+  padding-top: clamp(155px, 18vh, 220px);
+  padding-bottom: clamp(70px, 9vh, 110px);
+}
+
+@media (max-width: 900px) {
+  .mars-photo {
+    background-position: 58% center;
+  }
+}
+
+@media (max-width: 680px) {
+  .folio-hero {
+    min-height: 760px;
+  }
+
+  .mars-photo {
+    background-position: 62% center;
+  }
+
+  .folio-hero-inner {
+    padding-top: 145px;
+  }
+
+  .mars-photo-grade {
+    background:
+      linear-gradient(90deg,
+        rgba(21, 9, 5, .68),
+        rgba(73, 24, 7, .22)),
+      linear-gradient(180deg,
+        rgba(21, 9, 5, .18),
+        transparent 40%,
+        rgba(21, 9, 5, .68));
+  }
+}
+
+
+
+/* ============================================================
+   HERO TOP GAP FIX
+   Make the Mars photograph cover behind the navigation
+   ============================================================ */
+
+/* The shared header styles were creating the angled dark area.
+   Make the header transparent and keep it above the hero. */
+body[data-page="portfolio"] .site-header {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 100 !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Remove any header pseudo-element that could cover the photograph */
+body[data-page="portfolio"] .site-header::before,
+body[data-page="portfolio"] .site-header::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Hero starts at the absolute top of the page */
+body[data-page="portfolio"] main {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+body[data-page="portfolio"] .folio-hero {
+  position: relative;
+  margin: 0 !important;
+  padding-top: 0 !important;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Photograph fills the ENTIRE hero rectangle */
+body[data-page="portfolio"] .folio-hero-media,
+body[data-page="portfolio"] .mars-photo,
+body[data-page="portfolio"] .mars-photo-grade,
+body[data-page="portfolio"] .mars-ember-glow {
+  position: absolute;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* No rotation, skew, clipping or diagonal edge */
+body[data-page="portfolio"] .folio-hero-media,
+body[data-page="portfolio"] .mars-photo {
+  transform: none !important;
+  clip-path: none !important;
+}
+
+/* Full bleed NASA image */
+body[data-page="portfolio"] .mars-photo {
+  z-index: 0;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* Keep the Worx orange treatment but let the image remain visible */
+body[data-page="portfolio"] .mars-photo-grade {
+  z-index: 1;
+  background:
+    linear-gradient(90deg,
+      rgba(21, 9, 5, .63) 0%,
+      rgba(55, 18, 6, .34) 38%,
+      rgba(114, 39, 10, .12) 68%,
+      rgba(21, 9, 5, .20) 100%),
+    linear-gradient(180deg,
+      rgba(21, 9, 5, .34) 0%,
+      rgba(192, 69, 39, .05) 40%,
+      rgba(229, 125, 35, .10) 70%,
+      rgba(21, 9, 5, .56) 100%);
+}
+
+/* Preserve the warm animated atmosphere */
+body[data-page="portfolio"] .mars-ember-glow {
+  z-index: 2;
+}
+
+body[data-page="portfolio"] .folio-hero-particles {
+  z-index: 3;
+}
+
+/* Remove old folio hero masks that were producing the diagonal shape */
+body[data-page="portfolio"] .folio-hero::before,
+body[data-page="portfolio"] .folio-hero::after,
+body[data-page="portfolio"] .folio-hero-media::before,
+body[data-page="portfolio"] .folio-hero-media::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Navigation gets a subtle readable shadow instead of a dark header block */
+body[data-page="portfolio"] .nav-bar {
+  position: relative;
+  z-index: 101;
+}
+
+body[data-page="portfolio"] .site-header .brand,
+body[data-page="portfolio"] .site-header .nav-links {
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .28));
+}
+
+@media (max-width: 680px) {
+  body[data-page="portfolio"] .mars-photo {
+    background-position: 60% center !important;
+  }
+}
+
+
+
+/* ============================================================
+   EDITORIAL PORTFOLIO
+   Full-bleed work, asymmetric grid, hover-only page movement
+   ============================================================ */
+
+.folio-showcase-section.container {
+  width: 100%;
+  max-width: none;
+  padding-left: 60px;
+  padding-right: 60px;
+}
+
+.folio-editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 92px 30px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Default 3-up */
+.folio-editorial-grid .folio-card {
+  grid-column: span 4;
+  min-width: 0;
+}
+
+/* Editorial rhythm */
+.folio-editorial-grid .folio-card:nth-child(1),
+.folio-editorial-grid .folio-card:nth-child(4),
+.folio-editorial-grid .folio-card:nth-child(8) {
+  grid-column: span 8;
+}
+
+.folio-editorial-grid .folio-card:nth-child(2),
+.folio-editorial-grid .folio-card:nth-child(3),
+.folio-editorial-grid .folio-card:nth-child(5),
+.folio-editorial-grid .folio-card:nth-child(9) {
+  grid-column: span 4;
+}
+
+/* Start new rows where the composition needs it */
+.folio-editorial-grid .folio-card:nth-child(3),
+.folio-editorial-grid .folio-card:nth-child(6),
+.folio-editorial-grid .folio-card:nth-child(8),
+.folio-editorial-grid .folio-card:nth-child(10) {
+  grid-column-start: 1;
+}
+
+.folio-editorial-grid .folio-card:nth-child(3) {
+  grid-column-end: span 4;
+}
+
+.folio-editorial-grid .folio-card:nth-child(4) {
+  grid-column-start: 5;
+  grid-column-end: span 8;
+}
+
+.folio-editorial-grid .folio-card:nth-child(8) {
+  grid-column-end: span 8;
+}
+
+.folio-editorial-grid .folio-card:nth-child(9) {
+  grid-column-start: 9;
+  grid-column-end: span 4;
+}
+
+/* Clean cinematic image canvas */
+.folio-editorial-grid .folio-scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  margin: 0 0 24px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 24px;
+  background: #150905;
+  box-shadow: none;
+}
+
+/* Taller framing for the smaller cards */
+.folio-editorial-grid .folio-card:nth-child(2) .folio-scene,
+.folio-editorial-grid .folio-card:nth-child(3) .folio-scene,
+.folio-editorial-grid .folio-card:nth-child(5) .folio-scene,
+.folio-editorial-grid .folio-card:nth-child(9) .folio-scene {
+  aspect-ratio: 4 / 5;
+}
+
+/* Remove all fake device hardware */
+.folio-editorial-grid .folio-floor,
+.folio-editorial-grid .folio-browserbar,
+.folio-editorial-grid .folio-device__base,
+.folio-editorial-grid .folio-device__screen::after {
+  display: none !important;
+}
+
+.folio-editorial-grid .folio-device,
+.folio-editorial-grid .folio-card--laptop .folio-device--laptop,
+.folio-editorial-grid .folio-card--monitor .folio-device--monitor,
+.folio-editorial-grid .folio-card--tablet .folio-device--tablet,
+.folio-editorial-grid .folio-card--phone .folio-device--phone,
+.folio-editorial-grid .folio-card--duo .folio-device--laptop,
+.folio-editorial-grid .folio-card--duo .folio-device--phone,
+.folio-editorial-grid .folio-card--crop .folio-device--laptop {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+  border: 0 !important;
+}
+
+/* On duo cards use only the main website view */
+.folio-editorial-grid .folio-card--duo .folio-device--phone {
+  display: none !important;
+}
+
+.folio-editorial-grid .folio-device__screen,
+.folio-editorial-grid .folio-viewport {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #150905;
+  box-shadow: none !important;
+  aspect-ratio: auto !important;
+}
+
+/* Background image acts as a soft fallback while the live shot is loading */
+.folio-editorial-grid .folio-card-bg {
+  z-index: 0;
+  opacity: .72;
+  filter: saturate(.88) contrast(1.04) brightness(.80);
+  transform: scale(1.01);
+}
+
+/* Actual project page sits edge to edge */
+.folio-editorial-grid .folio-shot {
+  z-index: 3;
+  width: 100%;
+  min-height: 100%;
+  background: #150905;
+  transform: translateY(0);
+  animation: none !important;
+  will-change: transform;
+}
+
+.folio-editorial-grid .folio-shot img {
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* Full-image variants also become simple editorial canvases */
+.folio-editorial-grid .folio-fill {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  background: #150905;
+}
+
+.folio-editorial-grid .folio-live-full {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transform: scale(1.01);
+  transition: transform 1.2s cubic-bezier(.2, .75, .2, 1);
+}
+
+/* Warm Worx treatment. No geometric overlay. */
+.folio-editorial-grid .folio-scene::before {
+  z-index: 4;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(21, 9, 5, .02), rgba(21, 9, 5, .15)),
+    radial-gradient(80% 70% at 82% 12%, rgba(250, 167, 25, .10), transparent 70%);
+  opacity: 1;
+  transition: opacity .45s ease;
+}
+
+.folio-editorial-grid .folio-scene::after {
+  z-index: 5;
+  opacity: .04;
+  pointer-events: none;
+}
+
+/* IMPORTANT: no automatic scrolling */
+.folio-editorial-grid .folio-card.is-live .folio-shot {
+  animation: none !important;
+}
+
+/* Scroll the full screenshot ONLY while hovering/focusing.
+   portfolio.js already creates the repeated image needed for the full loop. */
+.folio-editorial-grid .folio-card.preview-active .folio-shot {
+  animation: folio-hover-scroll 14s linear forwards !important;
+}
+
+@keyframes folio-hover-scroll {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+/* Return smoothly to the top after hover */
+.folio-editorial-grid .folio-card:not(.preview-active) .folio-shot {
+  transition: transform .7s cubic-bezier(.2, .75, .2, 1);
+}
+
+/* Static full cards get a restrained hover zoom */
+.folio-editorial-grid .folio-card.preview-active .folio-live-full {
+  transform: scale(1.055);
+}
+
+.folio-editorial-grid .folio-card.preview-active .folio-scene::before {
+  opacity: .55;
+}
+
+/* Compact, uniform project information */
+.folio-editorial-grid .folio-body {
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  gap: 0;
+}
+
+.folio-editorial-grid .folio-name {
+  margin: 0 0 10px;
+  font-size: clamp(1.35rem, 1.55vw, 1.75rem);
+  line-height: 1.12;
+  font-weight: 500;
+  letter-spacing: -.025em;
+}
+
+.folio-editorial-grid .folio-desc {
+  max-width: 680px;
+  margin: 0;
+  min-height: 0;
+  font-size: .94rem;
+  line-height: 1.6;
+  color: rgba(254, 238, 207, .66);
+}
+
+.folio-editorial-grid .folio-cta {
+  margin-top: 18px;
+  padding: 10px 15px;
+  border: 1px solid rgba(250, 167, 25, .34);
+  border-radius: 999px;
+  background: rgba(250, 167, 25, .05);
+  font-size: .72rem;
+}
+
+.folio-editorial-grid .folio-card:hover .folio-cta {
+  color: #150905;
+  background: #faa719;
+  border-color: #faa719;
+}
+
+/* Tablet */
+@media (max-width: 1100px) {
+  .folio-showcase-section.container {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .folio-editorial-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 70px 28px;
+  }
+
+  .folio-editorial-grid .folio-card,
+  .folio-editorial-grid .folio-card:nth-child(n) {
+    grid-column: auto !important;
+    grid-column-start: auto !important;
+    grid-column-end: auto !important;
+  }
+
+  .folio-editorial-grid .folio-scene,
+  .folio-editorial-grid .folio-card:nth-child(n) .folio-scene {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* Mobile */
+@media (max-width: 680px) {
+  .folio-showcase-section.container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .folio-editorial-grid {
+    grid-template-columns: 1fr;
+    gap: 58px;
+  }
+
+  .folio-editorial-grid .folio-scene,
+  .folio-editorial-grid .folio-card:nth-child(n) .folio-scene {
+    aspect-ratio: 4 / 3;
+    border-radius: 18px;
+  }
+
+  /* Touch devices do not have hover, so keep previews static. */
+  .folio-editorial-grid .folio-card.preview-active .folio-shot {
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-editorial-grid .folio-card.preview-active .folio-shot {
+    animation: none !important;
+  }
+}
+
+
+
+/* ============================================================
+   UNIFORM LIVE-SITE PREVIEW GRID
+   Same-size cards, 60px page padding, hover-only slow scroll
+   ============================================================ */
+
+.folio-showcase-section.container {
+  width: 100%;
+  max-width: none;
+  padding-left: 60px;
+  padding-right: 60px;
+}
+
+.folio-editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 76px 30px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Override all previous asymmetric sizing */
+.folio-editorial-grid .folio-card,
+.folio-editorial-grid .folio-card:nth-child(n) {
+  grid-column: auto !important;
+  grid-column-start: auto !important;
+  grid-column-end: auto !important;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Every project visual is exactly the same size */
+.folio-editorial-grid .folio-scene,
+.folio-editorial-grid .folio-card:nth-child(n) .folio-scene {
+  width: 100%;
+  aspect-ratio: 16 / 10 !important;
+  margin: 0 0 22px;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #150905;
+}
+
+/* Remove device chrome, keep only the website preview */
+.folio-editorial-grid .folio-floor,
+.folio-editorial-grid .folio-browserbar,
+.folio-editorial-grid .folio-device__base,
+.folio-editorial-grid .folio-device__screen::after {
+  display: none !important;
+}
+
+.folio-editorial-grid .folio-device,
+.folio-editorial-grid .folio-card--laptop .folio-device--laptop,
+.folio-editorial-grid .folio-card--monitor .folio-device--monitor,
+.folio-editorial-grid .folio-card--tablet .folio-device--tablet,
+.folio-editorial-grid .folio-card--phone .folio-device--phone,
+.folio-editorial-grid .folio-card--duo .folio-device--laptop {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+}
+
+.folio-editorial-grid .folio-card--duo .folio-device--phone {
+  display: none !important;
+}
+
+.folio-editorial-grid .folio-device__screen,
+.folio-editorial-grid .folio-viewport {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  aspect-ratio: auto !important;
+  background: #150905;
+  box-shadow: none !important;
+}
+
+/* Website image starts at the top and remains completely still normally */
+.folio-editorial-grid .folio-shot {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 3;
+  width: 100%;
+  min-height: 100%;
+  transform: translateY(0);
+  animation: none !important;
+  will-change: transform;
+}
+
+.folio-editorial-grid .folio-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* Disable the previous automatic is-live animation */
+.folio-editorial-grid .folio-card.is-live .folio-shot,
+.folio-editorial-grid .folio-card.is-live .folio-device--phone .folio-shot {
+  animation: none !important;
+}
+
+/* Hover only:
+   top -> bottom slowly -> bottom -> top slowly -> repeat while hovered */
+@media (hover: hover) and (pointer: fine) {
+  .folio-editorial-grid .folio-card:hover .folio-shot {
+    animation: folio-preview-pingpong 26s ease-in-out infinite alternate !important;
+  }
+}
+
+@keyframes folio-preview-pingpong {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+/* Full-image cards use the same restrained hover motion */
+.folio-editorial-grid .folio-fill {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+}
+
+.folio-editorial-grid .folio-fill img {
+  width: 100%;
+  height: 115%;
+  object-fit: cover;
+  object-position: top center;
+  transform: translateY(0);
+  animation: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .folio-editorial-grid .folio-card:hover .folio-fill img {
+    animation: folio-full-preview-pingpong 26s ease-in-out infinite alternate !important;
+  }
+}
+
+@keyframes folio-full-preview-pingpong {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-13%);
+  }
+}
+
+/* Uniform text block */
+.folio-editorial-grid .folio-body {
+  width: 100%;
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.folio-editorial-grid .folio-name {
+  width: 100%;
+  margin: 0 0 7px;
+  font-size: clamp(1.35rem, 1.45vw, 1.65rem);
+  line-height: 1.15;
+}
+
+/* Show the exact live URL on every card */
+.folio-site-url {
+  position: relative;
+  z-index: 8;
+  display: block;
+  width: 100%;
+  margin: 0 0 13px;
+  overflow: hidden;
+  color: #faa719;
+  font-family: var(--font-mono);
+  font-size: .69rem;
+  line-height: 1.4;
+  letter-spacing: .01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-decoration: none;
+  opacity: .82;
+  transition: opacity .25s ease;
+}
+
+.folio-site-url:hover {
+  opacity: 1;
+}
+
+.folio-editorial-grid .folio-desc {
+  width: 100%;
+  max-width: 100%;
+  min-height: 3.1em;
+  margin: 0;
+  font-size: .92rem;
+  line-height: 1.58;
+}
+
+.folio-editorial-grid .folio-cta {
+  margin-top: auto;
+  transform: translateY(18px);
+}
+
+/* Touch devices stay static, because there is no hover */
+@media (max-width: 1100px) {
+  .folio-showcase-section.container {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .folio-editorial-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .folio-showcase-section.container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .folio-editorial-grid {
+    grid-template-columns: 1fr;
+    gap: 58px;
+  }
+
+  .folio-editorial-grid .folio-body {
+    min-height: 0;
+  }
+
+  .folio-editorial-grid .folio-cta {
+    margin-top: 18px;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .folio-editorial-grid .folio-card:hover .folio-shot,
+  .folio-editorial-grid .folio-card:hover .folio-fill img {
+    animation: none !important;
+  }
+}
+
+
+
+/* ============================================================
+   LIVE WEBSITE CARD PREVIEWS
+   URL labels removed. The actual site is shown inside each card.
+   ============================================================ */
+
+.folio-site-url {
+  display: none !important;
+}
+
+/* Keep every card equal size */
+.folio-editorial-grid .folio-scene,
+.folio-editorial-grid .folio-card:nth-child(n) .folio-scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10 !important;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #150905;
+}
+
+/* Real live website viewport */
+.folio-live-preview {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  background: #fff;
+  pointer-events: none;
+}
+
+/*
+  The iframe is rendered as a desktop webpage and scaled down to fit the card.
+  This prevents the website from switching to its mobile layout.
+*/
+.folio-live-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1440px;
+  height: 1800px;
+  border: 0;
+  background: #fff;
+  transform-origin: top left;
+  transform: scale(var(--live-scale, .30));
+  pointer-events: none;
+}
+
+/* Scale the desktop iframe to the actual card width */
+@media (min-width: 1101px) {
+  .folio-live-frame {
+    --live-scale: .30;
+  }
+}
+
+@media (min-width: 1500px) {
+  .folio-live-frame {
+    --live-scale: .36;
+  }
+}
+
+@media (min-width: 1900px) {
+  .folio-live-frame {
+    --live-scale: .42;
+  }
+}
+
+/*
+  Hover movement:
+  the live page itself moves downward inside the card, then reverses.
+  It does not animate until the card is hovered.
+*/
+/*
+  Automatic live website preview scrolling.
+  Starts without hover and continuously moves down and back up.
+*/
+.folio-editorial-grid .folio-card .folio-live-frame {
+  animation: live-page-scroll 32s ease-in-out infinite alternate;
+}
+
+@keyframes live-page-scroll {
+  0% {
+    top: 0;
+  }
+
+  100% {
+    top: -1050px;
+  }
+}
+
+/* Disable the old screenshot animation because the live iframe is now visible */
+.folio-editorial-grid .folio-card:hover .folio-shot,
+.folio-editorial-grid .folio-card:hover .folio-fill img,
+.folio-editorial-grid .folio-card.is-live .folio-shot {
+  animation: none !important;
+}
+
+/* Keep the warm Worx overlay extremely light so the real site stays readable */
+.folio-editorial-grid .folio-scene::before {
+  z-index: 20;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(21, 9, 5, .01), rgba(21, 9, 5, .05)),
+    radial-gradient(70% 60% at 85% 5%, rgba(250, 167, 25, .055), transparent 75%);
+}
+
+/* Tablet: still render the website as desktop, only scale it further */
+@media (max-width: 1100px) {
+  .folio-live-frame {
+    --live-scale: .30;
+  }
+}
+
+/* Mobile cards use a narrower live viewport */
+@media (max-width: 680px) {
+  .folio-live-frame {
+    width: 1000px;
+    height: 1500px;
+    --live-scale: .34;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-editorial-grid .folio-card .folio-live-frame {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+   MARS DISTANCE TREATMENT
+   Terrain is atmospheric and secondary to the hero content.
+   ============================================================ */
+
+body[data-page="portfolio"] .mars-photo {
+  background-image: url("../assets/portfolio/mars-landscape-hero.png.jpg") !important;
+  background-size: cover !important;
+  background-position: center 54% !important;
+  background-repeat: no-repeat !important;
+  opacity: .48 !important;
+  transform: scale(1.01) !important;
+  filter: saturate(.58) contrast(.82) brightness(.60) blur(.35px) !important;
+}
+
+body[data-page="portfolio"] .mars-photo-grade {
+  opacity: 1 !important;
+  background:
+    linear-gradient(180deg,
+      rgba(45, 13, 4, .48) 0%,
+      rgba(92, 28, 7, .58) 42%,
+      rgba(150, 50, 10, .68) 72%,
+      rgba(67, 18, 5, .80) 100%),
+    linear-gradient(90deg,
+      rgba(21, 9, 5, .58) 0%,
+      rgba(88, 25, 6, .28) 46%,
+      rgba(125, 39, 8, .22) 100%) !important;
+}
+
+body[data-page="portfolio"] .mars-3d-canvas {
+  z-index: 2 !important;
+  opacity: .58 !important;
+}
+
+body[data-page="portfolio"] .mars-ember-glow {
+  z-index: 3 !important;
+  opacity: .72 !important;
+}
+
+body[data-page="portfolio"] .folio-hero-particles {
+  z-index: 4 !important;
+  opacity: 1 !important;
+}
+
+body[data-page="portfolio"] .folio-hero-inner {
+  z-index: 5 !important;
+}
+
+@media (max-width: 900px) {
+  body[data-page="portfolio"] .mars-photo {
+    background-position: 56% 54% !important;
+  }
+}
+
+@media (max-width: 600px) {
+  body[data-page="portfolio"] .mars-photo {
+    background-position: 60% 54% !important;
+    opacity: .42 !important;
+  }
+}
+
+
+/* ============================================================
+   HERO COPY POSITION — raised for stronger visual balance
+   ============================================================ */
+body[data-page="portfolio"] .folio-hero-inner {
+  justify-content: flex-end !important;
+  padding-bottom: clamp(120px, 16vh, 190px) !important;
+}
+
+@media (max-width: 900px) {
+  body[data-page="portfolio"] .folio-hero-inner {
+    padding-bottom: clamp(95px, 13vh, 145px) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  body[data-page="portfolio"] .folio-hero-inner {
+    padding-bottom: 90px !important;
+  }
+}
+
+
+/* ============================================================
+   MARS RIDGE ASTRONAUT V7 — REBUILT FROM MEASURED ARTWORK
+   CSS ONLY. This is the single authoritative astronaut
+   implementation; no other rule in this file touches
+   .mars-astronaut / .mars-worx-flag.
+
+   WHY V6 STILL FLICKERED, MEASURED DIRECTLY FROM THE PNGs:
+   Each of the 10 walk PNGs (static/assets/portfolio/astronaut/
+   Astronaut - Final - 0XX.png, all 700x900) has its character
+   drawn in a DIFFERENT place on the canvas — full-silhouette
+   bounding-box center ranges from 43.0% to 49.9% of width and
+   92.2% to 94.4% of height (measured via alpha-channel bounding
+   box per frame). Because every frame was shown at the same
+   object-fit:contain box with no per-frame correction, swapping
+   frames visibly shifted the whole body left/right/up/down on
+   top of whatever the crossfade window was doing — a real
+   geometric jump, not just an opacity-timing artifact. Frames
+   1 and 10 are pixel-identical (bbox (187,221,417,830) both),
+   confirming they were meant to be the true loop point.
+
+   FIX: every frame image now carries its OWN measured
+   translate() correction (below), re-registering its silhouette
+   to one shared anchor point (45.6%, 92.2% of the 700x900
+   canvas) before the crossfade ever runs. That anchor point is
+   also what .mars-astronaut itself is positioned by (via a
+   trailing translate(-45.6%,-92.2%)) and what .mars-astronaut__
+   gravity rotates around — so the terrain path, the walk-cycle
+   registration and the lean pivot all reference the exact same
+   point on the character (their feet), not the padded PNG
+   rectangle. ASTRONAUT_KNEEL.png's own bbox (136,396,501,830)
+   already centers at (45.5%, 92.2%) with no correction needed —
+   confirms this anchor is the artwork's real, shared foot line.
+
+   Crossfade width was cut from a 1.2%-of-cycle blend down to a
+   ~1ms blend (imperceptible, avoids double-exposure ghosting)
+   while keeping the non-duplicate-percentage fix from the
+   previous pass (a repeated percentage inside one @keyframes
+   block does NOT create an instant cut in this browser — the
+   earlier value is dropped and the whole span interpolates,
+   which is what caused every frame to fade in from 0% at once
+   last time). Net effect: true single-frame visibility with an
+   effectively-instant swap, i.e. clean discrete frame switching.
+
+   Terrain: re-measured against the actual hero photo with a
+   variance-based ridge detector (2400x1600 image, 4px column
+   step, median + double moving-average smoothing to remove
+   foreground rock/boulder noise), producing 52 waypoints across
+   the 65s journey instead of a hand-picked ~24 — dense through
+   the climb/descent, sparse on the flat approach/exit.
+
+   Layers (unchanged shape from the previous pass, still the
+   right separation of concerns):
+     .mars-astronaut          terrain position + depth scale + opacity
+     .mars-astronaut__gravity slope lean, pivoting at the anchor point
+     .mars-astronaut__walking kneel-hide toggle + gait-synced bob
+     .mars-astronaut__frame   the 10-frame walk cycle
+     .mars-astronaut__kneel   inherits the parent's held position
+     .mars-worx-flag          sibling element, same anchor math,
+                               now carrying the Dark Logo badge
+   ============================================================ */
+
+body[data-page="portfolio"] .mars-astronaut {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: clamp(72px, 5vw, 98px);
+  height: clamp(94px, 6.8vw, 128px);
+  pointer-events: none;
+  opacity: 0;
+  transform-origin: 45.6% 92.2%;
+  will-change: transform, opacity;
+  filter: sepia(.20) saturate(.74) brightness(.76) contrast(.94) drop-shadow(0 6px 7px rgba(20, 5, 2, .28));
+  animation: marsAstronautTerrain 65s linear infinite;
+}
+
+/* ---- Terrain path: WIDE viewports (vw/vh > 1.5) --------------
+   translate(X, Y) places the shared anchor point (45.6%, 92.2%
+   of the sprite canvas -- the character's feet) at
+   (xf*100vw, 54vh + (yf-0.54)*66.667vw); the trailing
+   translate(-45.6%,-92.2%) re-anchors it from the sprite's
+   top-left corner to that measured point. */
+@keyframes marsAstronautTerrain {
+  0% { transform: translate(-7vw, calc(54vh + 3.36vw)) translate(-45.6%, -92.2%) scale(.904); opacity: 0; }
+  1.5% { transform: translate(-2vw, calc(54vh + 3.36vw)) translate(-45.6%, -92.2%) scale(.907); opacity: .85; }
+  4% { transform: translate(2vw, calc(54vh + 3.31vw)) translate(-45.6%, -92.2%) scale(.911); opacity: 1; }
+  7.2% { transform: translate(5.4vw, calc(54vh + 3.24vw)) translate(-45.6%, -92.2%) scale(.916); }
+  10.4% { transform: translate(8.8vw, calc(54vh + 3.23vw)) translate(-45.6%, -92.2%) scale(.921); }
+  13.6% { transform: translate(12.2vw, calc(54vh + 3.08vw)) translate(-45.6%, -92.2%) scale(.927); }
+  16.8% { transform: translate(15.6vw, calc(54vh + 2.11vw)) translate(-45.6%, -92.2%) scale(.932); }
+  20% { transform: translate(19vw, calc(54vh + .35vw)) translate(-45.6%, -92.2%) scale(.937); }
+  21.33% { transform: translate(20.75vw, calc(54vh - .79vw)) translate(-45.6%, -92.2%) scale(.939); }
+  22.67% { transform: translate(22.5vw, calc(54vh - 2.05vw)) translate(-45.6%, -92.2%) scale(.942); }
+  24% { transform: translate(24.25vw, calc(54vh - 3.18vw)) translate(-45.6%, -92.2%) scale(.944); }
+  25.33% { transform: translate(26vw, calc(54vh - 4.15vw)) translate(-45.6%, -92.2%) scale(.946); }
+  26.67% { transform: translate(27.75vw, calc(54vh - 5.07vw)) translate(-45.6%, -92.2%) scale(.948); }
+  28% { transform: translate(29.5vw, calc(54vh - 5.94vw)) translate(-45.6%, -92.2%) scale(.951); }
+  29.33% { transform: translate(31.25vw, calc(54vh - 6.79vw)) translate(-45.6%, -92.2%) scale(.953); }
+  30.67% { transform: translate(33vw, calc(54vh - 7.44vw)) translate(-45.6%, -92.2%) scale(.955); }
+  32% { transform: translate(34.75vw, calc(54vh - 7.73vw)) translate(-45.6%, -92.2%) scale(.957); }
+  33.33% { transform: translate(36.5vw, calc(54vh - 7.86vw)) translate(-45.6%, -92.2%) scale(.959); }
+  34.67% { transform: translate(38.25vw, calc(54vh - 8.04vw)) translate(-45.6%, -92.2%) scale(.962); }
+  36% { transform: translate(40vw, calc(54vh - 8.34vw)) translate(-45.6%, -92.2%) scale(.964); }
+  37.33% { transform: translate(41.75vw, calc(54vh - 8.71vw)) translate(-45.6%, -92.2%) scale(.966); }
+  38.67% { transform: translate(43.5vw, calc(54vh - 9.15vw)) translate(-45.6%, -92.2%) scale(.968); }
+  40% { transform: translate(45.25vw, calc(54vh - 9.81vw)) translate(-45.6%, -92.2%) scale(.97); }
+  41.33% { transform: translate(47vw, calc(54vh - 10.69vw)) translate(-45.6%, -92.2%) scale(.973); }
+  42.67% { transform: translate(48.75vw, calc(54vh - 11.47vw)) translate(-45.6%, -92.2%) scale(.975); }
+  /* summit: held flat through the (shortened) kneel window */
+  44%, 47.5% { transform: translate(50.5vw, calc(54vh - 11.87vw)) translate(-45.6%, -92.2%) scale(.98); opacity: 1; }
+  49.11% { transform: translate(52.42vw, calc(54vh - 11.89vw)) translate(-45.6%, -92.2%) scale(.974); }
+  50.71% { transform: translate(54.04vw, calc(54vh - 11.62vw)) translate(-45.6%, -92.2%) scale(.972); }
+  52.32% { transform: translate(55.66vw, calc(54vh - 11.13vw)) translate(-45.6%, -92.2%) scale(.969); }
+  53.93% { transform: translate(57.29vw, calc(54vh - 10.53vw)) translate(-45.6%, -92.2%) scale(.966); }
+  55.54% { transform: translate(58.91vw, calc(54vh - 9.95vw)) translate(-45.6%, -92.2%) scale(.964); }
+  57.14% { transform: translate(60.53vw, calc(54vh - 9.42vw)) translate(-45.6%, -92.2%) scale(.961); }
+  58.75% { transform: translate(62.15vw, calc(54vh - 8.97vw)) translate(-45.6%, -92.2%) scale(.958); }
+  60.36% { transform: translate(63.77vw, calc(54vh - 8.59vw)) translate(-45.6%, -92.2%) scale(.956); }
+  61.96% { transform: translate(65.39vw, calc(54vh - 8.26vw)) translate(-45.6%, -92.2%) scale(.953); }
+  63.57% { transform: translate(67.01vw, calc(54vh - 7.94vw)) translate(-45.6%, -92.2%) scale(.95); }
+  65.18% { transform: translate(68.64vw, calc(54vh - 7.54vw)) translate(-45.6%, -92.2%) scale(.948); }
+  66.79% { transform: translate(70.26vw, calc(54vh - 7.08vw)) translate(-45.6%, -92.2%) scale(.945); }
+  68.39% { transform: translate(71.88vw, calc(54vh - 6.66vw)) translate(-45.6%, -92.2%) scale(.942); }
+  70% { transform: translate(73.5vw, calc(54vh - 6.3vw)) translate(-45.6%, -92.2%) scale(.94); }
+  72.75% { transform: translate(76.44vw, calc(54vh - 5.9vw)) translate(-45.6%, -92.2%) scale(.935); }
+  75.5% { transform: translate(79.38vw, calc(54vh - 5.86vw)) translate(-45.6%, -92.2%) scale(.931); }
+  78.25% { transform: translate(82.31vw, calc(54vh - 6vw)) translate(-45.6%, -92.2%) scale(.926); }
+  81% { transform: translate(85.25vw, calc(54vh - 6.65vw)) translate(-45.6%, -92.2%) scale(.922); }
+  83.75% { transform: translate(88.19vw, calc(54vh - 5.84vw)) translate(-45.6%, -92.2%) scale(.917); }
+  86.5% { transform: translate(91.12vw, calc(54vh - 5.23vw)) translate(-45.6%, -92.2%) scale(.912); }
+  89.25% { transform: translate(94.06vw, calc(54vh - 2.08vw)) translate(-45.6%, -92.2%) scale(.908); }
+  92% { transform: translate(97vw, calc(54vh - .93vw)) translate(-45.6%, -92.2%) scale(.903); }
+  94% { transform: translate(99.75vw, calc(54vh - 1.15vw)) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
+  96% { transform: translate(102.5vw, calc(54vh - 1.16vw)) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
+  98% { transform: translate(105.25vw, calc(54vh - 1.16vw)) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
+  100% { transform: translate(108vw, calc(54vh - 1.16vw)) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
+}
+
+/* ---- Terrain path: TABLET / narrow desktop (<=900px) --------
+   Matches the hero photo's own 56% bgPosX at this width. */
+@media (max-width: 900px) {
+  @keyframes marsAstronautTerrain {
+    0% { transform: translate(calc(56vw - 94.5vh), 59.05vh) translate(-45.6%, -92.2%) scale(.904); opacity: 0; }
+    1.5% { transform: translate(calc(56vw - 87vh), 59.05vh) translate(-45.6%, -92.2%) scale(.907); opacity: .85; }
+    4% { transform: translate(calc(56vw - 81vh), 58.96vh) translate(-45.6%, -92.2%) scale(.911); opacity: 1; }
+    7.2% { transform: translate(calc(56vw - 75.9vh), 58.87vh) translate(-45.6%, -92.2%) scale(.916); }
+    10.4% { transform: translate(calc(56vw - 70.8vh), 58.84vh) translate(-45.6%, -92.2%) scale(.921); }
+    13.6% { transform: translate(calc(56vw - 65.7vh), 58.62vh) translate(-45.6%, -92.2%) scale(.927); }
+    16.8% { transform: translate(calc(56vw - 60.6vh), 57.17vh) translate(-45.6%, -92.2%) scale(.932); }
+    20% { transform: translate(calc(56vw - 55.5vh), 54.52vh) translate(-45.6%, -92.2%) scale(.937); }
+    21.33% { transform: translate(calc(56vw - 52.88vh), 52.81vh) translate(-45.6%, -92.2%) scale(.939); }
+    22.67% { transform: translate(calc(56vw - 50.25vh), 50.92vh) translate(-45.6%, -92.2%) scale(.942); }
+    24% { transform: translate(calc(56vw - 47.63vh), 49.24vh) translate(-45.6%, -92.2%) scale(.944); }
+    25.33% { transform: translate(calc(56vw - 45vh), 47.77vh) translate(-45.6%, -92.2%) scale(.946); }
+    26.67% { transform: translate(calc(56vw - 42.38vh), 46.39vh) translate(-45.6%, -92.2%) scale(.948); }
+    28% { transform: translate(calc(56vw - 39.75vh), 45.09vh) translate(-45.6%, -92.2%) scale(.951); }
+    29.33% { transform: translate(calc(56vw - 37.13vh), 43.81vh) translate(-45.6%, -92.2%) scale(.953); }
+    30.67% { transform: translate(calc(56vw - 34.5vh), 42.83vh) translate(-45.6%, -92.2%) scale(.955); }
+    32% { transform: translate(calc(56vw - 31.88vh), 42.4vh) translate(-45.6%, -92.2%) scale(.957); }
+    33.33% { transform: translate(calc(56vw - 29.25vh), 42.21vh) translate(-45.6%, -92.2%) scale(.959); }
+    34.67% { transform: translate(calc(56vw - 26.63vh), 41.94vh) translate(-45.6%, -92.2%) scale(.962); }
+    36% { transform: translate(calc(56vw - 24vh), 41.49vh) translate(-45.6%, -92.2%) scale(.964); }
+    37.33% { transform: translate(calc(56vw - 21.38vh), 40.93vh) translate(-45.6%, -92.2%) scale(.966); }
+    38.67% { transform: translate(calc(56vw - 18.75vh), 40.27vh) translate(-45.6%, -92.2%) scale(.968); }
+    40% { transform: translate(calc(56vw - 16.13vh), 39.28vh) translate(-45.6%, -92.2%) scale(.97); }
+    41.33% { transform: translate(calc(56vw - 13.5vh), 37.96vh) translate(-45.6%, -92.2%) scale(.973); }
+    42.67% { transform: translate(calc(56vw - 10.88vh), 36.8vh) translate(-45.6%, -92.2%) scale(.975); }
+    44%, 47.5% { transform: translate(calc(56vw - 8.25vh), 36.2vh) translate(-45.6%, -92.2%) scale(.98); opacity: 1; }
+    49.11% { transform: translate(calc(56vw - 5.37vh), 36.16vh) translate(-45.6%, -92.2%) scale(.974); }
+    50.71% { transform: translate(calc(56vw - 2.94vh), 36.57vh) translate(-45.6%, -92.2%) scale(.972); }
+    52.32% { transform: translate(calc(56vw - .5vh), 37.31vh) translate(-45.6%, -92.2%) scale(.969); }
+    53.93% { transform: translate(calc(56vw + 1.93vh), 38.21vh) translate(-45.6%, -92.2%) scale(.966); }
+    55.54% { transform: translate(calc(56vw + 4.36vh), 39.08vh) translate(-45.6%, -92.2%) scale(.964); }
+    57.14% { transform: translate(calc(56vw + 6.79vh), 39.87vh) translate(-45.6%, -92.2%) scale(.961); }
+    58.75% { transform: translate(calc(56vw + 9.22vh), 40.55vh) translate(-45.6%, -92.2%) scale(.958); }
+    60.36% { transform: translate(calc(56vw + 11.66vh), 41.12vh) translate(-45.6%, -92.2%) scale(.956); }
+    61.96% { transform: translate(calc(56vw + 14.09vh), 41.61vh) translate(-45.6%, -92.2%) scale(.953); }
+    63.57% { transform: translate(calc(56vw + 16.52vh), 42.1vh) translate(-45.6%, -92.2%) scale(.95); }
+    65.18% { transform: translate(calc(56vw + 18.95vh), 42.69vh) translate(-45.6%, -92.2%) scale(.948); }
+    66.79% { transform: translate(calc(56vw + 21.39vh), 43.38vh) translate(-45.6%, -92.2%) scale(.945); }
+    68.39% { transform: translate(calc(56vw + 23.82vh), 44.01vh) translate(-45.6%, -92.2%) scale(.942); }
+    70% { transform: translate(calc(56vw + 26.25vh), 44.55vh) translate(-45.6%, -92.2%) scale(.94); }
+    72.75% { transform: translate(calc(56vw + 30.66vh), 45.16vh) translate(-45.6%, -92.2%) scale(.935); }
+    75.5% { transform: translate(calc(56vw + 35.06vh), 45.2vh) translate(-45.6%, -92.2%) scale(.931); }
+    78.25% { transform: translate(calc(56vw + 39.47vh), 44.99vh) translate(-45.6%, -92.2%) scale(.926); }
+    81% { transform: translate(calc(56vw + 43.88vh), 44.03vh) translate(-45.6%, -92.2%) scale(.922); }
+    83.75% { transform: translate(calc(56vw + 48.28vh), 45.24vh) translate(-45.6%, -92.2%) scale(.917); }
+    86.5% { transform: translate(calc(56vw + 52.69vh), 46.15vh) translate(-45.6%, -92.2%) scale(.912); }
+    89.25% { transform: translate(calc(56vw + 57.09vh), 50.88vh) translate(-45.6%, -92.2%) scale(.908); }
+    92% { transform: translate(calc(56vw + 61.5vh), 52.6vh) translate(-45.6%, -92.2%) scale(.903); }
+    94% { transform: translate(calc(56vw + 65.62vh), 52.27vh) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
+    96% { transform: translate(calc(56vw + 69.75vh), 52.27vh) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
+    98% { transform: translate(calc(56vw + 73.87vh), 52.27vh) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
+    100% { transform: translate(calc(56vw + 78vh), 52.27vh) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
+  }
+}
+
+/* ---- Terrain path: MOBILE (<=600px) --------------------------
+   Matches the hero photo's own 60% bgPosX at this width. */
+@media (max-width: 600px) {
+  @keyframes marsAstronautTerrain {
+    0% { transform: translate(calc(60vw - 100.5vh), 59.05vh) translate(-45.6%, -92.2%) scale(.904); opacity: 0; }
+    1.5% { transform: translate(calc(60vw - 93vh), 59.05vh) translate(-45.6%, -92.2%) scale(.907); opacity: .85; }
+    4% { transform: translate(calc(60vw - 87vh), 58.96vh) translate(-45.6%, -92.2%) scale(.911); opacity: 1; }
+    7.2% { transform: translate(calc(60vw - 81.9vh), 58.87vh) translate(-45.6%, -92.2%) scale(.916); }
+    10.4% { transform: translate(calc(60vw - 76.8vh), 58.84vh) translate(-45.6%, -92.2%) scale(.921); }
+    13.6% { transform: translate(calc(60vw - 71.7vh), 58.62vh) translate(-45.6%, -92.2%) scale(.927); }
+    16.8% { transform: translate(calc(60vw - 66.6vh), 57.17vh) translate(-45.6%, -92.2%) scale(.932); }
+    20% { transform: translate(calc(60vw - 61.5vh), 54.52vh) translate(-45.6%, -92.2%) scale(.937); }
+    21.33% { transform: translate(calc(60vw - 58.87vh), 52.81vh) translate(-45.6%, -92.2%) scale(.939); }
+    22.67% { transform: translate(calc(60vw - 56.25vh), 50.92vh) translate(-45.6%, -92.2%) scale(.942); }
+    24% { transform: translate(calc(60vw - 53.62vh), 49.24vh) translate(-45.6%, -92.2%) scale(.944); }
+    25.33% { transform: translate(calc(60vw - 51vh), 47.77vh) translate(-45.6%, -92.2%) scale(.946); }
+    26.67% { transform: translate(calc(60vw - 48.38vh), 46.39vh) translate(-45.6%, -92.2%) scale(.948); }
+    28% { transform: translate(calc(60vw - 45.75vh), 45.09vh) translate(-45.6%, -92.2%) scale(.951); }
+    29.33% { transform: translate(calc(60vw - 43.12vh), 43.81vh) translate(-45.6%, -92.2%) scale(.953); }
+    30.67% { transform: translate(calc(60vw - 40.5vh), 42.83vh) translate(-45.6%, -92.2%) scale(.955); }
+    32% { transform: translate(calc(60vw - 37.87vh), 42.4vh) translate(-45.6%, -92.2%) scale(.957); }
+    33.33% { transform: translate(calc(60vw - 35.25vh), 42.21vh) translate(-45.6%, -92.2%) scale(.959); }
+    34.67% { transform: translate(calc(60vw - 32.62vh), 41.94vh) translate(-45.6%, -92.2%) scale(.962); }
+    36% { transform: translate(calc(60vw - 30vh), 41.49vh) translate(-45.6%, -92.2%) scale(.964); }
+    37.33% { transform: translate(calc(60vw - 27.38vh), 40.93vh) translate(-45.6%, -92.2%) scale(.966); }
+    38.67% { transform: translate(calc(60vw - 24.75vh), 40.27vh) translate(-45.6%, -92.2%) scale(.968); }
+    40% { transform: translate(calc(60vw - 22.13vh), 39.28vh) translate(-45.6%, -92.2%) scale(.97); }
+    41.33% { transform: translate(calc(60vw - 19.5vh), 37.96vh) translate(-45.6%, -92.2%) scale(.973); }
+    42.67% { transform: translate(calc(60vw - 16.87vh), 36.8vh) translate(-45.6%, -92.2%) scale(.975); }
+    44%, 47.5% { transform: translate(calc(60vw - 14.25vh), 36.2vh) translate(-45.6%, -92.2%) scale(.98); opacity: 1; }
+    49.11% { transform: translate(calc(60vw - 11.37vh), 36.16vh) translate(-45.6%, -92.2%) scale(.974); }
+    50.71% { transform: translate(calc(60vw - 8.94vh), 36.57vh) translate(-45.6%, -92.2%) scale(.972); }
+    52.32% { transform: translate(calc(60vw - 6.5vh), 37.31vh) translate(-45.6%, -92.2%) scale(.969); }
+    53.93% { transform: translate(calc(60vw - 4.07vh), 38.21vh) translate(-45.6%, -92.2%) scale(.966); }
+    55.54% { transform: translate(calc(60vw - 1.64vh), 39.08vh) translate(-45.6%, -92.2%) scale(.964); }
+    57.14% { transform: translate(calc(60vw + .79vh), 39.87vh) translate(-45.6%, -92.2%) scale(.961); }
+    58.75% { transform: translate(calc(60vw + 3.23vh), 40.55vh) translate(-45.6%, -92.2%) scale(.958); }
+    60.36% { transform: translate(calc(60vw + 5.66vh), 41.12vh) translate(-45.6%, -92.2%) scale(.956); }
+    61.96% { transform: translate(calc(60vw + 8.09vh), 41.61vh) translate(-45.6%, -92.2%) scale(.953); }
+    63.57% { transform: translate(calc(60vw + 10.52vh), 42.1vh) translate(-45.6%, -92.2%) scale(.95); }
+    65.18% { transform: translate(calc(60vw + 12.95vh), 42.69vh) translate(-45.6%, -92.2%) scale(.948); }
+    66.79% { transform: translate(calc(60vw + 15.39vh), 43.38vh) translate(-45.6%, -92.2%) scale(.945); }
+    68.39% { transform: translate(calc(60vw + 17.82vh), 44.01vh) translate(-45.6%, -92.2%) scale(.942); }
+    70% { transform: translate(calc(60vw + 20.25vh), 44.55vh) translate(-45.6%, -92.2%) scale(.94); }
+    72.75% { transform: translate(calc(60vw + 24.66vh), 45.16vh) translate(-45.6%, -92.2%) scale(.935); }
+    75.5% { transform: translate(calc(60vw + 29.06vh), 45.2vh) translate(-45.6%, -92.2%) scale(.931); }
+    78.25% { transform: translate(calc(60vw + 33.47vh), 44.99vh) translate(-45.6%, -92.2%) scale(.926); }
+    81% { transform: translate(calc(60vw + 37.88vh), 44.03vh) translate(-45.6%, -92.2%) scale(.922); }
+    83.75% { transform: translate(calc(60vw + 42.28vh), 45.24vh) translate(-45.6%, -92.2%) scale(.917); }
+    86.5% { transform: translate(calc(60vw + 46.69vh), 46.15vh) translate(-45.6%, -92.2%) scale(.912); }
+    89.25% { transform: translate(calc(60vw + 51.09vh), 50.88vh) translate(-45.6%, -92.2%) scale(.908); }
+    92% { transform: translate(calc(60vw + 55.5vh), 52.6vh) translate(-45.6%, -92.2%) scale(.903); }
+    94% { transform: translate(calc(60vw + 59.63vh), 52.27vh) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
+    96% { transform: translate(calc(60vw + 63.75vh), 52.27vh) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
+    98% { transform: translate(calc(60vw + 67.88vh), 52.27vh) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
+    100% { transform: translate(calc(60vw + 72vh), 52.27vh) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
+  }
+}
+
+/* ---- Body lean: rotates only, pivots at the measured foot
+   anchor (45.6%, 92.2%) via .mars-astronaut's own transform-
+   origin above -- not the image's geometric middle. Values are
+   proportional to the actual local slope of the smoothed ridge
+   between each pair of neighbouring waypoints, clamped to a
+   believable +-6 degrees, with the secondary/minor hill on the
+   descent (81-92%) damped further since it's a gentle rolling
+   feature, not a real climb, and a literal slope-proportional
+   angle there reads as jittery rather than purposeful. */
+body[data-page="portfolio"] .mars-astronaut__gravity {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-origin: 45.6% 92.2%;
+  animation: astronautLean 65s ease-in-out infinite;
+}
+
+@keyframes astronautLean {
+  0%, 1.5% { transform: rotate(0deg); }
+  4% { transform: rotate(.15deg); }
+  7.2% { transform: rotate(.1deg); }
+  10.4% { transform: rotate(.2deg); }
+  13.6% { transform: rotate(1.15deg); }
+  16.8% { transform: rotate(2.85deg); }
+  20% { transform: rotate(4.3deg); }
+  21.33% { transform: rotate(6deg); }
+  22.67% { transform: rotate(5.95deg); }
+  24% { transform: rotate(5.25deg); }
+  25.33% { transform: rotate(4.75deg); }
+  26.67% { transform: rotate(4.45deg); }
+  28% { transform: rotate(4.3deg); }
+  29.33% { transform: rotate(3.75deg); }
+  30.67% { transform: rotate(2.35deg); }
+  32% { transform: rotate(1deg); }
+  33.33% { transform: rotate(.75deg); }
+  34.67% { transform: rotate(1.2deg); }
+  36% { transform: rotate(1.7deg); }
+  37.33% { transform: rotate(2deg); }
+  38.67% { transform: rotate(2.75deg); }
+  40% { transform: rotate(3.85deg); }
+  41.33% { transform: rotate(4.15deg); }
+  42.67% { transform: rotate(2deg); }
+  44%, 47.5% { transform: rotate(0deg); }
+  49.11% { transform: rotate(-.25deg); }
+  50.71% { transform: rotate(-1.6deg); }
+  52.32% { transform: rotate(-2.25deg); }
+  53.93% { transform: rotate(-2.45deg); }
+  55.54% { transform: rotate(-2.3deg); }
+  57.14% { transform: rotate(-2deg); }
+  58.75% { transform: rotate(-1.7deg); }
+  60.36% { transform: rotate(-1.45deg); }
+  61.96% { transform: rotate(-1.35deg); }
+  63.57% { transform: rotate(-1.5deg); }
+  65.18% { transform: rotate(-1.8deg); }
+  66.79% { transform: rotate(-1.8deg); }
+  68.39% { transform: rotate(-1.6deg); }
+  70% { transform: rotate(-1.15deg); }
+  72.75% { transform: rotate(-.5deg); }
+  75.5% { transform: rotate(.1deg); }
+  78.25% { transform: rotate(.9deg); }
+  81% { transform: rotate(0deg); }
+  83.75% { transform: rotate(-.8deg); }
+  86.5% { transform: rotate(-2deg); }
+  89.25% { transform: rotate(-1.5deg); }
+  92% { transform: rotate(-.5deg); }
+  94%, 100% { transform: rotate(0deg); }
+}
+
+/* ---- Walking layer: kneel-hide toggle + gait-synced bob ------ */
+body[data-page="portfolio"] .mars-astronaut__walking {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 45.6% 92.2%;
+  animation:
+    astronautWalkingVisibility 65s linear infinite,
+    astronautBob 1.8s linear infinite;
+}
+
+/* Hidden only for the (shortened) kneel window, with a brief
+   crossfade at each edge so it never overlaps the kneel sprite
+   at full opacity and never leaves a visible gap. */
+@keyframes astronautWalkingVisibility {
+  0%, 43.7% { visibility: visible; opacity: 1; }
+  44%, 47.2% { visibility: hidden; opacity: 0; }
+  47.5%, 100% { visibility: visible; opacity: 1; }
+}
+
+/* Vertical-only weight transfer, tied to the SAME 1.8s clock as
+   the walk cycle: lowest (0) exactly on the "contact" frames
+   (feet planted), a small 2px rise at the midpoint of each
+   "passing" frame (legs crossing under the body, the real
+   moment a walking body is highest). This is motivated by the
+   actual gait rather than an independent decorative wobble, and
+   it never goes negative relative to the calibrated terrain
+   baseline, so the feet never sink. */
+@keyframes astronautBob {
+  0% { transform: translateY(0); }
+  10.9% { transform: translateY(0); }
+  24.4% { transform: translateY(-2px); }
+  38% { transform: translateY(0); }
+  44.4% { transform: translateY(0); }
+  55.4% { transform: translateY(0); }
+  74.4% { transform: translateY(-2px); }
+  88% { transform: translateY(0); }
+  94.4% { transform: translateY(0); }
+  100% { transform: translateY(0); }
+}
+
+body[data-page="portfolio"] .mars-astronaut__frame,
+body[data-page="portfolio"] .mars-astronaut__kneel {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  transform-origin: 45.6% 92.2%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* ============================================================
+   WALK CYCLE — one shared 1.8s loop, independent of the 65s
+   journey (so the legs cycle many times over the traverse
+   instead of ~once for the whole screen). Every frame's own
+   fade-in/out ramp is ~0.06% of the cycle (~1ms): short enough
+   to read as an instant, ghost-free swap rather than a visible
+   crossfade, while still being two DISTINCT percentages (not a
+   repeated one) so the browser doesn't drop the earlier value
+   and bleed the fade back to 0% -- the exact bug from the
+   previous pass. Hold widths stay weighted by gait role (11%
+   contact / 10% weight-transfer / 8% passing, read off the
+   artwork). Each frame also carries its own measured
+   translate() correction (see file header) so swapping frames
+   no longer visibly shifts the body.
+   ============================================================ */
+
+/* frame 01 -- contact (dx+2.44% dy-0.11% vs shared anchor) */
+body[data-page="portfolio"] .mars-astronaut__frame--01 {
+  transform: translate(calc(-50% + 2.44%), -.11%);
+  animation: astronautFrame01 1.8s linear infinite;
+}
+@keyframes astronautFrame01 { 0%, 10.94% { opacity: 1; } 11%, 100% { opacity: 0; } }
+
+/* frame 02 -- weight-transfer (dx-0.27% dy-1.33%) */
+body[data-page="portfolio"] .mars-astronaut__frame--02 {
+  transform: translate(calc(-50% - .27%), -1.33%);
+  animation: astronautFrame02 1.8s linear infinite;
+}
+@keyframes astronautFrame02 { 0%, 10.94% { opacity: 0; } 11%, 20.94% { opacity: 1; } 21%, 100% { opacity: 0; } }
+
+/* frame 03 -- passing, fastest part of the stride (dx-4.34% dy-1.56%) */
+body[data-page="portfolio"] .mars-astronaut__frame--03 {
+  transform: translate(calc(-50% - 4.34%), -1.56%);
+  animation: astronautFrame03 1.8s linear infinite;
+}
+@keyframes astronautFrame03 { 0%, 20.94% { opacity: 0; } 21%, 28.94% { opacity: 1; } 29%, 100% { opacity: 0; } }
+
+/* frame 04 -- swing-forward (dx-3.56% dy-2.00%) */
+body[data-page="portfolio"] .mars-astronaut__frame--04 {
+  transform: translate(calc(-50% - 3.56%), -2%);
+  animation: astronautFrame04 1.8s linear infinite;
+}
+@keyframes astronautFrame04 { 0%, 28.94% { opacity: 0; } 29%, 38.94% { opacity: 1; } 39%, 100% { opacity: 0; } }
+
+/* frame 05 -- contact, opposite leg (dx+0.44% dy-2.33%) */
+body[data-page="portfolio"] .mars-astronaut__frame--05 {
+  transform: translate(calc(-50% + .44%), -2.33%);
+  animation: astronautFrame05 1.8s linear infinite;
+}
+@keyframes astronautFrame05 { 0%, 38.94% { opacity: 0; } 39%, 49.94% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+/* frame 06 -- contact (dx+2.59% dy-2.11%) */
+body[data-page="portfolio"] .mars-astronaut__frame--06 {
+  transform: translate(calc(-50% + 2.59%), -2.11%);
+  animation: astronautFrame06 1.8s linear infinite;
+}
+@keyframes astronautFrame06 { 0%, 49.94% { opacity: 0; } 50%, 60.94% { opacity: 1; } 61%, 100% { opacity: 0; } }
+
+/* frame 07 -- weight-transfer (dx-1.49% dy-2.00%) */
+body[data-page="portfolio"] .mars-astronaut__frame--07 {
+  transform: translate(calc(-50% - 1.49%), -2%);
+  animation: astronautFrame07 1.8s linear infinite;
+}
+@keyframes astronautFrame07 { 0%, 60.94% { opacity: 0; } 61%, 70.94% { opacity: 1; } 71%, 100% { opacity: 0; } }
+
+/* frame 08 -- passing (dx+0.44% dy-1.33%) */
+body[data-page="portfolio"] .mars-astronaut__frame--08 {
+  transform: translate(calc(-50% + .44%), -1.33%);
+  animation: astronautFrame08 1.8s linear infinite;
+}
+@keyframes astronautFrame08 { 0%, 70.94% { opacity: 0; } 71%, 78.94% { opacity: 1; } 79%, 100% { opacity: 0; } }
+
+/* frame 09 -- swing-forward (dx+1.30% dy-0.33%) */
+body[data-page="portfolio"] .mars-astronaut__frame--09 {
+  transform: translate(calc(-50% + 1.3%), -.33%);
+  animation: astronautFrame09 1.8s linear infinite;
+}
+@keyframes astronautFrame09 { 0%, 78.94% { opacity: 0; } 79%, 88.94% { opacity: 1; } 89%, 100% { opacity: 0; } }
+
+/* frame 10 -- contact, wraps seamlessly back into frame 1: it is
+   PIXEL-IDENTICAL to frame 1 (same alpha bbox, same correction),
+   so the loop point has zero registration difference -- only
+   the (now-instant) opacity handoff needed fixing. */
+body[data-page="portfolio"] .mars-astronaut__frame--10 {
+  transform: translate(calc(-50% + 2.44%), -.11%);
+  animation: astronautFrame10 1.8s linear infinite;
+}
+@keyframes astronautFrame10 { 0%, 88.94% { opacity: 0; } 89%, 99.94% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ============================================================
+   KNEEL — inherits the parent's held summit transform (no
+   coordinates of its own). ASTRONAUT_KNEEL.png's measured bbox
+   already centers at (45.5%, 92.2%), i.e. the same anchor the
+   walk frames were corrected to, so the small "bottom" nudge
+   below is only compensating for the 135% oversize scale
+   (which stretches the ~7.8%-of-canvas gap under the character
+   into a larger absolute gap) -- not re-deriving the anchor.
+   Shortened to a ~2.3s hold (44%-47.5%) with a fast linear
+   crossfade against the walking layer instead of an instant
+   steps() pop.
+   ============================================================ */
+
+body[data-page="portfolio"] .mars-astronaut__kneel {
+  left: 50%;
+  bottom: calc(-1px - 2.7%);
+  width: 135%;
+  height: 135%;
+  transform: translateX(-50%) scale(1);
+  visibility: hidden;
+  animation: astronautKneel 65s linear infinite;
+}
+
+@keyframes astronautKneel {
+  0%, 43.8% { opacity: 0; visibility: hidden; }
+  44%, 47.3% { opacity: 1; visibility: visible; }
+  47.5%, 100% { opacity: 0; visibility: hidden; }
+}
+
+/* ============================================================
+   FLAG — a sibling element (not nested in .mars-astronaut), so
+   it needs the same closed-form summit anchor math, evaluated
+   at the pole's actual TIP pixel. Measured directly from
+   worx-flag.png (337x360): the lowest opaque (wood-brown, not
+   flag-cloth) pixels sit at x=[72,79] (center 22.4% of width),
+   y=342 solid / 343 antialiased edge (95.0% of height) -- NOT
+   the canvas edge, which is why the pole previously looked like
+   it stopped just short of the summit. transform-origin is set
+   to that exact point, so translate(-22.4%,-95%) + the terrain-
+   style anchor translate below lands the pole tip on the
+   measured summit coordinate. Width/scale are UNCHANGED from
+   before -- only the anchor point moved.
+   ============================================================ */
+
+body[data-page="portfolio"] .mars-worx-flag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: clamp(78px, 5.6vw, 110px);
+  height: auto;
+  opacity: 0;
+  pointer-events: none;
+  overflow: visible;
+  transform-origin: 22.4% 95%;
+  filter: sepia(.18) saturate(.72) brightness(.74) contrast(.94) drop-shadow(0 6px 8px rgba(20, 5, 2, .30));
+  animation: marsFlagPlant 65s linear infinite;
+}
+
+/* ---- Cloth wave: an animated SVG displacement filter (see the
+   <filter id="worxFlagWave"> in the markup) distorts the cloth
+   AND the branding group together, so the WORX mark rides the
+   fabric instead of sitting on top of it like a static sticker. */
+body[data-page="portfolio"] .worx-flag-wave {
+  filter: url(#worxFlagWave);
+}
+
+/* ---- Eye: the existing crescent used as a pupil, sliding a few
+   user-units left/right inside the untouched eye silhouette --
+   small enough that it never nears the eye's own edges. */
+body[data-page="portfolio"] .worx-eye-crescent {
+  animation: worxEyeLook 9s ease-in-out infinite;
+}
+
+@keyframes worxEyeLook {
+  0%, 8% { transform: translateX(0); }
+  28%, 38% { transform: translateX(-9px); }
+  50%, 58% { transform: translateX(0); }
+  78%, 88% { transform: translateX(9px); }
+  100% { transform: translateX(0); }
+}
+
+/* ---- Eye: the same eye silhouette again, painted black, scaling
+   from nothing up to full size over its own center to read as the
+   eye itself closing -- not the logo disappearing. Timed so the
+   four blinks per 23s loop land roughly 4.3-7.1s apart instead of
+   on a single mechanical interval. */
+body[data-page="portfolio"] .worx-eye-lid {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: worxEyeBlink 23s linear infinite;
+}
+
+@keyframes worxEyeBlink {
+  0%, 18.696% { transform: scaleY(.001); }
+  19.087%, 19.348% { transform: scaleY(1); }
+  19.783%, 43.478% { transform: scaleY(.001); }
+  43.87%, 44.13% { transform: scaleY(1); }
+  44.565%, 67.826% { transform: scaleY(.001); }
+  68.217%, 68.478% { transform: scaleY(1); }
+  68.913%, 87.826% { transform: scaleY(.001); }
+  88.217%, 88.478% { transform: scaleY(1); }
+  88.913%, 100% { transform: scaleY(.001); }
+}
+
+@keyframes marsFlagPlant {
+  0%, 44.2% { opacity: 0; visibility: hidden; transform: translate(51.7vw, calc(54vh - 11.93vw)) translate(-22.4%, -95%) scale(1.5) rotate(-5deg); }
+  45.3% { opacity: .76; visibility: visible; transform: translate(51.7vw, calc(54vh - 11.93vw)) translate(-22.4%, -95%) scale(1.5) rotate(-4deg); }
+  46.4% { opacity: .76; visibility: visible; transform: translate(51.7vw, calc(54vh - 11.93vw)) translate(-22.4%, -95%) scale(1.5) rotate(-1deg); }
+  47.5%, 98% { opacity: .76; visibility: visible; transform: translate(51.7vw, calc(54vh - 11.93vw)) translate(-22.4%, -95%) scale(1.5) rotate(0deg); }
+  100% { opacity: 0; visibility: hidden; transform: translate(51.7vw, calc(54vh - 11.93vw)) translate(-22.4%, -95%) scale(1.5) rotate(0deg); }
+}
+
+@media (max-width: 900px) {
+  @keyframes marsFlagPlant {
+    0%, 44.2% { opacity: 0; visibility: hidden; transform: translate(calc(56vw - 6.45vh), 36.1vh) translate(-22.4%, -95%) scale(1.5) rotate(-5deg); }
+    45.3% { opacity: .76; visibility: visible; transform: translate(calc(56vw - 6.45vh), 36.1vh) translate(-22.4%, -95%) scale(1.5) rotate(-4deg); }
+    46.4% { opacity: .76; visibility: visible; transform: translate(calc(56vw - 6.45vh), 36.1vh) translate(-22.4%, -95%) scale(1.5) rotate(-1deg); }
+    47.5%, 98% { opacity: .76; visibility: visible; transform: translate(calc(56vw - 6.45vh), 36.1vh) translate(-22.4%, -95%) scale(1.5) rotate(0deg); }
+    100% { opacity: 0; visibility: hidden; transform: translate(calc(56vw - 6.45vh), 36.1vh) translate(-22.4%, -95%) scale(1.5) rotate(0deg); }
+  }
+}
+
+@media (max-width: 600px) {
+  @keyframes marsFlagPlant {
+    0%, 44.2% { opacity: 0; visibility: hidden; transform: translate(calc(60vw - 12.45vh), 36.1vh) translate(-22.4%, -95%) scale(1.5) rotate(-5deg); }
+    45.3% { opacity: .76; visibility: visible; transform: translate(calc(60vw - 12.45vh), 36.1vh) translate(-22.4%, -95%) scale(1.5) rotate(-4deg); }
+    46.4% { opacity: .76; visibility: visible; transform: translate(calc(60vw - 12.45vh), 36.1vh) translate(-22.4%, -95%) scale(1.5) rotate(-1deg); }
+    47.5%, 98% { opacity: .76; visibility: visible; transform: translate(calc(60vw - 12.45vh), 36.1vh) translate(-22.4%, -95%) scale(1.5) rotate(0deg); }
+    100% { opacity: 0; visibility: hidden; transform: translate(calc(60vw - 12.45vh), 36.1vh) translate(-22.4%, -95%) scale(1.5) rotate(0deg); }
+  }
+}
+
+@media (max-width: 900px) {
+  body[data-page="portfolio"] .mars-astronaut {
+    width: clamp(64px, 7vw, 82px);
+    height: clamp(86px, 9vw, 108px);
+  }
+
+  body[data-page="portfolio"] .mars-worx-flag {
+    width: clamp(66px, 7.5vw, 88px);
+  }
+}
+
+@media (max-width: 600px) {
+  body[data-page="portfolio"] .mars-astronaut {
+    width: 58px;
+    height: 78px;
+  }
+
+  body[data-page="portfolio"] .mars-worx-flag {
+    width: 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  body[data-page="portfolio"] .mars-astronaut,
+  body[data-page="portfolio"] .mars-astronaut__gravity,
+  body[data-page="portfolio"] .mars-astronaut__walking,
+  body[data-page="portfolio"] .mars-astronaut__frame,
+  body[data-page="portfolio"] .mars-astronaut__frame--01,
+  body[data-page="portfolio"] .mars-astronaut__frame--02,
+  body[data-page="portfolio"] .mars-astronaut__frame--03,
+  body[data-page="portfolio"] .mars-astronaut__frame--04,
+  body[data-page="portfolio"] .mars-astronaut__frame--05,
+  body[data-page="portfolio"] .mars-astronaut__frame--06,
+  body[data-page="portfolio"] .mars-astronaut__frame--07,
+  body[data-page="portfolio"] .mars-astronaut__frame--08,
+  body[data-page="portfolio"] .mars-astronaut__frame--09,
+  body[data-page="portfolio"] .mars-astronaut__frame--10,
+  body[data-page="portfolio"] .mars-astronaut__kneel,
+  body[data-page="portfolio"] .mars-worx-flag,
+  body[data-page="portfolio"] .worx-flag-wave,
+  body[data-page="portfolio"] .worx-eye-crescent,
+  body[data-page="portfolio"] .worx-eye-lid {
+    animation: none !important;
+  }
+
+  body[data-page="portfolio"] .worx-flag-wave {
+    filter: none !important;
+  }
+
+  body[data-page="portfolio"] .mars-astronaut,
+  body[data-page="portfolio"] .mars-worx-flag {
+    display: none !important;
+  }
+}
+
+
+/* ============================================================
+   PORTFOLIO CARD VIDEO PREVIEWS — FINAL
+   Local MP4 recordings replace the external live iframes.
+   Each video autoplays muted and loops from the beginning.
+   ============================================================ */
+
+body[data-page="portfolio"] .folio-video-preview {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #150905;
+  pointer-events: none;
+}
+
+body[data-page="portfolio"] .folio-card-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  border: 0;
+  background: #150905;
+  pointer-events: none;
+}
+
+/* The local recording is now the visible card preview.
+   Existing screenshot/device layers remain in the HTML as fallback,
+   but sit underneath the video and are not changed. */
+body[data-page="portfolio"] .folio-video-preview+*,
+body[data-page="portfolio"] .folio-card-video+* {
+  pointer-events: none;
+}
+
+/* No iframe movement is needed once local videos are used. */
+body[data-page="portfolio"] .folio-video-preview .folio-live-frame {
+  display: none !important;
+  animation: none !important;
+}
+
+/* ============================================================
+   PORTFOLIO VIDEO — FULL CARD FILL
+   Reverts the contain/letterbox approach.
+   Videos fill the complete card width and height and keep playing.
+   ============================================================ */
+
+body[data-page="portfolio"] .folio-video-preview {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #150905;
+  pointer-events: none;
+}
+
+body[data-page="portfolio"] .folio-card-video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover !important;
+  object-position: center top !important;
+  border: 0;
+  background: #150905;
+  pointer-events: none;
+}
