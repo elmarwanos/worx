@@ -1,8 +1,11 @@
 <!DOCTYPE html>
+<!-- This is standard in every HTML document. It declares the type of document and version of HTML being used. In this case, it is HTML5. -->
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
+<!-- This is the language attribute of the page-->
+<head> <!-- The head element containing metadata (title, meta tags, stylesheet)-->
+  <meta charset="UTF-8"> <!-- Specifies the character encoding for the HTML document -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- control layout view on mobile devices -->
   <title>Contact — Worx by Glimpse</title>
   <meta name="description" content="Start a project with Worx by Glimpse. Email Hello@worxbyglimpse.com, call +971 55 566 9847, or visit us at Dubai Production City.">
 
@@ -41,65 +44,57 @@
   <main id="main">
 
     <section class="page-hero container">
-      <p class="eyebrow">Contact</p>
-      <h1>Let's get to <span class="gradient-text">work</span></h1>
-      <p data-reveal>
-        Tell us what you're building — a website, an app, a platform or
-        something nobody's named yet. We'll come back with a clear plan.
+      <p class="eyebrow" id="contact-eyebrow">Contact</p>
+      <h1 id="contact-title">Let's get to <span class="gradient-text">work</span></h1>
+      <p id="contact-intro" data-reveal>
+        Tell us what you're trying to accomplish — in your own words.
+        A few quick questions, no technical jargon.
+      </p>
+    </section>
+
+    <!-- The project planner (static/js/contact.js) builds a brief
+         from a few answers and hands it to the visitor's mail client
+         — there is no backend in this static build. It needs JS; the
+         contact details below work without it. -->
+    <section class="section container" style="padding-top: 0;">
+      <div id="contact-wizard" data-wizard></div>
+      <p class="cw-fallback">
+        The project planner needs JavaScript. You can email us directly at
+        <a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a>
+        or call <a href="tel:+971555669847">+971 55 566 9847</a>.
       </p>
     </section>
 
     <section class="section container" style="padding-top: 0;">
-      <div class="contact-grid">
-
-        <!-- The form opens the visitor's mail client (no backend
-             in this static build — see static/js/main.js). -->
-        <form id="contact-form" data-reveal>
-          <div class="form-field">
-            <label for="field-name">Your name</label>
-            <input type="text" id="field-name" name="name" required
-                   placeholder="Jane Doe">
-          </div>
-          <div class="form-field">
-            <label for="field-email">Email</label>
-            <input type="email" id="field-email" name="email" required
-                   placeholder="jane@company.com">
-          </div>
-          <div class="form-field">
-            <label for="field-message">Project details</label>
-            <textarea id="field-message" name="message" rows="6" required
-                      placeholder="What are we building together?"></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary">Send message</button>
-        </form>
-
-        <div data-reveal>
-          <div class="contact-detail">
-            <span class="label">Email</span>
-            <p><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></p>
-          </div>
-          <div class="contact-detail">
-            <span class="label">Phone</span>
-            <p><a href="tel:+971555669847">+971 55 566 9847</a></p>
-          </div>
-          <div class="contact-detail">
-            <span class="label">Office</span>
-            <p>
-              Unit 404 Makateb 2,<br>
-              Dubai Production City,<br>
-              PO Box 503417, Dubai, UAE
-            </p>
-          </div>
-          <div class="contact-detail">
-            <span class="label">Social</span>
-            <p>
-              <a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener">LinkedIn</a> ·
-              <a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener">Instagram</a> ·
-              <a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener">Facebook</a>
-            </p>
-          </div>
+      <div class="cw-stage" data-reveal>
+        <div class="contact-detail">
+          <span class="label">Email</span>
+          <p><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></p>
         </div>
-
+        <div class="contact-detail">
+          <span class="label">Phone</span>
+          <p><a href="tel:+971555669847">+971 55 566 9847</a></p>
+        </div>
+        <div class="contact-detail">
+          <span class="label">WhatsApp</span>
+          <p><a href="https://wa.me/971555669847" target="_blank" rel="noopener">Message the studio</a></p>
+        </div>
+        <div class="contact-detail">
+          <span class="label">Office</span>
+          <p>
+            Unit 404 Makateb 2,<br>
+            Dubai Production City,<br>
+            PO Box 503417, Dubai, UAE
+          </p>
+        </div>
+        <div class="contact-detail">
+          <span class="label">Social</span>
+          <p>
+            <a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener">LinkedIn</a> ·
+            <a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener">Instagram</a> ·
+            <a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener">Facebook</a>
+          </p>
+        </div>
       </div>
     </section>
 
@@ -110,7 +105,7 @@
       <div class="footer-grid">
         <div class="footer-about">
           <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png" alt="Worx by Glimpse" width="132" height="181"></a>
-          <p>Your one-stop destination for innovative website and software development — bringing digital aspirations to life, one line of code at a time.</p>
+          <p>Your destination for innovative website and software development. Bringing digital aspirations to life, one line of code at a time.</p>
         </div>
         <div>
           <h4>Explore</h4>
@@ -146,11 +141,12 @@
       </div>
     </div>
   </footer>
-
+<!-- This is where the JavaScript files are linked and the script calls are made -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="../static/js/nav.js"></script>
   <script src="../static/js/animations.js"></script>
   <script src="../static/js/main.js"></script>
+  <script src="../static/js/contact.js"></script>
 </body>
 </html>

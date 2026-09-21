@@ -43,11 +43,13 @@
 
     <!-- ====== Hero ====== -->
     <section class="hero">
+      <canvas class="hero-bg-canvas" id="hero-bg-canvas" aria-hidden="true"></canvas>
       <div class="hero-blob hero-blob--amber"></div>
       <div class="hero-blob hero-blob--ember"></div>
       <div class="container hero-inner">
-        <div class="hero-art" aria-hidden="true">
-          <img src="static/assets/tile-orange.png" alt="" width="480" height="480">
+        <div class="hero-art hero-art--3d" aria-hidden="true">
+          <img class="hero-art-fallback" src="static/assets/tile-orange.png" alt="" width="480" height="480">
+          <canvas class="hero-canvas" id="hero-canvas"></canvas>
         </div>
         <p class="eyebrow">Plan. Design. Create.</p>
         <h1>We build digital that Worx.</h1>
@@ -59,6 +61,7 @@
         <div class="hero-cta" data-reveal>
           <a href="contact/index.html" class="btn btn-primary">Start a project</a>
           <a href="portfolio/index.html" class="btn btn-ghost">See our work</a>
+          <button type="button" class="btn btn-ghost" data-contact-open>Talk to us</button>
         </div>
       </div>
       <span class="hero-scroll-hint">Scroll</span>
@@ -361,5 +364,8 @@
   <script src="static/js/nav.js"></script>
   <script src="static/js/animations.js"></script>
   <script src="static/js/main.js"></script>
+  <script src="static/js/contact-widget.js"></script>
+  <script type="module" src="static/js/hero-scene.js"></script>
+  <script type="module" src="static/js/hero-background.js"></script>
 </body>
 </html>
