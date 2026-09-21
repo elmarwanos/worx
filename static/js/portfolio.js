@@ -61,7 +61,13 @@
      Videos keep autoplay's visible behaviour (muted/looping,
      starts as soon as it is near the viewport) but stop
      buffering and decoding while scrolled well away, instead of
-     all 11 clips loading and playing at once on page load.
+     all 18 clips loading and playing at once on page load.
+
+     rootMargin is generous (600px) so play() — which is what
+     actually makes the browser start fetching/decoding beyond the
+     preload="metadata" hint — fires well before a card is
+     scrolled into view, giving it time to have a real frame ready
+     instead of popping in on a black/blank frame.
      ---------------------------------------------------------- */
   function initCardVideos() {
     var videos = document.querySelectorAll(".folio-card-video");
@@ -84,7 +90,7 @@
           }
         });
       },
-      { rootMargin: "200px 0px" }
+      { rootMargin: "600px 0px" }
     );
 
     videos.forEach(function (v) { io.observe(v); });

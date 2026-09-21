@@ -1270,7 +1270,9 @@
   border-radius: 999px;
   color: var(--brand-cream);
   background: rgba(250, 167, 25, .07);
+  pointer-events: none;
   transition:
+    color .3s ease,
     background .3s ease,
     border-color .3s ease,
     transform .3s ease;
@@ -2168,11 +2170,15 @@ body[data-page="portfolio"] .site-header .nav-links {
   min-width: 0;
 }
 
-/* Every project visual is exactly the same size */
+/* Every project visual is exactly the same size.
+   2.05/1: the supplied recordings are all ~2.07-2.11:1 (wide
+   screen captures) — matching the media viewport closely to that
+   ratio means object-fit:cover on the real video below crops at
+   most ~3% off either side, instead of the ~23% a 16:10 box forced. */
 .folio-editorial-grid .folio-scene,
 .folio-editorial-grid .folio-card:nth-child(n) .folio-scene {
   width: 100%;
-  aspect-ratio: 16 / 10 !important;
+  aspect-ratio: 2.05 / 1 !important;
   margin: 0 0 22px;
   overflow: hidden;
   border-radius: 22px;
@@ -2402,12 +2408,12 @@ body[data-page="portfolio"] .site-header .nav-links {
   display: none !important;
 }
 
-/* Keep every card equal size */
+/* Keep every card equal size (2.05/1 — see note above) */
 .folio-editorial-grid .folio-scene,
 .folio-editorial-grid .folio-card:nth-child(n) .folio-scene {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10 !important;
+  aspect-ratio: 2.05 / 1 !important;
   overflow: hidden;
   border-radius: 22px;
   background: #150905;
@@ -2738,18 +2744,24 @@ body[data-page="portfolio"] .mars-astronaut {
   66.79% { transform: translate(70.26vw, calc(54vh - 7.08vw)) translate(-45.6%, -92.2%) scale(.945); }
   68.39% { transform: translate(71.88vw, calc(54vh - 6.66vw)) translate(-45.6%, -92.2%) scale(.942); }
   70% { transform: translate(73.5vw, calc(54vh - 6.3vw)) translate(-45.6%, -92.2%) scale(.94); }
-  72.75% { transform: translate(76.44vw, calc(54vh - 5.9vw)) translate(-45.6%, -92.2%) scale(.935); }
-  75.5% { transform: translate(79.38vw, calc(54vh - 5.86vw)) translate(-45.6%, -92.2%) scale(.931); }
-  78.25% { transform: translate(82.31vw, calc(54vh - 6vw)) translate(-45.6%, -92.2%) scale(.926); }
-  81% { transform: translate(85.25vw, calc(54vh - 6.65vw)) translate(-45.6%, -92.2%) scale(.922); }
-  83.75% { transform: translate(88.19vw, calc(54vh - 5.84vw)) translate(-45.6%, -92.2%) scale(.917); }
-  86.5% { transform: translate(91.12vw, calc(54vh - 5.23vw)) translate(-45.6%, -92.2%) scale(.912); }
-  89.25% { transform: translate(94.06vw, calc(54vh - 2.08vw)) translate(-45.6%, -92.2%) scale(.908); }
-  92% { transform: translate(97vw, calc(54vh - .93vw)) translate(-45.6%, -92.2%) scale(.903); }
-  94% { transform: translate(99.75vw, calc(54vh - 1.15vw)) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
-  96% { transform: translate(102.5vw, calc(54vh - 1.16vw)) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
-  98% { transform: translate(105.25vw, calc(54vh - 1.16vw)) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
-  100% { transform: translate(108vw, calc(54vh - 1.16vw)) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
+  72.75% { transform: translate(76.44vw, calc(54vh - 6.14vw)) translate(-45.6%, -92.2%) scale(.935); }
+  /* 75.5%-100%: re-measured against the actual hero photo (the
+     terrain keeps a gentle near-ridge running right off-frame here,
+     not a drop back toward the 54vh baseline). The previous values
+     peeled away from that ridge and dove toward 0 by 92%, which is
+     what read as the astronaut sinking into the ground right before
+     he fades out. */
+  75.5% { transform: translate(79.38vw, calc(54vh - 6.48vw)) translate(-45.6%, -92.2%) scale(.931); }
+  78.25% { transform: translate(82.31vw, calc(54vh - 6.82vw)) translate(-45.6%, -92.2%) scale(.926); }
+  81% { transform: translate(85.25vw, calc(54vh - 7.13vw)) translate(-45.6%, -92.2%) scale(.922); }
+  83.75% { transform: translate(88.19vw, calc(54vh - 7.49vw)) translate(-45.6%, -92.2%) scale(.917); }
+  86.5% { transform: translate(91.12vw, calc(54vh - 7.8vw)) translate(-45.6%, -92.2%) scale(.912); }
+  89.25% { transform: translate(94.06vw, calc(54vh - 7.88vw)) translate(-45.6%, -92.2%) scale(.908); }
+  92% { transform: translate(97vw, calc(54vh - 7.75vw)) translate(-45.6%, -92.2%) scale(.903); }
+  94% { transform: translate(99.75vw, calc(54vh - 7.67vw)) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
+  96% { transform: translate(102.5vw, calc(54vh - 7.67vw)) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
+  98% { transform: translate(105.25vw, calc(54vh - 7.67vw)) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
+  100% { transform: translate(108vw, calc(54vh - 7.67vw)) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
 }
 
 /* ---- Terrain path: TABLET / narrow desktop (<=900px) --------
@@ -2802,12 +2814,15 @@ body[data-page="portfolio"] .mars-astronaut {
     81% { transform: translate(calc(56vw + 43.88vh), 44.03vh) translate(-45.6%, -92.2%) scale(.922); }
     83.75% { transform: translate(calc(56vw + 48.28vh), 45.24vh) translate(-45.6%, -92.2%) scale(.917); }
     86.5% { transform: translate(calc(56vw + 52.69vh), 46.15vh) translate(-45.6%, -92.2%) scale(.912); }
-    89.25% { transform: translate(calc(56vw + 57.09vh), 50.88vh) translate(-45.6%, -92.2%) scale(.908); }
-    92% { transform: translate(calc(56vw + 61.5vh), 52.6vh) translate(-45.6%, -92.2%) scale(.903); }
-    94% { transform: translate(calc(56vw + 65.62vh), 52.27vh) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
-    96% { transform: translate(calc(56vw + 69.75vh), 52.27vh) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
-    98% { transform: translate(calc(56vw + 73.87vh), 52.27vh) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
-    100% { transform: translate(calc(56vw + 78vh), 52.27vh) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
+    /* 89.25%-100%: continues the 81%-86.5% trend (44.03->46.15vh)
+       instead of the previous hard jump to ~51-53vh, which is what
+       read as sinking into the terrain right before the fade-out. */
+    89.25% { transform: translate(calc(56vw + 57.09vh), 46.9vh) translate(-45.6%, -92.2%) scale(.908); }
+    92% { transform: translate(calc(56vw + 61.5vh), 47.5vh) translate(-45.6%, -92.2%) scale(.903); }
+    94% { transform: translate(calc(56vw + 65.62vh), 47.8vh) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
+    96% { transform: translate(calc(56vw + 69.75vh), 47.8vh) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
+    98% { transform: translate(calc(56vw + 73.87vh), 47.8vh) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
+    100% { transform: translate(calc(56vw + 78vh), 47.8vh) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
   }
 }
 
@@ -2861,12 +2876,15 @@ body[data-page="portfolio"] .mars-astronaut {
     81% { transform: translate(calc(60vw + 37.88vh), 44.03vh) translate(-45.6%, -92.2%) scale(.922); }
     83.75% { transform: translate(calc(60vw + 42.28vh), 45.24vh) translate(-45.6%, -92.2%) scale(.917); }
     86.5% { transform: translate(calc(60vw + 46.69vh), 46.15vh) translate(-45.6%, -92.2%) scale(.912); }
-    89.25% { transform: translate(calc(60vw + 51.09vh), 50.88vh) translate(-45.6%, -92.2%) scale(.908); }
-    92% { transform: translate(calc(60vw + 55.5vh), 52.6vh) translate(-45.6%, -92.2%) scale(.903); }
-    94% { transform: translate(calc(60vw + 59.63vh), 52.27vh) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
-    96% { transform: translate(calc(60vw + 63.75vh), 52.27vh) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
-    98% { transform: translate(calc(60vw + 67.88vh), 52.27vh) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
-    100% { transform: translate(calc(60vw + 72vh), 52.27vh) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
+    /* 89.25%-100%: continues the 81%-86.5% trend (44.03->46.15vh)
+       instead of the previous hard jump to ~51-53vh, which is what
+       read as sinking into the terrain right before the fade-out. */
+    89.25% { transform: translate(calc(60vw + 51.09vh), 46.9vh) translate(-45.6%, -92.2%) scale(.908); }
+    92% { transform: translate(calc(60vw + 55.5vh), 47.5vh) translate(-45.6%, -92.2%) scale(.903); }
+    94% { transform: translate(calc(60vw + 59.63vh), 47.8vh) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
+    96% { transform: translate(calc(60vw + 63.75vh), 47.8vh) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
+    98% { transform: translate(calc(60vw + 67.88vh), 47.8vh) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
+    100% { transform: translate(calc(60vw + 72vh), 47.8vh) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
   }
 }
 
@@ -3280,6 +3298,13 @@ body[data-page="portfolio"] .worx-eye {
    PORTFOLIO CARD VIDEO PREVIEWS — FINAL
    Local MP4 recordings replace the external live iframes.
    Each video autoplays muted and loops from the beginning.
+
+   Fit: the media viewport itself (.folio-scene, above) is set to
+   2.05/1 to closely match the supplied recordings' own ~2.07-
+   2.11:1 aspect ratio, so object-fit:cover here only trims a few
+   percent off either edge instead of a quarter of the frame. The
+   video is the ONLY visual layer — no blurred duplicate, no
+   canvas capture, no second copy of the footage.
    ============================================================ */
 
 body[data-page="portfolio"] .folio-video-preview {
@@ -3295,15 +3320,24 @@ body[data-page="portfolio"] .folio-video-preview {
 }
 
 body[data-page="portfolio"] .folio-card-video {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: center;
   border: 0;
   background: #150905;
   pointer-events: none;
 }
+
+/* The video itself is deliberately NOT transformed/scaled on
+   hover: any animated transform on a playing <video> forces the
+   compositor to resample it every frame of the transition, which
+   softens it right when hover draws the eye to it. The video
+   stays completely static; only the CTA/overlay (.folio-cta,
+   .folio-scene's border/shadow) transitions on :hover. */
 
 /* The local recording is now the visible card preview.
    Existing screenshot/device layers remain in the HTML as fallback,
@@ -3319,35 +3353,3 @@ body[data-page="portfolio"] .folio-video-preview .folio-live-frame {
   animation: none !important;
 }
 
-/* ============================================================
-   PORTFOLIO VIDEO — FULL CARD FILL
-   Reverts the contain/letterbox approach.
-   Videos fill the complete card width and height and keep playing.
-   ============================================================ */
-
-body[data-page="portfolio"] .folio-video-preview {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  border-radius: inherit;
-  background: #150905;
-  pointer-events: none;
-}
-
-body[data-page="portfolio"] .folio-card-video {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  min-width: 100%;
-  min-height: 100%;
-  object-fit: cover !important;
-  object-position: center top !important;
-  border: 0;
-  background: #150905;
-  pointer-events: none;
-}
