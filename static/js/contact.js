@@ -12,9 +12,10 @@
      5. Let's make it happen.  (company + personal details)
 
    All answers live in one structured object (state.form). There
-   is no backend in this static build: on send it hands a
-   formatted brief to the visitor's mail client, then shows a
-   success screen in place of the form.
+   is no backend in this static build: on send it POSTs the
+   answers straight to Formspree (FORMSPREE_ENDPOINT below), which
+   relays them by email, then shows a success screen in place of
+   the form.
 
    Everything the questionnaire asks comes from the CONFIG block
    at the top — edit the data, not the render code.
@@ -32,8 +33,14 @@
 
   var STORE_KEY = "worx.contact.v4";
   var MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
-  var RECIPIENT = "Hello@worxbyglimpse.com";
-  var IDEA_CAP = 1400; // keep the mailto URL under mail-client limits
+  var FORMSPREE_ENDPOINT = "https://formspree.io/f/xeaojvzn";
+  // EmailJS auto-reply to the visitor. Leave any of these empty to disable.
+  // The public key is safe in client code; restrict it to your domain in
+  // the EmailJS dashboard (Account > Security).
+  var EMAILJS_SERVICE_ID = "service_5rgzqe1";
+  var EMAILJS_TEMPLATE_ID = "template_tdzm87f";
+  var EMAILJS_PUBLIC_KEY = "wm49sHmSgdQ04r0O-";
+  var IDEA_CAP = 1400; // keep the idea field a reasonable size
 
   var BUILD_OPTIONS = [
     { value: "website",    label: "Website",             desc: "A site that tells people who you are, or gets you found" },
@@ -212,49 +219,33 @@
     }
   }
 
-  function pad(s) { while (s.length < 14) s += " "; return s; }
   function truncate(s, n) {
     s = String(s);
     return s.length > n ? s.slice(0, n - 1) + "…" : s;
   }
 
-  function buildMailto() {
+  // Formspree reads _subject/_replyto itself (sets the notification
+  // email's subject line and Reply-To respectively); everything else
+  // shows up as a plain field in that notification and in the
+  // Formspree dashboard.
+  function buildFormspreePayload() {
     var f = state.form;
-    var L = [];
-    L.push("NEW ENQUIRY — Worx by Glimpse");
-    L.push("");
-    L.push(pad("Building:") + (labelFor(BUILD_OPTIONS, f.buildType) || "—"));
-    if (f.idea.trim()) {
-      L.push("");
-      L.push("Their idea, in their own words:");
-      L.push(truncate(f.idea.trim(), IDEA_CAP));
-    }
-    L.push("");
-    L.push(pad("Goal:") + (labelFor(GOAL_OPTIONS, f.goal) || "—"));
-    if (f.goal === "other" && f.goalOther.trim()) {
-      L.push(pad("") + f.goalOther.trim());
-    }
-    L.push("");
-    L.push(pad("Timeline:") + (labelFor(TIMELINE_OPTIONS, f.timeline) || "—"));
-    L.push(pad("Budget:") + (f.budget ? f.budget.label : "—"));
-    L.push("");
-    L.push("COMPANY");
-    L.push(pad("Name:") + f.companyName);
-    if (f.companyWebsite.trim()) L.push(pad("Website:") + f.companyWebsite.trim());
-    L.push("");
-    L.push("CONTACT");
-    L.push(pad("Name:") + f.name);
-    L.push(pad("Email:") + f.email);
-    L.push(pad("Phone:") + f.phone);
-    L.push("");
-    L.push("—");
-    L.push("Sent from worxbyglimpse.com/contact");
-
-    var subject = "New enquiry — " + (f.companyName || "Website project") +
-      (f.buildType ? " (" + labelFor(BUILD_OPTIONS, f.buildType) + ")" : "");
-    return "mailto:" + RECIPIENT +
-      "?subject=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(L.join("\n"));
+    return {
+      _subject: "New enquiry — " + (f.companyName || "Website project") +
+        (f.buildType ? " (" + labelFor(BUILD_OPTIONS, f.buildType) + ")" : ""),
+      _replyto: f.email,
+      building: labelFor(BUILD_OPTIONS, f.buildType) || "—",
+      idea: truncate(f.idea.trim(), IDEA_CAP),
+      goal: labelFor(GOAL_OPTIONS, f.goal) || "—",
+      goalOther: f.goal === "other" ? f.goalOther.trim() : "",
+      timeline: labelFor(TIMELINE_OPTIONS, f.timeline) || "—",
+      budget: f.budget ? f.budget.label : "—",
+      companyName: f.companyName,
+      companyWebsite: f.companyWebsite.trim(),
+      name: f.name,
+      email: f.email,
+      phone: f.phone
+    };
   }
 
   /* ----------------------------------------------------------
@@ -627,11 +618,51 @@
   }
 
   function submitEnquiry() {
-    state.completedAt = Date.now();
-    saveState();
-    window.location.href = buildMailto();
-    state.view = "success";
-    render();
+    els.next.disabled = true;
+    els.next.textContent = "Sending…";
+    clearError();
+
+    fetch(FORMSPREE_ENDPOINT, {
+      method: "POST",
+      headers: { "Accept": "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify(buildFormspreePayload())
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("Formspree responded with " + res.status);
+        sendFollowup();
+        state.completedAt = Date.now();
+        saveState();
+        state.view = "success";
+        render();
+      })
+      .catch(function () {
+        els.next.disabled = false;
+        els.next.textContent = "Send my enquiry";
+        showError("Something went wrong sending your enquiry — please try again, or email us directly at hello@worxbyglimpse.com.");
+      });
+  }
+
+  // Fire-and-forget auto-reply via EmailJS's REST API. Only the visitor's
+  // name and email go in — never the free-text idea — and a failure here
+  // must never break the success screen.
+  function sendFollowup() {
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) return;
+    var f = state.form;
+    fetch("https://api.emailjs.com/api/v1.0/email/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        service_id: EMAILJS_SERVICE_ID,
+        template_id: EMAILJS_TEMPLATE_ID,
+        user_id: EMAILJS_PUBLIC_KEY,
+        template_params: {
+          to_email: f.email.trim(),
+          name: truncate(f.name.trim(), 80),
+          building: labelFor(BUILD_OPTIONS, f.buildType)
+        }
+      }),
+      keepalive: true
+    }).catch(function () {});
   }
 
   function resetAll() {
@@ -681,7 +712,7 @@
     var saved = loadState();
     if (saved) {
       if (saved.form) {
-        var ff = freshForm();
+        var ff = freshForm()
         Object.keys(ff).forEach(function (k) {
           if (saved.form[k] != null) ff[k] = saved.form[k];
         });

@@ -1252,6 +1252,10 @@
   margin-top: 28px;
 }
 
+.cw-nav[hidden] {
+  display: none;
+}
+
 .cw-nav [data-next] {
   margin-left: auto;
 }
