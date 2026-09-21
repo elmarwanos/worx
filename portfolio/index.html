@@ -1,29 +1,492 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio — Worx by Glimpse</title>
-  <meta name="description" content="Selected work by Worx by Glimpse: Chaumet, Modon, Hyundai, Genesis, Kia, Hudayriyat, UAE Pavilion, Wealthface and more.">
+  <title>Portfolio, Worx by Glimpse</title>
+  <meta name="description"
+    content="Selected work by Worx by Glimpse: Chaumet, Modon, Hyundai, Genesis, Kia, Hudayriyat, UAE Pavilion, Wealthface and more.">
 
   <link rel="icon" type="image/png" sizes="32x32" href="../static/assets/favicon-32.png">
   <link rel="apple-touch-icon" href="../static/assets/apple-touch-icon.png">
   <meta name="theme-color" content="#150905">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap"
+    rel="stylesheet">
 
   <link rel="stylesheet" href="../static/css/base.css">
   <link rel="stylesheet" href="../static/css/layout.css">
   <link rel="stylesheet" href="../static/css/components.css">
   <link rel="stylesheet" href="../static/css/animations.css">
+  <link rel="stylesheet" href="../static/css/portfolio.css">
+
+  <style>
+    /* Portfolio hero: new full-screen panoramic Mars image */
+    body[data-page="portfolio"] .site-header {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      z-index: 100 !important;
+      background: transparent !important;
+      background-image: none !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    body[data-page="portfolio"] .site-header::before,
+    body[data-page="portfolio"] .site-header::after {
+      content: none !important;
+      display: none !important;
+    }
+
+    body[data-page="portfolio"] main {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+
+    body[data-page="portfolio"] .folio-hero {
+      position: relative !important;
+      width: 100% !important;
+      height: 100vh !important;
+      height: 100svh !important;
+      min-height: 720px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      isolation: isolate;
+    }
+
+    body[data-page="portfolio"] .folio-hero-media {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      transform: none !important;
+      clip-path: none !important;
+      overflow: hidden !important;
+    }
+
+    body[data-page="portfolio"] .mars-photo {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 0 !important;
+      background-image: url("../static/assets/portfolio/mars-landscape-hero.png.jpg") !important;
+      background-size: cover !important;
+      background-position: center 52% !important;
+      background-repeat: no-repeat !important;
+      transform: scale(1.015) !important;
+      clip-path: none !important;
+    }
+
+    body[data-page="portfolio"] .mars-photo-grade {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 1 !important;
+      width: 100% !important;
+      height: 100% !important;
+      background:
+        linear-gradient(90deg,
+          rgba(21, 9, 5, .62) 0%,
+          rgba(21, 9, 5, .42) 38%,
+          rgba(21, 9, 5, .24) 68%,
+          rgba(21, 9, 5, .20) 100%),
+        linear-gradient(0deg,
+          rgba(21, 9, 5, .50) 0%,
+          rgba(21, 9, 5, .10) 48%,
+          rgba(21, 9, 5, .22) 100%) !important;
+      opacity: .82 !important;
+      pointer-events: none;
+    }
+
+    body[data-page="portfolio"] .mars-ember-glow {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 2 !important;
+      pointer-events: none;
+    }
+
+    body[data-page="portfolio"] .folio-hero-particles {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 3 !important;
+      width: 100% !important;
+      height: 100% !important;
+      pointer-events: none;
+    }
+
+    body[data-page="portfolio"] .folio-hero-inner {
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      min-height: 100% !important;
+      flex-direction: column !important;
+      justify-content: flex-end !important;
+      align-items: flex-start !important;
+      padding-top: 150px !important;
+      padding-bottom: clamp(70px, 9vh, 120px) !important;
+    }
+
+    body[data-page="portfolio"] .folio-hero::before,
+    body[data-page="portfolio"] .folio-hero::after,
+    body[data-page="portfolio"] .folio-hero-media::before,
+    body[data-page="portfolio"] .folio-hero-media::after {
+      content: none !important;
+      display: none !important;
+    }
+
+    @media (max-width: 900px) {
+      body[data-page="portfolio"] .folio-hero {
+        min-height: 650px !important;
+      }
+
+      body[data-page="portfolio"] .mars-photo {
+        background-position: 56% center !important;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body[data-page="portfolio"] .folio-hero {
+        min-height: 620px !important;
+      }
+
+      body[data-page="portfolio"] .mars-photo {
+        background-position: 60% center !important;
+      }
+
+      body[data-page="portfolio"] .folio-hero-inner {
+        padding-top: 120px !important;
+        padding-bottom: 55px !important;
+      }
+    }
+  </style>
+
+
+  <style>
+    /* Hero layering: landscape image behind the existing star animation */
+    body[data-page="portfolio"] .folio-hero {
+      position: relative !important;
+      overflow: hidden !important;
+      isolation: isolate !important;
+    }
+
+    body[data-page="portfolio"] .folio-hero-media {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 0 !important;
+      overflow: hidden !important;
+    }
+
+    body[data-page="portfolio"] .mars-photo {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      background-image: url("../static/assets/portfolio/mars-landscape-hero.png.jpg") !important;
+      background-size: cover !important;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
+      opacity: .72 !important;
+    }
+
+    body[data-page="portfolio"] .mars-photo-grade {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 1 !important;
+      background:
+        linear-gradient(90deg,
+          rgba(21, 9, 5, .48) 0%,
+          rgba(21, 9, 5, .26) 46%,
+          rgba(21, 9, 5, .14) 100%),
+        linear-gradient(0deg,
+          rgba(21, 9, 5, .46) 0%,
+          rgba(21, 9, 5, .08) 48%,
+          rgba(21, 9, 5, .18) 100%) !important;
+      opacity: 1 !important;
+      pointer-events: none !important;
+    }
+
+    body[data-page="portfolio"] .mars-ember-glow {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 2 !important;
+      pointer-events: none !important;
+    }
+
+    body[data-page="portfolio"] .folio-hero-particles {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 3 !important;
+      width: 100% !important;
+      height: 100% !important;
+      pointer-events: none !important;
+    }
+
+    body[data-page="portfolio"] .folio-hero-inner {
+      position: relative !important;
+      z-index: 4 !important;
+    }
+
+    body[data-page="portfolio"] .site-header {
+      z-index: 10 !important;
+    }
+  </style>
+
+
+  <style>
+    /* FINAL HERO LAYERS
+       0 Mars terrain background
+       1 colour/opacity overlay
+       2 existing ember glow
+       3 existing animated stars
+       4 hero copy
+       10 navigation
+    */
+    body[data-page="portfolio"] .folio-hero {
+      position: relative !important;
+      overflow: hidden !important;
+      isolation: isolate !important;
+      background: #150905 !important;
+    }
+
+    body[data-page="portfolio"] .folio-hero-media {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+    }
+
+    body[data-page="portfolio"] .mars-photo {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+
+      /* Mars terrain background image */
+      background-image: url("../static/assets/portfolio/mars-landscape-hero.png.jpg") !important;
+      background-size: cover !important;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
+
+      opacity: .82 !important;
+      transform: none !important;
+      clip-path: none !important;
+    }
+
+    body[data-page="portfolio"] .mars-photo-grade {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 1 !important;
+      width: 100% !important;
+      height: 100% !important;
+      background:
+        linear-gradient(90deg,
+          rgba(21, 9, 5, .52) 0%,
+          rgba(21, 9, 5, .28) 42%,
+          rgba(21, 9, 5, .14) 72%,
+          rgba(21, 9, 5, .10) 100%),
+        linear-gradient(0deg,
+          rgba(21, 9, 5, .52) 0%,
+          rgba(21, 9, 5, .08) 52%,
+          rgba(21, 9, 5, .20) 100%) !important;
+      opacity: 1 !important;
+    }
+
+    body[data-page="portfolio"] .mars-ember-glow {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 2 !important;
+      pointer-events: none !important;
+    }
+
+    /* Existing star animation stays untouched and renders over Mars */
+    body[data-page="portfolio"] .folio-hero-particles {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 3 !important;
+      width: 100% !important;
+      height: 100% !important;
+      opacity: 1 !important;
+      pointer-events: none !important;
+    }
+
+    body[data-page="portfolio"] .folio-hero-inner {
+      position: relative !important;
+      z-index: 4 !important;
+    }
+
+    body[data-page="portfolio"] .site-header {
+      z-index: 10 !important;
+    }
+  </style>
+
+
+  <style>
+    /* Three.js layer: above Mars image/grade, below the existing stars and copy */
+    body[data-page="portfolio"] .mars-3d-canvas {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 2 !important;
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      pointer-events: none !important;
+    }
+
+    body[data-page="portfolio"] .mars-ember-glow {
+      z-index: 3 !important;
+    }
+
+    body[data-page="portfolio"] .folio-hero-particles {
+      z-index: 4 !important;
+    }
+
+    body[data-page="portfolio"] .folio-hero-inner {
+      z-index: 5 !important;
+    }
+  </style>
+
+
+  <style>
+    /* ============================================================
+       MARS DISTANCE TREATMENT
+       Keeps all existing hero features; only subdues the terrain.
+       ============================================================ */
+
+    body[data-page="portfolio"] .folio-hero {
+      background: #150905 !important;
+    }
+
+    body[data-page="portfolio"] .mars-photo {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 0 !important;
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      background-image: url("../static/assets/portfolio/mars-landscape-hero.png.jpg") !important;
+      background-size: cover !important;
+      background-position: center 54% !important;
+      background-repeat: no-repeat !important;
+      opacity: .48 !important;
+      visibility: visible !important;
+      transform: scale(1.01) !important;
+      filter: saturate(.58) contrast(.82) brightness(.60) blur(.35px) !important;
+      clip-path: none !important;
+      pointer-events: none !important;
+    }
+
+    /* Burnt-orange atmospheric veil: this pushes the photograph back
+       so the typography and star field remain the visual focus. */
+    body[data-page="portfolio"] .mars-photo-grade {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 1 !important;
+      width: 100% !important;
+      height: 100% !important;
+      opacity: 1 !important;
+      background:
+        linear-gradient(180deg,
+          rgba(45, 13, 4, .48) 0%,
+          rgba(92, 28, 7, .58) 42%,
+          rgba(150, 50, 10, .68) 72%,
+          rgba(67, 18, 5, .80) 100%),
+        linear-gradient(90deg,
+          rgba(21, 9, 5, .58) 0%,
+          rgba(88, 25, 6, .28) 46%,
+          rgba(125, 39, 8, .22) 100%) !important;
+      mix-blend-mode: normal !important;
+      pointer-events: none !important;
+    }
+
+    /* Preserve the existing atmospheric and animation layers. */
+    body[data-page="portfolio"] .mars-3d-canvas {
+      z-index: 2 !important;
+      opacity: .58 !important;
+      pointer-events: none !important;
+    }
+
+    body[data-page="portfolio"] .mars-ember-glow {
+      z-index: 3 !important;
+      opacity: .72 !important;
+      pointer-events: none !important;
+    }
+
+    /* Existing star animation remains clearly visible above Mars. */
+    body[data-page="portfolio"] .folio-hero-particles {
+      z-index: 4 !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: none !important;
+    }
+
+    body[data-page="portfolio"] .folio-hero-inner {
+      z-index: 5 !important;
+    }
+
+    body[data-page="portfolio"] .site-header {
+      z-index: 100 !important;
+    }
+
+    @media (max-width: 900px) {
+      body[data-page="portfolio"] .mars-photo {
+        background-position: 56% 54% !important;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body[data-page="portfolio"] .mars-photo {
+        background-position: 60% 54% !important;
+        opacity: .42 !important;
+      }
+    }
+  </style>
+
+
+  <style>
+    /* ============================================================
+       HERO COPY POSITION — raised for stronger visual balance
+       ============================================================ */
+    body[data-page="portfolio"] .folio-hero-inner {
+      justify-content: flex-end !important;
+      padding-bottom: clamp(120px, 16vh, 190px) !important;
+    }
+
+    @media (max-width: 900px) {
+      body[data-page="portfolio"] .folio-hero-inner {
+        padding-bottom: clamp(95px, 13vh, 145px) !important;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body[data-page="portfolio"] .folio-hero-inner {
+        padding-bottom: 90px !important;
+      }
+    }
+  </style>
+
 </head>
+
 <body data-page="portfolio">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header">
     <div class="container nav-bar">
-      <a class="brand" href="../index.html"><img class="brand-mark" src="../static/assets/mark.png" alt="" width="40" height="40"><span class="brand-text">WORX<small>&lt;like/magic&gt;</small></span></a>
+      <a class="brand" href="../index.html"><img class="brand-mark" src="../static/assets/mark.png" alt="" width="40"
+          height="40"><span class="brand-text">WORX<small>&lt;like/magic&gt;</small></span></a>
       <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -40,149 +503,633 @@
 
   <main id="main">
 
-    <section class="page-hero container">
-      <p class="eyebrow">Project portfolio</p>
-      <h1>Work that <span class="gradient-text">worked</span></h1>
-      <p data-reveal>
-        From luxury maisons to government pavilions — a selection of platforms,
-        apps and experiences we've designed, built and continue to maintain.
-      </p>
+    <!-- ====== Portfolio hero (Mars) ====== -->
+    <section class="folio-hero">
+      <div class="folio-hero-media" aria-hidden="true">
+        <!-- Worx Mars landscape hero asset -->
+        <div class="mars-photo"></div>
+        <div class="mars-photo-grade"></div>
+        <!-- Mars ridge astronaut — 10 FINAL walk frames + kneel + planted flag -->
+        <div class="mars-astronaut" aria-hidden="true">
+          <div class="mars-astronaut__gravity">
+            <div class="mars-astronaut__walking">
+              <img class="mars-astronaut__frame mars-astronaut__frame--01"
+                src="../static/assets/portfolio/astronaut/Astronaut - Final - 001.png" alt="">
+              <img class="mars-astronaut__frame mars-astronaut__frame--02"
+                src="../static/assets/portfolio/astronaut/Astronaut - Final - 002.png" alt="">
+              <img class="mars-astronaut__frame mars-astronaut__frame--03"
+                src="../static/assets/portfolio/astronaut/Astronaut - Final - 003.png" alt="">
+              <img class="mars-astronaut__frame mars-astronaut__frame--04"
+                src="../static/assets/portfolio/astronaut/Astronaut - Final - 004.png" alt="">
+              <img class="mars-astronaut__frame mars-astronaut__frame--05"
+                src="../static/assets/portfolio/astronaut/Astronaut - Final - 005.png" alt="">
+              <img class="mars-astronaut__frame mars-astronaut__frame--06"
+                src="../static/assets/portfolio/astronaut/Astronaut - Final - 006.png" alt="">
+              <img class="mars-astronaut__frame mars-astronaut__frame--07"
+                src="../static/assets/portfolio/astronaut/Astronaut - Final - 007.png" alt="">
+              <img class="mars-astronaut__frame mars-astronaut__frame--08"
+                src="../static/assets/portfolio/astronaut/Astronaut - Final - 008.png" alt="">
+              <img class="mars-astronaut__frame mars-astronaut__frame--09"
+                src="../static/assets/portfolio/astronaut/Astronaut - Final - 009.png" alt="">
+              <img class="mars-astronaut__frame mars-astronaut__frame--10"
+                src="../static/assets/portfolio/astronaut/Astronaut - Final - 010.png" alt="">
+            </div>
+            <img class="mars-astronaut__kneel" src="../static/assets/portfolio/astronaut/ASTRONAUT_KNEEL.png" alt="">
+          </div>
+        </div>
+
+        <svg class="mars-worx-flag" viewBox="0 0 337 360" role="img" aria-hidden="true" focusable="false">
+          <defs>
+            <!-- fabric shading -- the exact orange sampled from logo-dark.png's
+                 badge background (#e77d11), with subtle fold shading so it
+                 still reads as cloth instead of a flat digital rectangle.
+                 Static: no wave/turbulence filter is applied anywhere below. -->
+            <linearGradient id="worxClothShade" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#e77d11" />
+              <stop offset="18%" stop-color="#cf6d0d" />
+              <stop offset="40%" stop-color="#f08d29" />
+              <stop offset="65%" stop-color="#d0700e" />
+              <stop offset="100%" stop-color="#e77d11" />
+            </linearGradient>
+
+            <!-- flag-eye-solid.png is a mask here too (alpha, not luminance --
+                 the shape is painted solid black, which a default luminance mask
+                 would treat as fully-hidden): clips the crescent so it can slide
+                 left/right without ever spilling outside the eye's own outline. -->
+            <mask id="worxEyeClip" maskUnits="userSpaceOnUse" x="153.65" y="86" width="86.7" height="42"
+              style="mask-type:alpha">
+              <image x="153.65" y="86" width="86.7" height="42"
+                href="../static/assets/portfolio/astronaut/flag-eye-solid.png" />
+            </mask>
+          </defs>
+
+          <!-- flagpole: cropped straight from the original artwork -->
+          <image x="-2" y="48" width="88" height="298"
+            href="../static/assets/portfolio/astronaut/worx-flag-pole.png" />
+
+          <!-- cloth: a single static rect, no filter/animation -- the fabric
+               itself no longer moves. -->
+          <rect x="78" y="42" width="238" height="132" fill="url(#worxClothShade)" />
+
+          <!-- branding -->
+          <image x="173.71" y="50" width="46.58" height="30"
+            href="../static/assets/portfolio/astronaut/flag-swoosh.png" />
+
+          <!-- Worx eye: solid black almond (authentic logo-dark.png shape, no
+               synthetic white sclera) + the real orange crescent as a living
+               pupil that slides within it and blinks by squashing the whole
+               eye vertically -- the natural lens silhouette tapers to a line
+               at full closure, so there's no separate mask edge to seam. This
+               is the ONLY moving part of the flag. -->
+          <g class="worx-eye">
+            <image x="153.65" y="86" width="86.7" height="42"
+              href="../static/assets/portfolio/astronaut/flag-eye-solid.png" />
+            <g mask="url(#worxEyeClip)">
+              <g class="worx-eye-crescent">
+                <image x="153.65" y="86" width="86.7" height="42"
+                  href="../static/assets/portfolio/astronaut/flag-crescent.png" />
+              </g>
+            </g>
+          </g>
+
+          <text x="197" y="144" text-anchor="middle" font-family="Jost, sans-serif" font-weight="700"
+            font-size="16" letter-spacing="2" fill="#150905">WORX</text>
+          <text x="197" y="158" text-anchor="middle" font-family="Jost, sans-serif" font-weight="500"
+            font-size="8.5" letter-spacing="2.4" fill="#150905">&lt;like/magic&gt;</text>
+        </svg>
+        <canvas id="mars3d" class="mars-3d-canvas" aria-hidden="true"></canvas>
+        <div class="mars-ember-glow"></div>
+        <canvas class="folio-hero-particles"></canvas>
+      </div>
+      <div class="container folio-hero-inner">
+        <p class="eyebrow">Our Work</p>
+        <h1>Ideas, built to make an <span class="gradient-text">impact</span>.</h1>
+        <p class="folio-hero-lead" data-reveal>
+          Platforms, apps and campaigns for brands people already know
+          designed, built, and kept sharp long after launch.
+        </p>
+      </div>
     </section>
 
-    <section class="section container" style="padding-top: 0;">
-      <div class="project-grid">
+    <section class="section container folio-showcase-section">
+      <ul class="folio-grid folio-editorial-grid">
+        <li class="folio-card folio-card--tablet" data-scroll data-reveal data-live-url="https://hyundai-uae.com/">
+          <div class="folio-scene">
+            <img class="folio-card-bg" src="../static/assets/portfolio/live/hyundai.png" alt="" loading="lazy">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-device folio-device--tablet">
+              <div class="folio-device__screen">
+                <div class="folio-browserbar" aria-hidden="true"><span
+                    class="folio-browserdots"><i></i><i></i><i></i></span><span
+                    class="folio-browserurl">hyundai-uae.com</span></div>
+                <div class="folio-viewport">
+                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
+                      src="../static/assets/portfolio/live/hyundai.png" alt="" loading="lazy"></div>
+                </div>
+              </div>
+            </div>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Luxury e-commerce</span><span>2021</span></div>
-          <h3>Chaumet</h3>
-          <p>
-            One of the world's most recognised luxury jewellery Maisons, with a
-            history of over 240 years. Worx helped Chaumet Arabia create its
-            luxurious website and online presence for the MENA region —
-            bridging digital and physical luxury with a tailor-made shopping
-            experience for elite customers.
-          </p>
-        </article>
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Hyundai.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://hyundai-uae.com/" target="_blank"
+                rel="noopener">Hyundai<span class="visually-hidden">, see
+                  case study</span></a></h3>
+            <p class="folio-desc">A rapidly built iPad app for Hyundai Motors Group, presented at Expo 2020’s Korean
+              pavilion.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Real estate</span><span>2021–present</span></div>
-          <h3>Modon</h3>
-          <p>
-            Known for its sustainable approach to development, Modon Properties
-            is one of the UAE's most prized developers. Worx updates and
-            maintains the Modon corporate website today, with regular on-page
-            SEO, the latest Drupal updates and press releases.
-          </p>
-        </article>
+        <li class="folio-card folio-card--monitor" data-scroll data-reveal
+          data-live-url="https://www.theglimpseproject.com/">
+          <div class="folio-scene">
+            <img class="folio-card-bg" src="../static/assets/portfolio/live/the-glimpse-project.png" alt=""
+              loading="lazy">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-device folio-device--monitor">
+              <div class="folio-device__screen">
+                <div class="folio-browserbar" aria-hidden="true"><span
+                    class="folio-browserdots"><i></i><i></i><i></i></span><span
+                    class="folio-browserurl">www.theglimpseproject.com</span></div>
+                <div class="folio-viewport">
+                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
+                      src="../static/assets/portfolio/live/the-glimpse-project.png" alt="" loading="lazy"></div>
+                </div>
+              </div>
+              <div class="folio-device__base"></div>
+            </div>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Real estate</span><span>2021–present</span></div>
-          <h3>Hudayriyat Mar Vista</h3>
-          <p>
-            A leisure and recreation estate in Abu Dhabi with unique cultural
-            and environmental attractions. Worx covers the majority of its
-            digital services — maintaining the iOS and Android apps, and
-            designing and developing the Marsana Events subpage, anchored by
-            comprehensive brand guidelines.
-          </p>
-        </article>
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Glimpse.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.theglimpseproject.com/" target="_blank"
+                rel="noopener">The Glimpse Project<span class="visually-hidden">, see case study</span></a></h3>
+            <p class="folio-desc">Our own studio site, designed in-house, built by Worx, and tuned to rank among the
+              best on Google’s Lighthouse.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Automotive</span><span>2021–present</span></div>
-          <h3>Hyundai</h3>
-          <p>
-            For Expo 2020's Korean pavilion, Worx rapidly developed an
-            out-and-out iPad app for Hyundai Motors Group, presented during a
-            visit from the South Korean government. The app created new waves
-            of awareness and excitement for Hyundai.
-          </p>
-        </article>
+        <li class="folio-card folio-card--laptop" data-scroll data-reveal
+          data-live-url="https://www.genesis.com/ae/en/main.html">
+          <div class="folio-scene">
+            <img class="folio-card-bg" src="../static/assets/portfolio/live/genesis.png" alt="" loading="lazy">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-device folio-device--laptop">
+              <div class="folio-device__screen">
+                <div class="folio-browserbar" aria-hidden="true"><span
+                    class="folio-browserdots"><i></i><i></i><i></i></span><span
+                    class="folio-browserurl">www.genesis.com/ae/en/main.html</span></div>
+                <div class="folio-viewport">
+                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
+                      src="../static/assets/portfolio/live/genesis.png" alt="" loading="lazy"></div>
+                </div>
+              </div>
+              <div class="folio-device__base"></div>
+            </div>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Automotive</span><span>2020–present</span></div>
-          <h3>Genesis</h3>
-          <p>
-            South Korea's king of luxury. We helped launch Genesis vehicles in
-            MEA through online platforms, and handle the web development and
-            regular maintenance for the Genesis MEA pages at genesis.com/ae.
-          </p>
-        </article>
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Genesis.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.genesis.com/ae/en/main.html" target="_blank"
+                rel="noopener">Genesis<span class="visually-hidden">, see
+                  case study</span></a></h3>
+            <p class="folio-desc">Web development and upkeep for the Genesis MEA pages, supporting the marque’s regional
+              luxury launch.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Automotive</span><span>2020</span></div>
-          <h3>Kia Motors</h3>
-          <p>
-            Worx designed and developed a Unity-based 3D car demo application
-            for Kia, showcased at Expo 2020 UAE. Consistent with the global
-            brand yet ready for future expansion — a project that let us flex
-            our development skills on a global stage.
-          </p>
-        </article>
+        <li class="folio-card folio-card--tablet" data-scroll data-reveal
+          data-live-url="https://www.lg.com/ae">
+          <div class="folio-scene">
+            <img class="folio-card-bg" src="../static/assets/portfolio/live/lg-kitchen-planner.png" alt=""
+              loading="lazy">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-device folio-device--tablet">
+              <div class="folio-device__screen">
+                <div class="folio-browserbar" aria-hidden="true"><span
+                    class="folio-browserdots"><i></i><i></i><i></i></span><span
+                    class="folio-browserurl">www.lg.com/ae</span></div>
+                <div class="folio-viewport">
+                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
+                      src="../static/assets/portfolio/live/lg-kitchen-planner.png" alt="" loading="lazy"></div>
+                </div>
+              </div>
+            </div>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Government</span><span>2020</span></div>
-          <h3>UAE Pavilion</h3>
-          <p>
-            Under the theme "Land of Dreamers Who Do", we delivered creative
-            direction across photos, highlight videos and bilingual content —
-            with on-site teams coordinating production and rolling out posts in
-            real time for legacy coverage.
-          </p>
-        </article>
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/LG.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.lg.com/ae"
+                target="_blank" rel="noopener">LG &amp; LG Kitchen Planner<span class="visually-hidden">, see case
+                  study</span></a></h3>
+            <p class="folio-desc">Interactive planning tools that let customers visualise and configure LG’s kitchen
+              range before they buy.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Agency website</span><span>2023</span></div>
-          <h3>The Glimpse Project</h3>
-          <p>
-            Designed by our in-house team and developed by Worx, built with
-            performance and SEO in mind. After countless improvements it ranks
-            among the best on Google's own Lighthouse — the same technology
-            Google uses to rank websites.
-          </p>
-        </article>
+        <li class="folio-card folio-card--duo" data-reveal data-live-url="https://www.hisenseme.com/">
+          <div class="folio-scene">
+            <img class="folio-card-bg" src="../static/assets/portfolio/live/hisense.png" alt="" loading="lazy">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-device folio-device--laptop">
+              <div class="folio-device__screen">
+                <div class="folio-browserbar" aria-hidden="true"><span
+                    class="folio-browserdots"><i></i><i></i><i></i></span><span
+                    class="folio-browserurl">www.hisenseme.com</span></div>
+                <div class="folio-viewport">
+                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
+                      src="../static/assets/portfolio/live/hisense.png" alt="" loading="lazy"></div>
+                </div>
+              </div>
+              <div class="folio-device__base"></div>
+            </div>
+            <div class="folio-device folio-device--phone">
+              <div class="folio-device__screen">
+                <div class="folio-browserbar" aria-hidden="true"><span
+                    class="folio-browserdots"><i></i><i></i><i></i></span><span
+                    class="folio-browserurl">www.hisenseme.com</span></div>
+                <div class="folio-viewport">
+                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
+                      src="../static/assets/portfolio/live/hisense.png" alt="" loading="lazy"></div>
+                </div>
+              </div>
+            </div>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Fintech</span><span>2020–present</span></div>
-          <h3>Wealthface</h3>
-          <p>
-            Ongoing development partnership with the Wealthface investment
-            platform — supporting a fintech product where reliability,
-            security and clean UX are non-negotiable.
-          </p>
-        </article>
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Hisense.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.hisenseme.com/" target="_blank"
+                rel="noopener">Hisense<span class="visually-hidden">, see
+                  case study</span></a></h3>
+            <p class="folio-desc">Regional campaign web builds and content rollouts for one of the world’s
+              fastest-growing appliance brands.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Luxury jewellery</span><span>2022</span></div>
-          <h3>Tiara Dream</h3>
-          <p>
-            High-value campaign engineering: targeting, budget breakdown, ad
-            placements and creative formats from single image to carousel —
-            tuned until daily enquiries about price, location and
-            specifications became the norm.
-          </p>
-        </article>
+        <li class="folio-card folio-card--full" data-reveal data-pending-asset="true">
+          <div class="folio-scene">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-fill"></div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><span class="folio-link">Casio & Casio Music<span class="visually-hidden">, case study coming soon</span></span></h3>
+            <p class="folio-desc">Website design and development for Casio and Casio Music, supporting the brand’s regional electronics lineup.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Home appliances</span><span>2024</span></div>
-          <h3>Hisense</h3>
-          <p>
-            Digital experiences for one of the world's fastest-growing
-            appliance brands — supporting regional campaigns with web builds
-            and content rollouts across the GCC.
-          </p>
-        </article>
+        <li class="folio-card folio-card--laptop" data-scroll data-reveal
+          data-live-url="https://www.chaumet.com/ae_en/gb_en-homepage?redir-fix=1">
+          <div class="folio-scene">
+            <img class="folio-card-bg" src="../static/assets/portfolio/live/chaumet.png" alt="" loading="lazy">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-device folio-device--laptop">
+              <div class="folio-device__screen">
+                <div class="folio-browserbar" aria-hidden="true"><span
+                    class="folio-browserdots"><i></i><i></i><i></i></span><span
+                    class="folio-browserurl">www.chaumet.com/ae_en</span></div>
+                <div class="folio-viewport">
+                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
+                      src="../static/assets/portfolio/live/chaumet.png" alt="" loading="lazy"></div>
+                </div>
+              </div>
+              <div class="folio-device__base"></div>
+            </div>
 
-        <article class="project-card" data-reveal>
-          <div class="project-meta"><span>Home appliances</span><span>2025</span></div>
-          <h3>LG &amp; LG Kitchen Planner</h3>
-          <p>
-            Interactive planning tools for LG's kitchen range — helping
-            customers visualise and configure appliances in their own space
-            before they buy.
-          </p>
-        </article>
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/chaumet.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.chaumet.com/ae_en/gb_en-homepage?redir-fix=1" target="_blank"
+                rel="noopener">Chaumet<span class="visually-hidden">, see
+                  case study</span></a></h3>
+            <p class="folio-desc">Tailor-made online flagship for the 240-year-old jewellery Maison, built for luxury
+              shoppers across the MENA region.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
 
-      </div>
+        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.modon.com/">
+          <div class="folio-scene">
+            <img class="folio-card-bg" src="../static/assets/portfolio/live/modon.png" alt="" loading="lazy">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-fill"><img class="folio-live-full" src="../static/assets/portfolio/live/modon.png" alt=""
+                loading="lazy"></div>
+
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Modon.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.modon.com/" target="_blank"
+                rel="noopener">Modon<span class="visually-hidden">, see case
+                  study</span></a></h3>
+            <p class="folio-desc">Ongoing care of the corporate site for one of the UAE’s leading sustainable developers
+              , Drupal, on-page SEO and press releases.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
+
+        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.dunimiddleeast.com/">
+          <div class="folio-scene">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-fill"></div>
+
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Duni.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.dunimiddleeast.com/" target="_blank" rel="noopener">Duni Middle East<span class="visually-hidden">, see case study</span></a></h3>
+            <p class="folio-desc">Website design and development for Duni Middle East, presenting the brand’s premium napkins and table covering collections.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
+
+        <li class="folio-card folio-card--full" data-reveal
+          data-live-url="https://calatrava.com/projects/uae-pavilion-at-expo-dubai-united-arab-emirates.html">
+          <div class="folio-scene">
+            <img class="folio-card-bg" src="../static/assets/portfolio/live/uae-pavilion.png" alt="" loading="lazy">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-fill"><img class="folio-live-full" src="../static/assets/portfolio/live/uae-pavilion.png"
+                alt="" loading="lazy"></div>
+
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/UAE-Pavilion.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link"
+                href="https://calatrava.com/projects/uae-pavilion-at-expo-dubai-united-arab-emirates.html"
+                target="_blank" rel="noopener">UAE Pavilion<span class="visually-hidden">
+                  , see case study</span></a></h3>
+            <p class="folio-desc">Creative direction across photos, films and bilingual content under the theme “Land of
+              Dreamers Who Do”.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
+
+        <li class="folio-card folio-card--phone" data-scroll data-reveal
+          data-live-url="https://www.hudayriyatisland.ae/en/">
+          <div class="folio-scene">
+            <img class="folio-card-bg" src="../static/assets/portfolio/live/hudayriyat-mar-vista.png" alt=""
+              loading="lazy">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-device folio-device--phone">
+              <div class="folio-device__screen">
+                <div class="folio-browserbar" aria-hidden="true"><span
+                    class="folio-browserdots"><i></i><i></i><i></i></span><span
+                    class="folio-browserurl">www.hudayriyatisland.ae/en/</span></div>
+                <div class="folio-viewport">
+                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
+                      src="../static/assets/portfolio/live/hudayriyat-mar-vista.png" alt="" loading="lazy"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Hudayriyat.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.hudayriyatisland.ae/en/" target="_blank"
+                rel="noopener">Hudayriyat Mar Vista<span class="visually-hidden">, see case study</span></a></h3>
+            <p class="folio-desc">iOS and Android app upkeep plus the Marsana Events subpage for Abu Dhabi’s leisure and
+              recreation estate.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
+
+        <li class="folio-card folio-card--phone" data-scroll data-reveal data-live-url="https://wealthface.com/">
+          <div class="folio-scene">
+            <img class="folio-card-bg" src="../static/assets/portfolio/live/wealthface.png" alt="" loading="lazy">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-device folio-device--phone">
+              <div class="folio-device__screen">
+                <div class="folio-browserbar" aria-hidden="true"><span
+                    class="folio-browserdots"><i></i><i></i><i></i></span><span
+                    class="folio-browserurl">wealthface.com</span></div>
+                <div class="folio-viewport">
+                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
+                      src="../static/assets/portfolio/live/wealthface.png" alt="" loading="lazy"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Wealthface.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://wealthface.com/" target="_blank"
+                rel="noopener">Wealthface<span class="visually-hidden">
+                  see case study</span></a></h3>
+            <p class="folio-desc">An ongoing development partnership on an investment platform where security and clean
+              UX are non-negotiable.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
+
+        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.watchtradeco.com/">
+          <div class="folio-scene">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-fill"></div>
+
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Watch Trade .mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.watchtradeco.com/" target="_blank" rel="noopener">Watch Trade Co.<span class="visually-hidden">, see case study</span></a></h3>
+            <p class="folio-desc">Website design and development for Watch Trade Co., supporting the brand’s luxury watch trading platform.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
+
+        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.watchlocater.com/">
+          <div class="folio-scene">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-fill"></div>
+
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Watch Locater.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.watchlocater.com/" target="_blank" rel="noopener">Watch Locater<span class="visually-hidden">, see case study</span></a></h3>
+            <p class="folio-desc">Website design and development for Watch Locater, helping collectors discover and source luxury timepieces.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
+
+        <li class="folio-card folio-card--full" data-reveal data-pending-asset="true">
+          <div class="folio-scene">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-fill"></div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><span class="folio-link">SEPHORiA<span class="visually-hidden">, case study coming soon</span></span></h3>
+            <p class="folio-desc">Website design and development for SEPHORiA, supporting the brand’s regional electronics retail presence.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
+
+        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.sailnaxos.com/">
+          <div class="folio-scene">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-fill"></div>
+
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Sail Naxos.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.sailnaxos.com/" target="_blank" rel="noopener">Sail Naxos<span class="visually-hidden">, see case study</span></a></h3>
+            <p class="folio-desc">Website design and development for Sail Naxos, supporting the operator’s sailing tours and island excursions.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
+
+        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.tailorandtweak.com/">
+          <div class="folio-scene">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-fill"></div>
+
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Tailor and Tweak.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://www.tailorandtweak.com/" target="_blank" rel="noopener">Tailor &amp; Tweak<span class="visually-hidden">, see case study</span></a></h3>
+            <p class="folio-desc">Website design and development for Tailor & Tweak, presenting the brand’s made-to-measure tailoring services.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
+
+        <li class="folio-card folio-card--full" data-reveal data-live-url="https://tiara.ae/">
+          <div class="folio-scene">
+            <img class="folio-card-bg" src="../static/assets/portfolio/live/tiara-dream.png" alt="" loading="lazy">
+            <span class="folio-floor" aria-hidden="true"></span>
+            <div class="folio-fill"><img class="folio-live-full" src="../static/assets/portfolio/live/tiara-dream.png"
+                alt="" loading="lazy"></div>
+
+            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
+              <video class="folio-card-video" muted loop playsinline preload="metadata">
+                <source src="../static/assets/portfolio/videos/Tiara.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <div class="folio-body">
+            <h3 class="folio-name"><a class="folio-link" href="https://tiara.ae/" target="_blank" rel="noopener">Tiara
+                Dream<span class="visually-hidden">
+                  see case study</span></a></h3>
+            <p class="folio-desc">High-value campaign engineering, targeting, budgets and creative formats tuned until
+              daily enquiries became the norm.</p>
+            <span class="folio-cta" aria-hidden="true">
+              <span class="folio-cta-label">View Case Study</span>
+              <span class="folio-cta-arrow">&rarr;</span>
+            </span>
+          </div>
+        </li>
+      
+</ul>
     </section>
 
     <section class="section container">
@@ -199,8 +1146,10 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-about">
-          <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png" alt="Worx by Glimpse" width="132" height="181"></a>
-          <p>Your one-stop destination for innovative website and software development — bringing digital aspirations to life, one line of code at a time.</p>
+          <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png"
+              alt="Worx by Glimpse" width="132" height="181"></a>
+          <p>Your one-stop destination for innovative website and software development, bringing digital aspirations to
+            life, one line of code at a time.</p>
         </div>
         <div>
           <h4>Explore</h4>
@@ -215,7 +1164,8 @@
         <div>
           <h4>Social</h4>
           <ul>
-            <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener">LinkedIn</a></li>
+            <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener">LinkedIn</a>
+            </li>
             <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener">Instagram</a></li>
             <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener">Facebook</a></li>
             <li><a href="https://www.theglimpseproject.com" target="_blank" rel="noopener">Glimpse</a></li>
@@ -243,5 +1193,8 @@
   <script src="../static/js/animations.js"></script>
   <script src="../static/js/main.js"></script>
   <script src="../static/js/contact-widget.js"></script>
+  <script type="module" src="../static/js/portfolio-3d.js"></script>
+  <script src="../static/js/portfolio.js"></script>
 </body>
+
 </html>

@@ -1,119 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR activations that actually activate — Worx by Glimpse</title>
-  <meta name="description" content="What we learned shipping interactive experiences for Expo-scale audiences.">
-
-  <link rel="icon" type="image/png" sizes="32x32" href="../static/assets/favicon-32.png">
-  <link rel="apple-touch-icon" href="../static/assets/apple-touch-icon.png">
-  <meta name="theme-color" content="#150905">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="../static/css/base.css">
-  <link rel="stylesheet" href="../static/css/layout.css">
-  <link rel="stylesheet" href="../static/css/components.css">
-  <link rel="stylesheet" href="../static/css/animations.css">
-</head>
-<body data-page="blogs">
-  <a class="skip-link" href="#main">Skip to content</a>
-
-  <header class="site-header">
-    <div class="container nav-bar">
-      <a class="brand" href="../index.html"><img class="brand-mark" src="../static/assets/mark.png" alt="" width="40" height="40"><span class="brand-text">WORX<small>&lt;like/magic&gt;</small></span></a>
-      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-      <nav class="nav-links" aria-label="Main navigation">
-        <a href="../index.html" data-nav="home">Home</a>
-        <a href="../services/index.html" data-nav="services">Services</a>
-        <a href="../portfolio/index.html" data-nav="portfolio">Portfolio</a>
-        <a href="../about/index.html" data-nav="about">About</a>
-        <a href="../blogs/index.html" data-nav="blogs">Blog</a>
-        <a href="../contact/index.html" class="btn btn-primary" data-nav="contact">Let's Talk</a>
-      </nav>
-    </div>
-  </header>
-
-  <main id="main">
-
-    <section class="page-hero container">
-      <p class="eyebrow">Experience</p>
-      <h1>AR activations that actually activate</h1>
-      <div class="article-meta">
-        <span>March 2026</span><span>·</span><span>Worx by Glimpse</span>
-      </div>
-    </section>
-
-    <article class="container article-body" style="padding-bottom: var(--section-pad);">
-
-          <p>At Expo 2020 we shipped a Unity-based 3D car demo for Kia and an iPad app for Hyundai's pavilion visit — both on unforgiving deadlines, both in front of audiences that don't give second chances. Here's what those projects taught us about interactive activations.</p>
-
-          <h2>The first three seconds decide everything</h2>
-          <p>On an expo floor you're competing with everything else in peripheral vision. An activation has roughly three seconds to make someone stop. That means motion, scale and an obvious "what do I do here" — instructions are a design failure.</p>
-
-          <h2>Build for the worst network in the building</h2>
-          <p>Venue Wi-Fi will betray you. Every experience we ship for events runs fully offline first; the network is for analytics and content updates, never for the core experience. This single decision has saved more launches than any other.</p>
-
-          <h2>Make it travel</h2>
-          <p>The on-site audience is the smallest audience. The real reach is the photo someone posts, the clip the brand team cuts that evening. We design every activation with its own camera moment — and pair it with online campaigns so the experience outlives the event floor.</p>
-
-          <p>An activation that doesn't change what people do next is just an expensive screen. Plan the follow-through before you plan the wow.</p>
-        
-      <a href="index.html" class="btn btn-ghost" style="margin-top: 30px;">← All articles</a>
-    </article>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-about">
-          <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png" alt="Worx by Glimpse" width="132" height="181"></a>
-          <p>Your one-stop destination for innovative website and software development — bringing digital aspirations to life, one line of code at a time.</p>
-        </div>
-        <div>
-          <h4>Explore</h4>
-          <ul>
-            <li><a href="../services/index.html">Services</a></li>
-            <li><a href="../portfolio/index.html">Portfolio</a></li>
-            <li><a href="../about/index.html">About us</a></li>
-            <li><a href="../blogs/index.html">Blog</a></li>
-            <li><a href="../contact/index.html">Contact</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4>Social</h4>
-          <ul>
-            <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener">LinkedIn</a></li>
-            <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener">Instagram</a></li>
-            <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener">Facebook</a></li>
-            <li><a href="https://www.theglimpseproject.com" target="_blank" rel="noopener">Glimpse</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4>Contact</h4>
-          <ul>
-            <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
-            <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
-            <li>Unit 404 Makateb 2,<br>Dubai Production City,<br>PO Box 503417, Dubai, UAE</li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© <span id="footer-year">2026</span> Worx by Glimpse. All rights reserved.</span>
-        <span>Built for businesses, by creatives.</span>
-      </div>
-    </div>
-  </footer>
+  <link rel="stylesheet" href="../static/css/blog-post.css">
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="../static/js/nav.js"></script>
   <script src="../static/js/animations.js"></script>
   <script src="../static/js/main.js"></script>
-  <script src="../static/js/contact-widget.js"></script>
-</body>
-</html>
+
+  <script>
+    (() => {
+      const pageUrl = window.location.href;
+      const pageTitle = document.title;
+
+      document.querySelectorAll('[data-share]').forEach((button) => {
+        button.addEventListener('click', async (event) => {
+          event.preventDefault();
+          const network = button.dataset.share;
+          if (network === 'linkedin') {
+            window.open(
+              `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`,
+              '_blank',
+              'noopener,noreferrer,width=720,height=620'
+            );
+          }
+          if (network === 'facebook') {
+            window.open(
+              `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`,
+              '_blank',
+              'noopener,noreferrer,width=720,height=620'
+            );
+          }
+          if (network === 'x') {
+            window.open(
+              `https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(pageTitle)}`,
+              '_blank',
+              'noopener,noreferrer,width=720,height=620'
+            );
+          }
+          if (network === 'copy') {
+            try {
+              await navigator.clipboard.writeText(pageUrl);
+              const status = document.querySelector('.copy-status');
+              status.classList.add('is-visible');
+              setTimeout(() => status.classList.remove('is-visible'), 1600);
+            } catch (error) {
+              window.prompt('Copy this link:', pageUrl);
+            }
+          }
+        });
+      });
+    })();
+  </script>
