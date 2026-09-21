@@ -34,12 +34,6 @@
   var STORE_KEY = "worx.contact.v4";
   var MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
   var FORMSPREE_ENDPOINT = "https://formspree.io/f/xeaojvzn";
-  // EmailJS auto-reply to the visitor. Leave any of these empty to disable.
-  // The public key is safe in client code; restrict it to your domain in
-  // the EmailJS dashboard (Account > Security).
-  var EMAILJS_SERVICE_ID = "service_5rgzqe1";
-  var EMAILJS_TEMPLATE_ID = "template_tdzm87f";
-  var EMAILJS_PUBLIC_KEY = "wm49sHmSgdQ04r0O-";
   var IDEA_CAP = 1400; // keep the idea field a reasonable size
 
   var BUILD_OPTIONS = [
@@ -228,6 +222,9 @@
   // email's subject line and Reply-To respectively); everything else
   // shows up as a plain field in that notification and in the
   // Formspree dashboard.
+
+  // This is where you would add the EMAILJS service ID
+
   function buildFormspreePayload() {
     var f = state.form;
     return {
@@ -629,40 +626,18 @@
     })
       .then(function (res) {
         if (!res.ok) throw new Error("Formspree responded with " + res.status);
-        sendFollowup();
+          
         state.completedAt = Date.now();
         saveState();
         state.view = "success";
         render();
+          
       })
       .catch(function () {
         els.next.disabled = false;
         els.next.textContent = "Send my enquiry";
         showError("Something went wrong sending your enquiry — please try again, or email us directly at hello@worxbyglimpse.com.");
       });
-  }
-
-  // Fire-and-forget auto-reply via EmailJS's REST API. Only the visitor's
-  // name and email go in — never the free-text idea — and a failure here
-  // must never break the success screen.
-  function sendFollowup() {
-    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) return;
-    var f = state.form;
-    fetch("https://api.emailjs.com/api/v1.0/email/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        service_id: EMAILJS_SERVICE_ID,
-        template_id: EMAILJS_TEMPLATE_ID,
-        user_id: EMAILJS_PUBLIC_KEY,
-        template_params: {
-          to_email: f.email.trim(),
-          name: truncate(f.name.trim(), 80),
-          building: labelFor(BUILD_OPTIONS, f.buildType)
-        }
-      }),
-      keepalive: true
-    }).catch(function () {});
   }
 
   function resetAll() {
