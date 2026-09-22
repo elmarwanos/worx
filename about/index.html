@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="../static/css/layout.css">
   <link rel="stylesheet" href="../static/css/components.css">
   <link rel="stylesheet" href="../static/css/animations.css">
+  <link rel="stylesheet" href="../static/css/about.css">
 </head>
 <body data-page="about">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -40,136 +41,167 @@
 
   <main id="main">
 
-    <section class="page-hero container">
-      <p class="eyebrow">About us</p>
-      <h1>Built for businesses, <span class="gradient-text">by creatives</span></h1>
-      <p data-reveal>
-        Welcome to Worx by Glimpse — your one-stop destination for innovative
-        website and software development, headquartered in the dynamic hub of
-        the United Arab Emirates.
-      </p>
-    </section>
+    <div class="story" id="story">
 
-    <section class="section container">
-      <div class="card-grid card-grid--2">
-        <div data-reveal>
-          <p class="eyebrow">A quick intro</p>
-          <h2>Two teams, one launch</h2>
-          <p style="margin-top: 18px;">
-            Glimpse has always employed cutting-edge techniques to raise
-            companies to the pinnacle of digital marketing. Worx is Glimpse's
-            in-house sister company, born to integrate those foundational
-            marketing instincts into software development.
-          </p>
-          <p style="margin-top: 14px;">
-            Working together, Worx focuses on writing clean and maintainable
-            code while Glimpse prepares the platform and social networks to
-            connect to the website upon launch. The result: digital
-            experiences that are visually stunning <strong>and</strong>
-            technologically robust.
-          </p>
+      <div class="story-atmosphere" aria-hidden="true"></div>
+
+      <!-- Each .story-terrain carries its own inline background-image,
+           so a future chapter image is a one-line swap here — nothing
+           in about.css or about-story.js changes. The persistent sky
+           (.story-atmosphere) and stars never turn with the page; only
+           a .story-scene + its matching .story-text turn together. -->
+      <div class="story-scenes">
+        <div class="story-scene story-scene--preface">
+          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <div class="story-grade"></div>
         </div>
-        <div class="stats-grid" style="grid-template-columns: 1fr 1fr; border: 0;">
-          <div class="stat" data-reveal>
-            <strong data-count="300" data-suffix="+">0</strong>
-            <span>Projects delivered</span>
+        <div class="story-scene" data-chapter="01">
+          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <div class="story-grade"></div>
+        </div>
+        <div class="story-scene" data-chapter="02">
+          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <div class="story-grade"></div>
+        </div>
+        <div class="story-scene" data-chapter="03">
+          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <div class="story-grade"></div>
+        </div>
+        <div class="story-scene" data-chapter="04">
+          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <div class="story-grade"></div>
+        </div>
+        <div class="story-scene" data-chapter="05">
+          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <div class="story-grade"></div>
+        </div>
+        <div class="story-scene" data-chapter="06">
+          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <div class="story-grade"></div>
+        </div>
+        <div class="story-scene" data-chapter="07">
+          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <div class="story-grade"></div>
+        </div>
+        <div class="story-scene" data-chapter="08">
+          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <div class="story-grade"></div>
+        </div>
+        <div class="story-scene story-scene--final">
+          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <div class="story-grade"></div>
+        </div>
+      </div>
+
+      <!-- GLIMPSE landing sequence: 32-frame scroll-scrubbed canvas,
+           drawn by landing-sequence.js. Path/count/canvas-size are all
+           editable here without touching the JS; the vertical landing
+           position is the --landing-anchor-y custom property in about.css.
+
+           TEMPORARY — MECHANICS TEST ONLY:
+           data-landing-base below points at the throwaway placeholder
+           frames in static/assets/about/landing/dev-test/ (magenta/cyan
+           test shapes, clearly watermarked "NOT FINAL ART") so the
+           scroll-scrub architecture can be reviewed before real GLIMPSE
+           artwork exists. Once approved, delete dev-test/ and switch
+           this attribute back to:
+             ../static/assets/about/landing/glimpse-landing- -->
+      <canvas class="story-landing" aria-hidden="true"
+        data-landing-base="../static/assets/about/landing/dev-test/test-landing-"
+        data-landing-count="32"
+        data-landing-pad="3"
+        data-landing-width="2400"
+        data-landing-height="1350"></canvas>
+
+      <div class="story-turn-shadow" aria-hidden="true"></div>
+
+      <canvas class="story-stars" aria-hidden="true"></canvas>
+
+      <div class="story-texts">
+        <div class="story-text story-text--preface">
+          <div class="container">
+            <p class="eyebrow">Preface</p>
+            <h1 class="story-title">The origin of <span class="gradient-text">Worx</span></h1>
+            <p class="story-subtitle">A story about people, ideas and technology.</p>
           </div>
-          <div class="stat" data-reveal>
-            <strong data-count="12" data-suffix="+">0</strong>
-            <span>Loyal clients</span>
+          <p class="story-scroll-hint">Scroll to begin</p>
+        </div>
+
+        <div class="story-text">
+          <div class="container">
+            <p class="story-number">01 <span>/ 08</span></p>
+            <h2 class="story-title">The Beginning</h2>
+            <p class="story-subtitle">It started with a glimpse.</p>
           </div>
-          <div class="stat" data-reveal>
-            <strong data-count="95" data-suffix="%">0</strong>
-            <span>Client satisfaction</span>
+        </div>
+
+        <div class="story-text">
+          <div class="container">
+            <p class="story-number">02 <span>/ 08</span></p>
+            <h2 class="story-title">The Arrival</h2>
+            <p class="story-subtitle">Bigger ideas go further.</p>
           </div>
-          <div class="stat" data-reveal>
-            <strong data-count="10" data-suffix="%+">0</strong>
-            <span>Profit growth per year</span>
+        </div>
+
+        <div class="story-text">
+          <div class="container">
+            <p class="story-number">03 <span>/ 08</span></p>
+            <h2 class="story-title">The Deployment</h2>
+            <p class="story-subtitle">Ideas take shape.</p>
+          </div>
+        </div>
+
+        <div class="story-text">
+          <div class="container">
+            <p class="story-number">04 <span>/ 08</span></p>
+            <h2 class="story-title">The Journey</h2>
+            <p class="story-subtitle">Exploration builds opportunity.</p>
+          </div>
+        </div>
+
+        <div class="story-text">
+          <div class="container">
+            <p class="story-number">05 <span>/ 08</span></p>
+            <h2 class="story-title">Building Something New</h2>
+            <p class="story-subtitle">From vision to foundation.</p>
+          </div>
+        </div>
+
+        <div class="story-text">
+          <div class="container">
+            <p class="story-number">06 <span>/ 08</span></p>
+            <h2 class="story-title">Worx</h2>
+            <p class="story-subtitle">A base for a brighter tomorrow.</p>
+          </div>
+        </div>
+
+        <div class="story-text">
+          <div class="container">
+            <p class="story-number">07 <span>/ 08</span></p>
+            <h2 class="story-title">Connected</h2>
+            <p class="story-subtitle">Stronger together.</p>
+          </div>
+        </div>
+
+        <div class="story-text">
+          <div class="container">
+            <p class="story-number">08 <span>/ 08</span></p>
+            <h2 class="story-title">The Next Chapter</h2>
+            <p class="story-subtitle">Same sky. Bigger possibilities.</p>
+          </div>
+        </div>
+
+        <div class="story-text story-text--final">
+          <div class="container">
+            <h2 class="story-title"><span class="gradient-text">Worx</span></h2>
+            <p class="story-subtitle">People + Ideas + Technology</p>
+            <p class="story-subtitle story-subtitle--close">A brighter tomorrow builds further.</p>
+            <a href="../contact/index.html" class="story-cta">Start a project</a>
           </div>
         </div>
       </div>
-    </section>
 
-    <section class="section container">
-      <div class="section-head">
-        <p class="eyebrow">Our values</p>
-        <h2 data-reveal>Vision &amp; <span class="gradient-text">mission</span></h2>
-      </div>
-      <div class="card-grid card-grid--2">
-        <article class="card" data-reveal>
-          <div class="card-icon">🔭</div>
-          <h3>Vision</h3>
-          <p>
-            To be a global leader in website and software development,
-            recognised for unwavering commitment to excellence and
-            forward-thinking solutions. We aim to shape the future of digital
-            experiences by continuously pushing the boundaries of creativity
-            and technology — the driving force behind transformative online
-            solutions that inspire growth and make a lasting impact.
-          </p>
-        </article>
-        <article class="card" data-reveal>
-          <div class="card-icon">🎯</div>
-          <h3>Mission</h3>
-          <p>
-            To empower businesses and individuals with cutting-edge website
-            and software development that elevates their online presence. We
-            deliver innovative, reliable and customised digital experiences,
-            with a focus on quality, creativity and customer satisfaction — a
-            trusted partner in the ever-evolving digital landscape.
-          </p>
-        </article>
-      </div>
-    </section>
-
-    <section class="section container">
-      <div class="section-head">
-        <p class="eyebrow">Our goals</p>
-        <h2 data-reveal>What every build stands on</h2>
-      </div>
-      <div class="card-grid">
-        <article class="card" data-reveal>
-          <div class="card-icon">🏛️</div>
-          <h3>Stability</h3>
-          <p>Architecture and code that hold up under real traffic, real users and real growth.</p>
-        </article>
-        <article class="card" data-reveal>
-          <div class="card-icon">🔒</div>
-          <h3>Security</h3>
-          <p>Best practices baked in from the first commit — not bolted on after launch.</p>
-        </article>
-        <article class="card" data-reveal>
-          <div class="card-icon">🔄</div>
-          <h3>Continuity</h3>
-          <p>Long-term maintenance, documentation and training so your platform outlives any single team.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="section container">
-      <div class="section-head">
-        <p class="eyebrow">How we work</p>
-        <h2 data-reveal>The Worx <span class="gradient-text">sequence</span></h2>
-        <p data-reveal>Every engagement follows the same proven seven-step path — so you always know where your project stands.</p>
-      </div>
-      <ol class="sequence">
-        <li data-reveal>Consultation</li>
-        <li data-reveal>Deliberation</li>
-        <li data-reveal>Solutions</li>
-        <li data-reveal>Evaluation</li>
-        <li data-reveal>Finalisation</li>
-        <li data-reveal>Execution</li>
-        <li data-reveal>Management</li>
-      </ol>
-    </section>
-
-    <section class="section container">
-      <div class="cta-band" data-reveal>
-        <h2>With the right team, <span class="gradient-text">great things happen</span></h2>
-        <p>Join us on a journey where creativity meets functionality.</p>
-        <a href="../contact/index.html" class="btn btn-primary">Meet the team</a>
-      </div>
-    </section>
+    </div>
 
   </main>
 
@@ -221,5 +253,7 @@
   <script src="../static/js/animations.js"></script>
   <script src="../static/js/main.js"></script>
   <script src="../static/js/contact-widget.js"></script>
+  <script src="../static/js/landing-sequence.js"></script>
+  <script src="../static/js/about-story.js"></script>
 </body>
 </html>

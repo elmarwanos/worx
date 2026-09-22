@@ -1,0 +1,380 @@
+/* ============================================================
+   Worx by Glimpse — about.css
+   About page only: a pinned, scroll-scrubbed page-turn storybook.
+
+   Layering (all siblings inside #story, so z-index compares flatly —
+   see about-story.js for why): atmosphere (0) < scene stack (1) <
+   landing frame sequence (2) < turn shadow (3) < stars (4) < text
+   stack (5). Persistent layers (atmosphere, landing canvas, stars)
+   never move during a page turn; only the per-chapter scene/text
+   pair being turned does. The landing canvas is itself persistent
+   in the same sense — it only fades in/out at the start/end of its
+   own dedicated scroll range (about-story.js), never per chapter.
+
+   Each .story-scene's terrain is set via an inline background-image
+   (about/index.html) so a future chapter image is a one-line swap —
+   nothing here or in about-story.js changes.
+   ============================================================ */
+
+#story {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+/* GSAP/ScrollTrigger failed to load: fall back to a plain stacked
+   scroll so every chapter and the footer stay reachable. No pin,
+   no turn — just visible, ordered content. */
+#story.story--fallback {
+  height: auto;
+  overflow: visible;
+}
+
+#story.story--fallback .story-scenes,
+#story.story--fallback .story-texts {
+  position: static;
+}
+
+#story.story--fallback .story-scene,
+#story.story--fallback .story-text {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+
+#story.story--fallback .story-atmosphere,
+#story.story--fallback .story-landing,
+#story.story--fallback .story-turn-shadow,
+#story.story--fallback .story-stars {
+  position: fixed;
+}
+
+/* ---- Persistent atmosphere (never turns) ----------------------- */
+/* Dark-to-ember vertical gradient standing in for the source photo's
+   sky, plus a screened warm glow near the horizon — same recipe as
+   the Portfolio Mars hero's .mars-ember-glow (radial + screen). */
+
+.story-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    #0b0402 0%,
+    #1a0a05 26%,
+    #33130a 48%,
+    #562011 70%,
+    #7a2f13 100%);
+}
+
+.story-atmosphere::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 85% 55% at 50% 105%,
+      rgba(250, 167, 25, 0.30) 0%,
+      rgba(229, 125, 35, 0.16) 42%,
+      transparent 74%),
+    radial-gradient(ellipse 60% 40% at 78% 88%,
+      rgba(192, 69, 39, 0.22),
+      transparent 70%);
+  mix-blend-mode: screen;
+}
+
+/* ---- Scene stack (the part that turns) -------------------------- */
+
+.story-scenes {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  perspective: 1600px;
+}
+
+.story-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+
+/* The source photo's bright sky is never shown: the terrain box only
+   occupies the lower part of the frame, is cropped toward its ground
+   texture, toned with the same sepia/contrast/brightness recipe the
+   Portfolio hero uses to push it into Worx's burnt-orange palette
+   instead of the photo's pale yellow, and its own top edge fades into
+   .story-atmosphere via a mask instead of showing a hard photo edge.
+   Wider than the viewport + bottom-anchored so it reads as a distant,
+   expansive landscape rather than a cropped hero photo. */
+.story-terrain {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 132%;
+  height: 56%;
+  transform: translateX(-50%);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center 88%;
+  filter: sepia(0.35) saturate(1.3) contrast(1.12) brightness(0.7);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 26%);
+  mask-image: linear-gradient(180deg, transparent 0%, black 26%);
+}
+
+.story-grade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(0deg, rgba(21, 9, 5, 0.75) 0%, rgba(21, 9, 5, 0.05) 40%, rgba(21, 9, 5, 0.18) 100%),
+    linear-gradient(100deg, rgba(21, 9, 5, 0.38) 0%, rgba(21, 9, 5, 0.05) 44%, transparent 72%);
+}
+
+/* Cheap, shared depth cue: about-story.js fades this in/out (opacity
+   only) as each turn crosses its midpoint, instead of an expensive
+   per-scene shadow. */
+.story-turn-shadow {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse 90% 70% at 50% 40%,
+    transparent 30%,
+    rgba(11, 4, 2, 0.55) 100%);
+}
+
+/* ---- Landing frame sequence (persistent, own scroll range) ------ */
+/* Drawn "contain"-fit by landing-sequence.js so the spacecraft art
+   never stretches/distorts on off-16:9 viewports. --landing-anchor-y
+   is the single tunable knob for lining the artwork's own ground
+   line up with the live terrain once real frames exist: 0 = frame's
+   top edge pinned to this box's top, 1 = bottom, 0.5 = centered. */
+.story-landing {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  --landing-anchor-y: 1;
+}
+
+/* ---- Persistent star layer (never turns) ------------------------ */
+
+.story-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.story-stars.is-hidden {
+  opacity: 0;
+}
+
+/* ---- Text stack (crossfades independently of the scene turn) --- */
+
+.story-texts {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+
+.story-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding-top: clamp(140px, 20vw, 220px);
+  padding-bottom: clamp(64px, 10vh, 130px);
+  will-change: transform, opacity;
+}
+
+/* ---- Chapter pagination (book-style numeral) ------------------ */
+
+.story-number {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 18px;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--accent-2);
+}
+
+.story-number span {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.story-title {
+  max-width: 16ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6.4vw, 5rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.story-subtitle {
+  max-width: 46ch;
+  margin-top: 18px;
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  color: var(--muted);
+}
+
+/* ---- Preface ---------------------------------------------------- */
+
+.story-text--preface {
+  justify-content: center;
+}
+
+.story-text--preface .story-title {
+  max-width: 14ch;
+  font-size: clamp(2.9rem, 7.4vw, 5.6rem);
+  text-transform: none;
+}
+
+.story-scroll-hint {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(28px, 5vh, 48px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 1s ease 0.6s;
+}
+
+.story-text--preface.is-active .story-scroll-hint {
+  opacity: 0.75;
+}
+
+.story-scroll-hint::after {
+  content: "";
+  width: 1px;
+  height: 26px;
+  background: linear-gradient(180deg, var(--accent-2), transparent);
+  animation: story-hint-drift 2.2s ease-in-out infinite;
+}
+
+@keyframes story-hint-drift {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50%      { transform: translateY(6px); opacity: 1; }
+}
+
+/* ---- Final page --------------------------------------------------- */
+
+.story-text--final .story-title {
+  max-width: 18ch;
+  font-size: clamp(2.4rem, 5.6vw, 4.2rem);
+}
+
+.story-subtitle--close {
+  margin-top: 6px;
+}
+
+.story-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 30px;
+  padding: 15px 32px;
+  border-radius: 999px;
+  background: var(--gradient);
+  color: var(--on-accent);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.story-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px -14px rgba(229, 125, 35, 0.55);
+}
+
+/* ---- Responsive ------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .story-text {
+    padding-top: clamp(120px, 22vw, 180px);
+  }
+
+  .story-terrain {
+    height: 62%;
+    background-position: 56% 10%;
+  }
+}
+
+@media (max-width: 600px) {
+  .story-text {
+    padding-top: 112px;
+    padding-bottom: 48px;
+  }
+
+  .story-title {
+    max-width: 13ch;
+  }
+
+  .story-text--preface .story-title {
+    max-width: 11ch;
+  }
+
+  .story-terrain {
+    width: 160%;
+    height: 68%;
+    background-position: 60% 10%;
+  }
+}
+
+/* ---- Reduced motion ---------------------------------------------- */
+/* about-story.js swaps the page-turn tween properties down to a
+   plain opacity crossfade (no rotateX/scale/shadow) when this query
+   matches; this block only has to mop up the CSS-only bits. */
+
+@media (prefers-reduced-motion: reduce) {
+  .story-cta,
+  .story-stars {
+    transition: none !important;
+  }
+
+  .story-scroll-hint {
+    opacity: 0.6 !important;
+    transition: none !important;
+  }
+
+  .story-scroll-hint::after {
+    animation: none;
+  }
+}
