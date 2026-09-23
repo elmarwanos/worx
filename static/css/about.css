@@ -1,15 +1,27 @@
 /* ============================================================
    Worx by Glimpse — about.css
-   About page only: a pinned, scroll-scrubbed page-turn storybook.
+   About page only: a one-viewport, wheel/swipe-paged storybook.
+   Each gesture turns exactly one page (about-story.js) — this file
+   only owns the persistent environment and the per-chapter look.
 
    Layering (all siblings inside #story, so z-index compares flatly —
    see about-story.js for why): atmosphere (0) < scene stack (1) <
-   landing frame sequence (2) < turn shadow (3) < stars (4) < text
-   stack (5). Persistent layers (atmosphere, landing canvas, stars)
-   never move during a page turn; only the per-chapter scene/text
-   pair being turned does. The landing canvas is itself persistent
-   in the same sense — it only fades in/out at the start/end of its
-   own dedicated scroll range (about-story.js), never per chapter.
+   landing back layer — contact shadow + back dust (2) < landing ship
+   canvas (3) < landing front layer — engine exhaust + front dust (4)
+   < ember glow (4, later in the DOM) < turn shadow (5) < stars (6) < text stack (7). There is no
+   top-right HUD; the only narrative/status readout is the bottom-left
+   .story-status inside the text stack (about-story.js). Persistent
+   layers (atmosphere, the three landing canvases, stars) never move
+   during a page turn; only the per-chapter scene/text pair being
+   turned does. The landing canvases are persistent in that same
+   sense — they only fade in/out together when scene 0 (the landing
+   chapter) is entered/left (about-story.js).
+
+   --story-ground-y (below, on the landing canvases) is the single
+   calibrated value both the ship's placement and every ground-level
+   effect (shadow, dust origin) read to agree on where the terrain
+   photo actually becomes solid, visible ground — see landing-fx.js's
+   file header for how it's used.
 
    Each .story-scene's terrain is set via an inline background-image
    (about/index.html) so a future chapter image is a one-line swap —
@@ -51,7 +63,10 @@
 }
 
 #story.story--fallback .story-atmosphere,
+#story.story--fallback .story-landing-back,
 #story.story--fallback .story-landing,
+#story.story--fallback .story-landing-front,
+#story.story--fallback .story-ember,
 #story.story--fallback .story-turn-shadow,
 #story.story--fallback .story-stars {
   position: fixed;
@@ -68,11 +83,11 @@
   z-index: 0;
   pointer-events: none;
   background: linear-gradient(180deg,
-    #0b0402 0%,
-    #1a0a05 26%,
-    #33130a 48%,
-    #562011 70%,
-    #7a2f13 100%);
+    #1f0a04 0%,
+    #3a1307 30%,
+    #5c1c07 52%,
+    #7d2a0b 76%,
+    #5a1a06 100%);
 }
 
 .story-atmosphere::before {
@@ -106,37 +121,82 @@
   will-change: transform, opacity;
 }
 
-/* The source photo's bright sky is never shown: the terrain box only
-   occupies the lower part of the frame, is cropped toward its ground
-   texture, toned with the same sepia/contrast/brightness recipe the
-   Portfolio hero uses to push it into Worx's burnt-orange palette
-   instead of the photo's pale yellow, and its own top edge fades into
-   .story-atmosphere via a mask instead of showing a hard photo edge.
-   Wider than the viewport + bottom-anchored so it reads as a distant,
-   expansive landscape rather than a cropped hero photo. */
+/* Distant hills + near landing ground. The photo is scaled to the
+   box's width (background-size: 100% auto, 2:1 source, so the image
+   is 0.5 × --terrain-w tall) and shifted up by 0.12 × --terrain-w —
+   i.e. the box's top edge is always 24% down the source image,
+   whatever the viewport's aspect ratio. The hill ridge (≈28–36% down
+   the source) therefore sits just under the box's top, and the photo's
+   bright sky above it is cut off. The box is at most 70% of the
+   frame tall (so there's always open sky above the ridge) and at most
+   0.4 × its width (so it never runs past the image's bottom); on
+   short, wide screens only the near foreground is trimmed. The mask fades
+   the top 22% into .story-atmosphere, which softens the ridge into a
+   hazy, far-off silhouette instead of a hard photo edge. --terrain-w
+   is the one knob: wider = closer/larger landscape (the tablet/phone
+   rules raise it so the band stays tall on portrait screens).
+
+   GROUND-LINE MATH (read by --story-ground-y below): the ship's legs
+   rest at 82% of #story's height. On every tested aspect (16:9,
+   16:10, 21:9, tablet and phone portrait) that line falls at 60–85%
+   down the source image — the close-in, fully-opaque rocky
+   foreground, well below the hills. */
 .story-terrain {
+  --terrain-w: 110vw;
   position: absolute;
   left: 50%;
   bottom: 0;
-  width: 132%;
-  height: 56%;
+  width: var(--terrain-w);
+  height: min(70%, calc(var(--terrain-w) * 0.4));
   transform: translateX(-50%);
   background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center 88%;
-  filter: sepia(0.35) saturate(1.3) contrast(1.12) brightness(0.7);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 26%);
-  mask-image: linear-gradient(180deg, transparent 0%, black 26%);
+  background-size: 100% auto;
+  background-position: center calc(var(--terrain-w) * -0.12);
+  opacity: 0.9;
+  filter: saturate(0.85) contrast(0.95) brightness(0.88);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 22%);
+  mask-image: linear-gradient(180deg, transparent 0%, black 22%);
 }
 
+/* Burnt-orange atmospheric veil — the Portfolio Mars hero's
+   .mars-photo-grade recipe (portfolio/index.html, "MARS DISTANCE
+   TREATMENT"), on every chapter so the whole storybook shares the
+   hero's orange light. The 90deg layer keeps the copy side dark. */
 .story-grade {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(0deg, rgba(21, 9, 5, 0.75) 0%, rgba(21, 9, 5, 0.05) 40%, rgba(21, 9, 5, 0.18) 100%),
-    linear-gradient(100deg, rgba(21, 9, 5, 0.38) 0%, rgba(21, 9, 5, 0.05) 44%, transparent 72%);
+    linear-gradient(180deg,
+      rgba(45, 13, 4, 0.28) 0%,
+      rgba(92, 28, 7, 0.34) 42%,
+      rgba(150, 50, 10, 0.40) 72%,
+      rgba(67, 18, 5, 0.55) 100%),
+    linear-gradient(90deg,
+      rgba(21, 9, 5, 0.45) 0%,
+      rgba(88, 25, 6, 0.14) 46%,
+      rgba(125, 39, 8, 0.10) 100%);
+}
+
+/* Persistent ember glow (never turns) — the Portfolio hero's
+   .mars-ember-glow at the same .72 strength. Sits above the landing
+   canvases so the ship catches the same warm light as the terrain. */
+.story-ember {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0.72;
+  background:
+    radial-gradient(ellipse 70% 48% at 72% 58%,
+      rgba(250, 167, 25, 0.20) 0%,
+      rgba(229, 125, 35, 0.11) 34%,
+      transparent 72%),
+    radial-gradient(ellipse 62% 45% at 28% 74%,
+      rgba(192, 69, 39, 0.18),
+      transparent 70%);
+  mix-blend-mode: screen;
 }
 
 /* Cheap, shared depth cue: about-story.js fades this in/out (opacity
@@ -145,7 +205,7 @@
 .story-turn-shadow {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 5;
   pointer-events: none;
   opacity: 0;
   background: radial-gradient(ellipse 90% 70% at 50% 40%,
@@ -153,20 +213,45 @@
     rgba(11, 4, 2, 0.55) 100%);
 }
 
-/* ---- Landing frame sequence (persistent, own scroll range) ------ */
-/* Drawn "contain"-fit by landing-sequence.js so the spacecraft art
-   never stretches/distorts on off-16:9 viewports. --landing-anchor-y
-   is the single tunable knob for lining the artwork's own ground
-   line up with the live terrain once real frames exist: 0 = frame's
-   top edge pinned to this box's top, 1 = bottom, 0.5 = centered. */
-.story-landing {
+/* ---- Landing composite (persistent, three stacked canvases) ----- */
+/* Full-bleed. landing-fx.js places the ship frames so the ship's
+   foot pads land exactly on --story-ground-y (fraction of this box's
+   height, from its top) and sizes them by --landing-scale (1 = frame
+   "contain"-fit to the box). --story-horizon-y is where the far
+   horizon sits: the ship starts as a speck just above it and flies in
+   along a perspective path (landing-fx.js). All three canvases share this box; both
+   values are defined once here, on the back canvas, and read from
+   there so the shadow, engine light and ship can never disagree. */
+.story-landing-back {
   position: absolute;
   inset: 0;
   z-index: 2;
   width: 100%;
   height: 100%;
   pointer-events: none;
-  --landing-anchor-y: 1;
+  --story-ground-y: 0.82;
+  --story-horizon-y: 0.4;
+  --landing-scale: 0.9;
+}
+
+.story-landing {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Engine exhaust + the dust allowed to occlude the lower landing gear
+   — drawn last so it always paints on top of the ship art. */
+.story-landing-front {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 /* ---- Persistent star layer (never turns) ------------------------ */
@@ -174,7 +259,7 @@
 .story-stars {
   position: absolute;
   inset: 0;
-  z-index: 4;
+  z-index: 6;
   width: 100%;
   height: 100%;
   pointer-events: none;
@@ -186,12 +271,89 @@
   opacity: 0;
 }
 
+/* ---- Cinematic layers (landing shot) ---------------------------- */
+/* All z-index 7: above the world and stars, under the text stack, so
+   the descent narration reads like a subtitle over the picture.
+   #story.is-cinema (about-story.js) is on while the landing plays:
+   vignette deeper. .is-blackout holds on black
+   until the frames are decoded, then fades up. */
+
+.story-flash,
+.story-vignette,
+.story-grain,
+.story-blackout {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+
+/* Touchdown / separation flash — opacity driven per tick by landing-fx.js. */
+.story-flash {
+  opacity: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 72%,
+    rgba(255, 226, 180, 1) 0%,
+    rgba(255, 160, 80, 0.55) 40%,
+    transparent 78%);
+  mix-blend-mode: screen;
+}
+
+.story-vignette {
+  opacity: 0.55;
+  background: radial-gradient(ellipse 80% 75% at 50% 48%,
+    transparent 52%,
+    rgba(8, 3, 1, 0.7) 100%);
+  transition: opacity 1.6s ease;
+}
+
+#story.is-cinema .story-vignette {
+  opacity: 1;
+}
+
+/* Film grain: one noise tile (generated by landing-fx.js) jittered
+   by a stepped animation — no per-frame JS. */
+.story-grain {
+  inset: -60%;
+  opacity: 0.075;
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+  animation: story-grain 0.7s steps(7) infinite;
+}
+
+@keyframes story-grain {
+  0%   { transform: translate(0, 0); }
+  14%  { transform: translate(-7%, 4%); }
+  28%  { transform: translate(5%, -9%); }
+  42%  { transform: translate(-11%, -3%); }
+  57%  { transform: translate(9%, 7%); }
+  71%  { transform: translate(-4%, 11%); }
+  85%  { transform: translate(12%, -6%); }
+  100% { transform: translate(0, 0); }
+}
+
+.story-blackout {
+  background: #000;
+  opacity: 0;
+  transition: opacity 2.2s ease;
+}
+
+#story.is-blackout .story-blackout {
+  opacity: 1;
+  transition: none;
+}
+
+/* the old drifting star particles belong to the text-only pages; the two
+   sky pages use the real sky (sky-fx.js) behind the atmosphere */
+#story.has-sky .story-stars {
+  opacity: 0;
+}
+
 /* ---- Text stack (crossfades independently of the scene turn) --- */
 
 .story-texts {
   position: absolute;
   inset: 0;
-  z-index: 5;
+  z-index: 8;
 }
 
 .story-text {
@@ -206,23 +368,52 @@
   will-change: transform, opacity;
 }
 
-/* ---- Chapter pagination (book-style numeral) ------------------ */
+/* ---- Mission status line (replaces the old "01 / 08" numeral) -- */
+/* Revealed + scan-swept by about-story.js's playTextReveal(); see
+   .is-scanned below for the one-shot sweep it triggers on each page. */
 
-.story-number {
+.story-status {
+  position: relative;
   display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  margin-bottom: 18px;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 16px;
+  padding-bottom: 2px;
+  overflow: hidden;
   font-family: var(--font-mono);
-  font-size: 0.92rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--accent-2);
 }
 
-.story-number span {
-  color: var(--muted);
-  opacity: 0.7;
+.story-status::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 6px 1px rgba(250, 167, 25, 0.65);
+}
+
+.story-status::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: linear-gradient(90deg, rgba(254, 238, 207, 0.5), transparent);
+  pointer-events: none;
+}
+
+.story-status.is-scanned::after {
+  animation: story-status-scan 0.5s ease-out;
+}
+
+@keyframes story-status-scan {
+  from { width: 0; opacity: 1; }
+  to   { width: 100%; opacity: 0; }
 }
 
 .story-title {
@@ -230,10 +421,23 @@
   font-family: var(--font-display);
   font-size: clamp(2.6rem, 6.4vw, 5rem);
   font-weight: 700;
-  line-height: 1.02;
+  line-height: 1.06;
   letter-spacing: -0.02em;
   text-transform: uppercase;
   color: var(--text);
+}
+
+/* Clip-reveal shell for the headline: about-story.js animates
+   .story-title-inner's yPercent/letter-spacing inside this fixed,
+   overflow-hidden box so the title reads as a cinematic line-reveal
+   rather than a plain fade-in. */
+.story-title-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.story-title-inner {
+  display: block;
 }
 
 .story-subtitle {
@@ -244,52 +448,436 @@
   color: var(--muted);
 }
 
-/* ---- Preface ---------------------------------------------------- */
+/* ---- Landing (page 1 of 8) --------------------------------------- */
+/* A compact cinematic caption, not a hero headline — the Mars landing
+   itself is the hero. Sized larger than .story-status but well short
+   of the other story pages' display type, and narrow enough to stay
+   clear of the centered ship (see landing-fx.js). No scroll
+   instruction here any more: the landing plays on its own, and the
+   page-turn affordance is the same wheel/swipe gesture every other
+   story page already uses. */
 
-.story-text--preface {
-  justify-content: center;
-}
-
-.story-text--preface .story-title {
-  max-width: 14ch;
-  font-size: clamp(2.9rem, 7.4vw, 5.6rem);
+.story-text--landing .story-title {
+  max-width: 24ch;
+  font-size: clamp(1.5rem, 2.2vw, 2.1rem);
+  line-height: 1.15;
   text-transform: none;
 }
 
-.story-scroll-hint {
+.story-text--landing .story-subtitle {
+  max-width: 34ch;
+  margin-top: 10px;
+  font-size: clamp(0.88rem, 1.1vw, 1rem);
+}
+
+/* ---- Landing HUD ------------------------------------------------- */
+/* Broadcast-style mission graphics living inside the shot: transparent
+   panels tilted in 3D (as if hung in the scene, facing the ship), a
+   leader line from the active mission stage to a target marker that
+   tracks the ship, live telemetry. about-story.js drives it per frame
+   from landing-fx.js; .is-live boots it, .is-revealed brings in the
+   caption card after the dust clears. */
+
+.landing-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.story-text.is-live .landing-hud {
+  opacity: 1;
+}
+
+/* Borderless: a smoked-glass field that dissolves into the shot at its
+   edges, so the panels read as projected into the scene rather than
+   boxed on top of it. The glass (and its fade mask) lives on ::before,
+   behind the content, so only the glass dissolves — text stays crisp. */
+.hud-panel {
+  position: relative;
+  isolation: isolate;
+}
+
+.hud-panel::before {
+  content: "";
+  position: absolute;
+  inset: -16px -24px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(254, 238, 207, 0.03) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 120% 110% at 20% 40%, rgba(20, 9, 5, 0.66), rgba(20, 9, 5, 0.32) 60%, rgba(20, 9, 5, 0) 100%);
+  /* no backdrop blur: its hard blurred/sharp boundary would outline the box */
+  -webkit-mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
+  mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
+}
+
+.hud-log {
+  position: absolute;
+  left: clamp(20px, 5vw, 72px);
+  top: clamp(96px, 17vh, 170px);
+  width: clamp(250px, 22vw, 330px);
+  padding: 14px 18px 14px 16px;
+  font-family: var(--font-mono);
+  color: var(--text);
+  transform: perspective(900px) rotateY(20deg) rotateX(2deg);
+  transform-origin: left center;
+}
+
+.story-text.is-live .hud-log {
+  animation: hud-boot 0.9s steps(1, end) both;
+}
+
+.hud-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, rgba(254, 238, 207, 0.3), transparent) 1;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: rgba(254, 238, 207, 0.7);
+}
+
+.hud-callsign { flex: 1; }
+
+.hud-clock {
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-2);
+}
+
+.hud-rec {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff4a32;
+  box-shadow: 0 0 8px rgba(255, 74, 50, 0.8);
+  animation: hud-blink 1.2s steps(2, jump-none) infinite;
+}
+
+.hud-stages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hud-stages li {
+  position: relative;
+  padding: 3px 0 3px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(254, 238, 207, 0.26);
+  transition: color 0.35s ease, text-shadow 0.35s ease;
+}
+
+.hud-stages li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 7px;
+  height: 1px;
+  background: currentColor;
+}
+
+.hud-stages li.is-done {
+  color: rgba(254, 238, 207, 0.78);
+}
+
+.hud-stages li.is-active {
+  color: var(--accent);
+  text-shadow: 0 0 12px rgba(229, 125, 35, 0.55);
+}
+
+.hud-stages li.is-active::before {
+  width: 10px;
+  height: 2px;
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.hud-tele {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, rgba(254, 238, 207, 0.3), transparent) 1;
+}
+
+.hud-tele dt {
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  color: rgba(254, 238, 207, 0.5);
+}
+
+.hud-tele dd {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.hud-leader {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.hud-leader polyline {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.hud-leader-line {
+  stroke: rgba(254, 238, 207, 0.55);
+  stroke-width: 1;
+}
+
+.hud-leader-accent {
+  stroke: var(--accent);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 4px rgba(229, 125, 35, 0.8));
+}
+
+.hud-target {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  will-change: transform;
+}
+
+.hud-ring {
   position: absolute;
   left: 50%;
-  bottom: clamp(28px, 5vh, 48px);
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  top: 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(254, 238, 207, 0.8);
+  transform: translate(-50%, -50%);
+}
+
+.hud-ring--outer {
+  width: 34px;
+  height: 34px;
+  border-color: rgba(254, 238, 207, 0.45);
+  animation: hud-pulse 1.8s ease-out infinite;
+}
+
+.hud-ring--inner {
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, rgba(254, 238, 207, 0.95) 0 2px, transparent 3px);
+}
+
+.hud-target-label {
+  position: absolute;
+  left: 24px;
+  top: -22px;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
+  font-style: normal;
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  color: rgba(254, 238, 207, 0.8);
+}
+
+/* Right-hand mission log (Section 2's EVA log): mirrored, tilted to
+   face the scene from the right. */
+.hud-log--right {
+  left: auto;
+  right: clamp(20px, 5vw, 72px);
+  transform: perspective(900px) rotateY(-20deg) rotateX(2deg);
+  transform-origin: right center;
+}
+
+.hud-log--right::before {
+  background:
+    repeating-linear-gradient(0deg, rgba(254, 238, 207, 0.03) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 120% 110% at 80% 40%, rgba(20, 9, 5, 0.66), rgba(20, 9, 5, 0.32) 60%, rgba(20, 9, 5, 0) 100%);
+}
+
+.summary-hud .hud-target-label {
+  left: auto;
+  right: 24px;
+}
+
+/* Mission Control summary rows: label left, value right, booting in one
+   after another when the page goes live. */
+.hud-summary {
+  width: clamp(270px, 24vw, 360px);
+}
+
+.hud-summary-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hud-summary-rows li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgba(254, 238, 207, 0.62);
+}
+
+.hud-summary-rows b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.story-text.is-live .hud-summary-rows li {
+  animation: hud-row-in 0.45s ease both;
+}
+
+.hud-summary-rows li:nth-child(1) { animation-delay: 0.35s; }
+.hud-summary-rows li:nth-child(2) { animation-delay: 0.45s; }
+.hud-summary-rows li:nth-child(3) { animation-delay: 0.55s; }
+.hud-summary-rows li:nth-child(4) { animation-delay: 0.65s; }
+.hud-summary-rows li:nth-child(5) { animation-delay: 0.75s; }
+.hud-summary-rows li:nth-child(6) { animation-delay: 0.85s; }
+.hud-summary-rows li:nth-child(7) { animation-delay: 0.95s; }
+.hud-summary-rows li:nth-child(8) { animation-delay: 1.05s; }
+
+@keyframes hud-row-in {
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.hud-summary-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, rgba(254, 238, 207, 0.3), transparent) 1;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.hud-summary-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: hud-blink 1.4s steps(2, jump-none) infinite;
+}
+
+/* Caption card: a page's text on a tilted holographic HUD panel. Left
+   column by default (the landing, revealed after the dust clears);
+   .story-text--hud-right mirrors it to the right side, tilted to face
+   the scene. .is-revealed (about-story.js) boots it in. */
+.story-text .hud-card {
+  position: absolute;
+  left: clamp(20px, 5vw, 72px);   /* same column as the mission log */
+  bottom: clamp(40px, 8vh, 96px);
+  max-width: min(460px, calc(100% - 40px));
+  padding: 18px 26px 22px 22px;
   opacity: 0;
-  transition: opacity 1s ease 0.6s;
+  transform: perspective(1000px) rotateY(14deg) translateX(-12px);
+  transform-origin: left center;
+  transition: opacity 0.5s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.story-text--preface.is-active .story-scroll-hint {
-  opacity: 0.75;
+.story-text.is-revealed .hud-card {
+  opacity: 1;
+  transform: perspective(1000px) rotateY(14deg);
+  animation: hud-boot 0.7s steps(1, end) both;
 }
 
-.story-scroll-hint::after {
-  content: "";
-  width: 1px;
-  height: 26px;
-  background: linear-gradient(180deg, var(--accent-2), transparent);
-  animation: story-hint-drift 2.2s ease-in-out infinite;
+.story-text--hud-right .hud-card {
+  left: auto;
+  right: clamp(20px, 5vw, 72px);
+  max-width: min(460px, calc(100% - 40px));
+  padding: 18px 22px 22px 26px;
+  border-left: 0;
+  transform: perspective(1000px) rotateY(-14deg) translateX(12px);
+  transform-origin: right center;
 }
 
-@keyframes story-hint-drift {
-  0%, 100% { transform: translateY(0); opacity: 0.5; }
-  50%      { transform: translateY(6px); opacity: 1; }
+.story-text--hud-right.is-revealed .hud-card {
+  transform: perspective(1000px) rotateY(-14deg);
+}
+
+/* mirrored smoked-glass field: densest toward the card's inner edge */
+.story-text--hud-right .hud-panel::before {
+  background:
+    repeating-linear-gradient(0deg, rgba(254, 238, 207, 0.03) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 120% 110% at 80% 40%, rgba(20, 9, 5, 0.66), rgba(20, 9, 5, 0.32) 60%, rgba(20, 9, 5, 0) 100%);
+  -webkit-mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
+  mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
+}
+
+/* same text format as the landing caption (compact, sentence case) */
+.story-text--hud-right .story-status {
+  margin-bottom: 10px;
+}
+
+.story-text--hud-right .story-title {
+  max-width: 24ch;
+  font-size: clamp(1.5rem, 2.2vw, 2.1rem);
+  line-height: 1.15;
+  text-transform: none;
+}
+
+.story-text--hud-right .story-subtitle {
+  max-width: 34ch;
+  margin-top: 10px;
+  font-size: clamp(0.88rem, 1.1vw, 1rem);
+}
+
+/* Cards hold more text than the log: start the glass fade earlier so
+   no edge of the panel box can read. */
+.story-text .hud-card::before {
+  inset: -26px -40px;
+  -webkit-mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
+  mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
+}
+
+.story-text--hud-right .hud-card::before {
+  -webkit-mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
+  mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
+}
+
+.story-text--landing .story-status {
+  margin-bottom: 10px;
+}
+
+@keyframes hud-boot {
+  0%   { opacity: 0; }
+  12%  { opacity: 0.8; }
+  20%  { opacity: 0.1; }
+  34%  { opacity: 1; }
+  46%  { opacity: 0.45; }
+  60%, 100% { opacity: 1; }
+}
+
+@keyframes hud-blink {
+  50% { opacity: 0.15; }
+}
+
+@keyframes hud-pulse {
+  0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
 }
 
 /* ---- Final page --------------------------------------------------- */
@@ -332,8 +920,29 @@
   }
 
   .story-terrain {
-    height: 62%;
-    background-position: 56% 10%;
+    --terrain-w: 170vw;
+  }
+
+  /* Portrait: contain-fit makes the 16:9 frame screen-width, so the
+     ship would be tiny — scale up and let the dust run off-screen. */
+  .story-landing-back {
+    --landing-scale: 1.25;
+    --story-horizon-y: 0.52;
+  }
+
+  /* No room for a leader line across the frame: the log sits flat at
+     the top and the target marker alone tracks the ship. */
+  .hud-leader { display: none; }
+
+  .hud-log {
+    transform: none;
+    top: 88px;
+    width: min(320px, calc(100% - 40px));
+  }
+
+  .hud-log--right {
+    left: auto;
+    right: 20px;
   }
 }
 
@@ -347,21 +956,64 @@
     max-width: 13ch;
   }
 
-  .story-text--preface .story-title {
-    max-width: 11ch;
+  .story-text--landing .story-title {
+    max-width: 20ch;
   }
 
   .story-terrain {
-    width: 160%;
-    height: 68%;
-    background-position: 60% 10%;
+    --terrain-w: 230vw;
   }
+
+  .story-landing-back {
+    --landing-scale: 1.5;
+    --story-horizon-y: 0.6;
+  }
+
+  .hud-log {
+    left: 16px;
+    top: 80px;
+    padding: 10px 12px;
+  }
+
+  .hud-log--right {
+    left: auto;
+    right: 16px;
+  }
+
+  .hud-stages li:not(.is-active) { display: none; }
+
+  .hud-target-label { display: none; }
+
+  .story-text .hud-card {
+    left: 16px;
+    transform: none;
+    padding: 14px 16px 16px;
+  }
+
+  .story-text--hud-right .hud-card {
+    left: auto;
+    right: 16px;
+  }
+
+  .story-text.is-revealed .hud-card { transform: none; }
 }
 
 /* ---- Reduced motion ---------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .story-text.is-live .hud-summary-rows li,
+  .hud-summary-dot,
+  .story-grain,
+  .hud-rec,
+  .hud-ring--outer,
+  .story-text.is-live .hud-log,
+  .story-text.is-revealed .hud-card { animation: none; }
+}
+
 /* about-story.js swaps the page-turn tween properties down to a
    plain opacity crossfade (no rotateX/scale/shadow) when this query
-   matches; this block only has to mop up the CSS-only bits. */
+   matches; the mission-text stagger is skipped the same way — this
+   block only has to mop up the CSS-only bit: no status scan-line
+   sweep. */
 
 @media (prefers-reduced-motion: reduce) {
   .story-cta,
@@ -369,12 +1021,7 @@
     transition: none !important;
   }
 
-  .story-scroll-hint {
-    opacity: 0.6 !important;
-    transition: none !important;
-  }
-
-  .story-scroll-hint::after {
-    animation: none;
+  .story-status::after {
+    display: none;
   }
 }

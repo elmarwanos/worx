@@ -2,43 +2,66 @@
    Worx by Glimpse — about-story.js
    About page only. Four independent pieces:
 
-   1. Landing frame sequence — a dedicated, EXTENDED span of scroll
-      distance (LANDING.duration "slots") at the very start of the
-      pinned timeline, before the Preface→01 chapter transition
-      begins. Scroll progress across that span selects a frame
-      (0-31) from LandingSequence (landing-sequence.js), which draws
-      it onto .story-landing. This is separate from the chapter
-      page-turn below on purpose: it needs far more scroll runway
-      than a normal 1-slot transition to read as a real cinematic
-      landing rather than a rushed swap.
+   1. Scene animation lifecycle — each .story-scene can own an
+      animation that plays while that scene is active. Right now
+      only scene 0 (the GLIMPSE landing) has one: a 32-frame
+      autoplay sequence, drawn onto .story-landing via
+      LandingSequence (landing-sequence.js). It is driven by a
+      requestAnimationFrame clock (time-based, not scroll-based),
+      so it plays on its own the moment the scene becomes active,
+      and it is cancelled the instant the scene stops being active.
+      sceneAnimations[] below is the reusable hook table — future
+      chapters (rover deployment, base construction, etc.) plug in
+      the same way: { onEnter, onLeave }. onEnter also serves as
+      "onReEnter" — re-entering a scene just calls onEnter again,
+      which is why the landing resets to frame 0 and replays every
+      time the visitor scrolls back up to it.
 
-   2. Page-turn timeline — pins #story for the length of the
-      storybook and scrubs a GSAP timeline across it. Each chapter
-      transition gets one "slot" of scroll distance (one viewport
-      height) AFTER the landing span, so scroll position maps
-      directly to story progress in both directions — this is
-      scroll-DRIVEN, not a wheel event that plays a canned animation.
-      Only the outgoing/incoming scene+text pair animates per slot;
-      every other chapter sits at opacity 0 (autoAlpha, so it's also
-      out of the tab order) the whole time, which is what keeps the
-      rest of the stack from ever being visible — see about.css's
-      flat z-index layering for why nothing "shows through" underneath.
+   2. Page-turn navigation — scrolling no longer scrubs anything.
+      One wheel/trackpad gesture (or touch swipe) advances or
+      retreats exactly one story page; goToPage() plays a fixed-
+      duration GSAP tween (not a scrub) between the outgoing and
+      incoming scene+text pair. Every other chapter sits at
+      opacity 0 (autoAlpha, so it's also out of the tab order) the
+      whole time — see about.css's flat z-index layering for why
+      nothing "shows through" underneath.
 
-   3. Star layer — same persistent canvas particle system as before
-      (adapted from Portfolio's initHero()), now a child of #story so
-      it can sit between the scene stack and the text stack in the
-      same stacking context (position:fixed on #story during the pin
-      would otherwise trap it below the pinned text).
+   3. Scroll capture — while the story is showing (window is at
+      the very top of the page), wheel/touch input is intercepted
+      and converted into goToPage() calls instead of scrolling the
+      document. The one exception: scrolling forward from the last
+      page is allowed to fall through as a normal scroll, so the
+      visitor reaches the footer naturally. Scrolling back up from
+      the footer is likewise normal scroll until the page returns
+      to scrollY 0, at which point wheel input is captured again
+      (already sitting on the last story page, ready to step back).
+      A single isAnimating lock (transition duration + a short
+      buffer) makes one gesture equal one page, even under a fast
+      or "flung" trackpad gesture that fires many wheel events.
 
-   4. Reduced motion / no-GSAP fallback — reduced motion keeps the
-      scroll-driven pin but swaps the turn down to a plain opacity
-      crossfade (no rotateX/scale/shadow); the landing sequence itself
-      is unaffected (it was already a plain frame-substitution, not a
-      3D effect). If GSAP/ScrollTrigger fails to load at all, #story
-      drops the pin entirely and falls back to a plain stacked scroll
-      (about.css .story--fallback) so every chapter and the footer
-      stay reachable; the landing canvas is simply left blank in that
-      path (no frames are ever requested).
+   4. Star layer — same persistent canvas particle system as
+      before (adapted from Portfolio's initHero()), a child of
+      #story so it can sit between the scene stack and the text
+      stack in the same stacking context.
+
+   5. Landing composite — landing-fx.js (LandingFX) owns the landing
+      clock: it grounds the ship on the terrain's calibrated line,
+      cross-dissolves neighbouring frames for smooth motion, and adds
+      the contact shadow / engine light on the terrain (flames and the
+      main dust cloud are baked into the frames). This file just ticks
+      it and uses the returned frame number to drive the bottom-left
+      descent narration (DESCENT_NARRATION) — the only HUD location on
+      this page; there is no separate top-right panel.
+
+   Reduced motion / no-GSAP fallback: reduced motion keeps page
+   navigation but swaps the turn down to a plain opacity crossfade
+   (no rotateX/scale/shadow); the landing sequence itself is
+   unaffected (it was already a plain frame-substitution, not a 3D
+   effect). If GSAP fails to load at all, #story drops the whole
+   interaction model and falls back to a plain stacked scroll
+   (about.css .story--fallback) so every chapter and the footer
+   stay reachable; the landing canvas is simply left blank in that
+   path (no frames are ever requested).
    ============================================================ */
 
 (function () {
@@ -47,153 +70,645 @@
   var story = document.getElementById("story");
   if (!story) return;
 
-  // Native smooth-scroll (base.css) fights ScrollTrigger's own scrub
-  // smoothing, producing a laggy/mushy feel — this page drives its
-  // own easing instead.
-  document.documentElement.style.scrollBehavior = "auto";
-
   var reduceMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
   ).matches;
   var isCompact = window.matchMedia("(max-width: 640px)").matches;
 
-  var hasGsap = typeof gsap !== "undefined" && typeof ScrollTrigger !== "undefined";
+  var hasGsap = typeof gsap !== "undefined";
 
-  /* ----------------------------------------------------------
-     1. Page-turn timeline
-     ---------------------------------------------------------- */
   if (hasGsap) {
-    gsap.registerPlugin(ScrollTrigger);
-
     var scenes = gsap.utils.toArray(".story-scene");
     var texts = gsap.utils.toArray(".story-text");
     var shadow = document.querySelector(".story-turn-shadow");
-    var count = scenes.length;
+    var sceneCount = scenes.length;
 
-    // --- Landing frame sequence setup --------------------------
+    /* ----------------------------------------------------------
+       1. Landing frame sequence (scene 0's animation)
+       ---------------------------------------------------------- */
     var landingCanvas = document.querySelector(".story-landing");
+    var landingBackCanvas = document.querySelector(".story-landing-back");
+    var landingFrontCanvas = document.querySelector(".story-landing-front");
+    var landingStatusEl = document.querySelector(".story-text--landing .story-status");
+    var landingStatusTextEl = landingStatusEl && landingStatusEl.querySelector(".story-status-text");
     var landingSeq = null;
-    var LANDING_DURATION = 3.5; // "slots" (viewport heights) of dedicated scroll runway
+    var landingFX = null;
+    var LANDING_DURATION_MS = 4000; // fallback clock when LandingFX is unavailable
+    var LANDING_TEXT_DELAY_MS = 1600; // after the dust burst: card boots in as the legs come through the clearing dust
+    var TEXT_REVEAL_DELAY = 0.2; // seconds; beat between a page becoming active and its mission text starting
+    var landingRAF = 0;
+    var landingTextTimer = null;
 
     if (landingCanvas && typeof LandingSequence !== "undefined") {
       landingSeq = new LandingSequence(landingCanvas, {
-        basePath: landingCanvas.dataset.landingBase || "../static/assets/about/landing/glimpse-landing-",
+        basePath: landingCanvas.dataset.landingBase || "../static/assets/about/glimpse_landing_frames_001-032/glimpse-landing-",
         count: parseInt(landingCanvas.dataset.landingCount, 10) || 32,
         pad: parseInt(landingCanvas.dataset.landingPad, 10) || 3,
-        frameWidth: parseInt(landingCanvas.dataset.landingWidth, 10) || 2400,
-        frameHeight: parseInt(landingCanvas.dataset.landingHeight, 10) || 1350,
+        frameWidth: parseInt(landingCanvas.dataset.landingWidth, 10) || 2560,
+        frameHeight: parseInt(landingCanvas.dataset.landingHeight, 10) || 1440,
       });
       landingSeq.resize();
-      landingSeq.preload().then(function (info) {
+      var landingReady = landingSeq.preload();
+      landingReady.then(function (info) {
         console.info(
           "[about] landing sequence: " + info.loadedCount + "/" + info.total +
           " frame(s) found at " + (landingCanvas.dataset.landingBase || "(default path)") +
           (info.loadedCount < info.total ? " — drop the remaining PNGs in to complete it." : "")
         );
-        landingSeq.refreshPending();
+        if (!landingFX) landingSeq.refreshPending();
       });
-    } else {
-      LANDING_DURATION = 0; // no canvas / script missing: don't reserve scroll for nothing
     }
 
-    // Resting state: only the first scene/text pair visible. autoAlpha
-    // also sets visibility, so inactive chapters can't be tabbed into.
+    // Cinematic layers for the landing shot (about.css):
+    // grain, vignette, touchdown flash, fade-from-black.
+    var landingTerrain = document.querySelector(".story-scene--landing .story-terrain");
+    var flashEl = document.querySelector(".story-flash");
+    var grainEl = document.querySelector(".story-grain");
+
+    // The virtual camera moves the terrain and the three landing
+    // canvases together. They must share one transform origin in
+    // viewport space, or the push-in would slide them apart.
+    var CAMERA_ORIGIN_Y = 0.62;
+    function syncCameraOrigin() {
+      var h = story.clientHeight;
+      [landingBackCanvas, landingCanvas, landingFrontCanvas].forEach(function (el) {
+        if (el) el.style.transformOrigin = "50% " + (CAMERA_ORIGIN_Y * 100) + "%";
+      });
+      if (landingTerrain) {
+        landingTerrain.__camBase = "translateX(-50%)"; // its resting CSS transform
+        landingTerrain.style.transformOrigin = "50% " + (CAMERA_ORIGIN_Y * h - landingTerrain.offsetTop) + "px";
+      }
+    }
+    syncCameraOrigin();
+
+    if (grainEl && typeof LandingFX !== "undefined") {
+      grainEl.style.backgroundImage = "url(" + LandingFX.grainDataURL(180) + ")";
+    }
+
+    if (landingBackCanvas && landingFrontCanvas && typeof LandingFX !== "undefined") {
+      landingFX = new LandingFX(landingBackCanvas, landingFrontCanvas, {
+        sequence: landingSeq,
+        camera: [landingTerrain, landingBackCanvas, landingCanvas, landingFrontCanvas].filter(Boolean),
+        cameraOriginY: CAMERA_ORIGIN_Y,
+        flash: flashEl,
+        onFrame: function (info) {
+          if (currentIndex === 1) updateSummaryHud();
+          else updateHud(info);
+        },
+        reduceMotion: reduceMotion,
+      });
+      landingFX.resize();
+      if (typeof MartianSky !== "undefined") landingFX.sky = new MartianSky({ reduceMotion: reduceMotion });
+    }
+
+    // Section 2's camera angle on the landed ship: left third, turned to
+    // face right (perspective warp, LandingFX still mode — a clean,
+    // stationary ship with no dust). Narrow/portrait screens shift less.
+    function summaryPose() {
+      var wide = story.clientWidth / Math.max(1, story.clientHeight) > 1.1;
+      return { dx: wide ? -0.22 : -0.08, yaw: 0 };   // standing as shot, no turn
+    }
+    var updateSummaryHud = function () {};
+
+    var MARKS = typeof LandingFX !== "undefined" ? LandingFX.MARKS
+      : { separation: 0, hover: LANDING_DURATION_MS * 0.6, touchdown: LANDING_DURATION_MS * 0.75, landed: LANDING_DURATION_MS, clear: LANDING_DURATION_MS };
+    var DESCENT_NARRATION = [
+      { at: 0, text: "Atmospheric entry" },
+      { at: MARKS.separation - 1200, text: "Peak heating" },
+      { at: MARKS.separation, text: "Heat shield sep" },
+      { at: MARKS.separation + 1400, text: "Powered descent" },
+      { at: MARKS.hover - 500, text: "Surface acquired" },
+      { at: MARKS.touchdown, text: "Touchdown" },
+      { at: MARKS.clear - 600, text: "Site secured" },
+    ];
+
+    var landingTextEl = document.querySelector(".story-text--landing");
+    var hud = {
+      stages: [],
+      stage: -1,
+      lastText: 0,
+      root: document.querySelector(".landing-hud"),
+      log: document.querySelector(".hud-log"),
+      target: document.querySelector(".hud-target"),
+      label: document.querySelector(".hud-target-label"),
+      line: document.querySelector(".hud-leader-line"),
+      accent: document.querySelector(".hud-leader-accent"),
+      alt: document.querySelector('[data-hud="alt"]'),
+      vel: document.querySelector('[data-hud="vel"]'),
+      dist: document.querySelector('[data-hud="dist"]'),
+      clock: document.querySelector('[data-hud="t"]'),
+    };
+    (function buildStages() {
+      var list = document.querySelector(".hud-stages");
+      if (!list) return;
+      DESCENT_NARRATION.forEach(function (n) {
+        var li = document.createElement("li");
+        li.textContent = n.text;
+        list.appendChild(li);
+        hud.stages.push(li);
+      });
+    })();
+
+    function resetHud() {
+      hud.stage = -1;
+      hud.stages.forEach(function (li) { li.classList.remove("is-done", "is-active"); });
+      if (hud.label) hud.label.textContent = "GLIMPSE-01";
+      if (landingTextEl) landingTextEl.classList.remove("is-live", "is-revealed");
+    }
+
+    function fmtAlt(m) { return m >= 1000 ? (m / 1000).toFixed(2) + " KM" : Math.round(m) + " M"; }
+    function fmtVel(v) { return (v >= 10 ? Math.round(v) : v.toFixed(1)) + " M/S"; }
+    function fmtDist(km) { return km >= 1 ? km.toFixed(1) + " KM" : Math.round(km * 1000) + " M"; }
+    function fmtClock(ms) {
+      var sec = ms / 1000, m = Math.floor(sec / 60);
+      sec = sec - m * 60;
+      return "T+" + (m < 10 ? "0" : "") + m + ":" + (sec < 10 ? "0" : "") + sec.toFixed(1);
+    }
+
+    function updateHud(info) {
+      var e = info.elapsed;
+      // Stage list.
+      var stage = 0;
+      for (var i = 0; i < DESCENT_NARRATION.length; i++) if (e >= DESCENT_NARRATION[i].at) stage = i;
+      if (stage !== hud.stage) {
+        hud.stage = stage;
+        hud.stages.forEach(function (li, j) {
+          li.classList.toggle("is-done", j < stage);
+          li.classList.toggle("is-active", j === stage);
+        });
+        if (hud.label && e >= MARKS.touchdown) hud.label.textContent = "GLIMPSE-01 · LANDED";
+      }
+      // Telemetry, ~15 Hz so the digits stay readable.
+      if (e - hud.lastText > 66 || e < hud.lastText) {
+        hud.lastText = e;
+        var t = info.telemetry;
+        if (hud.alt) hud.alt.textContent = fmtAlt(t.alt);
+        if (hud.vel) hud.vel.textContent = fmtVel(t.vel);
+        if (hud.dist) hud.dist.textContent = fmtDist(t.dist);
+        if (hud.clock) hud.clock.textContent = fmtClock(e);
+      }
+      // The HUD rides the touchdown shake a little: it's part of the shot.
+      if (hud.root) hud.root.style.transform = (info.shake.x || info.shake.y)
+        ? "translate(" + (info.shake.x * 0.35).toFixed(1) + "px," + (info.shake.y * 0.35).toFixed(1) + "px)" : "";
+      // Target marker + leader line from the active stage to the ship.
+      var tx = info.ship.x, ty = info.ship.y;
+      if (hud.target) hud.target.style.transform = "translate(" + tx.toFixed(1) + "px," + ty.toFixed(1) + "px)";
+      var li = hud.stages[hud.stage];
+      if (li && hud.line && hud.accent && hud.log) {
+        var base = story.getBoundingClientRect();
+        var lr = hud.log.getBoundingClientRect();
+        var r = li.getBoundingClientRect();
+        var ax = lr.right - base.left, ay = r.top + r.height / 2 - base.top;
+        var kx = ax + Math.min(60, Math.max(24, (tx - ax) * 0.18));
+        var ex = tx - 20 * (tx >= kx ? 1 : -1), ey = ty; // stop at the outer ring
+        hud.accent.setAttribute("points", ax.toFixed(1) + "," + ay.toFixed(1) + " " + kx.toFixed(1) + "," + ay.toFixed(1));
+        hud.line.setAttribute("points", kx.toFixed(1) + "," + ay.toFixed(1) + " " + ex.toFixed(1) + "," + ey.toFixed(1));
+      }
+    }
+
+    function setLandingStatus(text) {
+      if (!landingStatusTextEl) return;
+      landingStatusTextEl.textContent = text;
+      if (landingStatusEl) {
+        landingStatusEl.classList.remove("is-scanned");
+        void landingStatusEl.offsetWidth; // restart the CSS scan-line keyframe
+        landingStatusEl.classList.add("is-scanned");
+      }
+    }
+
+    // Time-based, not scroll-based: plays 0→last once and stops. Always
+    // cancels any previous run first, so returning to the scene mid-flight
+    // (or fast back-and-forth navigation) never stacks up duplicate loops.
+    function playLanding() {
+      if (!landingSeq) return;
+      cancelAnimationFrame(landingRAF);
+      clearTimeout(landingTextTimer);
+      if (landingFX) landingFX.reset();
+      resetHud();
+      // Hold on black until the frames are decoded,
+      // so the ship can never arrive missing; then fade up and roll.
+      story.classList.add("is-cinema", "is-blackout");
+      var token = (playLanding.token = (playLanding.token || 0) + 1);
+      (landingReady || Promise.resolve()).then(function () {
+        if (token !== playLanding.token) return; // left/re-entered meanwhile
+        requestAnimationFrame(function () { story.classList.remove("is-blackout"); });
+        if (landingTextEl) landingTextEl.classList.add("is-live");
+        rollLanding();
+      });
+    }
+
+    function rollLanding() {
+      if (landingStatusEl) gsap.set(landingStatusEl, { autoAlpha: 1, y: 0 });
+      var titleInner = document.querySelector(".story-text--landing .story-title-inner");
+      var subtitle = document.querySelector(".story-text--landing .story-subtitle");
+      if (titleInner) gsap.set(titleInner, { yPercent: 100, autoAlpha: 0, letterSpacing: "0.05em" });
+      if (subtitle) gsap.set(subtitle, { autoAlpha: 0, y: 14 });
+
+      var start = null;
+      var last = landingSeq.count - 1;
+
+      function tick(ts) {
+        if (start === null) start = ts;
+        var elapsed = ts - start;
+        var done;
+        if (landingFX) {
+          done = landingFX.update(elapsed).done;
+        } else {
+          var progress = Math.min(1, elapsed / LANDING_DURATION_MS);
+          landingSeq.setFrame(Math.round(progress * last));
+          done = progress >= 1;
+        }
+
+
+        if (!done) {
+          landingRAF = requestAnimationFrame(tick);
+        } else {
+          landingRAF = 0;
+          if (landingFX) landingFX.runIdle();
+          landingTextTimer = setTimeout(revealFinalCaption, LANDING_TEXT_DELAY_MS);
+        }
+      }
+      landingRAF = requestAnimationFrame(tick);
+    }
+
+    // Clears the temporary descent narration and reveals the
+    // persistent opening caption — status swaps to its resting copy,
+    // title/subtitle play their staggered reveal for the first time.
+    function revealFinalCaption() {
+      var el = document.querySelector(".story-text--landing");
+      if (!el) return;
+      story.classList.remove("is-cinema"); // vignette eases back as the title lands
+      el.classList.add("is-revealed");
+      setLandingStatus("SOL 1 · SITE SECURED");
+      var titleInner = el.querySelector(".story-title-inner");
+      var subtitle = el.querySelector(".story-subtitle");
+      if (reduceMotion) {
+        if (titleInner) gsap.set(titleInner, { yPercent: 0, autoAlpha: 1, letterSpacing: "-0.02em" });
+        if (subtitle) gsap.set(subtitle, { autoAlpha: 1, y: 0 });
+        return;
+      }
+      var tl = gsap.timeline();
+      if (titleInner) tl.to(titleInner, { yPercent: 0, autoAlpha: 1, letterSpacing: "-0.02em", duration: 0.6, ease: "power3.out" }, 0);
+      if (subtitle) tl.to(subtitle, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power1.out" }, 0.2);
+    }
+
+    function stopLanding() {
+      playLanding.token = (playLanding.token || 0) + 1;
+      cancelAnimationFrame(landingRAF);
+      landingRAF = 0;
+      clearTimeout(landingTextTimer);
+      story.classList.remove("is-cinema", "is-blackout");
+      if (landingFX) landingFX.reset();
+      resetHud();
+    }
+
+    // ----------------------------------------------------------
+    // Staggered "mission text" reveal for the 8 story pages: status
+    // line, then title (line-mask clip reveal), then subtitle. Pages
+    // without a .story-status (the closing CTA scene) are left to the
+    // plain container fade goToPage() already does — nothing to stagger.
+    // ----------------------------------------------------------
+    function textParts(el) {
+      return {
+        status: el.querySelector(".story-status"),
+        titleInner: el.querySelector(".story-title-inner"),
+        subtitle: el.querySelector(".story-subtitle"),
+      };
+    }
+
+    function hideTextParts(parts) {
+      if (parts.status) gsap.set(parts.status, { autoAlpha: 0, y: -6 });
+      if (parts.titleInner) gsap.set(parts.titleInner, { yPercent: 100, autoAlpha: 0, letterSpacing: "0.05em" });
+      if (parts.subtitle) gsap.set(parts.subtitle, { autoAlpha: 0, y: 14 });
+    }
+
+    function playTextReveal(el, delay) {
+      var parts = textParts(el);
+      if (!parts.status) return; // legacy/CTA page: nothing to stagger
+      gsap.killTweensOf([parts.status, parts.titleInner, parts.subtitle].filter(Boolean));
+      hideTextParts(parts);
+
+      if (reduceMotion) {
+        gsap.set(parts.status, { autoAlpha: 1, y: 0 });
+        if (parts.titleInner) gsap.set(parts.titleInner, { yPercent: 0, autoAlpha: 1, letterSpacing: "-0.02em" });
+        if (parts.subtitle) gsap.set(parts.subtitle, { autoAlpha: 1, y: 0 });
+        return;
+      }
+
+      var tl = gsap.timeline({ delay: delay || 0 });
+      tl.to(parts.status, { autoAlpha: 1, y: 0, duration: 0.3, ease: "power1.out" }, 0);
+      tl.call(function () {
+        parts.status.classList.remove("is-scanned");
+        void parts.status.offsetWidth; // restart the CSS scan-line keyframe
+        parts.status.classList.add("is-scanned");
+      }, null, 0);
+      if (parts.titleInner) tl.to(parts.titleInner, { yPercent: 0, autoAlpha: 1, letterSpacing: "-0.02em", duration: 0.6, ease: "power3.out" }, 0.16);
+      if (parts.subtitle) tl.to(parts.subtitle, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power1.out" }, 0.3);
+    }
+
+    /* ----------------------------------------------------------
+       2. Per-scene animation hooks (reusable for future chapters)
+       ---------------------------------------------------------- */
+    // Pages whose text sits on a HUD card (about.css "Caption card") boot
+    // the card in as the page arrives and power it down when it leaves,
+    // so it re-boots on every visit.
+    var sceneAnimations = scenes.map(function (_, idx) {
+      var hasCard = !!(texts[idx] && texts[idx].querySelector(".hud-card"));
+      return {
+        onEnter: function () {
+          if (hasCard) texts[idx].classList.add("is-revealed");
+          playTextReveal(texts[idx], TEXT_REVEAL_DELAY);
+        },
+        onLeave: function () {
+          if (hasCard) texts[idx].classList.remove("is-revealed");
+        },
+      };
+    });
+
+    if (landingCanvas) {
+      var landingLayers = [landingCanvas];
+      if (landingBackCanvas) landingLayers.push(landingBackCanvas);
+      if (landingFrontCanvas) landingLayers.push(landingFrontCanvas);
+      sceneAnimations[0] = {
+        // Deliberately does NOT call playTextReveal: the landing page's
+        // title/subtitle stay hidden until touchdown + settle, driven
+        // by playLanding()/revealFinalCaption() instead — see §25 of
+        // the approved landing spec (temporary descent narration first,
+        // persistent caption only once the ship has stopped moving).
+        onEnter: function () {
+          gsap.killTweensOf(landingLayers);
+          gsap.set(landingLayers, { autoAlpha: 1 });
+          playLanding();
+        },
+        onLeave: function (toIndex) {
+          if (toIndex === 1 && landingFX) {
+            // Into Section 2: same shot, no teardown — stop the landing's
+            // clock, keep frame 033 + storm alive, and cut to the new angle.
+            playLanding.token = (playLanding.token || 0) + 1;
+            cancelAnimationFrame(landingRAF);
+            landingRAF = 0;
+            clearTimeout(landingTextTimer);
+            story.classList.remove("is-cinema", "is-blackout");
+            resetHud();
+            landingFX.setStill(true);
+            landingFX.runIdle();
+            landingFX.setPose(summaryPose(), 700, true); // only the left-hand ship: it fades in there
+            return;
+          }
+          stopLanding();
+          if (landingFX) landingFX.reset();
+          gsap.to(landingLayers, { autoAlpha: 0, duration: 0.3, overwrite: true });
+        },
+      };
+
+      // Section 2: frame 033 on the left third, turned to face right,
+      // with the Mission Control summary HUD on the right.
+      var summaryText = texts[1];
+      if (summaryText && landingFX) {
+        var sum = {
+          log: summaryText.querySelector(".hud-summary"),
+          target: summaryText.querySelector(".hud-target"),
+          line: summaryText.querySelector(".hud-leader-line"),
+          accent: summaryText.querySelector(".hud-leader-accent"),
+          status: summaryText.querySelector(".hud-summary-status"),
+          counts: Array.prototype.slice.call(summaryText.querySelectorAll("[data-count]")),
+          countTimer: null,
+        };
+
+        // Leader line from the summary's status line to the ship's hatch.
+        updateSummaryHud = function () {
+          if (currentIndex !== 1 || !sum.target) return;
+          var tp = landingFX.shipPoint(905, 1245);   // lower front hull (frame-033 px)
+          sum.target.style.transform = "translate(" + tp.x.toFixed(1) + "px," + tp.y.toFixed(1) + "px)";
+          if (!sum.line || !sum.log || !sum.status) return;
+          var base = story.getBoundingClientRect();
+          var lr = sum.log.getBoundingClientRect();
+          var r = sum.status.getBoundingClientRect();
+          var ax = lr.left - base.left, ay = r.top + r.height / 2 - base.top;
+          var kx = ax - Math.min(60, Math.max(24, (ax - tp.x) * 0.18));
+          var ex = tp.x + 20 * (tp.x <= kx ? 1 : -1);
+          sum.accent.setAttribute("points", ax.toFixed(1) + "," + ay.toFixed(1) + " " + kx.toFixed(1) + "," + ay.toFixed(1));
+          sum.line.setAttribute("points", kx.toFixed(1) + "," + ay.toFixed(1) + " " + ex.toFixed(1) + "," + tp.y.toFixed(1));
+        };
+
+        var countUp = function () {
+          clearInterval(sum.countTimer);
+          var t0 = performance.now();
+          sum.countTimer = setInterval(function () {
+            var k = Math.min(1, (performance.now() - t0) / 1200);
+            var ez = 1 - Math.pow(1 - k, 3);
+            sum.counts.forEach(function (el) {
+              var v = parseFloat(el.dataset.count) * ez, dec = parseInt(el.dataset.dec || "0", 10);
+              el.textContent = v.toFixed(dec) + (el.dataset.unit || "");
+            });
+            if (k >= 1) clearInterval(sum.countTimer);
+          }, 40);
+        };
+
+        sceneAnimations[1] = {
+          onEnter: function (fromIndex) {
+            gsap.killTweensOf(landingLayers);
+            gsap.set(landingLayers, { autoAlpha: 1 });
+            if (fromIndex !== 0) {
+              // arriving from further down: show the landed ship directly
+              landingFX.setStill(true);
+              landingFX.runIdle();
+              landingFX.setPose(summaryPose(), 0);
+            }
+            summaryText.classList.add("is-live", "is-revealed");
+            playTextReveal(summaryText, 0.5);
+            if (reduceMotion) sum.counts.forEach(function (el) {
+              el.textContent = (+el.dataset.count).toFixed(parseInt(el.dataset.dec || "0", 10)) + (el.dataset.unit || "");
+            });
+            else countUp();
+          },
+          onLeave: function (toIndex) {
+            clearInterval(sum.countTimer);
+            summaryText.classList.remove("is-live", "is-revealed");
+            if (toIndex !== 0) {
+              gsap.to(landingLayers, {
+                autoAlpha: 0, duration: 0.3, overwrite: true,
+                onComplete: function () { if (landingFX) landingFX.reset(); },
+              });
+            }
+          },
+        };
+      }
+    }
+
+    /* ----------------------------------------------------------
+       3. Page-turn navigation (fixed-duration tween, not scrubbed)
+       ---------------------------------------------------------- */
+
+    // Resting state: only scene 0 / text 0 visible. autoAlpha also sets
+    // visibility, so inactive chapters can't be tabbed into.
     gsap.set(scenes, { autoAlpha: 0, force3D: true });
     gsap.set(scenes[0], { autoAlpha: 1 });
     gsap.set(texts, { autoAlpha: 0, y: 22 });
     gsap.set(texts[0], { autoAlpha: 1, y: 0 });
     scenes[0].classList.add("is-active");
     texts[0].classList.add("is-active");
-    if (landingCanvas) gsap.set(landingCanvas, { autoAlpha: 1 });
+    story.classList.add("has-sky");
 
-    var activeIndex = 0;
-    function setActive(index) {
-      if (index === activeIndex) return;
-      activeIndex = index;
-      scenes.forEach(function (s, idx) { s.classList.toggle("is-active", idx === index); });
-      texts.forEach(function (t, idx) { t.classList.toggle("is-active", idx === index); });
-    }
-
-    var tlDuration = count - 1 + LANDING_DURATION;
-
-    var tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: story,
-        start: "top top",
-        end: function () { return "+=" + tlDuration * window.innerHeight; },
-        scrub: 0.15,
-        pin: true,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onUpdate: function (self) {
-          var t = self.progress * tlDuration;
-
-          if (landingSeq) {
-            var landingT = Math.max(0, Math.min(LANDING_DURATION, t));
-            var landingProgress = LANDING_DURATION ? landingT / LANDING_DURATION : 1;
-            landingSeq.setFrame(Math.round(landingProgress * (landingSeq.count - 1)));
-          }
-
-          setActive(Math.max(0, Math.round(t - LANDING_DURATION)));
-        },
-      },
-      defaults: { ease: "power1.inOut" },
+    // Mission-text inner elements (status/title/subtitle) start hidden
+    // regardless of their .story-text container's own autoAlpha, so the
+    // very first paint never flashes fully-revealed text before
+    // playTextReveal() runs it. Pages without the mission-text pattern
+    // (the closing CTA scene) have no .story-status and are skipped.
+    texts.forEach(function (t) {
+      var parts = textParts(t);
+      if (parts.status) hideTextParts(parts);
     });
 
-    if (landingCanvas && LANDING_DURATION) {
-      // Hold at full opacity through the landing, then release into
-      // the normal chapter pacing so the landed ship doesn't linger
-      // indefinitely once the story moves on.
-      tl.to(landingCanvas, { autoAlpha: 0, duration: 1 }, LANDING_DURATION);
-    }
+    var currentIndex = 0;
+    var isAnimating = false;
 
-    // Tuned down on narrow viewports per spec #20 — same transition,
-    // smaller perspective displacement so it doesn't look broken on
-    // a phone-width stage. Reduced motion drops rotate/scale/shadow
-    // entirely and just crossfades (spec #21).
+    // Tuned down on narrow viewports so it doesn't look broken on a
+    // phone-width stage. Reduced motion drops rotate/scale/shadow
+    // entirely and just crossfades.
     var outRotate = reduceMotion ? 0 : isCompact ? -5 : -11;
     var inRotate = reduceMotion ? 0 : isCompact ? 2 : 5;
     var outScale = reduceMotion ? 1 : isCompact ? 0.97 : 0.94;
     var inScaleFrom = reduceMotion ? 1 : isCompact ? 1.025 : 1.05;
+    var SCENE_DUR = reduceMotion ? 0.35 : 0.75; // spec target: 0.6–0.9s
+    var COOLDOWN_MS = 70; // swallows trailing momentum ticks from one gesture
 
-    for (var i = 0; i < count - 1; i++) {
-      var pos = i + LANDING_DURATION;
-      var outScene = scenes[i];
-      var inScene = scenes[i + 1];
-      var outText = texts[i];
-      var inText = texts[i + 1];
+    function visibleScene(idx) { return idx === 1 ? scenes[0] : scenes[idx]; }
 
-      tl.to(outScene, {
+    function goToPage(targetIndex, direction) {
+      if (isAnimating || targetIndex === currentIndex) return;
+      if (targetIndex < 0 || targetIndex > sceneCount - 1) return;
+
+      isAnimating = true;
+      var fromIndex = currentIndex;
+      var toIndex = targetIndex;
+      currentIndex = toIndex;
+
+      scenes.forEach(function (s, idx) { s.classList.toggle("is-active", idx === toIndex); });
+      texts.forEach(function (t, idx) { t.classList.toggle("is-active", idx === toIndex); });
+
+      if (sceneAnimations[fromIndex]) sceneAnimations[fromIndex].onLeave(toIndex);
+      if (sceneAnimations[toIndex]) sceneAnimations[toIndex].onEnter(fromIndex);
+
+      // Section 2 (index 1) continues Section 1's shot on the same terrain
+      // (scene 0 stays up): between them only the text changes — no page
+      // turn on the picture, so it plays as one continuous film.
+      story.classList.toggle("has-sky", toIndex <= 1);
+      var outScene = visibleScene(fromIndex);
+      var inScene = visibleScene(toIndex);
+      var sameShot = outScene === inScene;
+      var outText = texts[fromIndex];
+      var inText = texts[toIndex];
+      var fwd = direction === 1;
+
+      // Forward: the leaving page peels down/away, the new page rises up
+      // into place. Backward: mirrored, so it reads as turning back to a
+      // previous page rather than replaying the forward turn in reverse.
+      var outTo = fwd
+        ? { rotateX: outRotate, scale: outScale, transformOrigin: "50% 100%" }
+        : { rotateX: -inRotate, scale: inScaleFrom, transformOrigin: "50% 0%" };
+      var inFrom = fwd
+        ? { rotateX: inRotate, scale: inScaleFrom, transformOrigin: "50% 0%" }
+        : { rotateX: -outRotate, scale: outScale, transformOrigin: "50% 100%" };
+
+      // Wall-clock timeout, not GSAP's onComplete: onComplete depends on
+      // the rAF-driven ticker, which browsers fully suspend on a
+      // backgrounded/hidden tab. If the visitor alt-tabs away mid-turn,
+      // an onComplete-based unlock would never fire and permanently
+      // lock page navigation; setTimeout still fires (throttled, but
+      // never stalled) regardless of tab visibility.
+      setTimeout(function () { isAnimating = false; }, SCENE_DUR * 1000 + COOLDOWN_MS);
+
+      var tl = gsap.timeline({ defaults: { ease: "power1.inOut" } });
+
+      if (!sameShot) tl.to(outScene, {
         autoAlpha: 0,
-        rotateX: outRotate,
-        scale: outScale,
-        transformOrigin: "50% 100%",
-        duration: 1,
-      }, pos);
+        rotateX: outTo.rotateX,
+        scale: outTo.scale,
+        transformOrigin: outTo.transformOrigin,
+        duration: SCENE_DUR,
+      }, 0);
 
-      tl.fromTo(inScene,
-        { autoAlpha: 0, rotateX: inRotate, scale: inScaleFrom, transformOrigin: "50% 0%" },
-        { autoAlpha: 1, rotateX: 0, scale: 1, duration: 1 },
-        pos);
+      if (!sameShot) tl.fromTo(inScene,
+        { autoAlpha: 0, rotateX: inFrom.rotateX, scale: inFrom.scale, transformOrigin: inFrom.transformOrigin },
+        { autoAlpha: 1, rotateX: 0, scale: 1, duration: SCENE_DUR },
+        0);
 
-      if (shadow && !reduceMotion) {
-        tl.fromTo(shadow, { autoAlpha: 0 }, { autoAlpha: 0.28, duration: 0.5, ease: "power1.in" }, pos)
-          .to(shadow, { autoAlpha: 0, duration: 0.5, ease: "power1.out" }, pos + 0.5);
+      if (shadow && !reduceMotion && !sameShot) {
+        tl.fromTo(shadow, { autoAlpha: 0 }, { autoAlpha: 0.28, duration: SCENE_DUR * 0.4, ease: "power1.in" }, 0)
+          .to(shadow, { autoAlpha: 0, duration: SCENE_DUR * 0.4, ease: "power1.out" }, SCENE_DUR * 0.5);
       }
 
-      tl.to(outText, { autoAlpha: 0, y: -16, duration: 0.55 }, pos);
+      tl.to(outText, { autoAlpha: 0, y: fwd ? -16 : 16, duration: SCENE_DUR * 0.55 }, 0);
       tl.fromTo(inText,
-        { autoAlpha: 0, y: 22 },
-        { autoAlpha: 1, y: 0, duration: 0.55 },
-        pos + 0.4);
+        { autoAlpha: 0, y: fwd ? 22 : -22 },
+        { autoAlpha: 1, y: 0, duration: SCENE_DUR * 0.55 },
+        SCENE_DUR * 0.35);
     }
+
+    // Kick off the landing scene's own animation immediately on load —
+    // no scroll required to see the story "come alive".
+    if (sceneAnimations[0]) sceneAnimations[0].onEnter();
+
+    /* ----------------------------------------------------------
+       4. Wheel / touch capture → page navigation
+       ---------------------------------------------------------- */
+    var WHEEL_MIN_DELTA = 2; // ignores trackpad idle jitter
+
+    // Story only ever occupies the top viewport of the page (it's the
+    // first thing in #main, and the header floats over it), so scrollY
+    // is 0 exactly when the story is what's on screen. Forward input on
+    // the last page — and backward input once the footer has scrolled
+    // into view — is left alone so native scrolling takes over.
+    function shouldIntercept(deltaY) {
+      if (window.scrollY > 0) return false;
+      if (deltaY > 0 && currentIndex === sceneCount - 1) return false;
+      return true;
+    }
+
+    function attemptNavigate(deltaY) {
+      if (isAnimating) return;
+      goToPage(currentIndex + (deltaY > 0 ? 1 : -1), deltaY > 0 ? 1 : -1);
+    }
+
+    window.addEventListener("wheel", function (e) {
+      if (Math.abs(e.deltaY) < WHEEL_MIN_DELTA) return;
+      if (!shouldIntercept(e.deltaY)) return;
+      e.preventDefault();
+      attemptNavigate(e.deltaY);
+    }, { passive: false });
+
+    var touchStartY = 0;
+    var touchTracking = false;
+    var TOUCH_THRESHOLD = 40;
+
+    window.addEventListener("touchstart", function (e) {
+      touchStartY = e.touches[0].clientY;
+      touchTracking = true;
+    }, { passive: true });
+
+    window.addEventListener("touchmove", function (e) {
+      if (!touchTracking) return;
+      var dy = touchStartY - e.touches[0].clientY;
+      if (!shouldIntercept(dy)) { touchTracking = false; return; }
+      e.preventDefault();
+      if (Math.abs(dy) > TOUCH_THRESHOLD) {
+        attemptNavigate(dy);
+        touchTracking = false; // one nav per swipe; next touchstart resets
+      }
+    }, { passive: false });
+
+    window.addEventListener("touchend", function () {
+      touchTracking = false;
+    }, { passive: true });
 
     var resizeTimer;
     window.addEventListener("resize", function () {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
         if (landingSeq) landingSeq.resize();
-        ScrollTrigger.refresh();
+        syncCameraOrigin();
+        if (landingFX) landingFX.resize();
       }, 200);
     });
   } else {
@@ -204,7 +719,7 @@
   }
 
   /* ----------------------------------------------------------
-     2. Star layer (adapted from portfolio.js initHero())
+     Star layer (adapted from portfolio.js initHero())
      ---------------------------------------------------------- */
   var canvas = document.querySelector(".story-stars");
   if (!canvas) return;

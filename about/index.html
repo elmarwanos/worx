@@ -51,39 +51,35 @@
            (.story-atmosphere) and stars never turn with the page; only
            a .story-scene + its matching .story-text turn together. -->
       <div class="story-scenes">
-        <div class="story-scene story-scene--preface">
+        <div class="story-scene story-scene--landing">
           <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
           <div class="story-grade"></div>
         </div>
-        <div class="story-scene" data-chapter="01">
+        <div class="story-scene">
           <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
           <div class="story-grade"></div>
         </div>
-        <div class="story-scene" data-chapter="02">
+        <div class="story-scene">
           <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
           <div class="story-grade"></div>
         </div>
-        <div class="story-scene" data-chapter="03">
+        <div class="story-scene">
           <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
           <div class="story-grade"></div>
         </div>
-        <div class="story-scene" data-chapter="04">
+        <div class="story-scene">
           <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
           <div class="story-grade"></div>
         </div>
-        <div class="story-scene" data-chapter="05">
+        <div class="story-scene">
           <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
           <div class="story-grade"></div>
         </div>
-        <div class="story-scene" data-chapter="06">
+        <div class="story-scene">
           <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
           <div class="story-grade"></div>
         </div>
-        <div class="story-scene" data-chapter="07">
-          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
-          <div class="story-grade"></div>
-        </div>
-        <div class="story-scene" data-chapter="08">
+        <div class="story-scene">
           <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
           <div class="story-grade"></div>
         </div>
@@ -93,101 +89,176 @@
         </div>
       </div>
 
-      <!-- GLIMPSE landing sequence: 32-frame scroll-scrubbed canvas,
-           drawn by landing-sequence.js. Path/count/canvas-size are all
-           editable here without touching the JS; the vertical landing
-           position is the --landing-anchor-y custom property in about.css.
+      <!-- GLIMPSE landing composite: 32 production frames (2560x1440,
+           flames + dust baked in) drawn by landing-sequence.js and
+           placed/timed by landing-fx.js, orchestrated from
+           about-story.js:
 
-           TEMPORARY — MECHANICS TEST ONLY:
-           data-landing-base below points at the throwaway placeholder
-           frames in static/assets/about/landing/dev-test/ (magenta/cyan
-           test shapes, clearly watermarked "NOT FINAL ART") so the
-           scroll-scrub architecture can be reviewed before real GLIMPSE
-           artwork exists. Once approved, delete dev-test/ and switch
-           this attribute back to:
-             ../static/assets/about/landing/glimpse-landing- -->
+           .story-landing-back   contact shadow + engine light on the
+                                  terrain + dust streaks behind the ship
+           .story-landing        the ship frames, cross-dissolved for
+                                  smooth motion, feet on --story-ground-y
+           .story-landing-front  dust streaks in front of the gear
+
+           The ship PNGs themselves are never edited. -->
+      <canvas class="story-landing-back" aria-hidden="true"></canvas>
       <canvas class="story-landing" aria-hidden="true"
-        data-landing-base="../static/assets/about/landing/dev-test/test-landing-"
-        data-landing-count="32"
+        data-landing-base="../static/assets/about/glimpse_landing_frames_001-032/glimpse-landing-"
+        data-landing-count="33"
         data-landing-pad="3"
-        data-landing-width="2400"
-        data-landing-height="1350"></canvas>
+        data-landing-width="2560"
+        data-landing-height="1440"></canvas>
+      <canvas class="story-landing-front" aria-hidden="true"></canvas>
+
+      <div class="story-ember" aria-hidden="true"></div>
 
       <div class="story-turn-shadow" aria-hidden="true"></div>
 
       <canvas class="story-stars" aria-hidden="true"></canvas>
 
+      <!-- Cinematic layers for the landing shot (about.css): touchdown
+           flash, vignette, film grain, fade-from-black. -->
+      <div class="story-flash" aria-hidden="true"></div>
+      <div class="story-vignette" aria-hidden="true"></div>
+      <div class="story-grain" aria-hidden="true"></div>
+      <div class="story-blackout" aria-hidden="true"></div>
+
+
       <div class="story-texts">
-        <div class="story-text story-text--preface">
-          <div class="container">
-            <p class="eyebrow">Preface</p>
-            <h1 class="story-title">The origin of <span class="gradient-text">Worx</span></h1>
-            <p class="story-subtitle">A story about people, ideas and technology.</p>
+        <div class="story-text story-text--landing">
+          <!-- Mission HUD for the landing shot (about.css "Landing HUD"):
+               a tilted, transparent mission-log panel (stages + live
+               telemetry) tied by a leader line to a target marker that
+               tracks the ship. Driven per frame by about-story.js from
+               landing-fx.js's onFrame(). Decorative: the persistent
+               caption below carries the page's real text. -->
+          <div class="landing-hud" aria-hidden="true">
+            <div class="hud-panel hud-log">
+              <div class="hud-head">
+                <span class="hud-rec"></span>
+                <span class="hud-callsign">GLIMPSE-01 · MISSION LOG</span>
+                <span class="hud-clock" data-hud="t">T+00:00.0</span>
+              </div>
+              <ol class="hud-stages"></ol>
+              <dl class="hud-tele">
+                <div><dt>ALT</dt><dd data-hud="alt">—</dd></div>
+                <div><dt>VEL</dt><dd data-hud="vel">—</dd></div>
+                <div><dt>RNG</dt><dd data-hud="dist">—</dd></div>
+              </dl>
+            </div>
+            <svg class="hud-leader" width="100%" height="100%">
+              <polyline class="hud-leader-line" points=""></polyline>
+              <polyline class="hud-leader-accent" points=""></polyline>
+            </svg>
+            <div class="hud-target">
+              <span class="hud-ring hud-ring--outer"></span>
+              <span class="hud-ring hud-ring--inner"></span>
+              <em class="hud-target-label">GLIMPSE-01</em>
+            </div>
           </div>
-          <p class="story-scroll-hint">Scroll to begin</p>
+
+          <div class="container">
+            <!-- Persistent caption, revealed on its own tilted HUD card
+                 once the ship has landed and the dust has cleared. -->
+            <div class="hud-panel hud-card">
+              <p class="story-status"><span class="story-status-text">SOL 1 · SITE SECURED</span></p>
+              <h1 class="story-title"><span class="story-title-mask"><span class="story-title-inner">On the shoulders of giants</span></span></h1>
+              <p class="story-subtitle">The next frontier awaits.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="story-text story-text--hud-right story-text--summary">
+          <!-- Mission Control summary of the landing (Section 1), on a
+               tilted HUD panel in the right column, with a leader line to a
+               marker on the landed ship (frame 033, now on the left third,
+               turned to face right — see LandingFX.setPose). -->
+          <div class="landing-hud summary-hud" aria-hidden="true">
+            <div class="hud-panel hud-log hud-log--right hud-summary">
+              <div class="hud-head">
+                <span class="hud-rec"></span>
+                <span class="hud-callsign">MISSION CONTROL · SOL 2 SUMMARY</span>
+                <span class="hud-clock">T+00:08.7</span>
+              </div>
+              <ul class="hud-summary-rows">
+                <li><span>Entry interface</span><b data-count="12.4" data-dec="1" data-unit=" KM">12.4 KM</b></li>
+                <li><span>Entry velocity</span><b data-count="1460" data-unit=" M/S">1460 M/S</b></li>
+                <li><span>Peak heating</span><b>T+00:01.4</b></li>
+                <li><span>Heat shield sep</span><b>T+00:02.6</b></li>
+                <li><span>Touchdown</span><b>T+00:08.7</b></li>
+                <li><span>Touchdown velocity</span><b data-count="0.4" data-dec="1" data-unit=" M/S">0.4 M/S</b></li>
+                <li><span>Landing accuracy</span><b data-count="14" data-unit=" M">14 M</b></li>
+                <li><span>Hull integrity</span><b data-count="98" data-unit="%">98%</b></li>
+              </ul>
+              <div class="hud-summary-status"><span class="hud-summary-dot"></span>Crew 2/2 · Go for egress</div>
+            </div>
+            <svg class="hud-leader" width="100%" height="100%">
+              <polyline class="hud-leader-line" points=""></polyline>
+              <polyline class="hud-leader-accent" points=""></polyline>
+            </svg>
+            <div class="hud-target">
+              <span class="hud-ring hud-ring--outer"></span>
+              <span class="hud-ring hud-ring--inner"></span>
+              <em class="hud-target-label">GLIMPSE-01 · HATCH ARMED</em>
+            </div>
+          </div>
+
+          <div class="container">
+            <!-- Same holographic HUD card as the landing caption, mirrored
+                 to the right side (about.css "Caption card"). -->
+            <div class="hud-panel hud-card">
+              <p class="story-status"><span class="story-status-text">EGRESS: GO</span></p>
+              <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Beyond the hatch</span></span></h2>
+              <p class="story-subtitle">A new frontier is waiting to be explored.</p>
+            </div>
+          </div>
         </div>
 
         <div class="story-text">
           <div class="container">
-            <p class="story-number">01 <span>/ 08</span></p>
-            <h2 class="story-title">The Beginning</h2>
-            <p class="story-subtitle">It started with a glimpse.</p>
+            <p class="story-status"><span class="story-status-text">TRAVERSE: GO</span></p>
+            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Into the unknown</span></span></h2>
+            <p class="story-subtitle">Every mile takes us further into a new world.</p>
           </div>
         </div>
 
         <div class="story-text">
           <div class="container">
-            <p class="story-number">02 <span>/ 08</span></p>
-            <h2 class="story-title">The Arrival</h2>
-            <p class="story-subtitle">Bigger ideas go further.</p>
+            <p class="story-status"><span class="story-status-text">DEPLOYMENT: ACTIVE</span></p>
+            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Groundwork begins</span></span></h2>
+            <p class="story-subtitle">Every new world starts with something yet unfinished.</p>
           </div>
         </div>
 
         <div class="story-text">
           <div class="container">
-            <p class="story-number">03 <span>/ 08</span></p>
-            <h2 class="story-title">The Deployment</h2>
-            <p class="story-subtitle">Ideas take shape.</p>
+            <p class="story-status"><span class="story-status-text">OUTPOST: IN PROGRESS</span></p>
+            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Building a new home</span></span></h2>
+            <p class="story-subtitle">Piece by piece, the frontier becomes ours.</p>
           </div>
         </div>
 
         <div class="story-text">
           <div class="container">
-            <p class="story-number">04 <span>/ 08</span></p>
-            <h2 class="story-title">The Journey</h2>
-            <p class="story-subtitle">Exploration builds opportunity.</p>
+            <p class="story-status"><span class="story-status-text">ACKNOWLEDGMENT: COMPLETE</span></p>
+            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Saluting the giants</span></span></h2>
+            <p class="story-subtitle">We honor what brought us here, before forging our own way forward.</p>
           </div>
         </div>
 
         <div class="story-text">
           <div class="container">
-            <p class="story-number">05 <span>/ 08</span></p>
-            <h2 class="story-title">Building Something New</h2>
-            <p class="story-subtitle">From vision to foundation.</p>
+            <p class="story-status"><span class="story-status-text">ASCENT: NOMINAL</span></p>
+            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Link established</span></span></h2>
+            <p class="story-subtitle">Beyond distance, the signal holds strong.</p>
           </div>
         </div>
 
         <div class="story-text">
           <div class="container">
-            <p class="story-number">06 <span>/ 08</span></p>
-            <h2 class="story-title">Worx</h2>
-            <p class="story-subtitle">A base for a brighter tomorrow.</p>
-          </div>
-        </div>
-
-        <div class="story-text">
-          <div class="container">
-            <p class="story-number">07 <span>/ 08</span></p>
-            <h2 class="story-title">Connected</h2>
-            <p class="story-subtitle">Stronger together.</p>
-          </div>
-        </div>
-
-        <div class="story-text">
-          <div class="container">
-            <p class="story-number">08 <span>/ 08</span></p>
-            <h2 class="story-title">The Next Chapter</h2>
-            <p class="story-subtitle">Same sky. Bigger possibilities.</p>
+            <p class="story-status"><span class="story-status-text">HABITAT: ONLINE</span></p>
+            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">A new home. A new mission.</span></span></h2>
+            <p class="story-subtitle">The journey brought us here. Now the real work begins.</p>
           </div>
         </div>
 
@@ -254,6 +325,8 @@
   <script src="../static/js/main.js"></script>
   <script src="../static/js/contact-widget.js"></script>
   <script src="../static/js/landing-sequence.js"></script>
+  <script src="../static/js/sky-fx.js"></script>
+  <script src="../static/js/landing-fx.js"></script>
   <script src="../static/js/about-story.js"></script>
 </body>
 </html>

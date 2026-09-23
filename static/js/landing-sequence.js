@@ -181,5 +181,124 @@
     this.setFrame(idx);
   };
 
+  // Draws a given frame at an explicit rect instead of the automatic
+  // "contain, anchored by --landing-anchor-y" placement setFrame()
+  // uses. For callers (e.g. a compositor) that need the frame
+  // positioned by their own logic — perspective, centering, a
+  // calibrated ground line — while still getting setFrame()'s
+  // preload/decode/"keep last good frame" guarantees for free. Always
+  // redraws (no currentIndex short-circuit): a caller passing a custom
+  // rect is by definition placing the frame somewhere setFrame()
+  // wouldn't, so the dedupe that makes sense for setFrame's own
+  // repeated-index calls doesn't apply here.
+  LandingSequence.prototype.drawCustom = function (index, rect) {
+    index = Math.max(0, Math.min(this.count - 1, index));
+    if (!this.loaded[index]) return; // keep last good frame on screen
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.drawImage(this.images[index], rect.x, rect.y, rect.w, rect.h);
+    this.currentIndex = index;
+  };
+
+  // Cross-dissolves frame a (at rectA) into frame b (at rectB) by t.
+  // Both are drawn additively ("lighter") at (1-t) and t alpha onto the
+  // cleared canvas, which is an exact premultiplied blend — no double-
+  // dense overlap where both frames are opaque. opts:
+  //   alpha       overall opacity (fade-in)
+  //   filter      ctx.filter string applied to both draws
+  //   fadeX       fraction of frame width feathered away at each side
+  //   fadeBottom  fraction of frame height feathered away at the bottom
+  //   fadeA/fadeB { x, bottom } — feather each frame at its own rect
+  //   mode        "over": layered dissolve (b over a) using alphaA/alphaB
+  //   transform   [a, b, c, d, e, f] extra transform for the whole draw
+  //   rotate      { angle, x, y } — rotate the whole draw about (x, y)
+  // The feathering removes the hard line where baked-in dust meets the
+  // frame's own edge (see landing-fx.js).
+  LandingSequence.prototype.drawBlend = function (a, rectA, b, rectB, t, opts) {
+    opts = opts || {};
+    if (!this.loaded[a]) { a = b; rectA = rectB; t = 0; }
+    if (!this.loaded[b]) { b = a; rectB = rectA; t = 0; }
+    if (!this.loaded[a]) return; // keep last good frame on screen
+    var ctx = this.ctx;
+    var alpha = opts.alpha != null ? opts.alpha : 1;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // opts.transform: [a, b, c, d, e, f] applied to everything drawn
+    // (e.g. a camera-angle pose), after the canvas has been cleared.
+    var xf = opts.transform;
+    if (xf) { ctx.save(); ctx.transform(xf[0], xf[1], xf[2], xf[3], xf[4], xf[5]); }
+    var rot = opts.rotate;
+    if (rot) {
+      ctx.save();
+      ctx.translate(rot.x, rot.y);
+      ctx.rotate(rot.angle);
+      ctx.translate(-rot.x, -rot.y);
+    }
+    ctx.save();
+    ctx.filter = opts.filter || "none";
+    if (opts.mode === "over" && a !== b) {
+      // Layered dissolve: b drawn normally over a, each with its own alpha.
+      ctx.globalAlpha = alpha * (opts.alphaA != null ? opts.alphaA : 1 - t);
+      if (ctx.globalAlpha > 0.002) ctx.drawImage(this.images[a], rectA.x, rectA.y, rectA.w, rectA.h);
+      ctx.globalAlpha = alpha * (opts.alphaB != null ? opts.alphaB : t);
+      if (ctx.globalAlpha > 0.002) ctx.drawImage(this.images[b], rectB.x, rectB.y, rectB.w, rectB.h);
+    } else if (a === b || t <= 0.002) {
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(this.images[a], rectA.x, rectA.y, rectA.w, rectA.h);
+    } else if (t >= 0.998) {
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(this.images[b], rectB.x, rectB.y, rectB.w, rectB.h);
+    } else {
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = alpha * (1 - t);
+      ctx.drawImage(this.images[a], rectA.x, rectA.y, rectA.w, rectA.h);
+      ctx.globalAlpha = alpha * t;
+      ctx.drawImage(this.images[b], rectB.x, rectB.y, rectB.w, rectB.h);
+    }
+    ctx.restore();
+
+    // Edge feathering: per frame (fadeA / fadeB = { x, bottom }) when the
+    // two frames differ in size, else fadeX/fadeBottom on the dominant one.
+    if (opts.fadeA || opts.fadeB) {
+      if (opts.fadeA && t < 0.998) this._feather(rectA, opts.fadeA.x, opts.fadeA.bottom);
+      if (opts.fadeB && t > 0.002) this._feather(rectB, opts.fadeB.x, opts.fadeB.bottom);
+    } else if (opts.fadeX || opts.fadeBottom) {
+      this._feather(t < 0.5 ? rectA : rectB, opts.fadeX, opts.fadeBottom);
+    }
+    if (rot) ctx.restore();
+    if (xf) ctx.restore();
+    this.currentIndex = t < 0.5 ? a : b;
+  };
+
+  LandingSequence.prototype._feather = function (r, fadeX, fadeBottom) {
+    var ctx = this.ctx;
+    var g;
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-out";
+    if (fadeX) {
+      var fx = r.w * fadeX;
+      g = ctx.createLinearGradient(r.x, 0, r.x + fx, 0);
+      g.addColorStop(0, "rgba(0,0,0,1)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(r.x - 1, r.y, fx + 1, r.h);
+      g = ctx.createLinearGradient(r.x + r.w, 0, r.x + r.w - fx, 0);
+      g.addColorStop(0, "rgba(0,0,0,1)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(r.x + r.w - fx, r.y, fx + 1, r.h);
+    }
+    if (fadeBottom) {
+      var fb = r.h * fadeBottom;
+      var y1 = r.y + r.h;
+      g = ctx.createLinearGradient(0, y1, 0, y1 - fb);
+      g.addColorStop(0, "rgba(0,0,0,1)");
+      g.addColorStop(0.35, "rgba(0,0,0,0.7)");
+      g.addColorStop(0.7, "rgba(0,0,0,0.25)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(r.x, y1 - fb, r.w, fb + 2);
+    }
+    ctx.restore();
+  };
+
   global.LandingSequence = LandingSequence;
 })(window);
