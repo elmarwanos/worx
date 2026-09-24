@@ -16,11 +16,16 @@
                        Always there, always orange, never still: every
                        billow slowly swells and shrinks as it drifts.
                        Faint lightning pulses deep inside the wall.
-     2.6s  SEPARATION  A small, subtle flash that briefly lights the storm
-                       clouds from within; the ship emerges still hot,
-                       engines igniting. Kept clean: no falling heat
-                       shield or debris (CLEAN_SEPARATION; the shield /
-                       pyro / ember / plume code stays for an opt-in).
+     2.6s  SEPARATION  A flash lights the storm clouds from within, pyro
+                       bolts fire and ablator embers shed as the real
+                       aeroshell photo (glimpse-landing-00.png) peels
+                       away — tumbling, rim glowing hot, cooling as it
+                       falls behind and to the side, out of frame, then
+                       impacting the ground in the middle distance in a
+                       flash + dust plume + kicked-up embers. The ship
+                       emerges still hot, engines igniting. Set
+                       CLEAN_SEPARATION = true for the flash alone, no
+                       shield/debris.
      2.6s  GLIDE       Powered descent down a straight glide slope
                        toward the camera, braking so it looms without
                        lunging; braking lean, attitude wobble, exhaust
@@ -104,6 +109,19 @@
   };
   var SEQ_LOGO = [-31, -486.5];      // 001-032 logo square, relative to (hull center, feet)
 
+  // Frame 034 (Section 2 only, about-story.js): same ship, hatch + ramp
+  // open, crew on the ramp. Its own art (levelled by 4.7° from the
+  // source so all three pads share one ground line), sized via `scale`
+  // relative to F33 so the hull reads at the same on-screen width.
+  var F34 = {
+    w: 1432, h: 1153, cx: 730, feet: 1055, roll: 0, pivot: [730, 1055],
+    // three legs (left, centre, right), pads seated in the soil at y = feet;
+    // the ramp lip and the captain's front boot touch down on that same line
+    pads: [196, 723, 1231], spire: [572, 112],
+    scale: 0.99, padW: [251, 225, 262], // hull reads the same on-screen width as frame 033 in Section 1
+    hatch: [1038, 716] // the open doorway, for the HUD leader line target
+  };
+
   // Flight path (world units: fractions of viewport height at z = 1).
   var Z_FAR = 26;
   var START_SCREEN_Y = 0.2;
@@ -124,13 +142,35 @@
   var DURATION_MS = TOUCH + SETTLE_MS;
 
   var SHIELD_FALL_MS = 2400;
-  var CLEAN_SEPARATION = true;      // true: no falling heat shield / debris at separation
+  var CLEAN_SEPARATION = false;     // true: no falling heat shield / debris at separation
   var TRAIL_LIFE_MS = 1800;
   var WAKE_LIFE_MS = 900;
   var SMOKE_LIFE_MS = 5200;
 
   var DUST_COLORS = ["#5c210d", "#7a2f13", "#c04527", "#e57d23", "#d99a5c"];
   var ROCK_COLORS = ["#2a130a", "#3b1b0d", "#4d2410", "#1d0d06"];
+
+  // The real aeroshell photo, tumbling away at separation (_drawShield).
+  // Falls back to the old procedural dish (further down) if it hasn't
+  // decoded yet — separation never waits on it and never flashes a
+  // broken image.
+  var SHIELD_IMG_SRC = "../static/assets/about/glimpse_landing_frames_001-032/glimpse-landing-00.png";
+  var shieldImg = new Image();
+  var shieldImgReady = false;
+  var shieldImgAspect = 1.55;
+  shieldImg.onload = function () {
+    shieldImgReady = true;
+    shieldImgAspect = shieldImg.naturalWidth / shieldImg.naturalHeight;
+  };
+  shieldImg.src = SHIELD_IMG_SRC;
+
+  // Frame 034 — Section 2's ship, hatch open. Falls back to frame 033
+  // (via the sequence, already loaded) if it hasn't decoded yet.
+  var F34_IMG_SRC = "../static/assets/about/glimpse-landing-034-level.png";
+  var f34Img = new Image();
+  var f34ImgReady = false;
+  f34Img.onload = function () { f34ImgReady = true; };
+  f34Img.src = F34_IMG_SRC;
 
   function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
   function lerp(a, b, t) { return a + (b - a) * t; }
@@ -164,6 +204,7 @@
     return [px + dx * c - dy * s, py + dx * s + dy * c];
   }
   var F33_SPIRE = rotAbout(F33.spire[0], F33.spire[1], F33.pivot[0], F33.pivot[1], F33.roll);
+  var F34_SPIRE = rotAbout(F34.spire[0], F34.spire[1], F34.pivot[0], F34.pivot[1], F34.roll);
 
   // Flight state at elapsed ms. G = ground - horizon, horizon = y fraction.
   function stateAt(e, G, horizon) {
@@ -318,10 +359,12 @@
 
   // Screen (CSS px) position of a point on the landed ship, given in
   // frame-033 pixels — follows the pose and the camera. For HUD markers.
+  // still: px/py are frame-034 px (Section 2's own ship art). Otherwise:
+  // frame-033 px, as the rest of the landing sequence always was.
   LandingFX.prototype.shipPoint = function (px, py) {
     var L = this._layout({ z: 1, h: 0, X: 0, tilt: 0, clear: 1, v: FINAL_IDX });
     if (this.still) {
-      var w = this._warpPoint(L, this._poseState(performance.now()).pose, px, py);
+      var w = this._warpPoint34(L, this._poseState(performance.now()).pose, px, py);
       return this._toScreen(w.x, w.y);
     }
     var r = L.rectFor(FINAL_IDX);
@@ -365,6 +408,7 @@
     var s = parseFloat(cs.getPropertyValue("--landing-scale"));
     if (!isNaN(s)) this.scale = Math.min(1.8, Math.max(0.3, s));
     if (this.sequence) this.sequence.resize();
+    if (this.ascent) { this._renderAscent(this._lastAscent || 0, 0); return; }
     if (this._lastElapsed != null) this._render(this._lastElapsed, 0);
   };
 
@@ -372,6 +416,7 @@
     cancelAnimationFrame(this._idleRAF);
     this._idleRAF = 0;
     this.still = false;
+    this.ascent = null;
     this._clear();
     this.backCtx.clearRect(0, 0, this.backCanvas.width, this.backCanvas.height);
     this.frontCtx.clearRect(0, 0, this.frontCanvas.width, this.frontCanvas.height);
@@ -633,7 +678,9 @@
   // Shield world state at elapsed e. It shares the ship's momentum at
   // separation (same glide path), lags slightly (no engines, more drag)
   // and drops away beneath it, accelerating, until it hits the ground
-  // in the middle distance, off to the side of the landing site.
+  // well clear of the frame, off to the side of the landing site — it
+  // reads as background debris, never close enough to compete with the
+  // ship for attention.
   LandingFX.prototype._shieldState = function (e) {
     var sh = this.shield;
     var t = e - sh.t0;
@@ -641,9 +688,9 @@
     var ship = stateAt(e, this.groundY - this.horizonY, this.horizonY);
     return {
       t: t, q: q,
-      z: ship.z * (1 + 0.25 * q),
+      z: ship.z * (1 + 0.6 * q),
       h: Math.max(0, ship.h - 0.03 * Z_FAR * 0.02) * (1 - Math.pow(q, 1.6)),
-      X: ship.X * (1 + 0.25 * q) + START_X * Z_FAR * 0.3 * q,
+      X: ship.X * (1 + 0.6 * q) + START_X * Z_FAR * 0.6 * q,
       heat: Math.exp(-t / 1150),
       phi: 0.35 + t * 0.0019,                   // tumble about a horizontal axis
       roll: 0.18 + 0.22 * Math.sin(t * 0.0012)
@@ -670,10 +717,9 @@
       sh.lastSmoke = e;
       this.smoke.push({ x: p.x, y: p.y, t: e, r: p.unit * 0.22, a: 0.12 * ss.heat + 0.03, seed: Math.random() * 10 });
     }
-    if (ss.q >= 1) {
-      sh.impacted = true;
-      this.plumes.push({ x: p.x, y: p.ground, unit: p.unit, t: e });
-    }
+    // No ground-impact effect by design: the shield simply falls out of
+    // frame, well off to the side — it's gone before it would need one.
+    if (ss.q >= 1) sh.impacted = true;
   };
 
   LandingFX.prototype._drawSeparation = function (ctx, e) {
@@ -937,10 +983,136 @@
     ctx.restore();
   };
 
+  LandingFX.prototype._drawShield = function (ctx, e) {
+    var sh = this.shield;
+    if (!sh || sh.impacted) return;
+    if (!shieldImgReady) return this._drawShieldProcedural(ctx, e);
+    var ss = this._shieldState(e);
+    var p = this._project(ss.z, ss.h, ss.X);
+    var r = p.unit * 0.5;
+    if (r < 0.6) return;
+    var fade = ss.q > 0.9 ? 1 - (ss.q - 0.9) / 0.1 * 0.6 : 1;
+    this._drawShieldPhoto(ctx, p, ss, r, fade, ss.heat);
+  };
+
+  // Uneven ablation char + handling scuffs baked once into an offscreen
+  // texture (same recipe as makePuffSprite): heavier charring toward the
+  // rim (ablation eats the edge first, never symmetrically), scattered
+  // dark blotches and fine scratches — a flown, beaten-up aeroshell, not
+  // a showroom render.
+  var shieldScorchCanvas = null;
+  function shieldScorchTexture() {
+    if (shieldScorchCanvas) return shieldScorchCanvas;
+    var size = 256;
+    var c = document.createElement("canvas");
+    c.width = c.height = size;
+    var x = c.getContext("2d");
+    var rnd = (function (s) { return function () { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; })(50321);
+    var rim = x.createRadialGradient(size * 0.5, size * 0.52, size * 0.14, size * 0.5, size * 0.5, size * 0.54);
+    rim.addColorStop(0, "rgba(20,14,10,0)");
+    rim.addColorStop(0.65, "rgba(20,14,10,0.22)");
+    rim.addColorStop(1, "rgba(8,5,4,0.8)");
+    x.fillStyle = rim;
+    x.fillRect(0, 0, size, size);
+    for (var i = 0; i < 60; i++) {
+      var a = rnd() * Math.PI * 2, d = Math.pow(rnd(), 0.55) * size * 0.5;
+      var bx = size / 2 + Math.cos(a) * d, by = size / 2 + Math.sin(a) * d * 0.92;
+      var br = size * (0.025 + rnd() * 0.09);
+      x.beginPath();
+      x.fillStyle = "rgba(12,8,6," + (0.14 + rnd() * 0.32).toFixed(3) + ")";
+      x.arc(bx, by, br, 0, 6.2832);
+      x.fill();
+    }
+    x.strokeStyle = "rgba(0,0,0,0.22)";
+    x.lineWidth = 1;
+    for (var s = 0; s < 36; s++) {
+      var sx = rnd() * size, sy = rnd() * size, ang = rnd() * Math.PI * 2, len = 5 + rnd() * 20;
+      x.beginPath();
+      x.moveTo(sx, sy);
+      x.lineTo(sx + Math.cos(ang) * len, sy + Math.sin(ang) * len);
+      x.stroke();
+    }
+    shieldScorchCanvas = c;
+    return c;
+  }
+
+  // The shield + its weathering/heat tint, composited on an isolated,
+  // fully-transparent offscreen buffer before ever touching the scene.
+  // "source-atop" only masks to whatever's already ON THAT CANVAS — the
+  // main scene canvas behind the shield is already fully opaque (sky,
+  // storm, terrain), so tinting straight onto it would smear a faint
+  // rectangle onto the background instead of hugging the shield's own
+  // silhouette. Compositing here first, then drawing the one finished,
+  // correctly-alpha-shaped sprite onto the scene, keeps the edge
+  // transparent and seamless. Fixed resolution — this is the source
+  // photo's own aspect ratio, not the on-screen size, which changes
+  // every frame as the shield recedes.
+  var shieldBuf = null;
+  function shieldBuffer() {
+    if (!shieldBuf) {
+      shieldBuf = document.createElement("canvas");
+      shieldBuf.width = 320;
+      shieldBuf.height = Math.round(320 / shieldImgAspect);
+    }
+    return shieldBuf;
+  }
+
+  // The real aeroshell photo (glimpse-landing-00.png), tumbling end over
+  // end as it falls away: a slow in-plane roll plus a vertical squash
+  // that stands in for the tumble's other axis (a flat photo can't truly
+  // turn in 3D). Desaturated and darkened first, then scuffed with the
+  // scorch texture above — the flight-worn look the ask was for, rather
+  // than the clean manufacturing-photo original. A soft plasma-glow halo
+  // trails it, and a radial heat tint — cooling on the same exp() curve
+  // as the engine flames/embers elsewhere in this file — washes hottest
+  // at the rim.
+  LandingFX.prototype._drawShieldPhoto = function (ctx, p, ss, r, fade, heat) {
+    var w = r * 2.5, h = w / shieldImgAspect;
+    if (heat > 0.06) {
+      fillSoftEllipse(ctx, p.x, p.y, r * 2.3, r * 2.3 * (0.3 + 0.34 * Math.abs(Math.cos(ss.phi))), [
+        [0, heatColor(heat, 0.32 * heat)], [1, heatColor(heat, 0)]
+      ], "lighter");
+    }
+
+    var buf = shieldBuffer(), bw = buf.width, bh = buf.height;
+    var bctx = buf.getContext("2d");
+    bctx.clearRect(0, 0, bw, bh);
+    // Light weathering — just enough to read as flown hardware, matching
+    // the ship's own subtle dirt/scuff rather than a heavily charred prop.
+    if ("filter" in bctx) bctx.filter = "saturate(0.78) contrast(1.05) brightness(0.9)";
+    bctx.drawImage(shieldImg, 0, 0, bw, bh);
+    if ("filter" in bctx) bctx.filter = "none";
+    bctx.globalCompositeOperation = "source-atop";
+    bctx.globalAlpha = 0.5;
+    bctx.drawImage(shieldScorchTexture(), 0, 0, bw, bh);
+    bctx.globalAlpha = 1;
+    if (heat > 0.02) {
+      var hg = bctx.createRadialGradient(bw * 0.5, bh * 0.5, 0, bw * 0.5, bh * 0.5, bw * 0.62);
+      hg.addColorStop(0, heatColor(heat * 0.85, 0));
+      hg.addColorStop(0.55, heatColor(heat * 0.85, 0.1 * heat));
+      hg.addColorStop(0.85, heatColor(heat, 0.55 * heat));
+      hg.addColorStop(1, heatColor(Math.min(1, heat * 1.15), 0.8 * heat));
+      bctx.fillStyle = hg;
+      bctx.fillRect(0, 0, bw, bh);
+    }
+    bctx.globalCompositeOperation = "source-over";
+
+    ctx.save();
+    ctx.globalAlpha = fade;
+    ctx.translate(p.x, p.y);
+    ctx.rotate(ss.roll);
+    ctx.scale(1, 0.32 + 0.68 * Math.abs(Math.cos(ss.phi)));
+    ctx.drawImage(buf, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  };
+
   // Charred ablative dish seen from below: dark, faintly tiled face with
   // concentric ablation bands, metallic rim catching the sky, stagnation
-  // face glowing dull orange and cooling from the edge inward.
-  LandingFX.prototype._drawShield = function (ctx, e) {
+  // face glowing dull orange and cooling from the edge inward. Fallback
+  // for the rare case the real photo (glimpse-landing-00.png) hasn't
+  // decoded yet by the time separation fires — separation never waits on
+  // it and never flashes a broken image.
+  LandingFX.prototype._drawShieldProcedural = function (ctx, e) {
     var sh = this.shield;
     if (!sh || sh.impacted) return;
     var ss = this._shieldState(e);
@@ -1601,6 +1773,13 @@
       cam.tx = this._camX + noise(e * 0.01, 1) * 2.2;
       cam.ty += noise(e * 0.01, 5) * 1.6;
       cam.rot = noise(e * 0.006, 9) * 0.08;
+      // Section 2 still: a slow dolly push-in toward the open hatch
+      if (this.still && this._stillT0) {
+        var dk = easeInOutSine(clamp01((performance.now() - this._stillT0) / 18000));
+        cam.scale += 0.06 * dk;
+        cam.tx -= W * 0.012 * dk;
+        cam.ty -= H * 0.012 * dk;
+      }
       if (ts >= 0 && ts < 1100) {
         var amp = Math.exp(-ts / 230);
         cam.sx = noise(e * 1.4, 2) * 7 * amp;
@@ -1664,8 +1843,169 @@
      grows — a far more convincing turn at larger angles.
      --------------------------------------------------------------- */
   LandingFX.prototype.setStill = function (on) {
+    var was = this.still;
     this.still = !!on;
     if (this.still) { this.particles = []; this.rocks = []; this.trail = []; this.wake = []; this.smoke = []; }
+    if (this.still && !was) { this._stillT0 = performance.now(); this._motes = []; }
+  };
+
+  /* ---------------------------------------------------------------
+     HATCH SCENE (Section 2 still): the cinematic layer around frame
+     034's open hatch, all in frame-034 px run through the same
+     perspective warp as the ship, so it holds to the camera angle.
+       - lights-on: the airlock interior flickers on as the shot opens
+       - vent: vapour bursts from both sides of the hatch as it
+         equalises, then a smaller vent every few seconds
+       - beam: a warm volumetric spill from the doorway down the ramp
+         to the soil, with slowly shifting rays + a light pool below
+       - motes: dust drifting through the beam, twinkling in the light
+       - flare: a soft anamorphic streak on the hatch's top light strip
+       - ground haze: low dust rolling across in front of the ship
+     t = ms since the still shot started.
+     --------------------------------------------------------------- */
+  var HATCH = {
+    top: 600, sill: 835, left: 950, right: 1165,       // doorway opening
+    groundY: 1090, groundL: 880, groundR: 1560,         // where the beam lands
+    lights: [1058, 578]                                 // top light strip centre
+  };
+
+  function hatchLightsOn(t) {
+    if (t < 250) return 0;
+    if (t < 330) return 0.9;
+    if (t < 470) return 0.15;
+    if (t < 540) return 1;
+    if (t < 640) return 0.35;
+    return 0.55 + 0.45 * easeOutCubic(clamp01((t - 640) / 800));
+  }
+
+  // cone (u across 0..1, v down 0..1) -> frame-034 px
+  function hatchCone(u, v) {
+    var y = HATCH.top + (HATCH.groundY - HATCH.top) * v;
+    var l = HATCH.left + (HATCH.groundL - HATCH.left) * v;
+    var r = HATCH.right + (HATCH.groundR - HATCH.right) * v;
+    return [l + (r - l) * u, y];
+  }
+
+  LandingFX.prototype._hatchT = function () {
+    return this.reduceMotion ? 1e5 : performance.now() - (this._stillT0 || performance.now());
+  };
+
+  // Behind the ship: the pool of hatch light where the ramp meets the soil.
+  LandingFX.prototype._drawHatchGround = function (b, L, pose, alpha) {
+    var t = this._hatchT(), on = hatchLightsOn(t) * alpha;
+    if (on <= 0.01) return;
+    var k = this._rectFor34(L).k;
+    var c = this._warpPoint34(L, pose, 1175, HATCH.groundY - 12);
+    fillSoftEllipse(b, c.x, c.y, 330 * k * c.s, 52 * k * c.s, [
+      [0, rgba(255, 176, 98, 0.55 * on)], [0.5, rgba(240, 132, 62, 0.22 * on)], [1, "rgba(220,110,50,0)"]
+    ], "lighter");
+  };
+
+  // In front of the ship: beam, rays, motes, vent vapour, flare, haze.
+  LandingFX.prototype._drawHatchFX = function (f, L, pose, alpha, dt) {
+    var t = this._hatchT();
+    var k = this._rectFor34(L).k, self = this;
+    var flick = 0.94 + 0.06 * noise(t * 0.01, 11);
+    var on = hatchLightsOn(t) * flick * alpha;
+    function P(x, y) { return self._warpPoint34(L, pose, x, y); }
+
+    f.save();
+    f.globalCompositeOperation = "lighter";
+
+    // interior glow in the doorway
+    var dc = P((HATCH.left + HATCH.right) / 2, (HATCH.top + HATCH.sill) / 2);
+    fillSoftEllipse(f, dc.x, dc.y, 300 * k * dc.s, 250 * k * dc.s, [
+      [0, rgba(255, 176, 96, 0.4 * on)], [0.45, rgba(245, 136, 64, 0.16 * on)], [1, "rgba(220,110,50,0)"]
+    ]);
+
+    // volumetric beam: one soft cone + a few drifting rays
+    if (on > 0.01) {
+      var q = [hatchCone(0, 0.3), hatchCone(1, 0.3), hatchCone(1, 1), hatchCone(0, 1)].map(function (pt) { return P(pt[0], pt[1]); });
+      var g = f.createLinearGradient(0, q[0].y, 0, q[2].y);
+      g.addColorStop(0, "rgba(255,180,104,0)");
+      g.addColorStop(0.25, rgba(255, 184, 108, 0.32 * on));
+      g.addColorStop(0.7, rgba(245, 140, 70, 0.16 * on));
+      g.addColorStop(1, "rgba(230,120,55,0)");
+      f.fillStyle = g;
+      f.beginPath(); f.moveTo(q[0].x, q[0].y); f.lineTo(q[1].x, q[1].y); f.lineTo(q[2].x, q[2].y); f.lineTo(q[3].x, q[3].y); f.closePath(); f.fill();
+      for (var i = 0; i < 6; i++) {
+        var u = 0.1 + i * 0.16 + 0.03 * Math.sin(t / 2600 + i * 1.7);
+        var w = 0.035 + 0.02 * Math.sin(t / 3100 + i);
+        var ra = (0.14 + 0.1 * Math.sin(t / 1900 + i * 2.3)) * on;
+        var a0 = P.apply(null, hatchCone(u - w, 0.32)), a1 = P.apply(null, hatchCone(u + w, 0.32));
+        var b1 = P.apply(null, hatchCone(u + w * 1.8, 1)), b0 = P.apply(null, hatchCone(u - w * 1.8, 1));
+        var rg = f.createLinearGradient(0, a0.y, 0, b0.y);
+        rg.addColorStop(0, "rgba(255,196,128,0)");
+        rg.addColorStop(0.2, rgba(255, 200, 134, ra));
+        rg.addColorStop(1, "rgba(240,140,70,0)");
+        f.fillStyle = rg;
+        f.beginPath(); f.moveTo(a0.x, a0.y); f.lineTo(a1.x, a1.y); f.lineTo(b1.x, b1.y); f.lineTo(b0.x, b0.y); f.closePath(); f.fill();
+      }
+    }
+
+    // dust motes in the beam
+    if (!this.reduceMotion && on > 0.01) {
+      var motes = this._motes || (this._motes = []);
+      var sec = (dt || 16.7) / 1000;
+      while (motes.length < 80) motes.push({ u: Math.random(), v: 0.42 + Math.random() * 0.58, vu: rand(-0.012, 0.012), vv: rand(-0.02, 0.01), age: 0, life: rand(3, 8), sz: rand(1, 2.6), ph: Math.random() * 6.28 });
+      for (var m = motes.length - 1; m >= 0; m--) {
+        var d = motes[m];
+        d.age += sec;
+        d.u += (d.vu + 0.006 * Math.sin(t / 1500 + d.ph)) * sec;
+        d.v += d.vv * sec;
+        if (d.age > d.life || d.u < 0 || d.u > 1 || d.v < 0.4 || d.v > 1) { motes.splice(m, 1); continue; }
+        var mp = P.apply(null, hatchCone(d.u, d.v));
+        var edge = Math.min(d.u, 1 - d.u) * 5;
+        var ma = Math.sin(Math.PI * d.age / d.life) * clamp01(edge) * (0.35 + 0.65 * (1 - d.v)) *
+          (0.55 + 0.45 * Math.sin(t / 260 + d.ph * 3)) * on;
+        var rr = d.sz * this.dpr * mp.s;
+        f.fillStyle = rgba(255, 230, 190, ma);
+        f.beginPath(); f.arc(mp.x, mp.y, rr, 0, 6.2832); f.fill();
+        if (d.sz > 1.7) fillSoftEllipse(f, mp.x, mp.y, rr * 4, rr * 4, [[0, rgba(255, 196, 130, 0.4 * ma)], [1, "rgba(255,170,90,0)"]]);
+      }
+    }
+
+    // anamorphic flare on the top light strip
+    var lp = P(HATCH.lights[0], HATCH.lights[1]);
+    drawStreak(f, lp.x, lp.y, 420 * k * lp.s, Math.max(1, 2.6 * k * lp.s), 0.55 * on * (0.8 + 0.2 * Math.sin(t / 1300)));
+    f.restore();
+
+    // vent vapour: a strong burst as the hatch equalises, then smaller
+    // vents on a loop; pale, not additive, so it reads as vapour
+    if (!this.reduceMotion) {
+      var cycle = 9000, first = t < cycle;
+      var ct = first ? t - 700 : (t - 700) % cycle;
+      var strength = first ? 1 : 0.55;
+      var sides = [[930, 1000, -1], [1330, 1010, 1]];     // under the hull, either side of the ramp
+      for (var sI = 0; sI < 2; sI++) {
+        for (var j = 0; j < 9; j++) {
+          var age = ct - j * 90 - sI * 70;
+          if (age < 0 || age > 3600) continue;
+          var pr = age / 3600;
+          var jit = Math.sin(j * 12.9898 + sI * 78.233) * 0.5 + 0.5;   // stable per-puff variety
+          var out = easeOutPow(pr, 2.2) * (220 + jit * 200);           // rolls out along the soil
+          var sx = sides[sI][0] + sides[sI][2] * out + Math.sin(t / 400 + j) * 6;
+          var sy = sides[sI][1] + jit * 50 - easeOutPow(pr, 1.3) * (40 + jit * 90);  // hugs the ground, lifts late
+          var vp = P(sx, sy);
+          var vr = (22 + pr * (110 + jit * 80)) * k * vp.s;
+          var fin = clamp01(age / 600); fin = fin * fin * (3 - 2 * fin);
+          var va = Math.pow(1 - pr, 1.4) * fin * 0.42 * strength * alpha;
+          fillSoftEllipse(f, vp.x, vp.y, vr * (1.3 + jit * 0.6), vr * (0.7 + jit * 0.3), [
+            [0, rgba(232, 208, 186, va)], [0.4, rgba(218, 186, 160, va * 0.55)], [1, "rgba(200,160,130,0)"]
+          ]);
+        }
+      }
+
+      // low ground haze rolling across the front of the shot
+      var W = this.frontCanvas.width, Hh = this.frontCanvas.height;
+      for (var h = 0; h < 3; h++) {
+        var hx = ((t * 0.018 * (1 + h * 0.4) * this.dpr + h * W * 0.47) % (W * 1.7)) - W * 0.35;
+        var hy = L.feetY + (h - 0.6) * Hh * 0.025;
+        fillSoftEllipse(f, hx, hy, W * 0.34, Hh * 0.04, [
+          [0, rgba(186, 112, 66, 0.12 * alpha)], [0.6, rgba(170, 98, 56, 0.05 * alpha)], [1, "rgba(160,90,50,0)"]
+        ]);
+      }
+    }
   };
 
   // Frame-033 pixel -> canvas px under the pose, with perspective.
@@ -1681,6 +2021,51 @@
     var hz = this.backCanvas.height * this.horizonY;
     var ground = hz + (gy - hz) * sc;                 // the ground line at that depth
     return { x: gx + dx + xr * Math.cos(yaw) * sc, y: ground - (gy - Y) * sc, s: sc };
+  };
+
+  // Same idea as rectFor(FINAL_IDX), but for frame 034 (Section 2 only):
+  // its own (cx, feet) land on the layout's screen hull-centre/feet —
+  // no SEQ_LOGO dissolve-continuity math, since 034 never dissolves in
+  // from frame 032, it just appears.
+  LandingFX.prototype._rectFor34 = function (L) {
+    var k = L.k33 * (F33.scale / F34.scale);
+    return { x: L.shipCX - F34.cx * k, y: L.feetY - F34.feet * k, w: F34.w * k, h: F34.h * k, k: k };
+  };
+
+  // Frame-034 pixel -> canvas px under the pose, with perspective —
+  // identical math to _warpPoint, just against F34's own rect/cx/feet.
+  LandingFX.prototype._warpPoint34 = function (L, pose, px, py) {
+    var r = this._rectFor34(L), k = r.k;
+    var gx = r.x + F34.cx * k, gy = r.y + F34.feet * k;
+    var X = r.x + px * k, Y = r.y + py * k;
+    var yaw = (pose && pose.yaw || 0) * Math.PI / 180;
+    var dx = (pose && pose.dx || 0) * this.backCanvas.width;
+    var focal = L.shipW * 2.6;
+    var xr = X - gx;
+    var sc = focal / Math.max(focal * 0.2, focal + xr * Math.sin(yaw));
+    var hz = this.backCanvas.height * this.horizonY;
+    var ground = hz + (gy - hz) * sc;
+    return { x: gx + dx + xr * Math.cos(yaw) * sc, y: ground - (gy - Y) * sc, s: sc };
+  };
+
+  // Frame 034, warped the same way frame 033 is (see _drawShipWarped) —
+  // sliced into vertical strips so the "turn to face right" pose reads
+  // as perspective, not a flat skew. No dust-mask cleanup needed: unlike
+  // 033's photographed dust, 034 is a clean render.
+  LandingFX.prototype._drawShip34Warped = function (ctx, L, pose, alpha) {
+    if (!f34ImgReady) return this._drawShipWarped(ctx, L, pose, alpha); // frame 033 until it decodes
+    var r = this._rectFor34(L);
+    var N = 96, sw = F34.w / N;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    for (var i = 0; i < N; i++) {
+      var a = this._warpPoint34(L, pose, i * sw, 0), b = this._warpPoint34(L, pose, (i + 1) * sw, 0);
+      var m = this._warpPoint34(L, pose, (i + 0.5) * sw, 0);
+      var w = b.x - a.x;
+      if (w <= 0) continue;
+      ctx.drawImage(f34Img, i * sw, 0, sw, F34.h, a.x, m.y, w + 0.8, r.h * m.s);
+    }
+    ctx.restore();
   };
 
   // A clean copy of frame 033 for the still shot: the painted dust band
@@ -1738,6 +2123,14 @@
     ctx.restore();
   };
 
+  // The GLIMPSE mothership, drifting past in the far sky (glimpse-orbiter.js).
+  // Drawn straight in screen space — no camera transform — since at that
+  // distance the terrain's push-in/shake would never actually move it.
+  LandingFX.prototype._drawOrbiter = function (ctx) {
+    if (this.reduceMotion || typeof GlimpseOrbiter === "undefined") return;
+    GlimpseOrbiter.draw(ctx, this.frontCanvas.width, this.frontCanvas.height, { dpr: this.dpr });
+  };
+
   LandingFX.prototype._renderStill = function (e, dt) {
     this._lastElapsed = e;
     var st = { phase: "landed", v: FINAL_IDX, z: 1, h: 0, X: 0, tilt: 0, clear: 1 };
@@ -1747,31 +2140,38 @@
     var b = this.backCtx, f = this.frontCtx;
 
     b.clearRect(0, 0, this.backCanvas.width, this.backCanvas.height);
-    if (this.sky) this.sky.draw(b, this);   // Martian night sky (sky-fx.js) — behind the storm
-    this._drawStorm(b, e);
-    // soft ground shadow + contact shadows under the (warped) pads
-    var c = this._warpPoint(L, pose, F33.cx, F33.feet);
+    if (this.sky) this.sky.draw(b, this);   // Martian night sky (sky-fx.js)
+    // No storm wall here by design: that belongs to the active landing
+    // shot (Section 1) alone. Section 2's calm, already-landed view
+    // matches every later chapter — sky + terrain, no swirling "smoke"
+    // behind the ship.
+    // soft ground shadow + contact shadows under the (warped) pads —
+    // frame 034's own three legs.
+    var c = this._warpPoint34(L, pose, F34.cx, F34.feet);
     fillSoftEllipse(b, c.x, c.y, L.shipW * 0.52 * c.s, L.shipW * 0.07 * c.s, [
       [0, rgba(26, 12, 7, 0.42 * ps.alpha)], [0.6, rgba(26, 12, 7, 0.2 * ps.alpha)], [1, "rgba(26,12,7,0)"]
     ]);
-    for (var i = 0; i < 2; i++) {
-      var pp = this._warpPoint(L, pose, F33.pads[i], F33.feet);
-      var rx = F33.padW[i] * L.k33 * 0.62 * pp.s;
+    for (var i = 0; i < F34.pads.length; i++) {
+      var pp = this._warpPoint34(L, pose, F34.pads[i], F34.feet);
+      var rx = F34.padW[i] * L.k33 * (F33.scale / F34.scale) * 0.62 * pp.s;
       fillSoftEllipse(b, pp.x, pp.y + rx * 0.02, rx, rx * 0.18, [
         [0, rgba(14, 6, 3, 0.62 * ps.alpha)], [0.55, rgba(20, 9, 5, 0.3 * ps.alpha)], [1, "rgba(20,9,5,0)"]
       ]);
     }
 
+    this._drawHatchGround(b, L, pose, ps.alpha);
+
     var sctx = this.sequence.ctx;
     sctx.clearRect(0, 0, sctx.canvas.width, sctx.canvas.height);
-    this._drawShipWarped(sctx, L, pose, ps.alpha);
+    this._drawShip34Warped(sctx, L, pose, ps.alpha);
 
     f.clearRect(0, 0, this.frontCanvas.width, this.frontCanvas.height);
+    if (f34ImgReady) this._drawHatchFX(f, L, pose, ps.alpha, dt);
     // anti-collision strobe on the spire, same double blink
     var ph = e % 1800;
     var on = (ph < 70 ? 1 - ph / 70 * 0.3 : (ph > 230 && ph < 300 ? 1 - (ph - 230) / 70 * 0.3 : 0)) * ps.alpha;
     if (on) {
-      var bp = this._warpPoint(L, pose, F33_SPIRE[0], F33_SPIRE[1]);
+      var bp = this._warpPoint34(L, pose, F34_SPIRE[0], F34_SPIRE[1]);
       var br = Math.max(2 * this.dpr, L.shipW * 0.018) * bp.s;
       fillSoftEllipse(f, bp.x, bp.y, br * 4, br * 4, [[0, rgba(255, 60, 40, 0.45 * on)], [1, "rgba(255,40,30,0)"]], "lighter");
       fillSoftEllipse(f, bp.x, bp.y, br, br, [[0, rgba(255, 235, 225, on)], [0.5, rgba(255, 80, 60, 0.8 * on)], [1, "rgba(255,40,30,0)"]], "lighter");
@@ -1779,6 +2179,12 @@
     }
 
     if (this.sky) this.sky.drawLabels(f, this);
+    this._drawOrbiter(f);
+    // The ambient storm cell (glimpse-orbiter.js's sibling, ambient-
+    // storm.js), same top-right spot as every chapter.
+    if (typeof AmbientStorm !== "undefined" && !this.reduceMotion) {
+      AmbientStorm.draw(f, this.frontCanvas.width, this.frontCanvas.height);
+    }
     this._camera(e, L);
     var info = { elapsed: e, phase: "still", ship: this._toScreen(c.x, c.y), shipWidth: L.shipW / this.dpr, shake: { x: 0, y: 0 }, telemetry: { alt: 0, vel: 0, dist: 0, t: e } };
     if (this.onFrame) this.onFrame(info);
@@ -1835,6 +2241,13 @@
     this._drawDust(f, "front");
     this._drawRocks(f, true);
     if (this.sky) this.sky.drawLabels(f, this);
+    this._drawOrbiter(f);
+    // The ambient storm cell also rides over the landing shot, same
+    // top-right spot as every other chapter, so it's there from the very
+    // first section and carries straight through.
+    if (typeof AmbientStorm !== "undefined" && !this.reduceMotion) {
+      AmbientStorm.draw(f, this.frontCanvas.width, this.frontCanvas.height);
+    }
 
     this._camera(e, L);
 
@@ -1878,6 +2291,586 @@
       self._idleRAF = requestAnimationFrame(tick);
     }
     this._idleRAF = requestAnimationFrame(tick);
+  };
+
+  /* ===============================================================
+     ASCENT — "Link established": the landing played back the other way.
+     The About storybook's second-to-last page (about-story.js) reuses
+     this whole compositor (same sky, storm, camera rig, calibrated
+     ground line and ship placement) and flies the ship home:
+
+       0.0s  PAD         Frame 033 on the pad, beacon blinking.
+       1.6s  IGNITION    Main engines light: 033 dissolves into the
+                         burning frames, dust boils off the pad.
+       2.8s  LIFTOFF     Frames run 022 -> 001 as the ship climbs; the
+                         launch throws a dust wall across the plain.
+                         Exhaust trail, shake, flash.
+       5.2s  PITCH       The ship arcs up toward the GLIMPSE orbiter (the
+                         same small ship that drifts through every page),
+                         shrinking into the distance on its own plume; the
+                         habitat (frame 039) emerges from the settling
+                         dust where the ship stood.
+      10.6s  RENDEZVOUS  The ship reaches the exact point in the sky where
+                         Section 1's descent began (frame 001's start),
+                         just as the orbiter's pass crosses it
+                         (GlimpseOrbiter.syncX), and joins it — no
+                         docking close-up.
+      11.4s  BOOM IN     Rendezvous confirmed: the whole shot booms in on
+                         the habitat — a ~2x dolly push with a crane arc
+                         and a settling roll, dust streaking past the lens,
+                         the dome lights blooming as it lands. The sky
+                         (stars, orbiter, storm cell) stays put, as far
+                         things do, so the links stretch up to it.
+      12.0s  LINK        The habitat's dishes throw live data links up to
+                         the orbiter, locked on it as it drifts on.
+      13.8s  DONE        Caption time (about-story.js); links keep
+                         pulsing until reset().
+     Every frame reports the ship / habitat / orbiter screen points and
+     telemetry to the callback passed to playAscent(), for the HUD.
+     =============================================================== */
+  var ASCENT = {
+    ignite: 1600, lift: 2800, pitch: 5200, insert: 7600, rendezvous: 9000,
+    dock: 10600, merge: 11200, link: 12000, approach: 11400, done: 14200
+  };
+  var BOOM_MS = 2700;                 // the camera's boom-in to the habitat once the rendezvous is confirmed
+  var BOOM_ZOOM = 1.85;               // how far it pushes in (whole frame)
+  var ASC_E = 1e6;                    // landing-clock offset: every "after touchdown" effect is fully on
+  var ASC_IGNITE_IDX = 21;            // frame 022: engines at full burn, ship still on the pad
+  var ASC_CLIMB_IDX = 12;             // frame 013: where the lift-off hands over to the climb
+
+  var HAB_IMG_SRC = "../static/assets/about/glimpse-habitat-039.png";
+  var HAB = {
+    w: 1525, h: 975, z: 2.4, X: -0.04, width: 1.25, base: 0.985,            // width: hull widths
+    dishes: [[0.8156, 0.1484], [0.106, 0.313], [0.3605, 0.3518], [0.301, 0.535]],
+    beacons: [[0.2112, 0.094], [0.2525, 0.1384], [0.4355, 0.22], [0.6508, 0.1269], [0.6919, 0.0452], [0.916, 0.442], [0.323, 0.3805]],
+    dome: [0.628, 0.52], door: [0.641, 0.707], top: [0.637, 0.26]
+  };
+  var habImg = null;
+  function loadAscentArt() {
+    if (habImg) return;
+    habImg = new Image(); habImg.decoding = "async"; habImg.src = HAB_IMG_SRC;
+  }
+  function imgReady(img) { return img && img.complete && img.naturalWidth > 0; }
+  function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function easeInPow(t, p) { return Math.pow(t, p); }
+
+  LandingFX.ASCENT = ASCENT;
+  LandingFX.preloadAscent = loadAscentArt;
+
+  // Start the ascent shot. onFrame(info) is called every frame.
+  LandingFX.prototype.playAscent = function (onFrame) {
+    loadAscentArt();
+    this.reset();
+    this._prepareFinal();
+    this.ascent = { onFrame: onFrame || null, trail: [], stormed: false, lastTrail: -1e9 };
+    // Time the orbiter's pass so it crosses the descent's start point just
+    // as the ship gets there.
+    if (typeof GlimpseOrbiter !== "undefined") {
+      var m = this._descentStart();
+      GlimpseOrbiter.syncX(m.x / this.frontCanvas.width, this.reduceMotion ? 0 : ASCENT.dock, this.frontCanvas.width, this.frontCanvas.height);
+    }
+    var self = this;
+    if (this.reduceMotion) { this._renderAscent(ASCENT.done + 4000, 0); return; }
+    var start = null, last = null;
+    function tick(ts) {
+      if (!self.ascent) return;
+      if (start === null) start = ts;
+      var dt = last == null ? 16.6667 : Math.min(100, ts - last);
+      last = ts;
+      self._renderAscent(ts - start, dt);
+      self._idleRAF = requestAnimationFrame(tick);
+    }
+    this._idleRAF = requestAnimationFrame(tick);
+  };
+
+  // Where Section 1's descent begins: the ship's screen point (and hull
+  // width) at the start of the glide, frame 001. Canvas px.
+  LandingFX.prototype._descentStart = function () {
+    var L = this._layout(stateAt(SEP, this.groundY - this.horizonY, this.horizonY));
+    return { x: L.shipCX, y: L.pivotY, w: L.shipW };
+  };
+
+  // The GLIMPSE orbiter (glimpse-orbiter.js, its usual size and pass):
+  // where it is now, and where it will be at the rendezvous — the point
+  // the ship flies to. Canvas px.
+  LandingFX.prototype._ascentOrbiter = function (a) {
+    var cw = this.frontCanvas.width, ch = this.frontCanvas.height;
+    if (typeof GlimpseOrbiter === "undefined") {
+      var m = this._descentStart();
+      var fixed = { x: m.x, y: m.y, iw: m.w, ih: m.w * 0.6, node: { x: m.x, y: m.y } };
+      return { live: fixed, meet: { x: m.x, y: m.y, w: m.w * 0.4 } };
+    }
+    // It's drawn in screen space (it's in the sky: the camera never moves
+    // it), so its points are mapped back through the camera into the
+    // world layers the ship and the links are drawn in.
+    var live = GlimpseOrbiter.position(cw, ch);
+    var at = GlimpseOrbiter.position(cw, ch, Math.max(0, ASCENT.dock - a));
+    var ln = this._unCam(live.node.x, live.node.y), lc = this._unCam(live.x, live.y), mt = this._unCam(at.node.x, at.node.y);
+    // the ship arrives a touch smaller than the orbiter it's rejoining
+    return { live: { x: lc.x, y: lc.y, iw: live.iw, ih: live.ih, node: ln, screenNode: live.node },
+      meet: { x: mt.x, y: mt.y, w: at.iw * 0.42 } };
+  };
+
+  // Flight state for ascent time a: a landing-style state (so every
+  // existing effect can draw from it) plus ship alpha / dock progress.
+  LandingFX.prototype._ascentState = function (a, orb) {
+    var cw = this.backCanvas.width, ch = this.backCanvas.height;
+    var G = (this.groundY - this.horizonY) * ch, hor = ch * this.horizonY;
+    var st = { phase: "landed", v: FINAL_IDX, z: 1, h: 0, X: 0, tilt: 0, clear: 1 };
+    var out = { st: st, alpha: 1, ignite: 0, dock: 0, flying: false };
+    if (a < ASCENT.ignite) return out;
+    if (a < ASCENT.lift) {
+      out.ignite = easeInOutSine(clamp01((a - ASCENT.ignite) / 700));
+      st.v = ASC_IGNITE_IDX; st.clear = null;
+      st.tilt = wobble(a, 0.002) * out.ignite;
+      return out;
+    }
+    out.ignite = 1; out.flying = true; st.clear = null;
+    var L0 = this._layout({ z: 1, h: 0, X: 0, tilt: 0 });
+    var W0 = L0.shipW;
+    // lift-off: straight up off the pad, accelerating
+    var u = clamp01((a - ASCENT.lift) / (ASCENT.pitch - ASCENT.lift));
+    var hL = 0.3 * easeInPow(u, 1.8);
+    var zL = 1 + 0.4 * u * u;
+    if (a < ASCENT.pitch) {
+      st.v = lerp(ASC_IGNITE_IDX, ASC_CLIMB_IDX, u);
+      st.h = hL; st.z = zL; st.X = 0; st.tilt = wobble(a, 0.004);
+      return out;
+    }
+    // climb: a curve from the top of the lift-off up to the docking node,
+    // the hull shrinking (log scale) from its lift-off size to a speck
+    var Le = this._layout({ z: 1.4, h: 0.3, X: 0, tilt: 0 });
+    var p0 = { x: Le.shipCX, y: Le.pivotY };
+    var Wd = orb.meet.w;                // frame 001's size at the start of the descent
+    var p2 = { x: orb.meet.x, y: orb.meet.y };
+    var p1 = { x: lerp(p0.x, p2.x, 0.08), y: lerp(p0.y, p2.y, 0.72) };
+    var w = clamp01((a - ASCENT.pitch) / (ASCENT.dock - ASCENT.pitch));
+    var k = easeInOutCubic(w);
+    var q = 1 - k;
+    var sx = q * q * p0.x + 2 * q * k * p1.x + k * k * p2.x;
+    var sy = q * q * p0.y + 2 * q * k * p1.y + k * k * p2.y;
+    var tx = 2 * q * (p1.x - p0.x) + 2 * k * (p2.x - p1.x);
+    var ty = 2 * q * (p1.y - p0.y) + 2 * k * (p2.y - p1.y);
+    var W1 = Le.shipW;
+    var Wk = W1 * Math.pow(Wd / W1, easeOutPow(w, 1.35));
+    if (a >= ASCENT.dock) {
+      // rendezvous: it simply joins the orbiter at that point
+      var m = clamp01((a - ASCENT.dock) / (ASCENT.merge - ASCENT.dock));
+      out.dock = m;
+      out.alpha = 1 - easeInOutSine(m);
+      sx = orb.live.node.x; sy = orb.live.node.y; tx = 0.3; ty = -1;
+      if (a >= ASCENT.merge) out.alpha = 0;
+    }
+    var z = W0 / Math.max(1e-3, Wk);
+    var s = (this._layout({ z: 1, h: 0, X: 0 }).s) / z;
+    var feetY = sy + SHIP_HEIGHT * 0.45 * s;
+    st.z = z;
+    st.X = (sx / cw - 0.5) * z;
+    st.h = (G - (feetY - hor) * z) / ch;
+    st.v = lerp(ASC_CLIMB_IDX, 0, clamp01(w * 1.25));
+    var lean = Math.atan2(tx, -ty);
+    st.tilt = Math.max(-0.2, Math.min(0.2, lean * 0.3)) * (1 - out.dock) + wobble(a, 0.003);
+    return out;
+  };
+
+  // The ship: 033 on the pad, dissolving into the burning frames at
+  // ignition, then the sequence played backwards as it climbs.
+  LandingFX.prototype._drawAscentShip = function (a, S, L) {
+    var seq = this.sequence;
+    if (!seq) return;
+    if (S.alpha <= 0.002) { seq.ctx.clearRect(0, 0, seq.canvas.width, seq.canvas.height); return; }
+    var fin = this._finalReady ? FINAL_IDX : LAST_SEQ;
+    var st = S.st;
+    var rot = L.tilt ? { angle: L.tilt, x: L.shipCX, y: L.pivotY } : null;
+    if (S.ignite <= 0) {
+      seq.drawBlend(fin, L.rectFor(fin), fin, L.rectFor(fin), 0, { alpha: S.alpha });
+      return;
+    }
+    if (!S.flying) {
+      seq.drawBlend(fin, L.rectFor(fin), ASC_IGNITE_IDX, L.rectFor(ASC_IGNITE_IDX), S.ignite, {
+        mode: "over", alphaA: 1 - Math.pow(S.ignite, 1.6), alphaB: clamp01(S.ignite * 1.4),
+        fadeB: { x: 0.14, bottom: 0.12 }, rotate: rot
+      });
+      return;
+    }
+    var v = Math.max(0, Math.min(ASC_IGNITE_IDX, st.v));
+    var i1 = Math.ceil(v), i0 = Math.max(0, i1 - 1), t = v - i0;
+    if (i1 === i0) t = 0;
+    var far = clamp01((st.z - 1) / (Z_FAR - 1));
+    var haze = Math.pow(far, 0.6) * 0.7;
+    var filter = haze > 0.02
+      ? "brightness(" + lerp(1, 0.82, haze).toFixed(3) + ") contrast(" + lerp(1, 0.7, haze).toFixed(3) +
+        ") saturate(" + lerp(1, 0.6, haze).toFixed(3) + ") sepia(" + lerp(0, 0.3, haze).toFixed(3) + ")"
+      : "none";
+    var lowFade = 1 - clamp01(st.h / 0.2);
+    seq.drawBlend(i0, L.rectFor(i0), i1, L.rectFor(i1), t, {
+      alpha: S.alpha, filter: filter, rotate: rot,
+      fadeX: lerp(0.08, 0.14, lowFade), fadeBottom: lerp(0.03, 0.12, lowFade)
+    });
+  };
+
+  // Far-flight plume: once the baked flames run out (frames 001-008)
+  // the ship keeps burning on a live plume, bloom and streak.
+  LandingFX.prototype._drawAscentPlume = function (ctx, L, st, a, alpha) {
+    var baked = flameLenAt(Math.max(0, Math.min(LAST_SEQ, st.v)));
+    var amt = clamp01((150 - baked) / 110) * alpha;
+    if (amt <= 0.01) return;
+    var far = clamp01((st.z - 1) / (Z_FAR - 1));
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    if (L.tilt) { ctx.translate(L.shipCX, L.pivotY); ctx.rotate(L.tilt); ctx.translate(-L.shipCX, -L.pivotY); }
+    for (var n = 0; n < NOZZLES.length; n++) {
+      var nx = L.shipCX + NOZZLES[n] * L.shipW, ny = L.nozzleY;
+      var fl = 0.85 + 0.15 * noise(a * 0.9, n * 7 + 1);
+      var len = L.shipW * lerp(0.55, 1.4, far) * fl;
+      var wid = Math.max(1.2 * this.dpr, L.shipW * 0.05);
+      var g = ctx.createLinearGradient(0, ny, 0, ny + len);
+      g.addColorStop(0, rgba(255, 250, 235, 0.95 * amt));
+      g.addColorStop(0.12, rgba(255, 214, 140, 0.8 * amt));
+      g.addColorStop(0.45, rgba(255, 140, 50, 0.4 * amt));
+      g.addColorStop(1, "rgba(229,90,30,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(nx - wid, ny);
+      ctx.quadraticCurveTo(nx - wid * 1.6, ny + len * 0.35, nx, ny + len);
+      ctx.quadraticCurveTo(nx + wid * 1.6, ny + len * 0.35, nx + wid, ny);
+      ctx.closePath();
+      ctx.fill();
+      var r = Math.max(3 * this.dpr, L.shipW * 0.12) * lerp(1, 2.6, far);
+      fillSoftEllipse(ctx, nx, ny + r * 0.2, r, r * 1.3, [
+        [0, rgba(255, 244, 220, 0.8 * amt * fl)], [0.3, rgba(255, 190, 100, 0.4 * amt)], [1, "rgba(229,125,35,0)"]
+      ]);
+    }
+    ctx.restore();
+    drawStreak(ctx, L.shipCX, L.nozzleY, this.backCanvas.width * lerp(0.08, 0.22, far),
+      Math.max(1.2 * this.dpr, L.shipW * 0.012), 0.45 * amt);
+  };
+
+  // Exhaust column: puffs laid along the flight path that swell, drift
+  // and cool — a smoke trail hanging in the sky behind the ship.
+  LandingFX.prototype._updateAscentTrail = function (a, L, st, S) {
+    var tr = this.ascent.trail;
+    if (S.flying && S.alpha > 0.3 && a - this.ascent.lastTrail > 45) {
+      this.ascent.lastTrail = a;
+      tr.push({ x: L.shipCX, y: L.nozzleY + L.shipW * 0.2, t: a, r: Math.max(2.5 * this.dpr, L.shipW * 0.16), low: st.h < 0.35 });
+    }
+    while (tr.length && a - tr[0].t > 7000) tr.shift();
+  };
+
+  LandingFX.prototype._drawAscentTrail = function (ctx, a) {
+    var tr = this.ascent.trail;
+    for (var i = 0; i < tr.length; i++) {
+      var d = tr[i], age = (a - d.t) / 7000;
+      if (age < 0.01) continue;
+      var r = d.r * (1 + age * (d.low ? 5 : 3.2));
+      var al = (d.low ? 0.2 : 0.16) * Math.pow(1 - age, 1.6) * clamp01(age * 12);
+      fillSoftEllipse(ctx, d.x + age * r * 0.4, d.y + age * d.r * 0.6, r, r * 0.85, [
+        [0, rgba(lerp(250, 196, age), lerp(200, 150, age), lerp(160, 128, age), al)],
+        [0.6, rgba(180, 130, 110, al * 0.4)],
+        [1, "rgba(160,110,90,0)"]
+      ]);
+    }
+  };
+
+  // Ground-plane art at world depth z / lateral X (feet on the terrain).
+  LandingFX.prototype._groundArt = function (img, z, X, widthUnits, imgW, imgH, base) {
+    var p = this._project(z, 0, X);
+    var w = p.unit * widthUnits, h = w * imgH / imgW;
+    return { x: p.x - w / 2, y: p.ground - h * (base || 1), w: w, h: h, unit: p.unit, ground: p.ground, cx: p.x };
+  };
+
+  LandingFX.prototype._drawHabitatAscent = function (b, a) {
+    if (!imgReady(habImg)) return null;
+    var al = easeInOutSine(clamp01((a - (ASCENT.lift + 900)) / 3400));
+    var r = this._groundArt(habImg, HAB.z, HAB.X, HAB.width, HAB.w, HAB.h, HAB.base);
+    r.alpha = al;
+    if (al <= 0.01) return r;
+    b.save();
+    b.globalAlpha = al;
+    fillSoftEllipse(b, r.cx, r.ground, r.w * 0.56, r.w * 0.05, [[0, "rgba(24,10,5,0.6)"], [1, "rgba(24,10,5,0)"]]);
+    b.filter = "brightness(0.88) saturate(0.84) contrast(0.95) sepia(0.12)";
+    b.drawImage(habImg, r.x, r.y, r.w, r.h);
+    b.filter = "none";
+    b.restore();
+    return r;
+  };
+
+  // Habitat lights on the front layer: dome glow, red mast strobes.
+  LandingFX.prototype._drawHabitatLights = function (f, r, a) {
+    if (!r || !(r.alpha > 0.01)) return;
+    var al = r.alpha;
+    var pt = function (q) { return { x: r.x + q[0] * r.w, y: r.y + q[1] * r.h }; };
+    var dome = pt(HAB.dome);
+    var land = this._boom ? Math.max(0, 1 - Math.abs(this._boom - 0.92) / 0.3) : 0;   // arrival swell
+    var br = 0.75 + 0.25 * Math.sin(a * 0.0016) + 1.2 * land;
+    fillSoftEllipse(f, dome.x, dome.y, r.w * 0.24, r.w * 0.2, [
+      [0, rgba(255, 196, 110, 0.18 * al * br)], [1, "rgba(255,160,70,0)"]
+    ], "lighter");
+    var door = pt(HAB.door);
+    fillSoftEllipse(f, door.x, door.y + r.h * 0.12, r.w * 0.12, r.w * 0.04, [
+      [0, rgba(255, 206, 130, 0.35 * al)], [1, "rgba(255,160,70,0)"]
+    ], "lighter");
+    if (land > 0.01) drawStreak(f, door.x, door.y - r.h * 0.05, r.w * 0.9, Math.max(1.5 * this.dpr, r.w * 0.006), 0.7 * land * al);
+    for (var i = 0; i < HAB.beacons.length; i++) {
+      var p = pt(HAB.beacons[i]);
+      var ph = (a + i * 410) % 1800;
+      var on = ph < 70 ? 1 - ph / 70 * 0.3 : (ph > 230 && ph < 300 ? 1 - (ph - 230) / 70 * 0.3 : 0);
+      if (!on) continue;
+      var rr = Math.max(1.5 * this.dpr, r.w * 0.006);
+      fillSoftEllipse(f, p.x, p.y, rr * 5, rr * 5, [[0, rgba(255, 60, 40, 0.5 * on * al)], [1, "rgba(255,40,30,0)"]], "lighter");
+      fillSoftEllipse(f, p.x, p.y, rr, rr, [[0, rgba(255, 235, 225, on * al)], [1, "rgba(255,60,40,0)"]], "lighter");
+    }
+  };
+
+  // Data links: each dish throws a beam up to the orbiter — locked on it,
+  // following it as it drifts along its pass — then packets stream along
+  // it and the dishes ping.
+  LandingFX.prototype._drawLinks = function (f, r, orb, a) {
+    if (!r || !(r.alpha > 0.5) || a < ASCENT.link) return;
+    var target = { x: orb.live.x, y: orb.live.y };
+    f.save();
+    f.globalCompositeOperation = "lighter";
+    for (var i = 0; i < HAB.dishes.length; i++) {
+      var d = { x: r.x + HAB.dishes[i][0] * r.w, y: r.y + HAB.dishes[i][1] * r.h };
+      var p = easeOutCubic(clamp01((a - ASCENT.link - i * 260) / 900));
+      if (p <= 0) continue;
+      var ex = lerp(d.x, target.x, p), ey = lerp(d.y, target.y, p);
+      var g = f.createLinearGradient(d.x, d.y, ex, ey);
+      g.addColorStop(0, "rgba(255,214,150,0.55)");
+      g.addColorStop(1, "rgba(255,236,200,0.2)");
+      f.strokeStyle = "rgba(255,170,80,0.08)";
+      f.lineWidth = 6 * this.dpr;
+      f.beginPath(); f.moveTo(d.x, d.y); f.lineTo(ex, ey); f.stroke();
+      f.strokeStyle = g;
+      f.lineWidth = Math.max(1, 1 * this.dpr);
+      f.setLineDash([6 * this.dpr, 5 * this.dpr]);
+      f.lineDashOffset = -a * 0.04 * this.dpr;
+      f.beginPath(); f.moveTo(d.x, d.y); f.lineTo(ex, ey); f.stroke();
+      f.setLineDash([]);
+      // packets
+      if (p >= 1) {
+        for (var k = 0; k < 3; k++) {
+          var u = ((a * 0.00042 + i * 0.29 + k / 3) % 1);
+          var px = lerp(d.x, target.x, u), py = lerp(d.y, target.y, u);
+          fillSoftEllipse(f, px, py, 3.5 * this.dpr, 3.5 * this.dpr, [[0, "rgba(255,246,225,0.95)"], [1, "rgba(255,200,120,0)"]]);
+        }
+        var ping = ((a - ASCENT.link) % 1700) / 1700;
+        f.strokeStyle = rgba(255, 214, 150, 0.6 * (1 - ping));
+        f.lineWidth = Math.max(1, this.dpr);
+        f.beginPath(); f.ellipse(d.x, d.y, r.w * 0.05 * (0.3 + ping), r.w * 0.02 * (0.3 + ping), 0, 0, Math.PI * 2); f.stroke();
+      }
+      fillSoftEllipse(f, d.x, d.y, 5 * this.dpr, 5 * this.dpr, [[0, "rgba(255,236,190,0.9)"], [1, "rgba(255,190,100,0)"]]);
+    }
+    f.restore();
+  };
+
+  LandingFX.prototype._cameraAscent = function (a, L, S) {
+    var flash = 0;
+    var ig = a - ASCENT.ignite;
+    if (ig >= 0 && ig < 900) flash = 0.12 * Math.exp(-ig / 260);
+    var lf = a - ASCENT.lift;
+    if (lf >= 0 && lf < 900) flash = Math.max(flash, 0.18 * Math.exp(-lf / 200));
+    if (this.flashEl) this.flashEl.style.opacity = flash.toFixed(3);
+    var cam = { tx: 0, ty: 0, rot: 0, scale: 1, sx: 0, sy: 0 };
+    var boom = this.reduceMotion ? 1 : clamp01((a - ASCENT.approach) / BOOM_MS);
+    this._boom = boom;
+    if (this.cameraEls.length) {
+      var W = this._cssW || 1, H = this._cssH || 1;
+      // follow the climb: tilt up (world drifts down) and ease back out
+      var up = easeInOutSine(clamp01((a - ASCENT.lift) / 6000));
+      cam.scale = 1.1 + 0.04 * easeInOutSine(clamp01(a / ASCENT.lift)) - 0.03 * up;
+      cam.ty = H * 0.032 * up;
+      var tgt = S.alpha > 0.05 ? -((L.shipCX / this.dpr) / W - 0.5) * W * 0.05 : 0;
+      this._camX = this._camX == null ? tgt : lerp(this._camX, tgt, 0.04);
+      cam.tx = this._camX + noise(a * 0.01, 1) * 2.2;
+      cam.ty += noise(a * 0.01, 5) * 1.6;
+      cam.rot = noise(a * 0.006, 9) * 0.08;
+      // engine rumble: builds at ignition, peaks at lift-off, fades with height
+      var rumble = 0;
+      if (a >= ASCENT.ignite && a < ASCENT.pitch + 1500) {
+        rumble = clamp01((a - ASCENT.ignite) / 900) * (1 - clamp01((a - ASCENT.lift - 600) / 3200));
+        if (lf >= 0 && lf < 700) rumble += 1.4 * Math.exp(-lf / 240);
+      }
+      if (rumble > 0.01) {
+        cam.sx = noise(a * 1.4, 2) * 4 * rumble;
+        cam.sy = noise(a * 1.7, 4) * 6 * rumble;
+        cam.rot += noise(a * 1.2, 6) * 0.2 * rumble;
+      }
+      if (this.reduceMotion) { cam.tx = cam.ty = cam.rot = 0; cam.scale = 1.1; }
+      // BOOM IN: the whole frame pushes in on the habitat. Its focus point
+      // travels from where it sits on screen to just above centre while
+      // the scale grows about it; a crane arc lifts and settles the frame
+      // and a small roll comes out as it lands; then a slow creep.
+      if (boom > 0) {
+        var k = easeInOutCubic(boom);
+        var creep = this.reduceMotion ? 0 : easeInOutSine(clamp01((a - ASCENT.approach - BOOM_MS) / 9000));
+        var hr = this._groundArt(null, HAB.z, HAB.X, HAB.width, HAB.w, HAB.h, HAB.base);
+        var fx = (hr.x + hr.w * 0.55) / this.dpr, fy = (hr.y + hr.h * 0.5) / this.dpr;
+        var ox = W * 0.5, oy = H * this.cameraOriginY;
+        var s0 = cam.scale;
+        var f0x = ox + cam.tx + s0 * (fx - ox), f0y = oy + cam.ty + s0 * (fy - oy);
+        var S = s0 * lerp(1, BOOM_ZOOM, k) * (1 + 0.035 * creep);
+        var arc = Math.sin(Math.PI * k);
+        var cx = lerp(f0x, W * (W > H ? 0.54 : 0.5), k), cy = lerp(f0y, H * (W > H ? 0.53 : 0.5), k) - H * 0.05 * arc;
+        cam.scale = S;
+        cam.tx = cx - ox - S * (fx - ox);
+        cam.ty = cy - oy - S * (fy - oy);
+        cam.rot += 0.9 * arc * (1 - k) - 0.25 * arc;
+      }
+      var tr = "translate3d(" + (cam.tx + cam.sx).toFixed(2) + "px," + (cam.ty + cam.sy).toFixed(2) + "px,0) rotate(" +
+        cam.rot.toFixed(3) + "deg) scale(" + cam.scale.toFixed(4) + ")";
+      for (var i = 0; i < this.cameraEls.length; i++) {
+        var el = this.cameraEls[i];
+        el.style.transform = (el.__camBase ? el.__camBase + " " : "") + tr;
+      }
+    }
+    this._cam = cam;
+  };
+
+  // Canvas px on screen -> canvas px in the camera-moved world layers.
+  LandingFX.prototype._unCam = function (x, y) {
+    var cam = this._cam;
+    if (!cam) return { x: x, y: y };
+    var d = this.dpr, ox = (this._cssW || 0) * 0.5 * d, oy = (this._cssH || 0) * this.cameraOriginY * d;
+    var qx = x - ox - (cam.tx + cam.sx) * d, qy = y - oy - (cam.ty + cam.sy) * d;
+    var r = -cam.rot * Math.PI / 180, c = Math.cos(r), sn = Math.sin(r);
+    return { x: ox + (qx * c - qy * sn) / cam.scale, y: oy + (qx * sn + qy * c) / cam.scale };
+  };
+
+  // Draw fn() in screen space on a camera-moved canvas (the sky: things
+  // at infinity the camera move must not carry).
+  LandingFX.prototype._inScreenSpace = function (ctx, fn) {
+    var cam = this._cam;
+    ctx.save();
+    if (cam) {
+      var d = this.dpr, ox = (this._cssW || 0) * 0.5 * d, oy = (this._cssH || 0) * this.cameraOriginY * d;
+      ctx.translate(ox, oy);
+      ctx.rotate(-cam.rot * Math.PI / 180);
+      ctx.scale(1 / cam.scale, 1 / cam.scale);
+      ctx.translate(-ox - (cam.tx + cam.sx) * d, -oy - (cam.ty + cam.sy) * d);
+    }
+    fn.call(this);
+    ctx.restore();
+  };
+
+  // The boom-in's rush: dust streaking past the lens, radiating from the
+  // habitat, strongest mid-move. Screen space.
+  LandingFX.prototype._drawBoomStreaks = function (f, a) {
+    var b = clamp01((a - ASCENT.approach) / BOOM_MS);
+    var v = Math.sin(Math.PI * b);
+    if (v <= 0.02 || this.reduceMotion) return;
+    var cw = this.frontCanvas.width, ch = this.frontCanvas.height;
+    var cx = cw * 0.5, cy = ch * 0.5, R = Math.hypot(cw, ch) * 0.6;
+    var k = easeInOutCubic(b);
+    f.save();
+    f.lineCap = "round";
+    for (var i = 0; i < 70; i++) {
+      var ang = i * 2.39996 + 0.3;
+      var rr = ((i * 0.1379 + k * 1.3) % 1);
+      var r0 = R * (0.18 + 0.82 * rr * rr);
+      var len = R * 0.09 * v * (0.4 + rr);
+      var x0 = cx + Math.cos(ang) * r0, y0 = cy + Math.sin(ang) * r0 * 0.7;
+      var x1 = cx + Math.cos(ang) * (r0 + len), y1 = cy + Math.sin(ang) * (r0 + len) * 0.7;
+      f.strokeStyle = rgba(236, 188, 142, (0.08 + 0.2 * rr) * v);
+      f.lineWidth = Math.max(1, this.dpr * (0.6 + 2.2 * rr));
+      f.beginPath(); f.moveTo(x0, y0); f.lineTo(x1, y1); f.stroke();
+    }
+    f.restore();
+  };
+
+  // Plausible ascent telemetry: altitude, speed, range to the orbiter.
+  function ascentTelemetry(a) {
+    var alt, vel;
+    if (a < ASCENT.lift) { alt = 0; vel = 0; }
+    else if (a < ASCENT.pitch) {
+      var u = (a - ASCENT.lift) / (ASCENT.pitch - ASCENT.lift);
+      alt = 420 * Math.pow(u, 1.8); vel = 95 * Math.pow(u, 1.2);
+    } else if (a < ASCENT.dock) {
+      var w = (a - ASCENT.pitch) / (ASCENT.dock - ASCENT.pitch);
+      alt = lerp(420, 318000, Math.pow(w, 1.6)); vel = lerp(95, 3410, easeOutPow(w, 1.4));
+    } else { alt = 318000; vel = 3410; }
+    var dist = a < ASCENT.dock ? lerp(1240, 0, easeInOutCubic(clamp01(a / ASCENT.dock))) : 0;
+    return { alt: alt, vel: vel, dist: dist, t: a };
+  }
+
+  LandingFX.prototype._renderAscent = function (a, dt) {
+    var A = this.ascent;
+    if (!A) return;
+    this._lastAscent = a;
+    var e = ASC_E + a;
+    var orb = this._ascentOrbiter(a);
+    var S = this._ascentState(a, orb);
+    var st = S.st;
+    var L = this._layout(st);
+    this._cameraAscent(a, L, S);   // first: the sky layers below draw through it
+
+    // launch dust: the pad boils at ignition, a dust wall at lift-off
+    var rate = 0;
+    if (a >= ASCENT.ignite && a < ASCENT.pitch) {
+      rate = st.h < 0.22 ? lerp(3, 16, clamp01((a - ASCENT.ignite) / 800)) * (1 - clamp01(st.h / 0.22)) : 0;
+    }
+    if (rate > 0) this._spawnDust(this._layout({ z: 1, h: 0, X: 0, tilt: 0 }), rate, dt);
+    if (!A.stormed && a >= ASCENT.lift + 150) { A.stormed = true; if (!this.reduceMotion) this._spawnImpactStorm(this._layout({ z: 1, h: 0, X: 0, tilt: 0 })); }
+    this._advanceDust(dt);
+    this._updateAscentTrail(a, L, st, S);
+
+    var b = this.backCtx, f = this.frontCtx;
+    b.clearRect(0, 0, this.backCanvas.width, this.backCanvas.height);
+    if (this.sky) this.sky.draw(b, this);
+    this._drawStorm(b, e);
+    this._drawAscentTrail(b, a);
+    var hab = this._drawHabitatAscent(b, a);
+    if (!S.flying) this._drawPadContact(b, L, { clear: 1, v: FINAL_IDX });
+    if (S.alpha > 0) {
+      this._drawShadow(b, L, st);
+      if (S.ignite > 0) {
+        b.save(); b.globalAlpha = S.ignite;
+        this._drawGroundLight(b, L, st, e);
+        b.restore();
+      }
+    }
+    this._drawDust(b, "back");
+
+    this._drawAscentShip(a, S, L);
+
+    f.clearRect(0, 0, this.frontCanvas.width, this.frontCanvas.height);
+    if (S.ignite > 0.3 && S.alpha > 0) {
+      f.save(); f.globalAlpha = clamp01((S.ignite - 0.3) / 0.7) * S.alpha;
+      this._drawThrust(f, L, st, e);
+      this._drawBloom(f, L, st, e);
+      f.restore();
+    }
+    if (S.flying) this._drawAscentPlume(f, L, st, a, S.alpha);
+    if (S.alpha > 0.05) this._drawBeacon(f, L, st, e);
+    if (!S.flying && a < ASCENT.lift) this._drawGroundBlend(f, L, { clear: 1, v: FINAL_IDX }, e);
+    this._drawDust(f, "front");
+    this._drawHabitatLights(f, hab, a);
+    if (this.sky) this.sky.drawLabels(f, this);
+    this._inScreenSpace(f, function () {
+      this._drawOrbiter(f);
+      if (typeof AmbientStorm !== "undefined" && !this.reduceMotion) {
+        AmbientStorm.draw(f, this.frontCanvas.width, this.frontCanvas.height);
+      }
+    });
+    this._drawLinks(f, hab, orb, a);
+    this._inScreenSpace(f, function () { this._drawBoomStreaks(f, a); });
+
+    if (A.onFrame) {
+      var shipPt = S.alpha > 0.05
+        ? { x: L.shipCX + L.shipW * 0.05, y: L.feetY - SHIP_HEIGHT * 0.86 * L.s }
+        : orb.live.node;
+      var habPt = hab ? { x: hab.x + HAB.top[0] * hab.w, y: hab.y + HAB.top[1] * hab.h } : null;
+      A.onFrame({
+        elapsed: a,
+        ship: this._toScreen(shipPt.x, shipPt.y),
+        shipVisible: S.alpha > 0.05,
+        habitat: habPt ? this._toScreen(habPt.x, habPt.y) : null,
+        habitatAlpha: hab ? hab.alpha || 0 : 0,
+        orbiter: { x: orb.live.screenNode.x / this.dpr, y: orb.live.screenNode.y / this.dpr },
+        shake: this._cam ? { x: this._cam.sx, y: this._cam.sy } : { x: 0, y: 0 },
+        telemetry: ascentTelemetry(a)
+      });
+    }
   };
 
   // Film grain tile (generated once) for a CSS-animated overlay.

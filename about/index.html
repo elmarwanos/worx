@@ -61,26 +61,177 @@
         </div>
         <div class="story-scene">
           <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <!-- Traverse page: the landed ship (frame 033, clean) left behind
+               in the distance on the right, turned to face left. -->
+          <div class="story-far-ship" aria-hidden="true">
+            <div class="story-far-ship-body">
+              <img src="../static/assets/about/glimpse-landing-033-far.png" alt="" width="720" height="405" decoding="async">
+              <span class="beacon beacon--red" style="--bx:0.414; --by:0.006;"></span>
+            </div>
+          </div>
+          <!-- Traverse page: the crew's rover (frame 035) on the move, left of
+               centre, kicking dust off its tyres that drifts back and settles
+               into the ground haze. -->
+          <div class="story-rover" aria-hidden="true">
+            <div class="story-rover-body">
+              <span class="rover-shadow"></span>
+              <span class="rover-trail"></span>
+              <div class="rover-dust rover-dust--back">
+              <span class="rover-puff" style="--x:0.077; --d:0s; --s:1;"></span>
+              <span class="rover-puff" style="--x:0.077; --d:-0.7s; --s:0.8;"></span>
+              <span class="rover-puff" style="--x:0.077; --d:-1.4s; --s:1.1;"></span>
+              <span class="rover-puff" style="--x:0.255; --d:-0.35s; --s:0.9;"></span>
+              <span class="rover-puff" style="--x:0.255; --d:-1.05s; --s:1;"></span>
+              <span class="rover-puff" style="--x:0.255; --d:-1.75s; --s:0.8;"></span>
+              </div>
+              <img class="rover-img" src="../static/assets/about/glimpse-rover-035.png" alt="" width="1100" height="622" decoding="async">
+              <span class="rover-beacons">
+                <span class="beacon beacon--amber" style="--bx:0.338; --by:0.01;"></span>
+                <span class="beacon beacon--red" style="--bx:0.604; --by:0.004;"></span>
+                <span class="beacon beacon--amber beacon--late" style="--bx:0.666; --by:0.014;"></span>
+              </span>
+              <div class="rover-dust rover-dust--front">
+              <span class="rover-puff" style="--x:0.559; --d:-0.2s; --s:0.9;"></span>
+              <span class="rover-puff" style="--x:0.559; --d:-0.9s; --s:1.1;"></span>
+              <span class="rover-puff" style="--x:0.559; --d:-1.6s; --s:0.8;"></span>
+              <span class="rover-puff" style="--x:0.913; --d:-0.5s; --s:0.8;"></span>
+              <span class="rover-puff" style="--x:0.913; --d:-1.2s; --s:1;"></span>
+              <span class="rover-puff" style="--x:0.913; --d:-1.9s; --s:0.7;"></span>
+              </div>
+              <span class="rover-haze"></span>
+            </div>
+          </div>
           <div class="story-grade"></div>
         </div>
         <div class="story-scene">
           <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <!-- Deployment page: the landed ship (frame 033, clean) on the far
+               left, nearer than on the traverse page, turned to face in. -->
+          <div class="story-far-ship story-far-ship--left" aria-hidden="true">
+            <div class="story-far-ship-body">
+              <img src="../static/assets/about/glimpse-landing-033-far.png" alt="" width="720" height="405" decoding="async">
+              <span class="beacon beacon--red" style="--bx:0.414; --by:0.006;"></span>
+            </div>
+          </div>
+          <!-- Deployment page: the build site (frame 036) — the rover just
+               pulled in and unloading, crew hauling crates toward the dome
+               and crane. The page turns in like the others; the site
+               keeps working: welding sparks, beacons, breathing floodlight
+               and settling dust, footfall dust under the crew, a survey
+               drone and passing dust gusts. It sits mid-distance with an
+               atmospheric haze layer so it melts into the plain; the
+               image's cut edges feather into the haze and the rover's
+               dust bank. -->
+          <div class="story-site" aria-hidden="true">
+            <div class="story-site-body">
+              <span class="site-shadow"></span>
+              <div class="site-drift">
+                <img class="site-img" src="../static/assets/about/glimpse_landing_frames_001-032/glimpse-rover-036.png" alt="" width="1670" height="941" decoding="async">
+                <span class="site-atmos"></span>
+                <span class="site-glow"></span>
+                <!-- footfall dust under the two crew hauling crates -->
+                <span class="site-step" style="--x:0.405; --y:0.95; --d:0s;"></span>
+                <span class="site-step" style="--x:0.43; --y:0.935; --d:-0.55s;"></span>
+                <span class="site-step" style="--x:0.52; --y:0.875; --d:-0.3s;"></span>
+                <span class="site-step" style="--x:0.535; --y:0.87; --d:-0.85s;"></span>
+                <!-- survey drone circling the build, nav light blinking -->
+                <span class="site-drone"><span class="site-drone-light"></span></span>
+                <span class="site-spark" style="--bx:0.6; --by:0.49; --d:0s;"></span>
+                <span class="site-spark" style="--bx:0.787; --by:0.42; --d:-1.3s;"></span>
+                <span class="site-spark" style="--bx:0.708; --by:0.37; --d:-2.1s;"></span>
+                <span class="beacon beacon--red" style="--bx:0.859; --by:0.024;"></span>
+                <span class="beacon beacon--amber beacon--late" style="--bx:0.964; --by:0.39;"></span>
+                <span class="beacon beacon--red beacon--late" style="--bx:0.166; --by:0.26;"></span>
+                <span class="beacon beacon--amber" style="--bx:0.362; --by:0.36;"></span>
+              </div>
+              <div class="site-dust">
+                <span class="site-dustbank"></span>
+                <span class="rover-puff" style="--x:0.03; --d:0s; --s:1.3;"></span>
+                <span class="rover-puff" style="--x:0.05; --d:-1.5s; --s:1.1;"></span>
+                <span class="rover-puff" style="--x:0.02; --d:-3s; --s:1.4;"></span>
+                <span class="rover-puff" style="--x:0.2; --d:-2.2s; --s:0.8;"></span>
+              </div>
+              <span class="site-haze"></span>
+              <span class="site-mote" style="--mx:0.2; --my:0.7; --d:0s;"></span>
+              <span class="site-mote" style="--mx:0.45; --my:0.55; --d:-3s;"></span>
+              <span class="site-mote" style="--mx:0.7; --my:0.8; --d:-6s;"></span>
+              <span class="site-mote" style="--mx:0.35; --my:0.85; --d:-8s;"></span>
+              <span class="site-mote" style="--mx:0.85; --my:0.6; --d:-4.5s;"></span>
+            </div>
+            <!-- a low dust gust rolls across the whole plain now and then,
+                 veiling the ship and the site as it passes -->
+            <span class="site-gust"></span>
+          </div>
           <div class="story-grade"></div>
         </div>
         <div class="story-scene">
           <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+          <!-- Tribute page: close on the landed ship (frame 037), hatch open
+               on the office inside, with the crew (frame 038) in the
+               foreground, backs to camera, saluting it. The hatch light is
+               the key: a volumetric shaft pours out over the ramp, rims the
+               crew and throws their shadows toward the lens; the screen
+               inside flickers, the ramp lights chase and the spire strobe
+               blinks like the ship in the earlier sections. -->
+          <div class="story-tribute" aria-hidden="true">
+            <div class="tribute-ship">
+              <div class="tribute-drift">
+                <span class="tribute-ship-shadow"></span>
+                <img class="tribute-ship-img" src="../static/assets/about/glimpse-ship-open-037.png" alt="" width="1565" height="1249" decoding="async">
+                <span class="tribute-interior"></span>
+                <span class="tribute-screen"></span>
+                <span class="tribute-shaft"></span>
+                <span class="tribute-pool"></span>
+                <span class="tribute-mote" style="--mx:0.6; --my:0.82; --d:0s;"></span>
+                <span class="tribute-mote" style="--mx:0.68; --my:0.9; --d:-2.5s;"></span>
+                <span class="tribute-mote" style="--mx:0.76; --my:0.8; --d:-5s;"></span>
+                <span class="tribute-mote" style="--mx:0.55; --my:0.96; --d:-7s;"></span>
+                <span class="tribute-mote" style="--mx:0.72; --my:1.02; --d:-9s;"></span>
+                <span class="tribute-mote" style="--mx:0.64; --my:0.86; --d:-11s;"></span>
+                <span class="tribute-ramp-light" style="--bx:0.49; --by:0.79; --d:0s;"></span>
+                <span class="tribute-ramp-light" style="--bx:0.5; --by:0.85; --d:0.25s;"></span>
+                <span class="tribute-ramp-light" style="--bx:0.51; --by:0.91; --d:0.5s;"></span>
+                <span class="tribute-ramp-light" style="--bx:0.8; --by:0.79; --d:0s;"></span>
+                <span class="tribute-ramp-light" style="--bx:0.83; --by:0.85; --d:0.25s;"></span>
+                <span class="tribute-ramp-light" style="--bx:0.86; --by:0.91; --d:0.5s;"></span>
+                <span class="beacon beacon--red" style="--bx:0.399; --by:0.004;"></span>
+                <span class="beacon beacon--amber beacon--late" style="--bx:0.111; --by:0.907;"></span>
+                <span class="beacon beacon--amber beacon--late" style="--bx:0.409; --by:0.94;"></span>
+              </div>
+              <!-- anamorphic flare off the hatch light -->
+              <span class="tribute-flare"></span>
+            </div>
+            <span class="tribute-haze"></span>
+            <div class="tribute-crew">
+              <span class="tribute-crew-glow"></span>
+              <span class="tribute-crew-shadow tribute-crew-shadow--a"></span>
+              <span class="tribute-crew-shadow tribute-crew-shadow--b"></span>
+              <img class="tribute-crew-img" src="../static/assets/about/glimpse-crew-salute-038.png" alt="" width="954" height="1020" decoding="async">
+              <!-- Mars ambient light and haze on the suits, masked to them -->
+              <span class="tribute-crew-tint"></span>
+              <span class="tribute-crew-contact tribute-crew-contact--a"></span>
+              <span class="tribute-crew-contact tribute-crew-contact--b"></span>
+              <!-- helmet comm lamps (steady glow) and backpack status LEDs
+                   (the landing strobe, amber) -->
+              <span class="tribute-lamp" style="--bx:0.136; --by:0.176; --d:0s;"></span>
+              <span class="tribute-lamp" style="--bx:0.281; --by:0.172; --d:-1.2s;"></span>
+              <span class="tribute-lamp" style="--bx:0.613; --by:0.093; --d:-0.6s;"></span>
+              <span class="tribute-lamp" style="--bx:0.776; --by:0.078; --d:-1.8s;"></span>
+              <span class="beacon beacon--amber" style="--bx:0.094; --by:0.29;"></span>
+              <span class="beacon beacon--red beacon--late" style="--bx:0.275; --by:0.28;"></span>
+              <span class="beacon beacon--amber beacon--late" style="--bx:0.574; --by:0.21;"></span>
+              <span class="beacon beacon--red" style="--bx:0.781; --by:0.206;"></span>
+              <!-- low dust streaming past their boots -->
+              <span class="tribute-wind"></span>
+              <span class="tribute-wind tribute-wind--late"></span>
+            </div>
+          </div>
           <div class="story-grade"></div>
         </div>
-        <div class="story-scene">
-          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
-          <div class="story-grade"></div>
-        </div>
-        <div class="story-scene">
-          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
-          <div class="story-grade"></div>
-        </div>
-        <div class="story-scene">
-          <div class="story-terrain" style="background-image: url('../static/assets/about/mars-story-bg.jpg');"></div>
+        <!-- Ascent page: a placeholder in the stack only — like Section 2 it
+             plays on the landing shot (scene 0 + the landing canvases),
+             flown in reverse by landing-fx.js's playAscent(). -->
+        <div class="story-scene story-scene--ascent">
           <div class="story-grade"></div>
         </div>
         <div class="story-scene story-scene--final">
@@ -169,37 +320,26 @@
         </div>
 
         <div class="story-text story-text--hud-right story-text--summary">
-          <!-- Mission Control summary of the landing (Section 1), on a
-               tilted HUD panel in the right column, with a leader line to a
-               marker on the landed ship (frame 033, now on the left third,
-               turned to face right — see LandingFX.setPose). -->
+          <!-- EVA readiness log: the crew is suited up and cleared to
+               leave the ship, on a tilted HUD panel in the right column. -->
           <div class="landing-hud summary-hud" aria-hidden="true">
             <div class="hud-panel hud-log hud-log--right hud-summary">
               <div class="hud-head">
                 <span class="hud-rec"></span>
-                <span class="hud-callsign">MISSION CONTROL · SOL 2 SUMMARY</span>
-                <span class="hud-clock">T+00:08.7</span>
+                <span class="hud-callsign">WORX-01 · EVA READINESS</span>
+                <span class="hud-clock">SOL 1</span>
               </div>
               <ul class="hud-summary-rows">
-                <li><span>Entry interface</span><b data-count="12.4" data-dec="1" data-unit=" KM">12.4 KM</b></li>
-                <li><span>Entry velocity</span><b data-count="1460" data-unit=" M/S">1460 M/S</b></li>
-                <li><span>Peak heating</span><b>T+00:01.4</b></li>
-                <li><span>Heat shield sep</span><b>T+00:02.6</b></li>
-                <li><span>Touchdown</span><b>T+00:08.7</b></li>
-                <li><span>Touchdown velocity</span><b data-count="0.4" data-dec="1" data-unit=" M/S">0.4 M/S</b></li>
-                <li><span>Landing accuracy</span><b data-count="14" data-unit=" M">14 M</b></li>
-                <li><span>Hull integrity</span><b data-count="98" data-unit="%">98%</b></li>
+                <li><span>Airlock depress</span><b>COMPLETE</b></li>
+                <li><span>Suit pressure</span><b data-count="4.3" data-dec="1" data-unit=" PSI">4.3 PSI</b></li>
+                <li><span>PLSS O2 reserve</span><b data-count="100" data-unit="%">100%</b></li>
+                <li><span>Comm loop</span><b>NOMINAL</b></li>
+                <li><span>Nav fix</span><b>LOCKED</b></li>
+                <li><span>Traverse plan</span><b data-count="2.4" data-dec="1" data-unit=" KM">2.4 KM</b></li>
+                <li><span>Science payload</span><b>STOWED</b></li>
+                <li><span>EVA-1 poll</span><b>ALL GO</b></li>
               </ul>
-              <div class="hud-summary-status"><span class="hud-summary-dot"></span>Crew 2/2 · Go for egress</div>
-            </div>
-            <svg class="hud-leader" width="100%" height="100%">
-              <polyline class="hud-leader-line" points=""></polyline>
-              <polyline class="hud-leader-accent" points=""></polyline>
-            </svg>
-            <div class="hud-target">
-              <span class="hud-ring hud-ring--outer"></span>
-              <span class="hud-ring hud-ring--inner"></span>
-              <em class="hud-target-label">GLIMPSE-01 · HATCH ARMED</em>
+              <div class="hud-summary-status"><span class="hud-summary-dot"></span>Worx Crew 2/2 · Go for EVA</div>
             </div>
           </div>
 
@@ -214,60 +354,180 @@
           </div>
         </div>
 
-        <div class="story-text">
+        <div class="story-text story-text--traverse">
+          <!-- Surface traverse log: the crew is out and moving. Same layout
+               as the landing page (log top-left, caption card bottom-left),
+               with log and card booting in together. -->
+          <div class="landing-hud" aria-hidden="true">
+            <div class="hud-panel hud-log hud-summary">
+              <div class="hud-head">
+                <span class="hud-rec"></span>
+                <span class="hud-callsign">WORX-02 · TRAVERSE LOG</span>
+                <span class="hud-clock">SOL 2</span>
+              </div>
+              <ul class="hud-summary-rows">
+                <li><span>EVA-1 elapsed</span><b>01:42:16</b></li>
+                <li><span>Odometry</span><b data-count="1.8" data-dec="1" data-unit=" KM">1.8 KM</b></li>
+                <li><span>Heading</span><b data-count="74" data-unit="°">74°</b></li>
+                <li><span>Next waypoint</span><b>WP-03</b></li>
+                <li><span>Terrain</span><b>FIRM</b></li>
+                <li><span>Hazard scan</span><b>CLEAR</b></li>
+                <li><span>Relay link</span><b>LOCKED</b></li>
+                <li><span>Site survey</span><b>MAPPING</b></li>
+              </ul>
+              <div class="hud-summary-status"><span class="hud-summary-dot"></span>Worx Crew 2/2 · Traverse GO</div>
+            </div>
+          </div>
+
           <div class="container">
-            <p class="story-status"><span class="story-status-text">TRAVERSE: GO</span></p>
-            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Into the unknown</span></span></h2>
-            <p class="story-subtitle">Every mile takes us further into a new world.</p>
+            <div class="hud-panel hud-card">
+              <p class="story-status"><span class="story-status-text">TRAVERSE: GO</span></p>
+              <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Into the unknown</span></span></h2>
+              <p class="story-subtitle">Every mile takes us further into a new world.</p>
+            </div>
           </div>
         </div>
 
-        <div class="story-text">
+        <div class="story-text story-text--hud-right">
+          <!-- Site deployment log: groundwork under way. Log and caption card
+               both in the right column, like the EVA page; they boot in
+               together. -->
+          <div class="landing-hud" aria-hidden="true">
+            <div class="hud-panel hud-log hud-log--right hud-summary">
+              <div class="hud-head">
+                <span class="hud-rec"></span>
+                <span class="hud-callsign">WORX-02 · SITE DEPLOYMENT</span>
+                <span class="hud-clock">SOL 3</span>
+              </div>
+              <ul class="hud-summary-rows">
+                <li><span>Site survey</span><b>COMPLETE</b></li>
+                <li><span>Regolith grading</span><b data-count="64" data-unit="%">64%</b></li>
+                <li><span>Foundation pads</span><b>2 / 6</b></li>
+                <li><span>Solar array</span><b>DEPLOYING</b></li>
+                <li><span>Power bus</span><b data-count="12.4" data-dec="1" data-unit=" KW">12.4 KW</b></li>
+                <li><span>Comms mast</span><b>RAISED</b></li>
+                <li><span>Habitat module</span><b>STAGED</b></li>
+                <li><span>Build phase</span><b>ACTIVE</b></li>
+              </ul>
+              <div class="hud-summary-status"><span class="hud-summary-dot"></span>Worx Crew 2/2 · Build GO</div>
+            </div>
+          </div>
+
           <div class="container">
-            <p class="story-status"><span class="story-status-text">DEPLOYMENT: ACTIVE</span></p>
-            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Groundwork begins</span></span></h2>
-            <p class="story-subtitle">Every new world starts with something yet unfinished.</p>
+            <div class="hud-panel hud-card">
+              <p class="story-status"><span class="story-status-text">DEPLOYMENT: ACTIVE</span></p>
+              <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Groundwork begins</span></span></h2>
+              <p class="story-subtitle">Every new world starts with something yet unfinished.</p>
+            </div>
           </div>
         </div>
 
-        <div class="story-text">
+        <div class="story-text story-text--tribute">
+          <!-- Tribute log: honouring the missions that came before. Same
+               layout as the traverse page (log top-left, caption card
+               bottom-left), log and card booting in together. -->
+          <div class="landing-hud" aria-hidden="true">
+            <div class="hud-panel hud-log hud-summary">
+              <div class="hud-head">
+                <span class="hud-rec"></span>
+                <span class="hud-callsign">WORX-02 · HERITAGE LOG</span>
+                <span class="hud-clock">SOL 4</span>
+              </div>
+              <ul class="hud-summary-rows">
+                <li><span>Foundation pads</span><b>6 / 6</b></li>
+                <li><span>Solar array</span><b>ONLINE</b></li>
+                <li><span>Power bus</span><b data-count="18.6" data-dec="1" data-unit=" KW">18.6 KW</b></li>
+                <li><span>Relay link</span><b>LOCKED</b></li>
+                <li><span>Heritage archive</span><b>SYNCED</b></li>
+                <li><span>Legacy data</span><b data-count="100" data-unit="%">100%</b></li>
+                <li><span>Tribute marker</span><b>PLACED</b></li>
+                <li><span>Ascent prep</span><b>STAGED</b></li>
+              </ul>
+              <div class="hud-summary-status"><span class="hud-summary-dot"></span>Worx Crew 2/2 · Tribute GO</div>
+            </div>
+          </div>
+
           <div class="container">
-            <p class="story-status"><span class="story-status-text">OUTPOST: IN PROGRESS</span></p>
-            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Building a new home</span></span></h2>
-            <p class="story-subtitle">Piece by piece, the frontier becomes ours.</p>
+            <div class="hud-panel hud-card">
+              <p class="story-status"><span class="story-status-text">ACKNOWLEDGMENT: COMPLETE</span></p>
+              <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Saluting the giants</span></span></h2>
+              <p class="story-subtitle">We honor what brought us here, before forging our own way forward.</p>
+            </div>
           </div>
         </div>
 
-        <div class="story-text">
-          <div class="container">
-            <p class="story-status"><span class="story-status-text">ACKNOWLEDGMENT: COMPLETE</span></p>
-            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Saluting the giants</span></span></h2>
-            <p class="story-subtitle">We honor what brought us here, before forging our own way forward.</p>
+        <div class="story-text story-text--ascent">
+          <!-- Ascent HUD: the landing's broadcast graphics, flown home.
+               GLIMPSE-01's ascent log (top-left, live stages + telemetry,
+               leader line to the ship, then the orbiter) and the WORX
+               surface log (top-right, statuses updating as the habitat
+               comes online, leader line to the habitat). Driven per frame
+               by about-story.js from landing-fx.js's playAscent(). -->
+          <div class="landing-hud ascent-hud" aria-hidden="true">
+            <div class="hud-panel hud-log ascent-log">
+              <div class="hud-head">
+                <span class="hud-rec"></span>
+                <span class="hud-callsign">GLIMPSE-01 · ASCENT LOG</span>
+                <span class="hud-clock" data-asc="t">T+00:00.0</span>
+              </div>
+              <ol class="hud-stages"></ol>
+              <dl class="hud-tele">
+                <div><dt>ALT</dt><dd data-asc="alt">0 M</dd></div>
+                <div><dt>VEL</dt><dd data-asc="vel">0.0 M/S</dd></div>
+                <div><dt>RNG</dt><dd data-asc="dist">1240 KM</dd></div>
+              </dl>
+            </div>
+            <div class="hud-panel hud-log hud-log--right hud-summary worx-log">
+              <div class="hud-head">
+                <span class="hud-rec"></span>
+                <span class="hud-callsign">WORX-02 · SURFACE LOG</span>
+                <span class="hud-clock">SOL 5</span>
+              </div>
+              <ul class="hud-summary-rows">
+                <li><span>Launch poll</span><b data-worx="poll">POLLING</b></li>
+                <li><span>Launch pad</span><b data-worx="pad">ARMED</b></li>
+                <li><span>Habitat power</span><b data-worx="power">12%</b></li>
+                <li><span>Dish array</span><b data-worx="dish">STOWED</b></li>
+                <li><span>Orbiter range</span><b data-worx="range">1240 KM</b></li>
+                <li><span>Uplink</span><b data-worx="uplink">STANDBY</b></li>
+                <li><span>Signal</span><b data-worx="signal">—</b></li>
+                <li><span>Habitat</span><b data-worx="habitat">STANDBY</b></li>
+              </ul>
+              <div class="hud-summary-status"><span class="hud-summary-dot"></span><span data-worx="status">Worx Crew 2/2 · Ascent GO</span></div>
+            </div>
+            <svg class="hud-leader" width="100%" height="100%">
+              <polyline class="hud-leader-line" data-leader="ship-line" points=""></polyline>
+              <polyline class="hud-leader-accent" data-leader="ship-accent" points=""></polyline>
+              <polyline class="hud-leader-line" data-leader="hab-line" points=""></polyline>
+              <polyline class="hud-leader-accent" data-leader="hab-accent" points=""></polyline>
+            </svg>
+            <div class="hud-target" data-target="ship">
+              <span class="hud-ring hud-ring--outer"></span>
+              <span class="hud-ring hud-ring--inner"></span>
+              <em class="hud-target-label">GLIMPSE-01</em>
+            </div>
+            <div class="hud-target hud-target--hab" data-target="hab">
+              <span class="hud-ring hud-ring--outer"></span>
+              <span class="hud-ring hud-ring--inner"></span>
+              <em class="hud-target-label">WORX HABITAT</em>
+            </div>
           </div>
-        </div>
 
-        <div class="story-text">
           <div class="container">
-            <p class="story-status"><span class="story-status-text">ASCENT: NOMINAL</span></p>
-            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">Link established</span></span></h2>
-            <p class="story-subtitle">Beyond distance, the signal holds strong.</p>
-          </div>
-        </div>
-
-        <div class="story-text">
-          <div class="container">
-            <p class="story-status"><span class="story-status-text">HABITAT: ONLINE</span></p>
-            <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">A new home. A new mission.</span></span></h2>
-            <p class="story-subtitle">The journey brought us here. Now the real work begins.</p>
+            <!-- Revealed like Section 1's caption once the links are up;
+                 two seconds later the story turns to the final page. -->
+            <div class="hud-panel hud-card">
+              <p class="story-status"><span class="story-status-text">HABITAT: ONLINE</span></p>
+              <h2 class="story-title"><span class="story-title-mask"><span class="story-title-inner">A new home. A new mission.</span></span></h2>
+              <p class="story-subtitle">The journey brought us here. Now the real work begins.</p>
+            </div>
           </div>
         </div>
 
         <div class="story-text story-text--final">
           <div class="container">
-            <h2 class="story-title"><span class="gradient-text">Worx</span></h2>
-            <p class="story-subtitle">People + Ideas + Technology</p>
-            <p class="story-subtitle story-subtitle--close">A brighter tomorrow builds further.</p>
-            <a href="../contact/index.html" class="story-cta">Start a project</a>
+            <h2 class="story-title story-title--worx"><span class="gradient-text">WORX</span></h2>
+            <a href="../contact/index.html" class="story-cta">Start your project</a>
           </div>
         </div>
       </div>
@@ -326,6 +586,8 @@
   <script src="../static/js/contact-widget.js"></script>
   <script src="../static/js/landing-sequence.js"></script>
   <script src="../static/js/sky-fx.js"></script>
+  <script src="../static/js/glimpse-orbiter.js"></script>
+  <script src="../static/js/ambient-storm.js"></script>
   <script src="../static/js/landing-fx.js"></script>
   <script src="../static/js/about-story.js"></script>
 </body>

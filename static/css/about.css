@@ -158,6 +158,973 @@
   mask-image: linear-gradient(180deg, transparent 0%, black 22%);
 }
 
+/* Traverse page: the landed ship far behind the crew. Same box as
+   .story-terrain (without its mask/filter) so the ship stays planted on
+   the same patch of the ground photo at every aspect; .story-grade above
+   tints it with the rest of the scene. */
+.story-far-ship {
+  --terrain-w: 110vw;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: var(--terrain-w);
+  height: min(70%, calc(var(--terrain-w) * 0.4));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.story-far-ship-body {
+  position: absolute;
+  left: 78%;
+  top: 33%;
+  width: 8%;
+  transform: translate(-50%, -100%) perspective(700px) rotateY(28deg);
+  transform-origin: 50% 100%;
+}
+
+.story-far-ship-body img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* distance: flatter, dustier, a touch soft */
+  filter: brightness(0.78) saturate(0.7) contrast(0.88) sepia(0.18) blur(0.3px);
+}
+
+/* Deployment page: same ship, far left and nearer, turned to face in
+   toward the build site (and the HUD on the right). */
+.story-far-ship--left .story-far-ship-body {
+  left: 15%;
+  top: 41%;
+  width: 12.5%;
+  transform: translate(-50%, -100%) perspective(900px) rotateY(-24deg);
+}
+
+.story-far-ship--left .story-far-ship-body img {
+  filter: brightness(0.84) saturate(0.78) contrast(0.92) sepia(0.12);
+}
+
+/* far off now, so its strobe runs larger to stay readable */
+.story-far-ship--left .beacon { width: max(3px, 2.4%); }
+.story-far-ship--left .beacon::before { width: 1300%; }
+
+/* contact shadow under the pads */
+.story-far-ship-body::after {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: -3%;
+  height: 9%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(26, 12, 7, 0.55), rgba(26, 12, 7, 0));
+  z-index: -1;
+}
+
+/* Traverse page: the crew's rover, left of centre and closer than the
+   ship. Same terrain-locked box. The body gently bobs on its suspension;
+   each tyre throws puffs of dust that swell, drift back (the rover heads
+   right) and thin out, and a low haze band over the tyre bottoms melts
+   the wheels into the ground so nothing reads as pasted on. */
+.story-rover {
+  --terrain-w: 110vw;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: var(--terrain-w);
+  height: min(70%, calc(var(--terrain-w) * 0.4));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.story-rover-body {
+  position: absolute;
+  left: 43%;
+  top: 60%;
+  width: 26%;
+  aspect-ratio: 1100 / 622;
+  transform: translate(-50%, -97%);
+}
+
+.rover-img {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: brightness(0.86) saturate(0.8) contrast(0.94) sepia(0.08);
+  animation: rover-bob 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes rover-bob {
+  from { transform: translateY(0) rotate(0deg); }
+  to   { transform: translateY(-0.6%) rotate(-0.25deg); }
+}
+
+.rover-shadow {
+  position: absolute;
+  z-index: 1;
+  left: -2%;
+  right: -4%;
+  bottom: -4%;
+  height: 14%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(24, 10, 5, 0.6), rgba(24, 10, 5, 0));
+}
+
+.rover-dust {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.rover-dust--back { z-index: 1; }
+.rover-dust--front { z-index: 3; }
+
+.rover-puff {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  top: 97%;
+  width: 28%;
+  aspect-ratio: 1.7;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(236, 184, 140, 0.78),
+    rgba(214, 150, 106, 0.4) 50%,
+    rgba(190, 124, 82, 0) 100%);
+  filter: blur(4px);
+  opacity: 0;
+  transform: translate(-50%, -70%) scale(0.3);
+  animation: rover-puff 2.1s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+  animation-delay: var(--d);
+}
+.rover-dust--front .rover-puff { width: 22%; }
+
+@keyframes rover-puff {
+  0%   { opacity: 0;    transform: translate(-50%, -70%) scale(calc(0.3 * var(--s))); }
+  12%  { opacity: 1; }
+  100% { opacity: 0;    transform: translate(-140%, -115%) scale(calc(2.2 * var(--s))); }
+}
+
+/* the long, settling wake the rover leaves behind it */
+.rover-trail {
+  position: absolute;
+  z-index: 1;
+  right: 55%;
+  bottom: -6%;
+  width: 95%;
+  height: 34%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse 50% 50% at 70% 60%,
+    rgba(226, 170, 126, 0.55),
+    rgba(200, 138, 96, 0.24) 55%,
+    rgba(160, 92, 54, 0) 100%);
+  filter: blur(8px);
+  animation: rover-trail 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes rover-trail {
+  from { opacity: 0.75; transform: scaleX(0.95); }
+  to   { opacity: 1;    transform: scaleX(1.05) translateY(-4%); }
+}
+
+.rover-haze {
+  position: absolute;
+  z-index: 4;
+  left: -10%;
+  right: -8%;
+  bottom: -5%;
+  height: 16%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(212, 152, 108, 0.5),
+    rgba(186, 122, 80, 0.22) 60%,
+    rgba(150, 84, 48, 0) 100%);
+  filter: blur(4px);
+}
+
+/* Traverse page beacons: the same anti-collision double blink the
+   landed ship's spire strobe uses in Sections 1-2 (landing-fx.js: two
+   70ms flashes 230ms apart, every 1.8s) — red on the ship's spire and
+   the rover's antenna, amber on the rover's two masts (the second one
+   half a cycle late, so the rover always has a light going). */
+.rover-beacons {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  animation: rover-bob 0.9s ease-in-out infinite alternate;   /* rides with the body */
+}
+
+.beacon {
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--bx) * 100%);
+  top: calc(var(--by) * 100%);
+  width: max(2px, 1.1%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff4ec;
+  opacity: 0;
+  animation: beacon-strobe 1.8s linear infinite;
+}
+
+.beacon::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 900%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, var(--glow), transparent);
+}
+
+.beacon::after {                                  /* thin anamorphic streak */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2400%;
+  height: 60%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(90deg, transparent, var(--glow) 50%, transparent);
+  opacity: 0.6;
+}
+
+.beacon--red   { --glow: rgba(255, 60, 40, 0.75); }
+.beacon--amber { --glow: rgba(255, 170, 40, 0.75); background: #fff6e0; }
+.beacon--late  { animation-delay: -0.9s; }
+.story-far-ship-body .beacon { width: max(2px, 2%); }
+
+@keyframes beacon-strobe {
+  0%     { opacity: 1; }
+  3.9%   { opacity: 0.7; }
+  4%     { opacity: 0; }
+  12.7%  { opacity: 0; }
+  12.8%  { opacity: 1; }
+  16.6%  { opacity: 0.7; }
+  16.7%, 100% { opacity: 0; }
+}
+
+/* Deployment page: the build site (frame 036), mid-distance between
+   the landed ship (left) and the HUD (right). Same terrain-locked box as
+   the rover/ship, and it turns in with the page like every other
+   chapter; the site keeps working on loop. The source image is cut at its
+   left (rover's front tyre), right and bottom: those edges feather out
+   under the rover's dust bank and the ground haze. Motion uses the
+   individual `translate`/`scale` properties so it composes with each
+   element's positioning `transform`. */
+.story-site {
+  --terrain-w: 110vw;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: var(--terrain-w);
+  height: min(70%, calc(var(--terrain-w) * 0.4));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.story-site-body {
+  position: absolute;
+  left: 49%;
+  top: 66%;
+  width: 37%;
+  aspect-ratio: 1670 / 941;
+  transform: translate(-50%, -100%);
+  transform-origin: 50% 100%;
+}
+
+/* slow "hand-held" camera breathing once the shot has landed */
+.site-drift {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  transform-origin: 40% 100%;
+  animation: site-breathe 16s ease-in-out infinite alternate;
+}
+
+@keyframes site-breathe {
+  from { scale: 1;     translate: 0 0; }
+  to   { scale: 1.025; translate: -0.6% -0.3%; }
+}
+
+.site-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: brightness(0.9) saturate(0.78) contrast(0.93) sepia(0.12) blur(0.2px);
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, #000 8%, #000 90%, transparent 100%),
+    linear-gradient(180deg, #000 78%, transparent 98%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 8%, #000 90%, transparent 100%),
+    linear-gradient(180deg, #000 78%, transparent 98%);
+  mask-composite: intersect;
+}
+
+/* atmospheric perspective: the plain's dusty air laid over the site's own
+   pixels (masked by the PNG plus the same edge feather), heavier up high
+   where the crane and dome stand farther into the haze */
+.site-atmos {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(206, 128, 84, 0.42) 0%,
+    rgba(190, 112, 70, 0.26) 45%,
+    rgba(168, 96, 58, 0.12) 80%,
+    rgba(150, 84, 48, 0.2) 100%);
+  -webkit-mask:
+    url("../assets/about/glimpse_landing_frames_001-032/glimpse-rover-036.png") 0 0 / 100% 100% no-repeat,
+    linear-gradient(90deg, transparent 0%, #000 8%, #000 90%, transparent 100%),
+    linear-gradient(180deg, #000 78%, transparent 98%);
+  -webkit-mask-composite: source-in, source-in;
+  mask:
+    url("../assets/about/glimpse_landing_frames_001-032/glimpse-rover-036.png") 0 0 / 100% 100% no-repeat,
+    linear-gradient(90deg, transparent 0%, #000 8%, #000 90%, transparent 100%),
+    linear-gradient(180deg, #000 78%, transparent 98%);
+  mask-composite: intersect;
+}
+
+.site-shadow {
+  position: absolute;
+  z-index: 1;
+  left: 2%;
+  right: 4%;
+  bottom: 1%;
+  height: 16%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(24, 10, 5, 0.55), rgba(24, 10, 5, 0));
+}
+
+/* warm floodlight spill from the dome and the work lights, breathing */
+.site-glow {
+  position: absolute;
+  left: 44%;
+  top: 22%;
+  width: 56%;
+  height: 58%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(255, 178, 90, 0.34),
+    rgba(250, 140, 50, 0.12) 55%,
+    rgba(250, 140, 50, 0) 100%);
+  mix-blend-mode: screen;
+  animation: site-glow 5.5s ease-in-out infinite alternate;
+}
+
+@keyframes site-glow {
+  0%   { opacity: 0.55; }
+  46%  { opacity: 0.85; }
+  50%  { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* welding sparks on the dome scaffolding: an irregular arc flicker with
+   a hot core and a warm bloom */
+.site-spark {
+  position: absolute;
+  left: calc(var(--bx) * 100%);
+  top: calc(var(--by) * 100%);
+  width: max(3px, 0.6%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #fffaf0;
+  box-shadow: 0 0 4px 1px rgba(255, 236, 190, 0.9);
+  opacity: 0;
+  animation: site-spark 3.4s steps(1, end) infinite;
+  animation-delay: var(--d);
+}
+
+.site-spark::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2000%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(170, 215, 255, 0.7), rgba(255, 170, 70, 0.25) 45%, transparent);
+}
+
+/* falling sparks under the arc */
+.site-spark::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 60%;
+  height: 700%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(255, 210, 140, 0.9), rgba(255, 150, 60, 0));
+  filter: blur(0.4px);
+}
+
+@keyframes site-spark {
+  0%   { opacity: 1; }
+  3%   { opacity: 0.3; }
+  5%   { opacity: 1; }
+  9%   { opacity: 0.6; }
+  12%  { opacity: 1; }
+  16%  { opacity: 0; }
+  38%  { opacity: 0.9; }
+  41%  { opacity: 0; }
+  44%  { opacity: 1; }
+  47%  { opacity: 0.4; }
+  52%  { opacity: 1; }
+  57%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.site-drift .beacon { width: max(2px, 0.7%); }
+
+/* the rover just pulled in: its dust bank still rolls off the front tyre
+   (and hides where the image is cut), drifting slowly toward the ship */
+.site-dust {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.site-dust .rover-puff {
+  top: 88%;
+  width: 26%;
+  background: radial-gradient(closest-side,
+    rgba(226, 170, 124, 0.9),
+    rgba(206, 142, 98, 0.5) 50%,
+    rgba(186, 120, 80, 0) 100%);
+  filter: blur(6px);
+  animation-duration: 4.8s;
+  animation-timing-function: cubic-bezier(0.25, 0.5, 0.35, 1);
+}
+
+/* a settled bank of dust around the front tyre, where the image ends */
+.site-dustbank {
+  position: absolute;
+  left: -6%;
+  bottom: 2%;
+  width: 18%;
+  height: 34%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(214, 154, 110, 0.75),
+    rgba(196, 132, 90, 0.35) 60%,
+    rgba(170, 104, 64, 0) 100%);
+  filter: blur(6px);
+  animation: rover-trail 5s ease-in-out infinite alternate;
+}
+
+.site-haze {
+  position: absolute;
+  z-index: 4;
+  left: -8%;
+  right: -6%;
+  bottom: -4%;
+  height: 18%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(212, 152, 108, 0.55),
+    rgba(186, 122, 80, 0.24) 60%,
+    rgba(150, 84, 48, 0) 100%);
+  filter: blur(5px);
+  animation: rover-trail 6s ease-in-out infinite alternate;
+}
+
+/* lit dust motes drifting through the floodlight */
+.site-mote {
+  position: absolute;
+  z-index: 5;
+  left: calc(var(--mx) * 100%);
+  top: calc(var(--my) * 100%);
+  width: max(2px, 0.3%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255, 214, 160, 0.85);
+  box-shadow: 0 0 6px rgba(255, 190, 120, 0.8);
+  opacity: 0;
+  animation: site-mote 10s linear infinite;
+  animation-delay: var(--d);
+}
+
+@keyframes site-mote {
+  0%   { opacity: 0;   translate: 0 0; }
+  15%  { opacity: 0.9; }
+  85%  { opacity: 0.6; }
+  100% { opacity: 0;   translate: -900% -700%; }
+}
+
+/* footfall dust: a small kick at each step as the crew walk */
+.site-step {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  top: calc(var(--y) * 100%);
+  width: 6%;
+  aspect-ratio: 2.2;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(226, 168, 122, 0.75), rgba(206, 142, 98, 0));
+  filter: blur(2px);
+  opacity: 0;
+  transform: translate(-50%, -60%) scale(0.3);
+  animation: site-step 1.1s ease-out infinite;
+  animation-delay: var(--d);
+}
+
+@keyframes site-step {
+  0%   { opacity: 0;    transform: translate(-50%, -60%) scale(0.3); }
+  15%  { opacity: 0.9; }
+  100% { opacity: 0;    transform: translate(-75%, -110%) scale(1.5); }
+}
+
+/* survey drone: loops over the build, banking as it turns */
+.site-drone {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: max(4px, 0.9%);
+  aspect-ratio: 2.4;
+  border-radius: 40%;
+  background: #2a1a12;
+  box-shadow: 0 0 0 1px rgba(255, 220, 180, 0.25);
+  animation: site-drone 18s ease-in-out infinite;
+}
+
+.site-drone-light {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -30%);
+  background: #eaffea;
+  box-shadow: 0 0 6px 2px rgba(120, 255, 170, 0.8);
+  animation: beacon-strobe 1.2s linear infinite;
+}
+
+@keyframes site-drone {
+  0%   { translate: 5200% 1400%;  rotate: 0deg; }
+  20%  { translate: 7600% 400%;   rotate: 6deg; }
+  40%  { translate: 10400% 900%;  rotate: -4deg; }
+  55%  { translate: 9800% 2000%;  rotate: -10deg; }
+  75%  { translate: 7200% 2600%;  rotate: 4deg; }
+  100% { translate: 5200% 1400%;  rotate: 0deg; }
+}
+
+/* the rolling dust gust, crossing the plain right to left */
+.site-gust {
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  bottom: 18%;
+  width: 70%;
+  height: 46%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 50% 40% at 40% 60%, rgba(214, 150, 104, 0.38), rgba(214, 150, 104, 0) 70%),
+    radial-gradient(ellipse 36% 30% at 70% 45%, rgba(226, 170, 124, 0.3), rgba(226, 170, 124, 0) 70%);
+  filter: blur(14px);
+  opacity: 0;
+  translate: 110% 0;
+  animation: site-gust 19s linear 3s infinite;
+}
+
+@keyframes site-gust {
+  0%   { opacity: 0;   translate: 110% 0; }
+  12%  { opacity: 1; }
+  45%  { opacity: 0.9; translate: 10% -4%; }
+  60%  { opacity: 0;   translate: -40% -6%; }
+  100% { opacity: 0;   translate: -40% -6%; }
+}
+
+/* Tribute page: close on the landed ship (frame 037), hatch open on the
+   office inside, the crew (frame 038) in the foreground with their backs
+   to camera, saluting it. Same terrain-locked box as the other pages, and
+   it turns in with the page like every chapter. The hatch is the key
+   light: a volumetric shaft and a pool on the ground pour out toward the
+   lens, the crew are rim-lit and cast long shadows at the viewer, the
+   screen inside flickers and the ramp lights chase. Ship and crew drift
+   in opposite directions on a slow loop for parallax depth. */
+.story-tribute {
+  --terrain-w: 110vw;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: var(--terrain-w);
+  height: min(70%, calc(var(--terrain-w) * 0.4));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.tribute-ship {
+  position: absolute;
+  left: 69%;
+  top: 68%;
+  width: 29%;
+  aspect-ratio: 1565 / 1249;
+  transform: translate(-50%, -100%);
+}
+
+.tribute-drift {
+  position: absolute;
+  inset: 0;
+  /* turned so the open hatch faces left, straight at the crew */
+  transform: perspective(900px) rotateY(-30deg);
+  transform-origin: 50% 100%;
+  animation: tribute-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes tribute-drift {
+  from { scale: 1;     translate: 0 0; }
+  to   { scale: 1.03; translate: 0.8% -0.4%; }
+}
+
+.tribute-ship-img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  /* farther off: a touch of the plain's haze */
+  filter: brightness(0.88) saturate(0.8) contrast(0.94) sepia(0.12);
+}
+
+.tribute-ship-shadow {
+  position: absolute;
+  left: 2%;
+  right: 0;
+  bottom: 1%;
+  height: 14%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(24, 10, 5, 0.6), rgba(24, 10, 5, 0));
+}
+
+/* warm office light breathing inside the hatch */
+.tribute-interior {
+  position: absolute;
+  z-index: 2;
+  left: 44%;
+  top: 30%;
+  width: 44%;
+  height: 48%;
+  border-radius: 30%;
+  background: radial-gradient(closest-side, rgba(255, 190, 110, 0.28), rgba(255, 160, 70, 0.08) 60%, transparent);
+  mix-blend-mode: screen;
+  animation: tribute-interior 6s ease-in-out infinite alternate;
+}
+
+@keyframes tribute-interior {
+  0%   { opacity: 0.6; }
+  48%  { opacity: 0.9; }
+  51%  { opacity: 0.72; }
+  100% { opacity: 1; }
+}
+
+/* the wall screen's cool glow, flickering with its content */
+.tribute-screen {
+  position: absolute;
+  z-index: 2;
+  left: 57.7%;
+  top: 49.4%;
+  width: 26%;
+  aspect-ratio: 1.6;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(150, 110, 255, 0.4), rgba(220, 80, 200, 0.14) 55%, transparent);
+  mix-blend-mode: screen;
+  animation: tribute-screen 4.2s steps(1, end) infinite;
+}
+
+@keyframes tribute-screen {
+  0%   { opacity: 0.7; }
+  18%  { opacity: 0.95; }
+  22%  { opacity: 0.55; }
+  40%  { opacity: 0.85; }
+  63%  { opacity: 1; }
+  66%  { opacity: 0.6; }
+  80%  { opacity: 0.9; }
+}
+
+/* volumetric light shaft out of the hatch, widening toward the lens */
+.tribute-shaft {
+  position: absolute;
+  z-index: 3;
+  left: 22%;
+  top: 52%;
+  width: 90%;
+  height: 80%;
+  clip-path: polygon(28% 0, 71% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg,
+    rgba(255, 196, 120, 0) 0%,
+    rgba(255, 190, 110, 0.2) 30%,
+    rgba(250, 170, 90, 0.12) 65%,
+    rgba(250, 170, 90, 0) 100%);
+  filter: blur(10px);
+  mix-blend-mode: screen;
+  animation: tribute-shaft 7s ease-in-out infinite alternate;
+}
+
+@keyframes tribute-shaft {
+  from { opacity: 0.7; }
+  to   { opacity: 1; }
+}
+
+/* the pool of hatch light on the ground in front of the ramp */
+.tribute-pool {
+  position: absolute;
+  z-index: 0;
+  left: 30%;
+  top: 88%;
+  width: 78%;
+  height: 26%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 186, 110, 0.4), rgba(240, 150, 80, 0.14) 60%, transparent);
+  mix-blend-mode: screen;
+}
+
+/* dust hanging in the shaft, lit as it drifts up */
+.tribute-mote {
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--mx) * 100%);
+  top: calc(var(--my) * 100%);
+  width: max(2px, 0.35%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255, 222, 170, 0.9);
+  box-shadow: 0 0 6px rgba(255, 196, 120, 0.9);
+  opacity: 0;
+  animation: tribute-mote 13s linear infinite;
+  animation-delay: var(--d);
+}
+
+@keyframes tribute-mote {
+  0%   { opacity: 0;   translate: 0 0; }
+  20%  { opacity: 0.9; }
+  80%  { opacity: 0.5; }
+  100% { opacity: 0;   translate: 500% -1400%; }
+}
+
+/* ramp edge lights chasing down toward the crew */
+.tribute-ramp-light {
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--bx) * 100%);
+  top: calc(var(--by) * 100%);
+  width: 3%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 214, 150, 0.95), rgba(255, 160, 60, 0.35) 45%, transparent);
+  mix-blend-mode: screen;
+  opacity: 0.2;
+  animation: tribute-ramp 1.5s ease-out infinite;
+  animation-delay: var(--d);
+}
+
+@keyframes tribute-ramp {
+  0%   { opacity: 1; }
+  45%  { opacity: 0.2; }
+  100% { opacity: 0.2; }
+}
+
+.tribute-drift .beacon { width: max(3px, 1%); }
+
+/* anamorphic flare off the hatch: a hot core and a long thin streak */
+.tribute-flare {
+  position: absolute;
+  z-index: 4;
+  left: 60%;
+  top: 55%;
+  width: 24%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 236, 200, 0.55), rgba(255, 180, 90, 0.18) 45%, transparent);
+  mix-blend-mode: screen;
+  animation: tribute-flare 6s ease-in-out infinite alternate;
+}
+
+.tribute-flare::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 900%;
+  height: 4%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(120, 170, 255, 0.18) 30%,
+    rgba(255, 220, 170, 0.6) 50%,
+    rgba(120, 170, 255, 0.18) 70%,
+    transparent);
+  filter: blur(1px);
+}
+
+@keyframes tribute-flare {
+  0%   { opacity: 0.55; scale: 0.95; }
+  100% { opacity: 1;    scale: 1.08; }
+}
+
+.tribute-haze {
+  position: absolute;
+  z-index: 1;
+  left: 40%;
+  right: 2%;
+  top: 60%;
+  height: 16%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(212, 152, 108, 0.45),
+    rgba(186, 122, 80, 0.2) 60%,
+    rgba(150, 84, 48, 0) 100%);
+  filter: blur(6px);
+  animation: rover-trail 7s ease-in-out infinite alternate;
+}
+
+/* the crew: backs to camera, backlit by the hatch (darker fronts, warm
+   rim), feet on the ground in the foreground */
+.tribute-crew {
+  position: absolute;
+  z-index: 2;
+  left: 44%;
+  top: 97%;
+  width: 21%;
+  aspect-ratio: 954 / 1020;
+  transform: translate(-50%, -100%);
+  animation: tribute-parallax 18s ease-in-out infinite alternate;
+}
+
+@keyframes tribute-parallax {
+  from { translate: 0 0; }
+  to   { translate: -1.6% 0; }
+}
+
+.tribute-crew-img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  transform-origin: 50% 100%;
+  /* graded into the scene: dusty, warm, lower contrast, a faint rim only */
+  filter: brightness(0.8) saturate(0.75) contrast(0.93) sepia(0.2)
+    drop-shadow(0 0 1px rgba(255, 196, 130, 0.45));
+}
+
+/* the plain's ambient light on the white suits (multiply warms them to
+   the terrain) plus a veil of the same dusty air, both clipped to the
+   crew's silhouette */
+.tribute-crew-tint {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(196, 116, 72, 0.16), rgba(170, 96, 58, 0.1) 70%, rgba(150, 84, 48, 0.2)),
+    linear-gradient(180deg, rgba(240, 168, 118, 1), rgba(226, 150, 102, 1));
+  background-blend-mode: normal;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  -webkit-mask: url("../assets/about/glimpse-crew-salute-038.png") 0 0 / 100% 100% no-repeat;
+  mask: url("../assets/about/glimpse-crew-salute-038.png") 0 0 / 100% 100% no-repeat;
+}
+
+/* contact shadows where the boots meet the ground */
+.tribute-crew-contact {
+  position: absolute;
+  z-index: 0;
+  bottom: -1.5%;
+  height: 6%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(28, 11, 5, 0.7), rgba(28, 11, 5, 0));
+  filter: blur(2px);
+}
+.tribute-crew-contact--a { left: 2%;  width: 40%; }
+.tribute-crew-contact--b { left: 50%; width: 44%; }
+
+/* backlight bloom: the sky and hatch light wrapping round the crew */
+.tribute-crew-glow {
+  position: absolute;
+  z-index: 0;
+  left: -15%;
+  right: -15%;
+  top: -8%;
+  height: 80%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 176, 96, 0.12), rgba(255, 140, 60, 0.04) 55%, transparent);
+  mix-blend-mode: screen;
+  animation: tribute-shaft 7s ease-in-out infinite alternate;
+}
+
+/* helmet comm lamps: a soft steady glow that breathes */
+.tribute-lamp {
+  position: absolute;
+  z-index: 2;
+  left: calc(var(--bx) * 100%);
+  top: calc(var(--by) * 100%);
+  width: 5%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 230, 180, 0.7), rgba(255, 180, 80, 0.25) 40%, transparent);
+  mix-blend-mode: screen;
+  animation: tribute-lamp 2.4s ease-in-out infinite alternate;
+  animation-delay: var(--d);
+}
+
+@keyframes tribute-lamp {
+  from { opacity: 0.45; }
+  to   { opacity: 1; }
+}
+
+.tribute-crew .beacon { width: max(3px, 1.2%); }
+
+/* dust streaming past the boots, right to left */
+.tribute-wind {
+  position: absolute;
+  z-index: 3;
+  left: -40%;
+  width: 180%;
+  bottom: -3%;
+  height: 14%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 30% 45% at 30% 60%, rgba(220, 160, 114, 0.45), transparent 70%),
+    radial-gradient(ellipse 24% 40% at 62% 50%, rgba(230, 172, 126, 0.35), transparent 70%),
+    radial-gradient(ellipse 20% 35% at 85% 65%, rgba(210, 148, 104, 0.3), transparent 70%);
+  filter: blur(5px);
+  opacity: 0;
+  animation: tribute-wind 8s linear infinite;
+}
+.tribute-wind--late { animation-delay: -4s; bottom: 2%; height: 10%; }
+
+@keyframes tribute-wind {
+  0%   { opacity: 0;   translate: 18% 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 0.8; }
+  100% { opacity: 0;   translate: -18% -10%; }
+}
+
+/* long shadows thrown toward the lens by the hatch light behind them */
+.tribute-crew-shadow {
+  position: absolute;
+  z-index: 0;
+  top: 96%;
+  height: 22%;
+  border-radius: 50% 50% 40% 40%;
+  background: linear-gradient(180deg, rgba(22, 9, 4, 0.6), rgba(22, 9, 4, 0));
+  filter: blur(3px);
+  transform: skewX(-18deg);
+  transform-origin: 50% 0;
+}
+.tribute-crew-shadow--a { left: 8%;  width: 38%; }
+.tribute-crew-shadow--b { left: 54%; width: 40%; }
+
 /* Burnt-orange atmospheric veil — the Portfolio Mars hero's
    .mars-photo-grade recipe (portfolio/index.html, "MARS DISTANCE
    TREATMENT"), on every chapter so the whole storybook shares the
@@ -342,11 +1309,9 @@
   transition: none;
 }
 
-/* the old drifting star particles belong to the text-only pages; the two
-   sky pages use the real sky (sky-fx.js) behind the atmosphere */
-#story.has-sky .story-stars {
-  opacity: 0;
-}
+/* the drifting star particles run over every page, the two sky pages
+   included (about-story.js skips its storm cell + orbiter there, since
+   landing-fx.js already draws those on that shot) */
 
 /* ---- Text stack (crossfades independently of the scene turn) --- */
 
@@ -774,6 +1739,7 @@
 }
 
 .hud-summary-dot {
+  flex: none;
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -862,6 +1828,38 @@
   margin-bottom: 10px;
 }
 
+/* Traverse and tribute pages: the landing's layout and caption format
+   exactly (log top-left, card bottom-left), log and card booting in
+   together. */
+.story-text--traverse .story-status,
+.story-text--tribute .story-status,
+.story-text--ascent .story-status {
+  margin-bottom: 10px;
+}
+
+.story-text--traverse .story-title,
+.story-text--tribute .story-title,
+.story-text--ascent .story-title {
+  max-width: 24ch;
+  font-size: clamp(1.5rem, 2.2vw, 2.1rem);
+  line-height: 1.15;
+  text-transform: none;
+}
+
+.story-text--traverse .story-subtitle,
+.story-text--tribute .story-subtitle,
+.story-text--ascent .story-subtitle {
+  max-width: 34ch;
+  margin-top: 10px;
+  font-size: clamp(0.88rem, 1.1vw, 1rem);
+}
+
+@media (max-width: 600px) {
+  .story-text--traverse .story-title,
+  .story-text--tribute .story-title,
+  .story-text--ascent .story-title { max-width: 20ch; }
+}
+
 @keyframes hud-boot {
   0%   { opacity: 0; }
   12%  { opacity: 0.8; }
@@ -880,11 +1878,51 @@
   100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
 }
 
-/* ---- Final page --------------------------------------------------- */
+/* Ascent page: the WORX surface log sits bottom-right, leaving the sky
+   (and the orbiter up there) clear. */
+.worx-log {
+  top: auto;
+  bottom: clamp(56px, 11vh, 130px);
+}
 
-.story-text--final .story-title {
-  max-width: 18ch;
-  font-size: clamp(2.4rem, 5.6vw, 4.2rem);
+/* Ascent page: the habitat's target ring appears once it's out of the
+   launch dust (about-story.js sets its opacity). */
+.hud-target--hab {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.hud-target--hab .hud-target-label {
+  left: auto;
+  right: 24px;
+}
+
+/* ---- Final page --------------------------------------------------- */
+/* One word and one action, dead centre, over the same sky, storm,
+   orbiter, stars and plain as every other page. */
+.story-text--final {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 16px;
+}
+
+.story-text--final .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.story-text--final .story-title--worx {
+  max-width: none;
+  font-size: clamp(4.5rem, 17vw, 13.5rem);
+  line-height: 0.92;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.story-text--final .story-cta {
+  margin-top: clamp(22px, 4vh, 40px);
 }
 
 .story-subtitle--close {
@@ -921,6 +1959,37 @@
 
   .story-terrain {
     --terrain-w: 170vw;
+  }
+
+  .story-far-ship,
+  .story-rover,
+  .story-site,
+  .story-tribute {
+    --terrain-w: 170vw;
+  }
+
+  .tribute-ship { left: 63%; top: 54%; width: 26%; }
+  .tribute-crew { left: 43%; top: 62%; width: 15%; }
+
+  .story-site-body {
+    left: 56%;
+    width: 42%;
+  }
+
+  .story-rover-body {
+    left: 44%;
+    width: 34%;
+  }
+
+  .story-far-ship-body {
+    left: 70%;
+    width: 9%;
+  }
+
+  .story-far-ship--left .story-far-ship-body {
+    left: 27%;
+    top: 37%;
+    width: 11%;
   }
 
   /* Portrait: contain-fit makes the 16:9 frame screen-width, so the
@@ -964,6 +2033,37 @@
     --terrain-w: 230vw;
   }
 
+  .story-far-ship,
+  .story-rover,
+  .story-site,
+  .story-tribute {
+    --terrain-w: 230vw;
+  }
+
+  .tribute-ship { left: 60%; top: 38%; width: 22%; }
+  .tribute-crew { left: 45%; top: 45%; width: 12%; }
+
+  .story-site-body {
+    left: 57%;
+    top: 50%;
+    width: 34%;
+  }
+
+  .story-rover-body {
+    left: 47%;
+    width: 32%;
+  }
+
+  .story-far-ship--left .story-far-ship-body {
+    left: 33%;
+    top: 27%;
+    width: 10%;
+  }
+
+  .story-far-ship-body {
+    left: 62%;
+  }
+
   .story-landing-back {
     --landing-scale: 1.5;
     --story-horizon-y: 0.6;
@@ -981,6 +2081,8 @@
   }
 
   .hud-stages li:not(.is-active) { display: none; }
+
+  .worx-log { display: none; }
 
   .hud-target-label { display: none; }
 
@@ -1001,6 +2103,8 @@
 /* ---- Reduced motion ---------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .story-text.is-live .hud-summary-rows li,
+  .rover-img,
+  .rover-trail,
   .hud-summary-dot,
   .story-grain,
   .hud-rec,
@@ -1024,4 +2128,49 @@
   .story-status::after {
     display: none;
   }
+}
+
+
+/* Reduced motion: the rover's dust holds as a still, settled cloud. */
+@media (prefers-reduced-motion: reduce) {
+  .rover-beacons { animation: none; }
+  .beacon { animation: none; opacity: 0.8; }
+
+  .rover-puff {
+    animation: none;
+    opacity: 0.45;
+    transform: translate(-110%, -95%) scale(calc(1.3 * var(--s)));
+  }
+}
+
+/* Reduced motion: the build site simply appears, lit and still. */
+@media (prefers-reduced-motion: reduce) {
+  .site-drift,
+  .site-glow,
+  .site-haze { animation: none; }
+
+  .site-mote { animation: none; opacity: 0; }
+
+  .site-spark { animation: none; opacity: 0.7; }
+
+  .site-step,
+  .site-gust { animation: none; opacity: 0; }
+
+  .site-drone { animation: none; translate: 7600% 400%; }
+
+  .tribute-drift,
+  .tribute-interior,
+  .tribute-screen,
+  .tribute-shaft,
+  .tribute-ramp-light,
+  .tribute-haze,
+  .tribute-crew { animation: none; }
+
+  .tribute-mote { animation: none; opacity: 0; }
+
+  .tribute-flare,
+  .tribute-crew-glow,
+  .tribute-lamp { animation: none; }
+
+  .tribute-wind { animation: none; opacity: 0; }
 }
