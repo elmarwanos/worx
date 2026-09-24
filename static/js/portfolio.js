@@ -1,6 +1,6 @@
 /* ============================================================
    Worx by Glimpse — portfolio.js
-   Portfolio page only. Two small, self-contained pieces:
+   Portfolio page only. Small, self-contained pieces:
 
    1. initShots()     — one shared auto-scroll for every project
                         preview: duplicates the screenshot once
@@ -8,8 +8,11 @@
                         cards near the viewport.
    2. initHero()      — drifting-particle atmosphere over the
                         Mars hero image.
+   3. initSky()       — the About page's night sky (stars,
+                        storm cell, GLIMPSE orbiter) behind
+                        the Mars terrain.
 
-   Both stand down for prefers-reduced-motion. No dependencies.
+   All stand down for prefers-reduced-motion. No dependencies.
    ============================================================ */
 
 (function () {
@@ -198,7 +201,99 @@
     });
   }
 
+  /* ----------------------------------------------------------
+     3. Mars hero sky — the About page's sky behind the terrain
+     Same shared modules about-story.js draws on its star canvas:
+     sky-fx.js (stars, Earth · Moon, Saturn, meteor), ambient-storm.js
+     (the violet storm cell) and glimpse-orbiter.js (the GLIMPSE pass).
+     The terrain photo sits above this canvas, so the ridge hides
+     whatever falls behind it.
+     ---------------------------------------------------------- */
+  function initSky() {
+    var canvas = document.querySelector(".folio-sky-canvas");
+    if (!canvas || typeof MartianSky === "undefined") return;
+    var hero = canvas.closest(".folio-hero");
+    var ctx = canvas.getContext("2d");
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var sky = new MartianSky({ reduceMotion: reduceMotion });
+    var skyFx = { dpr: dpr, _cam: null, cameraOriginY: 0.62, horizonY: 0.5 };
+    var rockLight = document.querySelector(".mars-terrain-fx__storm");
+    var glow = 0;
+    var raf = 0;
+    var running = false;
+
+    // Where the photo's ridge lands on screen: the terrain is a 3:2
+    // image at background-size: cover, 54% down; the ridge averages
+    // ~47% down the source image.
+    function horizon(w, h) {
+      var s = Math.max(w / 2400, h / 1600);
+      var y = (h - 1600 * s) * 0.54 + 0.47 * 1600 * s;
+      return Math.min(0.9, Math.max(0.2, y / h));
+    }
+
+    function resize() {
+      var r = hero.getBoundingClientRect();
+      canvas.width = Math.max(1, r.width * dpr);
+      canvas.height = Math.max(1, r.height * dpr);
+      skyFx.horizonY = horizon(r.width, r.height);
+    }
+
+    function paint() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      sky.draw(ctx, skyFx);
+      if (typeof AmbientStorm !== "undefined") AmbientStorm.draw(ctx, canvas.width, canvas.height, { alpha: 0.85 });
+      if (typeof GlimpseOrbiter !== "undefined") GlimpseOrbiter.draw(ctx, canvas.width, canvas.height, { dpr: dpr });
+      sky.drawLabels(ctx, skyFx);
+      // The storm's lightning bounces off the boulders below: snap up
+      // with each flicker, fall off a little slower than the sky does.
+      if (rockLight && typeof AmbientStorm !== "undefined") {
+        var f = AmbientStorm.flash || 0;
+        glow = f > glow ? f : glow * 0.88;
+        rockLight.style.opacity = (glow * 0.9).toFixed(3);
+      }
+    }
+
+    function step() {
+      paint();
+      raf = requestAnimationFrame(step);
+    }
+
+    function start() {
+      if (running) return;
+      running = true;
+      step();
+    }
+    function stop() {
+      running = false;
+      cancelAnimationFrame(raf);
+    }
+
+    resize();
+
+    if (reduceMotion) {
+      paint();                              // one still sky
+      // the orbiter's sprite loads async; repaint once it's in
+      if (typeof GlimpseOrbiter !== "undefined") GlimpseOrbiter.image().addEventListener("load", paint);
+    } else if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (e) {
+        e[0].isIntersecting ? start() : stop();
+      }).observe(hero);
+    } else {
+      start();
+    }
+
+    var t;
+    window.addEventListener("resize", function () {
+      clearTimeout(t);
+      t = setTimeout(function () {
+        resize();
+        if (reduceMotion) paint();
+      }, 200);
+    });
+  }
+
   initShots();
   initCardVideos();
   initHero();
+  initSky();
 })();

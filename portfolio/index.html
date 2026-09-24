@@ -478,6 +478,215 @@
     }
   </style>
 
+
+  <style>
+    /* ============================================================
+       MARS HERO — one landscape under the About page's sky
+       mars-hero-terrain.webp is a single plate: the original ridge
+       (same pixels, so the astronaut's path still lands on it),
+       colour-matched to the About ground, carrying its pebble grain up
+       the slopes, hazing with distance, and running down into the
+       About boulder field. Its sky is transparent.
+
+       .folio-camera        wraps every layer for a slow push-in
+       .folio-sky           About's .story-atmosphere gradient + glow
+       .folio-sky-canvas    stars, Earth·Moon, Saturn, storm, GLIMPSE
+       .mars-terrain-base   solid backing so no star shows through ground
+       .mars-photo          the terrain plate, About's terrain treatment
+       .mars-photo-grade    About's .story-grade, clipped to the terrain
+       .mars-terrain-fx     storm bounce light + creeping dust, clipped
+       .folio-grain         About's film grain over the whole frame
+       ============================================================ */
+    body[data-page="portfolio"] .folio-hero-media {
+      --terrain-img: url("../static/assets/portfolio/mars-hero-terrain.webp");
+      --terrain-pos: center 54%;
+    }
+
+    /* Size container: the astronaut/flag paths (portfolio.css) are in
+       cqw/cqh, i.e. measured on the hero box the terrain is laid out
+       in, so they stay on the ridge even when the hero is taller than
+       the viewport (landscape phones, short windows). */
+    body[data-page="portfolio"] .folio-camera {
+      position: absolute;
+      inset: 0;
+      container-type: size;
+      transform-origin: 56% 62%;
+      animation: folioPushIn 46s ease-in-out infinite alternate;
+    }
+
+    @keyframes folioPushIn {
+      from { transform: scale(1); }
+      to { transform: scale(1.045) translate3d(-.4%, .3%, 0); }
+    }
+
+    body[data-page="portfolio"] .folio-sky,
+    body[data-page="portfolio"] .folio-sky-canvas,
+    body[data-page="portfolio"] .mars-terrain-base,
+    body[data-page="portfolio"] .mars-terrain-fx {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    body[data-page="portfolio"] .folio-sky {
+      background: linear-gradient(180deg,
+        #1f0a04 0%,
+        #3a1307 30%,
+        #5c1c07 52%,
+        #7d2a0b 76%,
+        #5a1a06 100%);
+    }
+
+    body[data-page="portfolio"] .folio-sky::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 85% 55% at 50% 105%,
+          rgba(250, 167, 25, 0.30) 0%,
+          rgba(229, 125, 35, 0.16) 42%,
+          transparent 74%),
+        radial-gradient(ellipse 60% 40% at 78% 88%,
+          rgba(192, 69, 39, 0.22),
+          transparent 70%);
+      mix-blend-mode: screen;
+    }
+
+    /* Everything that belongs to the ground is clipped to its outline. */
+    body[data-page="portfolio"] .mars-terrain-base,
+    body[data-page="portfolio"] .mars-photo-grade,
+    body[data-page="portfolio"] .mars-terrain-fx {
+      -webkit-mask-image: var(--terrain-img);
+      mask-image: var(--terrain-img);
+      -webkit-mask-size: cover;
+      mask-size: cover;
+      -webkit-mask-position: var(--terrain-pos);
+      mask-position: var(--terrain-pos);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      transform: scale(1.01);
+    }
+
+    body[data-page="portfolio"] .mars-terrain-base {
+      background: #150905;
+    }
+
+    /* About's .story-terrain treatment */
+    body[data-page="portfolio"] .mars-photo {
+      background-image: var(--terrain-img) !important;
+      background-position: var(--terrain-pos) !important;
+      opacity: .9 !important;
+      filter: saturate(.85) contrast(.95) brightness(.88) !important;
+    }
+
+    /* About's .story-grade, plus a soft pool of shade under the copy */
+    body[data-page="portfolio"] .mars-photo-grade {
+      background:
+        radial-gradient(ellipse 58% 50% at 32% 80%,
+          rgba(21, 9, 5, .62) 0%,
+          rgba(21, 9, 5, .28) 55%,
+          transparent 82%),
+        linear-gradient(180deg,
+          rgba(45, 13, 4, 0.28) 0%,
+          rgba(92, 28, 7, 0.34) 42%,
+          rgba(150, 50, 10, 0.40) 72%,
+          rgba(67, 18, 5, 0.55) 100%),
+        linear-gradient(90deg,
+          rgba(21, 9, 5, 0.45) 0%,
+          rgba(88, 25, 6, 0.14) 46%,
+          rgba(125, 39, 8, 0.10) 100%) !important;
+    }
+
+    body[data-page="portfolio"] .mars-terrain-fx {
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* Violet bounce light from the storm cell, opacity driven by its
+       lightning (portfolio.js initSky). */
+    body[data-page="portfolio"] .mars-terrain-fx__storm {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      background: radial-gradient(ellipse 60% 70% at 86% 30%,
+        rgba(206, 140, 214, .55) 0%,
+        rgba(161, 71, 157, .22) 40%,
+        transparent 75%);
+      mix-blend-mode: screen;
+    }
+
+    /* Low dust creeping across the plain at the mountain's foot. */
+    body[data-page="portfolio"] .mars-terrain-fx__dust {
+      position: absolute;
+      top: 50%;
+      height: 26%;
+      left: -30%;
+      right: -30%;
+      background:
+        radial-gradient(ellipse 22% 60% at 20% 55%, rgba(229, 125, 35, .20), transparent 70%),
+        radial-gradient(ellipse 30% 70% at 52% 45%, rgba(214, 110, 50, .18), transparent 72%),
+        radial-gradient(ellipse 18% 55% at 80% 60%, rgba(250, 167, 25, .15), transparent 70%);
+      filter: blur(8px);
+      animation: marsDust 38s ease-in-out infinite alternate;
+    }
+
+    @keyframes marsDust {
+      from { transform: translate3d(-6%, 0, 0); opacity: .7; }
+      50% { opacity: 1; }
+      to { transform: translate3d(6%, -6%, 0); opacity: .75; }
+    }
+
+    /* About's film grain (.story-grain), from an SVG noise tile. */
+    body[data-page="portfolio"] .folio-grain {
+      position: absolute;
+      inset: -60%;
+      z-index: 4;
+      pointer-events: none;
+      opacity: .075;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") repeat;
+      mix-blend-mode: overlay;
+      animation: folioGrain .7s steps(7) infinite;
+    }
+
+    @keyframes folioGrain {
+      0%   { transform: translate(0, 0); }
+      14%  { transform: translate(-7%, 4%); }
+      28%  { transform: translate(5%, -9%); }
+      42%  { transform: translate(-11%, -3%); }
+      57%  { transform: translate(9%, 7%); }
+      71%  { transform: translate(-4%, 11%); }
+      85%  { transform: translate(12%, -6%); }
+      100% { transform: translate(0, 0); }
+    }
+
+    @media (max-width: 900px) {
+      body[data-page="portfolio"] .folio-hero-media {
+        --terrain-pos: 56% 54%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body[data-page="portfolio"] .folio-hero-media {
+        --terrain-pos: 60% 54%;
+      }
+
+      body[data-page="portfolio"] .mars-photo {
+        opacity: .86 !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body[data-page="portfolio"] .folio-camera,
+      body[data-page="portfolio"] .mars-terrain-fx__dust,
+      body[data-page="portfolio"] .folio-grain {
+        animation: none;
+      }
+    }
+  </style>
+
 </head>
 
 <body data-page="portfolio">
@@ -506,9 +715,20 @@
     <!-- ====== Portfolio hero (Mars) ====== -->
     <section class="folio-hero">
       <div class="folio-hero-media" aria-hidden="true">
-        <!-- Worx Mars landscape hero asset -->
+       <div class="folio-camera">
+        <!-- About-page night sky (sky-fx.js stars + Earth/Saturn,
+             ambient-storm.js cell, glimpse-orbiter.js pass) behind the
+             terrain plate (see the MARS HERO style block). -->
+        <div class="folio-sky"></div>
+        <canvas class="folio-sky-canvas"></canvas>
+        <div class="mars-terrain-base"></div>
+        <!-- Worx Mars landscape: ridge + About boulder field, one plate -->
         <div class="mars-photo"></div>
         <div class="mars-photo-grade"></div>
+        <div class="mars-terrain-fx">
+          <div class="mars-terrain-fx__storm"></div>
+          <div class="mars-terrain-fx__dust"></div>
+        </div>
         <!-- Mars ridge astronaut — 10 FINAL walk frames + kneel + planted flag -->
         <div class="mars-astronaut" aria-hidden="true">
           <div class="mars-astronaut__gravity">
@@ -600,6 +820,8 @@
         <canvas id="mars3d" class="mars-3d-canvas" aria-hidden="true"></canvas>
         <div class="mars-ember-glow"></div>
         <canvas class="folio-hero-particles"></canvas>
+        <div class="folio-grain"></div>
+       </div>
       </div>
       <div class="container folio-hero-inner">
         <p class="eyebrow">Our Work</p>
@@ -1190,9 +1412,13 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="../static/js/nav.js"></script>
+  <script src="../static/js/logo-eye.js"></script>
   <script src="../static/js/animations.js"></script>
   <script src="../static/js/main.js"></script>
   <script src="../static/js/contact-widget.js"></script>
+  <script src="../static/js/sky-fx.js"></script>
+  <script src="../static/js/glimpse-orbiter.js"></script>
+  <script src="../static/js/ambient-storm.js"></script>
   <script type="module" src="../static/js/portfolio-3d.js"></script>
   <script src="../static/js/portfolio.js"></script>
 </body>

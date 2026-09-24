@@ -66,8 +66,10 @@
   text-transform: lowercase;
 }
 
-/* Footer uses the full stacked logo */
-.brand--footer img {
+/* Footer uses the full stacked logo (an <img>, or the inline SVG
+   logo-eye.js swaps in so its crescent can follow the pointer) */
+.brand--footer img,
+.brand--footer .logo-eye {
   width: 132px;
   height: auto;
 }
@@ -250,5 +252,12 @@
 @media (max-width: 860px) {
   .footer-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Phones: the brand blurb gets the full row instead of half of it */
+@media (max-width: 560px) {
+  .footer-about {
+    grid-column: 1 / -1;
   }
 }

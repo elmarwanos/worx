@@ -165,6 +165,7 @@
     _lastFlash: -1e9,
     _nextFlash: 2200 + Math.random() * 2600,
     _strike: null,
+    flash: 0,
 
     // ctx/w/h: canvas + its device-pixel size. opts: { x, y (0..1 of
     // w/h, cell center), scale (0..1 of min(w,h)), alpha }.
@@ -183,6 +184,7 @@
         this._strike = buildStrike(rng((t | 0) + 7));
       }
       var flash = this._strike ? strikeIntensity(this._strike, t - this._lastFlash) : 0;
+      this.flash = flash; // last drawn lightning level (0..1), for scenes lit by it
       var pulse = globalSurge(t);
       var es = scale * pulse; // effective scale: the whole cell's cinematic breath
 
