@@ -496,55 +496,84 @@
   text-align: center;
 }
 
+/* Background: a dark planet rising over the bottom edge, lit from
+   behind like an eclipse. Used when WebGL is unavailable. */
+
+.cx-hero-sky {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 85% 75% at 50% 45%, transparent 55%, rgba(8, 3, 1, 0.55) 100%);
+}
+
 .cx-hero-glow {
   position: absolute;
   z-index: -2;
   left: 50%;
-  bottom: -20vh;
-  width: 140vw;
-  height: 70vh;
+  top: 30%;
+  width: min(900px, 110vw);
+  height: 60vh;
   transform: translateX(-50%);
-  background: radial-gradient(ellipse at center, rgba(229, 125, 35, 0.45), rgba(192, 69, 39, 0.18) 40%, transparent 70%);
-  filter: blur(20px);
+  background: radial-gradient(ellipse at center, rgba(192, 69, 39, 0.22), transparent 70%);
+  filter: blur(30px);
 }
 
-.cx-hero-orbit {
+.cx-eclipse {
+  --size: max(170vw, 1500px);
   position: absolute;
-  z-index: -2;
+  z-index: -1;
   left: 50%;
-  top: 46%;
-  width: 0;
-  height: 0;
+  top: 78%;
+  width: var(--size);
+  aspect-ratio: 1;
+  margin-left: calc(var(--size) / -2);
+  pointer-events: none;
 }
 
-.cx-hero-orbit span {
+.cx-eclipse-planet,
+.cx-eclipse-flare {
   position: absolute;
   left: 50%;
-  top: 50%;
-  border: 1px solid rgba(254, 238, 207, 0.08);
+  top: 0;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  transform: translate(-50%, -50%) rotateX(72deg);
+  transform: translate(-50%, -50%);
+  background: #fff6e4;
+  box-shadow: 0 0 20px 6px rgba(250, 167, 25, 0.9), 0 0 80px 30px rgba(229, 125, 35, 0.45);
+  animation: cx-flare 5s ease-in-out infinite;
 }
 
-.cx-hero-orbit span::after {
+.cx-eclipse-flare::before {
   content: "";
   position: absolute;
+  left: 50%;
   top: 50%;
-  left: -4px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent-2);
-  box-shadow: 0 0 16px var(--accent-2);
+  width: min(1100px, 90vw);
+  height: 2px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(90deg, transparent, rgba(254, 238, 207, 0.9) 50%, transparent);
+  filter: blur(0.5px);
 }
 
-.cx-hero-orbit span:nth-child(1) { width: 60vw; height: 60vw; animation: cx-orbit 22s linear infinite; }
-.cx-hero-orbit span:nth-child(2) { width: 88vw; height: 88vw; animation: cx-orbit 34s linear infinite reverse; }
-.cx-hero-orbit span:nth-child(3) { width: 120vw; height: 120vw; animation: cx-orbit 50s linear infinite; }
+@keyframes cx-flare {
+  0%, 100% { opacity: 0.85; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.25); }
+}
 
-@keyframes cx-orbit {
-  from { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(0deg); }
-  to { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg); }
+.cx-hero-gl {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.cx-gl-on .cx-eclipse,
+.cx-gl-on .cx-hero-glow {
+  display: none;
 }
 
 .cx-hud {
@@ -688,38 +717,11 @@
   border-color: var(--accent-2);
 }
 
-.cx-terrain {
-  position: absolute;
-  z-index: -1;
-  left: -5%;
-  right: -5%;
-  bottom: -2px;
-  height: 46vh;
-  pointer-events: none;
-}
-
-.cx-terrain img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 62%;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 30%);
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 30%);
-  filter: brightness(0.62) saturate(1.1);
-}
-
-.cx-terrain::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 40%, var(--ink) 100%);
-}
-
 @media (max-width: 720px) {
   .cx-hud { inset: 80px 16px 20px; font-size: 0.56rem; }
   .cx-hud-corner--bl,
   .cx-hud-cross { display: none; }
-  .cx-terrain { height: 34vh; }
+  .cx-eclipse { top: 82%; --size: 260vw; }
 }
 
 /* ---- 01 Manifesto -------------------------------------------- */
@@ -2425,18 +2427,13 @@
   .cx-flight-checklist { display: none; }
 }
 
-/* ---- 05 Ignition --------------------------------------------- */
+/* ---- 05 Ignition (CTA) --------------------------------------- */
 
 .cx-ignite {
   position: relative;
-  min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  padding: 140px 6vw 120px;
-  text-align: center;
-  overflow: hidden;
+  padding: var(--section-pad) 6vw;
   isolation: isolate;
 }
 
@@ -2445,22 +2442,54 @@
   position: absolute;
   z-index: -1;
   left: 50%;
-  top: 62%;
-  width: min(900px, 120vw);
-  aspect-ratio: 1;
+  top: 50%;
+  width: min(1100px, 130vw);
+  height: 80%;
   transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(229, 125, 35, 0.28), transparent 62%);
+  background: radial-gradient(ellipse at center, rgba(229, 125, 35, 0.2), transparent 65%);
+  filter: blur(20px);
 }
 
-.cx-ignite .eyebrow {
-  justify-content: center;
+.cx-cta {
+  position: relative;
+  width: min(1180px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(32px, 5vw, 64px);
+  padding: clamp(26px, 4.5vw, 60px);
+  border: 1px solid var(--line-strong);
+  border-radius: 32px;
+  background:
+    radial-gradient(600px 400px at 0% 0%, rgba(192, 69, 39, 0.28), transparent 70%),
+    radial-gradient(500px 360px at 100% 100%, rgba(250, 167, 25, 0.12), transparent 70%),
+    linear-gradient(160deg, rgba(66, 29, 15, 0.75), rgba(21, 9, 5, 0.9));
+  backdrop-filter: blur(12px);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.cx-cta::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
+  opacity: 0.8;
+}
+
+.cx-cta-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .cx-ignite-title {
-  font-size: clamp(3.2rem, 10vw, 9rem);
-  line-height: 0.92;
-  letter-spacing: -0.035em;
+  margin-top: 6px;
+  font-size: clamp(2.6rem, 5.4vw, 4.8rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
 }
 
 .cx-ignite-title em {
@@ -2468,90 +2497,75 @@
 }
 
 .cx-ignite-sub {
-  max-width: 520px;
-  margin-top: 24px;
+  max-width: 440px;
+  margin-top: 22px;
   color: var(--muted);
 }
 
-.cx-ignite-btn {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: clamp(180px, 22vw, 240px);
-  aspect-ratio: 1;
-  margin-top: 50px;
-  border-radius: 50%;
-}
-
-.cx-ignite-ring {
-  position: absolute;
-  inset: 0;
+.cx-cta-steps {
+  list-style: none;
   width: 100%;
-  height: 100%;
-  animation: cx-spin 16s linear infinite;
+  max-width: 440px;
+  margin-top: 32px;
+  border-top: 1px solid var(--line);
 }
 
-.cx-ignite-btn:hover .cx-ignite-ring {
-  animation-duration: 4s;
-}
-
-@keyframes cx-spin {
-  to { transform: rotate(360deg); }
-}
-
-.cx-ignite-ring text {
-  font: 600 12.5px var(--font-mono);
-  letter-spacing: 0.22em;
-  fill: var(--brand-cream);
-}
-
-.cx-ignite-core {
-  display: grid;
-  place-items: center;
-  width: 62%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--on-accent);
+.cx-cta-steps li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(1rem, 1.4vw, 1.2rem);
-  line-height: 1.15;
-  animation: cx-throb 2.4s ease-out infinite;
-  transition: background 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  font-weight: 500;
 }
 
-.cx-ignite-btn:hover .cx-ignite-core {
-  background: var(--accent-2);
-  transform: scale(1.08);
+.cx-cta-steps span {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--accent-2);
 }
 
-@keyframes cx-throb {
-  0% { box-shadow: 0 0 0 0 rgba(250, 167, 25, 0.5), 0 20px 60px rgba(229, 125, 35, 0.45); }
-  70%, 100% { box-shadow: 0 0 0 36px rgba(250, 167, 25, 0), 0 20px 60px rgba(229, 125, 35, 0.45); }
-}
-
-.cx-ignite-btn:focus-visible {
-  outline: 2px solid var(--accent-2);
-  outline-offset: 6px;
-}
-
-.cx-ignite-links {
+.cx-cta-contact {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px 24px;
-  margin-top: 60px;
-  font-size: 0.9rem;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 32px;
 }
 
-.cx-ignite-links a {
-  color: var(--muted);
-  transition: color 0.25s ease;
+.cx-cta-contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  color: var(--text);
+  transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
 }
 
-.cx-ignite-links a:hover {
+.cx-cta-contact svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
   color: var(--accent-2);
+}
+
+.cx-cta-contact a:hover {
+  border-color: var(--accent-2);
+  background: rgba(250, 167, 25, 0.08);
+}
+
+@media (min-width: 1101px) {
+  .cx-cta { width: min(1180px, calc(100vw - 320px)); }
+}
+
+@media (max-width: 900px) {
+  .cx-cta { grid-template-columns: 1fr; }
+  .cx-cta-contact { margin-top: 0; }
 }
 
 /* ---- JS-controlled start states ------------------------------ */
@@ -2574,14 +2588,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .cx-grain,
-  .cx-hero-orbit span,
+  .cx-eclipse-flare,
   .cx-comms-signal i,
   .cx-comms-line::after,
   .sm-phone,
   .sa-cube,
   .sa-floor,
-  .cx-ignite-ring,
-  .cx-ignite-core {
+  .cx-eclipse-flare {
     animation: none !important;
   }
 }
@@ -3229,31 +3242,45 @@
 /* ---- Mission builder ----------------------------------------- */
 
 .cx-mission {
-  width: min(1100px, 100%);
-  margin-top: 40px;
-  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(18px, 2.4vw, 28px);
   border: 1px solid var(--line);
   border-radius: 22px;
   background: rgba(21, 9, 5, 0.6);
-  backdrop-filter: blur(10px);
   text-align: left;
+}
+
+.cx-mission-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding-bottom: 16px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.cx-mission-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.25rem;
 }
 
 .cx-mission-readout {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding-bottom: 16px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid var(--line);
+  gap: 12px;
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--hud);
 }
 
 .cx-mission-readout b {
-  color: var(--text);
+  color: var(--hud);
   font-weight: 500;
 }
 
@@ -3262,8 +3289,7 @@
 }
 
 .cx-mission-clear {
-  margin-left: auto;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   background: none;
@@ -3272,24 +3298,34 @@
   cursor: pointer;
 }
 
+.cx-mission-clear:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
 .cx-mission-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px 22px;
+  display: flex;
+  flex-direction: column;
 }
 
 .cx-mission-group {
   display: flex;
   flex-wrap: wrap;
-  align-content: flex-start;
+  align-items: center;
   gap: 6px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.cx-mission-group:last-child {
+  border-bottom: 0;
 }
 
 .cx-mission-group p {
   flex: 0 0 100%;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--hud-dim);
@@ -3299,23 +3335,28 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 6px 12px;
+  padding: 7px 13px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   background: rgba(33, 16, 9, 0.6);
   color: var(--text);
-  font: 500 0.8rem/1.2 var(--font-body);
+  font: 500 0.82rem/1.2 var(--font-body);
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .cx-chip::before {
-  content: "";
-  width: 7px;
-  height: 7px;
+  content: "+";
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   border: 1px solid var(--muted);
-  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  font-size: 0.7rem;
+  line-height: 1;
+  color: var(--muted);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .cx-chip:hover {
@@ -3329,9 +3370,10 @@
 }
 
 .cx-chip[aria-pressed="true"]::before {
+  content: "✓";
   background: var(--accent-2);
   border-color: var(--accent-2);
-  box-shadow: 0 0 8px var(--accent-2);
+  color: var(--on-accent);
 }
 
 .cx-chip:active {
@@ -3343,17 +3385,47 @@
   outline-offset: 2px;
 }
 
-.cx-ignite-btn.is-armed .cx-ignite-core {
+.cx-mission-foot {
+  margin-top: auto;
+  padding-top: 20px;
+  text-align: center;
+}
+
+.cx-ignite-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding-top: 18px;
+  padding-bottom: 18px;
+  font-size: 1.05rem;
+}
+
+.cx-ignite-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.3s ease;
+}
+
+.cx-ignite-btn:hover svg {
+  transform: translateX(4px);
+}
+
+.cx-ignite-btn.is-armed {
   background: var(--accent-2);
+  box-shadow: 0 16px 50px rgba(250, 167, 25, 0.35);
 }
 
-@media (max-width: 900px) {
-  .cx-mission-grid { grid-template-columns: 1fr 1fr; }
-}
-
-@media (max-width: 560px) {
-  .cx-mission { padding: 16px; }
-  .cx-mission-grid { grid-template-columns: 1fr; }
+.cx-mission-note {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 /* ---- Keep wide content clear of the fixed HUD rails ----------- */

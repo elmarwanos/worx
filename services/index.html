@@ -12,7 +12,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="../static/assets/portfolio/mars-hero-terrain.webp">
 
   <link rel="stylesheet" href="../static/css/base.css">
   <link rel="stylesheet" href="../static/css/layout.css">
@@ -158,9 +157,11 @@
 
     <!-- ================= 00 · LAUNCH ================= -->
     <section class="cx-hero" id="launch" data-chapter-section="launch">
+      <div class="cx-hero-sky" aria-hidden="true"></div>
       <div class="cx-hero-glow" aria-hidden="true"></div>
-      <div class="cx-hero-orbit" aria-hidden="true">
-        <span></span><span></span><span></span>
+      <div class="cx-eclipse" aria-hidden="true">
+        <span class="cx-eclipse-planet"></span>
+        <span class="cx-eclipse-flare"></span>
       </div>
 
       <div class="cx-hud" aria-hidden="true">
@@ -184,9 +185,6 @@
         </div>
       </div>
 
-      <div class="cx-terrain" aria-hidden="true">
-        <img src="../static/assets/portfolio/mars-hero-terrain.webp" alt="" width="2400" height="1600">
-      </div>
     </section>
 
     <!-- ================= 01 · MANIFESTO ================= -->
@@ -585,16 +583,33 @@
 
     <!-- ================= 05 · IGNITION ================= -->
     <section class="cx-ignite" id="ignition" data-chapter-section="ignition">
-      <p class="eyebrow">Final countdown</p>
-      <h2 class="cx-ignite-title">
-        <span class="cx-line"><span>Ready for</span></span>
-        <span class="cx-line"><span><em class="gradient-text">launch?</em></span></span>
-      </h2>
-      <p class="cx-ignite-sub">Arm the systems you need, then hit ignition. We'll plot the trajectory together.</p>
+      <div class="cx-cta">
+        <div class="cx-cta-intro">
+          <p class="eyebrow">Start a project</p>
+          <h2 class="cx-ignite-title">
+            <span class="cx-line"><span>Got an idea?</span></span>
+            <span class="cx-line"><span><em class="gradient-text">Let's build it.</em></span></span>
+          </h2>
+          <p class="cx-ignite-sub">Tell us what you need and we'll come back with a plan, a team and a timeline. One brief, one crew, zero hand-offs.</p>
 
-      <div class="cx-mission" role="group" aria-label="Choose the services you need">
-        <div class="cx-mission-readout" aria-live="polite"><span>PAYLOAD</span><b data-payload>0 systems armed</b><button type="button" class="cx-mission-clear" data-mission-clear hidden>Clear</button></div>
-        <div class="cx-mission-grid"><!--WORX:GEN mission-->
+          <ol class="cx-cta-steps">
+            <li><span>01</span>Pick the services you need</li>
+            <li><span>02</span>Send us the brief</li>
+            <li><span>03</span>We plan the launch together</li>
+          </ol>
+
+          <div class="cx-cta-contact">
+            <a href="mailto:Hello@worxbyglimpse.com" data-cursor="Write"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg>Hello@worxbyglimpse.com</a>
+            <a href="tel:+971555669847" data-cursor="Call"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg>+971 55 566 9847</a>
+          </div>
+        </div>
+
+        <div class="cx-mission" role="group" aria-label="Choose the services you need">
+          <div class="cx-mission-head">
+            <p class="cx-mission-title">Build your brief</p>
+            <div class="cx-mission-readout" aria-live="polite"><b data-payload>Nothing selected yet</b><button type="button" class="cx-mission-clear" data-mission-clear hidden>Clear</button></div>
+          </div>
+          <div class="cx-mission-grid"><!--WORX:GEN mission-->
           <div class="cx-mission-group">
             <p>Development</p>
             <button type="button" class="cx-chip" aria-pressed="false" data-mission="Web Development">Web Development</button>
@@ -624,15 +639,12 @@
             <button type="button" class="cx-chip" aria-pressed="false" data-mission="Cloud Transformation">Cloud Transformation</button>
           </div>
         <!--/WORX:GEN mission--></div>
+          <div class="cx-mission-foot">
+            <a class="btn btn-primary cx-ignite-btn" href="../contact/index.html" data-magnetic data-warp data-cursor="Send"><span data-cta-label>Start a project</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <p class="cx-mission-note">Not sure yet? Skip the list and just say hello.</p>
+          </div>
+        </div>
       </div>
-
-      <a class="cx-ignite-btn" href="../contact/index.html" data-magnetic data-warp data-cursor="Ignite">
-        <svg class="cx-ignite-ring" viewBox="0 0 200 200" aria-hidden="true">
-          <defs><path id="cx-ring-path" d="M100 100 m-82 0 a82 82 0 1 1 164 0 a82 82 0 1 1 -164 0"/></defs>
-          <text><textPath href="#cx-ring-path">PLAN · DESIGN · CREATE · LAUNCH · PLAN · DESIGN · CREATE · LAUNCH ·</textPath></text>
-        </svg>
-        <span class="cx-ignite-core">Start a<br>project</span>
-      </a>
     </section>
   </main>
 
@@ -710,5 +722,6 @@
   <script src="../static/js/main.js"></script>
   <script src="../static/js/contact-widget.js"></script>
   <script src="../static/js/services.js"></script>
+  <script src="../static/js/services-hero.js"></script>
 </body>
 </html>

@@ -190,7 +190,7 @@
     .fromTo(".cx-hero-sub", { y: 20 }, { opacity: 1, y: 0, duration: 0.8 }, "-=0.7")
     .fromTo(".cx-hero-cta", { y: 20 }, { opacity: 1, y: 0, duration: 0.8 }, "-=0.6")
     .fromTo(".cx-hud", { scale: 1.04 }, { opacity: 1, scale: 1, duration: 1 }, "-=0.8")
-    .fromTo(".cx-terrain", { yPercent: 30 }, { yPercent: 0, duration: 1.6, ease: "power2.out" }, "-=1.6")
+    .fromTo(".cx-eclipse", { y: "22vh" }, { y: 0, duration: 1.8, ease: "power3.out" }, "-=1.6")
     .fromTo(".cx-comms", { x: -30 }, { opacity: 1, x: 0, duration: 0.8 }, "-=0.8")
     .fromTo(".cx-alt", { x: 30 }, { opacity: 1, x: 0, duration: 0.8 }, "<")
     .set(".cx-letterbox", { display: "none" })
@@ -269,16 +269,16 @@
   });
 
   // =============================================================
-  // Launch scroll-out: text flies toward the camera, terrain sinks
+  // Launch scroll-out: text flies toward the camera, the planet rises
   // =============================================================
   gsap.timeline({
     scrollTrigger: { trigger: ".cx-hero", start: "top top", end: "bottom top", scrub: true }
   })
     .to(".cx-hero-copy", { scale: 1.35, opacity: 0, yPercent: -12, filter: "blur(6px)", ease: "none" }, 0)
-    .to(".cx-terrain", { yPercent: 40, ease: "none" }, 0)
+    .to(".cx-eclipse", { y: "-18vh", ease: "none" }, 0)
     .to(".cx-hero-glow", { opacity: 0, ease: "none" }, 0)
     .to(".cx-hud", { opacity: 0, ease: "none" }, 0)
-    .to(".cx-hero-orbit", { scale: 1.6, opacity: 0, ease: "none" }, 0);
+    .to(".cx-hero-sky", { opacity: 0, ease: "none" }, 0);
 
   // =============================================================
   // Manifesto: words light up as you scroll (pinned)
@@ -506,7 +506,7 @@
     scrollTrigger: { trigger: ".cx-ignite", start: "top 65%" }
   });
 
-  gsap.from([".cx-ignite .eyebrow", ".cx-ignite-sub", ".cx-mission", ".cx-ignite-btn"], {
+  gsap.from([".cx-cta-intro .eyebrow", ".cx-ignite-sub", ".cx-cta-steps", ".cx-cta-contact", ".cx-mission"], {
     y: 30, opacity: 0, stagger: 0.12, duration: 0.9, ease: "power3.out",
     scrollTrigger: { trigger: ".cx-ignite", start: "top 55%" }
   });
@@ -977,15 +977,15 @@
     var payload = $("[data-payload]");
     var clear = $("[data-mission-clear]");
     var btn = $(".cx-ignite-btn");
+    var label = $("[data-cta-label]");
     if (!chips.length || !btn) return;
     var base = btn.getAttribute("href");
 
     function update() {
       var picked = chips.filter(function (c) { return c.getAttribute("aria-pressed") === "true"; })
         .map(function (c) { return c.getAttribute("data-mission"); });
-      payload.textContent = picked.length
-        ? picked.length + (picked.length === 1 ? " system armed" : " systems armed")
-        : "0 systems armed";
+      payload.textContent = picked.length ? picked.length + " selected" : "Nothing selected yet";
+      if (label) label.textContent = picked.length ? "Send my brief" : "Start a project";
       payload.parentNode.classList.toggle("is-armed", picked.length > 0);
       clear.hidden = !picked.length;
       btn.setAttribute("href", picked.length ? base + "?services=" + encodeURIComponent(picked.join(",")) : base);
