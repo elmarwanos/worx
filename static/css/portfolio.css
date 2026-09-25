@@ -2610,687 +2610,164 @@ body[data-page="portfolio"] .folio-hero-inner {
 
 
 /* ============================================================
-   MARS RIDGE ASTRONAUT V8 — HEAD-REGISTERED WALK CYCLE
-   CSS ONLY. This is the single authoritative astronaut
-   implementation; no other rule in this file touches
-   .mars-astronaut / .mars-worx-flag.
-
-   WHY V7 STILL FLICKERED, RE-MEASURED DIRECTLY FROM THE PNGs:
-   V7's per-frame dx correction registered every frame to the
-   FULL-SILHOUETTE bounding-box center. That's the wrong anchor:
-   a walking figure's leg spread changes every frame (narrow on
-   contact frames, wide on passing frames), so the silhouette's
-   overall bbox center swings with the legs, not with the torso —
-   measured bbox-center-x actually ranged 43.0%-49.9% of the
-   700px canvas (a ~49px swing). Forcing that swinging point to
-   one fixed screen position made the torso/head visibly hop
-   left-right every frame, most noticeably across 009→010→001→
-   002 where the stance changes most.
-
-   FIX: re-registered horizontally on the HELMET/HEAD centroid
-   instead (alpha centroid of the top 80px of each silhouette),
-   which is the anatomically stable part of a walk cycle — a real
-   walking head barely drifts sideways while the legs swing
-   underneath. Measured head-centroid-x only ranges 45.86%-46.76%
-   across all 10 frames (a ~5px swing, 10x tighter than the old
-   bbox-center method), so the per-frame dx values below are
-   correspondingly small and the body no longer visibly jumps.
-   Frames 1 and 10 are pixel-identical (bbox (187,221,417,830)
-   both, head-centroid-x 46.17% both), confirming they're still
-   the true loop point. Vertical (dy) registration is unchanged
-   from V7 — it anchors each frame's own measured foot-bottom to
-   the shared terrain contact line and was never the source of
-   the reported flicker.
-
-   The shared anchor point (45.6%, 92.2% of the 700x900 canvas)
-   is unchanged: it's still what .mars-astronaut itself is
-   positioned by (via a trailing translate(-45.6%,-92.2%)) and
-   what .mars-astronaut__gravity rotates around — so the terrain
-   path and the lean pivot (feet) are untouched by this fix, only
-   the per-frame walk-cycle registration moved from bbox-center
-   to head-centroid. ASTRONAUT_KNEEL.png's own bbox (136,396,501,
-   830) already centers at (45.5%, 92.2%) with no correction
-   needed — confirms this anchor is the artwork's real, shared
-   foot line.
-
-   Crossfade width was cut from a 1.2%-of-cycle blend down to a
-   ~1ms blend (imperceptible, avoids double-exposure ghosting)
-   while keeping the non-duplicate-percentage fix from the
-   previous pass (a repeated percentage inside one @keyframes
-   block does NOT create an instant cut in this browser — the
-   earlier value is dropped and the whole span interpolates,
-   which is what caused every frame to fade in from 0% at once
-   last time). Net effect: true single-frame visibility with an
-   effectively-instant swap, i.e. clean discrete frame switching.
-
-   Terrain: re-measured against the actual hero photo with a
-   variance-based ridge detector (2400x1600 image, 4px column
-   step, median + double moving-average smoothing to remove
-   foreground rock/boulder noise), producing 52 waypoints across
-   the 65s journey instead of a hand-picked ~24 — dense through
-   the climb/descent, sparse on the flat approach/exit.
-
-   Layers (unchanged shape from the previous pass, still the
-   right separation of concerns):
-     .mars-astronaut          terrain position + depth scale + opacity
-     .mars-astronaut__gravity slope lean, pivoting at the anchor point
-     .mars-astronaut__walking kneel-hide toggle + gait-synced bob
-     .mars-astronaut__frame   the 10-frame walk cycle
-     .mars-astronaut__kneel   inherits the parent's held position
-     .mars-worx-flag          sibling element, same anchor math,
-                               now carrying the Dark Logo badge
+   SUMMIT SCENE — canvases drawn by static/js/rover-scene.js
+   (rover drives up, astronaut plants the flag, rover drives off).
+   Same layer slot and grade as the old CSS astronaut: the dusty,
+   warm suit/rover grade on the main canvas, the flag kept closer to
+   the brand orange on its own canvas behind it, and the lamps on an
+   ungraded canvas screened over the top so they read as light.
    ============================================================ */
 
-body[data-page="portfolio"] .mars-astronaut {
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 2;
-  width: clamp(72px, 5cqw, 98px);
-  height: clamp(94px, 6.8cqw, 128px);
-  pointer-events: none;
-  opacity: 0;
-  transform-origin: 45.6% 92.2%;
-  will-change: transform, opacity;
-  filter: sepia(.20) saturate(.74) brightness(.76) contrast(.94) drop-shadow(0 6px 7px rgba(20, 5, 2, .28));
-  animation: marsAstronautTerrain 65s linear infinite;
-}
-
-/* ---- Terrain path: WIDE viewports (vw/vh > 1.5) --------------
-   translate(X, Y) places the shared anchor point (45.6%, 92.2%
-   of the sprite canvas -- the character's feet) at
-   (xf*100cqw, 54cqh + (yf-0.54)*66.667cqw); the trailing
-   translate(-45.6%,-92.2%) re-anchors it from the sprite's
-   top-left corner to that measured point. */
-@keyframes marsAstronautTerrain {
-  0% { transform: translate(-7cqw, calc(54cqh + 3.36cqw)) translate(-45.6%, -92.2%) scale(.904); opacity: 0; }
-  1.5% { transform: translate(-2cqw, calc(54cqh + 3.36cqw)) translate(-45.6%, -92.2%) scale(.907); opacity: .85; }
-  4% { transform: translate(2cqw, calc(54cqh + 3.31cqw)) translate(-45.6%, -92.2%) scale(.911); opacity: 1; }
-  7.2% { transform: translate(5.4cqw, calc(54cqh + 3.24cqw)) translate(-45.6%, -92.2%) scale(.916); }
-  10.4% { transform: translate(8.8cqw, calc(54cqh + 3.23cqw)) translate(-45.6%, -92.2%) scale(.921); }
-  13.6% { transform: translate(12.2cqw, calc(54cqh + 3.08cqw)) translate(-45.6%, -92.2%) scale(.927); }
-  16.8% { transform: translate(15.6cqw, calc(54cqh + 2.11cqw)) translate(-45.6%, -92.2%) scale(.932); }
-  20% { transform: translate(19cqw, calc(54cqh + .35cqw)) translate(-45.6%, -92.2%) scale(.937); }
-  21.33% { transform: translate(20.75cqw, calc(54cqh - .79cqw)) translate(-45.6%, -92.2%) scale(.939); }
-  22.67% { transform: translate(22.5cqw, calc(54cqh - 2.05cqw)) translate(-45.6%, -92.2%) scale(.942); }
-  24% { transform: translate(24.25cqw, calc(54cqh - 3.18cqw)) translate(-45.6%, -92.2%) scale(.944); }
-  25.33% { transform: translate(26cqw, calc(54cqh - 4.15cqw)) translate(-45.6%, -92.2%) scale(.946); }
-  26.67% { transform: translate(27.75cqw, calc(54cqh - 5.07cqw)) translate(-45.6%, -92.2%) scale(.948); }
-  28% { transform: translate(29.5cqw, calc(54cqh - 5.94cqw)) translate(-45.6%, -92.2%) scale(.951); }
-  29.33% { transform: translate(31.25cqw, calc(54cqh - 6.79cqw)) translate(-45.6%, -92.2%) scale(.953); }
-  30.67% { transform: translate(33cqw, calc(54cqh - 7.44cqw)) translate(-45.6%, -92.2%) scale(.955); }
-  32% { transform: translate(34.75cqw, calc(54cqh - 7.73cqw)) translate(-45.6%, -92.2%) scale(.957); }
-  33.33% { transform: translate(36.5cqw, calc(54cqh - 7.86cqw)) translate(-45.6%, -92.2%) scale(.959); }
-  34.67% { transform: translate(38.25cqw, calc(54cqh - 8.04cqw)) translate(-45.6%, -92.2%) scale(.962); }
-  36% { transform: translate(40cqw, calc(54cqh - 8.34cqw)) translate(-45.6%, -92.2%) scale(.964); }
-  37.33% { transform: translate(41.75cqw, calc(54cqh - 8.71cqw)) translate(-45.6%, -92.2%) scale(.966); }
-  38.67% { transform: translate(43.5cqw, calc(54cqh - 9.15cqw)) translate(-45.6%, -92.2%) scale(.968); }
-  40% { transform: translate(45.25cqw, calc(54cqh - 9.81cqw)) translate(-45.6%, -92.2%) scale(.97); }
-  41.33% { transform: translate(47cqw, calc(54cqh - 10.69cqw)) translate(-45.6%, -92.2%) scale(.973); }
-  42.67% { transform: translate(48.75cqw, calc(54cqh - 11.47cqw)) translate(-45.6%, -92.2%) scale(.975); }
-  /* summit: held flat through the (shortened) kneel window */
-  44%, 47.5% { transform: translate(50.5cqw, calc(54cqh - 11.87cqw)) translate(-45.6%, -92.2%) scale(.98); opacity: 1; }
-  49.11% { transform: translate(52.42cqw, calc(54cqh - 11.89cqw)) translate(-45.6%, -92.2%) scale(.974); }
-  50.71% { transform: translate(54.04cqw, calc(54cqh - 11.62cqw)) translate(-45.6%, -92.2%) scale(.972); }
-  52.32% { transform: translate(55.66cqw, calc(54cqh - 11.13cqw)) translate(-45.6%, -92.2%) scale(.969); }
-  53.93% { transform: translate(57.29cqw, calc(54cqh - 10.53cqw)) translate(-45.6%, -92.2%) scale(.966); }
-  55.54% { transform: translate(58.91cqw, calc(54cqh - 9.95cqw)) translate(-45.6%, -92.2%) scale(.964); }
-  57.14% { transform: translate(60.53cqw, calc(54cqh - 9.42cqw)) translate(-45.6%, -92.2%) scale(.961); }
-  58.75% { transform: translate(62.15cqw, calc(54cqh - 8.97cqw)) translate(-45.6%, -92.2%) scale(.958); }
-  60.36% { transform: translate(63.77cqw, calc(54cqh - 8.59cqw)) translate(-45.6%, -92.2%) scale(.956); }
-  61.96% { transform: translate(65.39cqw, calc(54cqh - 8.26cqw)) translate(-45.6%, -92.2%) scale(.953); }
-  63.57% { transform: translate(67.01cqw, calc(54cqh - 7.94cqw)) translate(-45.6%, -92.2%) scale(.95); }
-  65.18% { transform: translate(68.64cqw, calc(54cqh - 7.54cqw)) translate(-45.6%, -92.2%) scale(.948); }
-  66.79% { transform: translate(70.26cqw, calc(54cqh - 7.08cqw)) translate(-45.6%, -92.2%) scale(.945); }
-  68.39% { transform: translate(71.88cqw, calc(54cqh - 6.66cqw)) translate(-45.6%, -92.2%) scale(.942); }
-  70% { transform: translate(73.5cqw, calc(54cqh - 6.3cqw)) translate(-45.6%, -92.2%) scale(.94); }
-  72.75% { transform: translate(76.44cqw, calc(54cqh - 6.14cqw)) translate(-45.6%, -92.2%) scale(.935); }
-  /* 75.5%-100%: re-measured against the actual hero photo (the
-     terrain keeps a gentle near-ridge running right off-frame here,
-     not a drop back toward the 54cqh baseline). The previous values
-     peeled away from that ridge and dove toward 0 by 92%, which is
-     what read as the astronaut sinking into the ground right before
-     he fades out. */
-  75.5% { transform: translate(79.38cqw, calc(54cqh - 6.48cqw)) translate(-45.6%, -92.2%) scale(.931); }
-  78.25% { transform: translate(82.31cqw, calc(54cqh - 6.82cqw)) translate(-45.6%, -92.2%) scale(.926); }
-  81% { transform: translate(85.25cqw, calc(54cqh - 7.13cqw)) translate(-45.6%, -92.2%) scale(.922); }
-  83.75% { transform: translate(88.19cqw, calc(54cqh - 7.49cqw)) translate(-45.6%, -92.2%) scale(.917); }
-  86.5% { transform: translate(91.12cqw, calc(54cqh - 7.8cqw)) translate(-45.6%, -92.2%) scale(.912); }
-  89.25% { transform: translate(94.06cqw, calc(54cqh - 7.88cqw)) translate(-45.6%, -92.2%) scale(.908); }
-  92% { transform: translate(97cqw, calc(54cqh - 7.75cqw)) translate(-45.6%, -92.2%) scale(.903); }
-  94% { transform: translate(99.75cqw, calc(54cqh - 7.67cqw)) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
-  96% { transform: translate(102.5cqw, calc(54cqh - 7.67cqw)) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
-  98% { transform: translate(105.25cqw, calc(54cqh - 7.67cqw)) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
-  100% { transform: translate(108cqw, calc(54cqh - 7.67cqw)) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
-}
-
-/* ---- Terrain path: TABLET / narrow desktop (<=900px) --------
-   Matches the hero photo's own 56% bgPosX at this width. */
-@media (max-width: 900px) {
-  @keyframes marsAstronautTerrain {
-    0% { transform: translate(calc(56cqw - 94.5cqh), 59.05cqh) translate(-45.6%, -92.2%) scale(.904); opacity: 0; }
-    1.5% { transform: translate(calc(56cqw - 87cqh), 59.05cqh) translate(-45.6%, -92.2%) scale(.907); opacity: .85; }
-    4% { transform: translate(calc(56cqw - 81cqh), 58.96cqh) translate(-45.6%, -92.2%) scale(.911); opacity: 1; }
-    7.2% { transform: translate(calc(56cqw - 75.9cqh), 58.87cqh) translate(-45.6%, -92.2%) scale(.916); }
-    10.4% { transform: translate(calc(56cqw - 70.8cqh), 58.84cqh) translate(-45.6%, -92.2%) scale(.921); }
-    13.6% { transform: translate(calc(56cqw - 65.7cqh), 58.62cqh) translate(-45.6%, -92.2%) scale(.927); }
-    16.8% { transform: translate(calc(56cqw - 60.6cqh), 57.17cqh) translate(-45.6%, -92.2%) scale(.932); }
-    20% { transform: translate(calc(56cqw - 55.5cqh), 54.52cqh) translate(-45.6%, -92.2%) scale(.937); }
-    21.33% { transform: translate(calc(56cqw - 52.88cqh), 52.81cqh) translate(-45.6%, -92.2%) scale(.939); }
-    22.67% { transform: translate(calc(56cqw - 50.25cqh), 50.92cqh) translate(-45.6%, -92.2%) scale(.942); }
-    24% { transform: translate(calc(56cqw - 47.63cqh), 49.24cqh) translate(-45.6%, -92.2%) scale(.944); }
-    25.33% { transform: translate(calc(56cqw - 45cqh), 47.77cqh) translate(-45.6%, -92.2%) scale(.946); }
-    26.67% { transform: translate(calc(56cqw - 42.38cqh), 46.39cqh) translate(-45.6%, -92.2%) scale(.948); }
-    28% { transform: translate(calc(56cqw - 39.75cqh), 45.09cqh) translate(-45.6%, -92.2%) scale(.951); }
-    29.33% { transform: translate(calc(56cqw - 37.13cqh), 43.81cqh) translate(-45.6%, -92.2%) scale(.953); }
-    30.67% { transform: translate(calc(56cqw - 34.5cqh), 42.83cqh) translate(-45.6%, -92.2%) scale(.955); }
-    32% { transform: translate(calc(56cqw - 31.88cqh), 42.4cqh) translate(-45.6%, -92.2%) scale(.957); }
-    33.33% { transform: translate(calc(56cqw - 29.25cqh), 42.21cqh) translate(-45.6%, -92.2%) scale(.959); }
-    34.67% { transform: translate(calc(56cqw - 26.63cqh), 41.94cqh) translate(-45.6%, -92.2%) scale(.962); }
-    36% { transform: translate(calc(56cqw - 24cqh), 41.49cqh) translate(-45.6%, -92.2%) scale(.964); }
-    37.33% { transform: translate(calc(56cqw - 21.38cqh), 40.93cqh) translate(-45.6%, -92.2%) scale(.966); }
-    38.67% { transform: translate(calc(56cqw - 18.75cqh), 40.27cqh) translate(-45.6%, -92.2%) scale(.968); }
-    40% { transform: translate(calc(56cqw - 16.13cqh), 39.28cqh) translate(-45.6%, -92.2%) scale(.97); }
-    41.33% { transform: translate(calc(56cqw - 13.5cqh), 37.96cqh) translate(-45.6%, -92.2%) scale(.973); }
-    42.67% { transform: translate(calc(56cqw - 10.88cqh), 36.8cqh) translate(-45.6%, -92.2%) scale(.975); }
-    44%, 47.5% { transform: translate(calc(56cqw - 8.25cqh), 36.2cqh) translate(-45.6%, -92.2%) scale(.98); opacity: 1; }
-    49.11% { transform: translate(calc(56cqw - 5.37cqh), 36.16cqh) translate(-45.6%, -92.2%) scale(.974); }
-    50.71% { transform: translate(calc(56cqw - 2.94cqh), 36.57cqh) translate(-45.6%, -92.2%) scale(.972); }
-    52.32% { transform: translate(calc(56cqw - .5cqh), 37.31cqh) translate(-45.6%, -92.2%) scale(.969); }
-    53.93% { transform: translate(calc(56cqw + 1.93cqh), 38.21cqh) translate(-45.6%, -92.2%) scale(.966); }
-    55.54% { transform: translate(calc(56cqw + 4.36cqh), 39.08cqh) translate(-45.6%, -92.2%) scale(.964); }
-    57.14% { transform: translate(calc(56cqw + 6.79cqh), 39.87cqh) translate(-45.6%, -92.2%) scale(.961); }
-    58.75% { transform: translate(calc(56cqw + 9.22cqh), 40.55cqh) translate(-45.6%, -92.2%) scale(.958); }
-    60.36% { transform: translate(calc(56cqw + 11.66cqh), 41.12cqh) translate(-45.6%, -92.2%) scale(.956); }
-    61.96% { transform: translate(calc(56cqw + 14.09cqh), 41.61cqh) translate(-45.6%, -92.2%) scale(.953); }
-    63.57% { transform: translate(calc(56cqw + 16.52cqh), 42.1cqh) translate(-45.6%, -92.2%) scale(.95); }
-    65.18% { transform: translate(calc(56cqw + 18.95cqh), 42.69cqh) translate(-45.6%, -92.2%) scale(.948); }
-    66.79% { transform: translate(calc(56cqw + 21.39cqh), 43.38cqh) translate(-45.6%, -92.2%) scale(.945); }
-    68.39% { transform: translate(calc(56cqw + 23.82cqh), 44.01cqh) translate(-45.6%, -92.2%) scale(.942); }
-    70% { transform: translate(calc(56cqw + 26.25cqh), 44.55cqh) translate(-45.6%, -92.2%) scale(.94); }
-    72.75% { transform: translate(calc(56cqw + 30.66cqh), 45.16cqh) translate(-45.6%, -92.2%) scale(.935); }
-    75.5% { transform: translate(calc(56cqw + 35.06cqh), 45.2cqh) translate(-45.6%, -92.2%) scale(.931); }
-    78.25% { transform: translate(calc(56cqw + 39.47cqh), 44.99cqh) translate(-45.6%, -92.2%) scale(.926); }
-    81% { transform: translate(calc(56cqw + 43.88cqh), 44.03cqh) translate(-45.6%, -92.2%) scale(.922); }
-    83.75% { transform: translate(calc(56cqw + 48.28cqh), 45.24cqh) translate(-45.6%, -92.2%) scale(.917); }
-    86.5% { transform: translate(calc(56cqw + 52.69cqh), 46.15cqh) translate(-45.6%, -92.2%) scale(.912); }
-    /* 89.25%-100%: continues the 81%-86.5% trend (44.03->46.15cqh)
-       instead of the previous hard jump to ~51-53cqh, which is what
-       read as sinking into the terrain right before the fade-out. */
-    89.25% { transform: translate(calc(56cqw + 57.09cqh), 46.9cqh) translate(-45.6%, -92.2%) scale(.908); }
-    92% { transform: translate(calc(56cqw + 61.5cqh), 47.5cqh) translate(-45.6%, -92.2%) scale(.903); }
-    94% { transform: translate(calc(56cqw + 65.62cqh), 47.8cqh) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
-    96% { transform: translate(calc(56cqw + 69.75cqh), 47.8cqh) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
-    98% { transform: translate(calc(56cqw + 73.87cqh), 47.8cqh) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
-    100% { transform: translate(calc(56cqw + 78cqh), 47.8cqh) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
-  }
-}
-
-/* ---- Terrain path: MOBILE (<=600px) --------------------------
-   Matches the hero photo's own 60% bgPosX at this width. */
-@media (max-width: 600px) {
-  @keyframes marsAstronautTerrain {
-    0% { transform: translate(calc(60cqw - 100.5cqh), 59.05cqh) translate(-45.6%, -92.2%) scale(.904); opacity: 0; }
-    1.5% { transform: translate(calc(60cqw - 93cqh), 59.05cqh) translate(-45.6%, -92.2%) scale(.907); opacity: .85; }
-    4% { transform: translate(calc(60cqw - 87cqh), 58.96cqh) translate(-45.6%, -92.2%) scale(.911); opacity: 1; }
-    7.2% { transform: translate(calc(60cqw - 81.9cqh), 58.87cqh) translate(-45.6%, -92.2%) scale(.916); }
-    10.4% { transform: translate(calc(60cqw - 76.8cqh), 58.84cqh) translate(-45.6%, -92.2%) scale(.921); }
-    13.6% { transform: translate(calc(60cqw - 71.7cqh), 58.62cqh) translate(-45.6%, -92.2%) scale(.927); }
-    16.8% { transform: translate(calc(60cqw - 66.6cqh), 57.17cqh) translate(-45.6%, -92.2%) scale(.932); }
-    20% { transform: translate(calc(60cqw - 61.5cqh), 54.52cqh) translate(-45.6%, -92.2%) scale(.937); }
-    21.33% { transform: translate(calc(60cqw - 58.87cqh), 52.81cqh) translate(-45.6%, -92.2%) scale(.939); }
-    22.67% { transform: translate(calc(60cqw - 56.25cqh), 50.92cqh) translate(-45.6%, -92.2%) scale(.942); }
-    24% { transform: translate(calc(60cqw - 53.62cqh), 49.24cqh) translate(-45.6%, -92.2%) scale(.944); }
-    25.33% { transform: translate(calc(60cqw - 51cqh), 47.77cqh) translate(-45.6%, -92.2%) scale(.946); }
-    26.67% { transform: translate(calc(60cqw - 48.38cqh), 46.39cqh) translate(-45.6%, -92.2%) scale(.948); }
-    28% { transform: translate(calc(60cqw - 45.75cqh), 45.09cqh) translate(-45.6%, -92.2%) scale(.951); }
-    29.33% { transform: translate(calc(60cqw - 43.12cqh), 43.81cqh) translate(-45.6%, -92.2%) scale(.953); }
-    30.67% { transform: translate(calc(60cqw - 40.5cqh), 42.83cqh) translate(-45.6%, -92.2%) scale(.955); }
-    32% { transform: translate(calc(60cqw - 37.87cqh), 42.4cqh) translate(-45.6%, -92.2%) scale(.957); }
-    33.33% { transform: translate(calc(60cqw - 35.25cqh), 42.21cqh) translate(-45.6%, -92.2%) scale(.959); }
-    34.67% { transform: translate(calc(60cqw - 32.62cqh), 41.94cqh) translate(-45.6%, -92.2%) scale(.962); }
-    36% { transform: translate(calc(60cqw - 30cqh), 41.49cqh) translate(-45.6%, -92.2%) scale(.964); }
-    37.33% { transform: translate(calc(60cqw - 27.38cqh), 40.93cqh) translate(-45.6%, -92.2%) scale(.966); }
-    38.67% { transform: translate(calc(60cqw - 24.75cqh), 40.27cqh) translate(-45.6%, -92.2%) scale(.968); }
-    40% { transform: translate(calc(60cqw - 22.13cqh), 39.28cqh) translate(-45.6%, -92.2%) scale(.97); }
-    41.33% { transform: translate(calc(60cqw - 19.5cqh), 37.96cqh) translate(-45.6%, -92.2%) scale(.973); }
-    42.67% { transform: translate(calc(60cqw - 16.87cqh), 36.8cqh) translate(-45.6%, -92.2%) scale(.975); }
-    44%, 47.5% { transform: translate(calc(60cqw - 14.25cqh), 36.2cqh) translate(-45.6%, -92.2%) scale(.98); opacity: 1; }
-    49.11% { transform: translate(calc(60cqw - 11.37cqh), 36.16cqh) translate(-45.6%, -92.2%) scale(.974); }
-    50.71% { transform: translate(calc(60cqw - 8.94cqh), 36.57cqh) translate(-45.6%, -92.2%) scale(.972); }
-    52.32% { transform: translate(calc(60cqw - 6.5cqh), 37.31cqh) translate(-45.6%, -92.2%) scale(.969); }
-    53.93% { transform: translate(calc(60cqw - 4.07cqh), 38.21cqh) translate(-45.6%, -92.2%) scale(.966); }
-    55.54% { transform: translate(calc(60cqw - 1.64cqh), 39.08cqh) translate(-45.6%, -92.2%) scale(.964); }
-    57.14% { transform: translate(calc(60cqw + .79cqh), 39.87cqh) translate(-45.6%, -92.2%) scale(.961); }
-    58.75% { transform: translate(calc(60cqw + 3.23cqh), 40.55cqh) translate(-45.6%, -92.2%) scale(.958); }
-    60.36% { transform: translate(calc(60cqw + 5.66cqh), 41.12cqh) translate(-45.6%, -92.2%) scale(.956); }
-    61.96% { transform: translate(calc(60cqw + 8.09cqh), 41.61cqh) translate(-45.6%, -92.2%) scale(.953); }
-    63.57% { transform: translate(calc(60cqw + 10.52cqh), 42.1cqh) translate(-45.6%, -92.2%) scale(.95); }
-    65.18% { transform: translate(calc(60cqw + 12.95cqh), 42.69cqh) translate(-45.6%, -92.2%) scale(.948); }
-    66.79% { transform: translate(calc(60cqw + 15.39cqh), 43.38cqh) translate(-45.6%, -92.2%) scale(.945); }
-    68.39% { transform: translate(calc(60cqw + 17.82cqh), 44.01cqh) translate(-45.6%, -92.2%) scale(.942); }
-    70% { transform: translate(calc(60cqw + 20.25cqh), 44.55cqh) translate(-45.6%, -92.2%) scale(.94); }
-    72.75% { transform: translate(calc(60cqw + 24.66cqh), 45.16cqh) translate(-45.6%, -92.2%) scale(.935); }
-    75.5% { transform: translate(calc(60cqw + 29.06cqh), 45.2cqh) translate(-45.6%, -92.2%) scale(.931); }
-    78.25% { transform: translate(calc(60cqw + 33.47cqh), 44.99cqh) translate(-45.6%, -92.2%) scale(.926); }
-    81% { transform: translate(calc(60cqw + 37.88cqh), 44.03cqh) translate(-45.6%, -92.2%) scale(.922); }
-    83.75% { transform: translate(calc(60cqw + 42.28cqh), 45.24cqh) translate(-45.6%, -92.2%) scale(.917); }
-    86.5% { transform: translate(calc(60cqw + 46.69cqh), 46.15cqh) translate(-45.6%, -92.2%) scale(.912); }
-    /* 89.25%-100%: continues the 81%-86.5% trend (44.03->46.15cqh)
-       instead of the previous hard jump to ~51-53cqh, which is what
-       read as sinking into the terrain right before the fade-out. */
-    89.25% { transform: translate(calc(60cqw + 51.09cqh), 46.9cqh) translate(-45.6%, -92.2%) scale(.908); }
-    92% { transform: translate(calc(60cqw + 55.5cqh), 47.5cqh) translate(-45.6%, -92.2%) scale(.903); }
-    94% { transform: translate(calc(60cqw + 59.63cqh), 47.8cqh) translate(-45.6%, -92.2%) scale(.9); opacity: 1; }
-    96% { transform: translate(calc(60cqw + 63.75cqh), 47.8cqh) translate(-45.6%, -92.2%) scale(.897); opacity: .6; }
-    98% { transform: translate(calc(60cqw + 67.88cqh), 47.8cqh) translate(-45.6%, -92.2%) scale(.893); opacity: 0; }
-    100% { transform: translate(calc(60cqw + 72cqh), 47.8cqh) translate(-45.6%, -92.2%) scale(.89); opacity: 0; }
-  }
-}
-
-/* ---- Body lean: rotates only, pivots at the measured foot
-   anchor (45.6%, 92.2%) via .mars-astronaut's own transform-
-   origin above -- not the image's geometric middle. Values are
-   proportional to the actual local slope of the smoothed ridge
-   between each pair of neighbouring waypoints, clamped to a
-   believable +-6 degrees, with the secondary/minor hill on the
-   descent (81-92%) damped further since it's a gentle rolling
-   feature, not a real climb, and a literal slope-proportional
-   angle there reads as jittery rather than purposeful. */
-body[data-page="portfolio"] .mars-astronaut__gravity {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-origin: 45.6% 92.2%;
-  animation: astronautLean 65s ease-in-out infinite;
-}
-
-@keyframes astronautLean {
-  0%, 1.5% { transform: rotate(0deg); }
-  4% { transform: rotate(.15deg); }
-  7.2% { transform: rotate(.1deg); }
-  10.4% { transform: rotate(.2deg); }
-  13.6% { transform: rotate(1.15deg); }
-  16.8% { transform: rotate(2.85deg); }
-  20% { transform: rotate(4.3deg); }
-  21.33% { transform: rotate(6deg); }
-  22.67% { transform: rotate(5.95deg); }
-  24% { transform: rotate(5.25deg); }
-  25.33% { transform: rotate(4.75deg); }
-  26.67% { transform: rotate(4.45deg); }
-  28% { transform: rotate(4.3deg); }
-  29.33% { transform: rotate(3.75deg); }
-  30.67% { transform: rotate(2.35deg); }
-  32% { transform: rotate(1deg); }
-  33.33% { transform: rotate(.75deg); }
-  34.67% { transform: rotate(1.2deg); }
-  36% { transform: rotate(1.7deg); }
-  37.33% { transform: rotate(2deg); }
-  38.67% { transform: rotate(2.75deg); }
-  40% { transform: rotate(3.85deg); }
-  41.33% { transform: rotate(4.15deg); }
-  42.67% { transform: rotate(2deg); }
-  44%, 47.5% { transform: rotate(0deg); }
-  49.11% { transform: rotate(-.25deg); }
-  50.71% { transform: rotate(-1.6deg); }
-  52.32% { transform: rotate(-2.25deg); }
-  53.93% { transform: rotate(-2.45deg); }
-  55.54% { transform: rotate(-2.3deg); }
-  57.14% { transform: rotate(-2deg); }
-  58.75% { transform: rotate(-1.7deg); }
-  60.36% { transform: rotate(-1.45deg); }
-  61.96% { transform: rotate(-1.35deg); }
-  63.57% { transform: rotate(-1.5deg); }
-  65.18% { transform: rotate(-1.8deg); }
-  66.79% { transform: rotate(-1.8deg); }
-  68.39% { transform: rotate(-1.6deg); }
-  70% { transform: rotate(-1.15deg); }
-  72.75% { transform: rotate(-.5deg); }
-  75.5% { transform: rotate(.1deg); }
-  78.25% { transform: rotate(.9deg); }
-  81% { transform: rotate(0deg); }
-  83.75% { transform: rotate(-.8deg); }
-  86.5% { transform: rotate(-2deg); }
-  89.25% { transform: rotate(-1.5deg); }
-  92% { transform: rotate(-.5deg); }
-  94%, 100% { transform: rotate(0deg); }
-}
-
-/* ---- Walking layer: kneel-hide toggle + gait-synced bob ------ */
-body[data-page="portfolio"] .mars-astronaut__walking {
+body[data-page="portfolio"] .rover-scene {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  transform-origin: 45.6% 92.2%;
-  animation:
-    astronautWalkingVisibility 65s linear infinite,
-    astronautBob 1.8s linear infinite;
-}
-
-/* Hidden only for the (shortened) kneel window, with a brief
-   crossfade at each edge so it never overlaps the kneel sprite
-   at full opacity and never leaves a visible gap. */
-@keyframes astronautWalkingVisibility {
-  0%, 43.7% { visibility: visible; opacity: 1; }
-  44%, 47.2% { visibility: hidden; opacity: 0; }
-  47.5%, 100% { visibility: visible; opacity: 1; }
-}
-
-/* Vertical-only weight transfer, tied to the SAME 1.8s clock as
-   the walk cycle: lowest (0) exactly on the "contact" frames
-   (feet planted), a small 2px rise at the midpoint of each
-   "passing" frame (legs crossing under the body, the real
-   moment a walking body is highest). This is motivated by the
-   actual gait rather than an independent decorative wobble, and
-   it never goes negative relative to the calibrated terrain
-   baseline, so the feet never sink. */
-@keyframes astronautBob {
-  0% { transform: translateY(0); }
-  10.9% { transform: translateY(0); }
-  24.4% { transform: translateY(-2px); }
-  38% { transform: translateY(0); }
-  44.4% { transform: translateY(0); }
-  55.4% { transform: translateY(0); }
-  74.4% { transform: translateY(-2px); }
-  88% { transform: translateY(0); }
-  94.4% { transform: translateY(0); }
-  100% { transform: translateY(0); }
-}
-
-body[data-page="portfolio"] .mars-astronaut__frame,
-body[data-page="portfolio"] .mars-astronaut__kneel {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
-  transform-origin: 45.6% 92.2%;
-  pointer-events: none;
-  opacity: 0;
-}
-
-/* ============================================================
-   WALK CYCLE — one shared 1.8s loop, independent of the 65s
-   journey (so the legs cycle many times over the traverse
-   instead of ~once for the whole screen). Every frame's own
-   fade-in/out ramp is ~0.06% of the cycle (~1ms): short enough
-   to read as an instant, ghost-free swap rather than a visible
-   crossfade, while still being two DISTINCT percentages (not a
-   repeated one) so the browser doesn't drop the earlier value
-   and bleed the fade back to 0% -- the exact bug from the
-   previous pass. Hold widths stay weighted by gait role (11%
-   contact / 10% weight-transfer / 8% passing, read off the
-   artwork). Each frame also carries its own measured
-   translate() correction (see file header) so swapping frames
-   no longer visibly shifts the body.
-   ============================================================ */
-
-/* frame 01 -- contact (dx-0.57% head-registered, dy-0.11%) */
-body[data-page="portfolio"] .mars-astronaut__frame--01 {
-  transform: translate(calc(-50% - .57%), -.11%);
-  animation: astronautFrame01 1.8s linear infinite;
-}
-@keyframes astronautFrame01 { 0%, 10.94% { opacity: 1; } 11%, 100% { opacity: 0; } }
-
-/* frame 02 -- weight-transfer (dx-0.30% head-registered, dy-1.33%) */
-body[data-page="portfolio"] .mars-astronaut__frame--02 {
-  transform: translate(calc(-50% - .3%), -1.33%);
-  animation: astronautFrame02 1.8s linear infinite;
-}
-@keyframes astronautFrame02 { 0%, 10.94% { opacity: 0; } 11%, 20.94% { opacity: 1; } 21%, 100% { opacity: 0; } }
-
-/* frame 03 -- passing, fastest part of the stride (dx-0.26% head-registered, dy-1.56%) */
-body[data-page="portfolio"] .mars-astronaut__frame--03 {
-  transform: translate(calc(-50% - .26%), -1.56%);
-  animation: astronautFrame03 1.8s linear infinite;
-}
-@keyframes astronautFrame03 { 0%, 20.94% { opacity: 0; } 21%, 28.94% { opacity: 1; } 29%, 100% { opacity: 0; } }
-
-/* frame 04 -- swing-forward (dx-1.02% head-registered, dy-2.00%) */
-body[data-page="portfolio"] .mars-astronaut__frame--04 {
-  transform: translate(calc(-50% - 1.02%), -2%);
-  animation: astronautFrame04 1.8s linear infinite;
-}
-@keyframes astronautFrame04 { 0%, 28.94% { opacity: 0; } 29%, 38.94% { opacity: 1; } 39%, 100% { opacity: 0; } }
-
-/* frame 05 -- contact, opposite leg (dx-1.16% head-registered, dy-2.33%) */
-body[data-page="portfolio"] .mars-astronaut__frame--05 {
-  transform: translate(calc(-50% - 1.16%), -2.33%);
-  animation: astronautFrame05 1.8s linear infinite;
-}
-@keyframes astronautFrame05 { 0%, 38.94% { opacity: 0; } 39%, 49.94% { opacity: 1; } 50%, 100% { opacity: 0; } }
-
-/* frame 06 -- contact (dx-0.52% head-registered, dy-2.11%) */
-body[data-page="portfolio"] .mars-astronaut__frame--06 {
-  transform: translate(calc(-50% - .52%), -2.11%);
-  animation: astronautFrame06 1.8s linear infinite;
-}
-@keyframes astronautFrame06 { 0%, 49.94% { opacity: 0; } 50%, 60.94% { opacity: 1; } 61%, 100% { opacity: 0; } }
-
-/* frame 07 -- weight-transfer (dx-0.29% head-registered, dy-2.00%) */
-body[data-page="portfolio"] .mars-astronaut__frame--07 {
-  transform: translate(calc(-50% - .29%), -2%);
-  animation: astronautFrame07 1.8s linear infinite;
-}
-@keyframes astronautFrame07 { 0%, 60.94% { opacity: 0; } 61%, 70.94% { opacity: 1; } 71%, 100% { opacity: 0; } }
-
-/* frame 08 -- passing (dx-0.72% head-registered, dy-1.33%) */
-body[data-page="portfolio"] .mars-astronaut__frame--08 {
-  transform: translate(calc(-50% - .72%), -1.33%);
-  animation: astronautFrame08 1.8s linear infinite;
-}
-@keyframes astronautFrame08 { 0%, 70.94% { opacity: 0; } 71%, 78.94% { opacity: 1; } 79%, 100% { opacity: 0; } }
-
-/* frame 09 -- swing-forward (dx-1.08% head-registered, dy-0.33%) */
-body[data-page="portfolio"] .mars-astronaut__frame--09 {
-  transform: translate(calc(-50% - 1.08%), -.33%);
-  animation: astronautFrame09 1.8s linear infinite;
-}
-@keyframes astronautFrame09 { 0%, 78.94% { opacity: 0; } 79%, 88.94% { opacity: 1; } 89%, 100% { opacity: 0; } }
-
-/* frame 10 -- contact, wraps seamlessly back into frame 1: it is
-   PIXEL-IDENTICAL to frame 1 (same alpha bbox, same head-centroid,
-   same correction), so the loop point has zero registration
-   difference -- only the (now-instant) opacity handoff needed
-   fixing. */
-body[data-page="portfolio"] .mars-astronaut__frame--10 {
-  transform: translate(calc(-50% - .57%), -.11%);
-  animation: astronautFrame10 1.8s linear infinite;
-}
-@keyframes astronautFrame10 { 0%, 88.94% { opacity: 0; } 89%, 99.94% { opacity: 1; } 100% { opacity: 0; } }
-
-/* ============================================================
-   KNEEL — inherits the parent's held summit transform (no
-   coordinates of its own). ASTRONAUT_KNEEL.png's measured bbox
-   already centers at (45.5%, 92.2%), i.e. the same anchor the
-   walk frames were corrected to, so the small "bottom" nudge
-   below is only compensating for the 135% oversize scale
-   (which stretches the ~7.8%-of-canvas gap under the character
-   into a larger absolute gap) -- not re-deriving the anchor.
-   Shortened to a ~2.3s hold (44%-47.5%) with a fast linear
-   crossfade against the walking layer instead of an instant
-   steps() pop.
-   ============================================================ */
-
-body[data-page="portfolio"] .mars-astronaut__kneel {
-  left: 50%;
-  bottom: calc(-1px - 2.7%);
-  width: 135%;
-  height: 135%;
-  transform: translateX(-50%) scale(1);
-  visibility: hidden;
-  animation: astronautKneel 65s linear infinite;
-}
-
-@keyframes astronautKneel {
-  0%, 43.8% { opacity: 0; visibility: hidden; }
-  44%, 47.3% { opacity: 1; visibility: visible; }
-  47.5%, 100% { opacity: 0; visibility: hidden; }
-}
-
-/* ============================================================
-   FLAG — a sibling element (not nested in .mars-astronaut), so
-   it needs the same closed-form summit anchor math, evaluated
-   at the pole's actual TIP pixel. Measured directly from
-   worx-flag.png (337x360): the lowest opaque (wood-brown, not
-   flag-cloth) pixels sit at x=[72,79] (center 22.4% of width),
-   y=342 solid / 343 antialiased edge (95.0% of height) -- NOT
-   the canvas edge, which is why the pole previously looked like
-   it stopped just short of the summit. transform-origin is set
-   to that exact point, so translate(-22.4%,-95%) + the terrain-
-   style anchor translate below lands the pole tip on the
-   measured summit coordinate. Width/scale/anchor are UNCHANGED
-   from before -- only the cloth/branding markup inside the SVG
-   was rebuilt (see markup comments), so the planted pole tip and
-   summit contact are untouched by this pass.
-   ============================================================ */
-
-body[data-page="portfolio"] .mars-worx-flag {
-  position: absolute;
-  left: 0;
-  top: 0;
   z-index: 2;
-  width: clamp(76px, 5.5cqw, 109px);
-  height: auto;
-  opacity: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  overflow: visible;
-  transform-origin: 22.4% 95%;
-  filter: sepia(.04) saturate(1.2) brightness(.98) contrast(1.05) drop-shadow(0 6px 8px rgba(20, 5, 2, .30));
-  animation: marsFlagPlant 65s linear infinite;
 }
 
-/* ---- Eye: the real orange crescent from logo-dark.png used as a
-   living pupil, sliding a few user-units left/right inside the
-   masked eye silhouette -- small enough that it never nears the
-   eye's own edges, with a restrained warm glow for a subtle
-   living/energy quality that doesn't overwhelm the Worx mark. */
-body[data-page="portfolio"] .worx-eye-crescent {
-  animation: worxEyeLook 9s ease-in-out infinite;
-  filter: drop-shadow(0 0 1.4px rgba(250, 167, 25, .65)) drop-shadow(0 0 3px rgba(229, 125, 35, .35));
+body[data-page="portfolio"] .rover-scene__main {
+  filter: sepia(.18) saturate(.8) brightness(.8) contrast(.95);
 }
 
-@keyframes worxEyeLook {
-  0%, 8% { transform: translateX(0); }
-  28%, 38% { transform: translateX(-7.5px); }
-  50%, 58% { transform: translateX(0); }
-  78%, 88% { transform: translateX(7.5px); }
-  100% { transform: translateX(0); }
+body[data-page="portfolio"] .rover-scene__flag {
+  filter: saturate(1.1) brightness(.92) contrast(1.04);
 }
 
-/* ---- Eye: blinks by squashing the WHOLE eye (solid base + masked
-   crescent together) vertically around its own center, rather than
-   overlaying a separate near-zero-height "eyelid" shape on top of
-   it -- that overlay approach is what produced the visible black
-   seam/line in the previous implementation (a filled shape held at
-   a near-zero, but never exactly zero, scale rasterizes as a
-   persistent hairline). Scaling the real eye artwork itself instead
-   means it closes by tapering into its own already-lens-shaped
-   silhouette -- there is no separate mask edge to seam, and no line
-   is visible except the ~100ms the eye is actually shut. Timed so
-   the four blinks per 23s loop land roughly 4.5-7s apart instead of
-   on a single mechanical interval, independent of the crescent's 9s
-   look-around cycle. The flag fabric itself is fully static -- the
-   eye/crescent are the only moving parts on the flag. */
-body[data-page="portfolio"] .worx-eye {
-  transform-box: fill-box;
-  transform-origin: 50% 50%;
-  animation: worxEyeBlink 23s ease-in-out infinite;
+body[data-page="portfolio"] .rover-scene__glow {
+  mix-blend-mode: screen;
 }
 
-@keyframes worxEyeBlink {
-  0%, 18.5% { transform: scaleY(1); }
-  19% { transform: scaleY(.04); }
-  19.5%, 43% { transform: scaleY(1); }
-  43.5% { transform: scaleY(.04); }
-  44%, 67.5% { transform: scaleY(1); }
-  68% { transform: scaleY(.04); }
-  68.5%, 87.5% { transform: scaleY(1); }
-  88% { transform: scaleY(.04); }
-  88.5%, 100% { transform: scaleY(1); }
+
+/* ============================================================
+   HERO CAPTION CARD — the About page's chapter caption (about.css
+   .story-text .hud-card / .hud-panel / .story-status / .story-title
+   / .story-subtitle, compact caption format): a smoked-glass field
+   that dissolves into the shot at its edges, tilted in 3D as if hung
+   in the scene, bottom-left. Same type, sizes and --hud-scale steps.
+   ============================================================ */
+
+body[data-page="portfolio"] .folio-hero {
+  --hud-scale: 1;
 }
 
-@keyframes marsFlagPlant {
-  0%, 44.2% { opacity: 0; visibility: hidden; transform: translate(51.7cqw, calc(54cqh - 11.93cqw)) translate(-22.4%, -95%) scale(1.435) rotate(-5deg); }
-  45.3% { opacity: .76; visibility: visible; transform: translate(51.7cqw, calc(54cqh - 11.93cqw)) translate(-22.4%, -95%) scale(1.435) rotate(-4deg); }
-  46.4% { opacity: .76; visibility: visible; transform: translate(51.7cqw, calc(54cqh - 11.93cqw)) translate(-22.4%, -95%) scale(1.435) rotate(-1deg); }
-  47.5%, 98% { opacity: .76; visibility: visible; transform: translate(51.7cqw, calc(54cqh - 11.93cqw)) translate(-22.4%, -95%) scale(1.435) rotate(0deg); }
-  100% { opacity: 0; visibility: hidden; transform: translate(51.7cqw, calc(54cqh - 11.93cqw)) translate(-22.4%, -95%) scale(1.435) rotate(0deg); }
+body[data-page="portfolio"] .folio-hero-caption {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
 }
 
-@media (max-width: 900px) {
-  @keyframes marsFlagPlant {
-    0%, 44.2% { opacity: 0; visibility: hidden; transform: translate(calc(56cqw - 6.45cqh), 36.1cqh) translate(-22.4%, -95%) scale(1.435) rotate(-5deg); }
-    45.3% { opacity: .76; visibility: visible; transform: translate(calc(56cqw - 6.45cqh), 36.1cqh) translate(-22.4%, -95%) scale(1.435) rotate(-4deg); }
-    46.4% { opacity: .76; visibility: visible; transform: translate(calc(56cqw - 6.45cqh), 36.1cqh) translate(-22.4%, -95%) scale(1.435) rotate(-1deg); }
-    47.5%, 98% { opacity: .76; visibility: visible; transform: translate(calc(56cqw - 6.45cqh), 36.1cqh) translate(-22.4%, -95%) scale(1.435) rotate(0deg); }
-    100% { opacity: 0; visibility: hidden; transform: translate(calc(56cqw - 6.45cqh), 36.1cqh) translate(-22.4%, -95%) scale(1.435) rotate(0deg); }
-  }
+body[data-page="portfolio"] .folio-hud-card {
+  position: absolute;
+  left: clamp(20px, 5vw, 72px);
+  bottom: clamp(40px, 8vh, 96px);
+  isolation: isolate;
+  max-width: min(calc(460px * var(--hud-scale)), calc(100% - 40px));
+  padding: 1.125em 1.625em 1.375em 1.375em;
+  font-size: calc(1rem * var(--hud-scale));
+  pointer-events: auto;
+  transform: perspective(1000px) rotateY(14deg);
+  transform-origin: left center;
+  animation: folio-hud-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both, folio-hud-boot 0.7s steps(1, end) 0.2s both;
 }
 
-@media (max-width: 600px) {
-  @keyframes marsFlagPlant {
-    0%, 44.2% { opacity: 0; visibility: hidden; transform: translate(calc(60cqw - 12.45cqh), 36.1cqh) translate(-22.4%, -95%) scale(1.435) rotate(-5deg); }
-    45.3% { opacity: .76; visibility: visible; transform: translate(calc(60cqw - 12.45cqh), 36.1cqh) translate(-22.4%, -95%) scale(1.435) rotate(-4deg); }
-    46.4% { opacity: .76; visibility: visible; transform: translate(calc(60cqw - 12.45cqh), 36.1cqh) translate(-22.4%, -95%) scale(1.435) rotate(-1deg); }
-    47.5%, 98% { opacity: .76; visibility: visible; transform: translate(calc(60cqw - 12.45cqh), 36.1cqh) translate(-22.4%, -95%) scale(1.435) rotate(0deg); }
-    100% { opacity: 0; visibility: hidden; transform: translate(calc(60cqw - 12.45cqh), 36.1cqh) translate(-22.4%, -95%) scale(1.435) rotate(0deg); }
-  }
+/* the glass lives behind the content, so only the glass dissolves */
+body[data-page="portfolio"] .folio-hud-card::before {
+  content: "";
+  position: absolute;
+  inset: -26px -40px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(254, 238, 207, 0.03) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 120% 110% at 20% 40%, rgba(20, 9, 5, 0.66), rgba(20, 9, 5, 0.32) 60%, rgba(20, 9, 5, 0) 100%);
+  -webkit-mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
+  mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
 }
 
-@media (max-width: 900px) {
-  body[data-page="portfolio"] .mars-astronaut {
-    width: clamp(64px, 7cqw, 82px);
-    height: clamp(86px, 9cqw, 108px);
-  }
-
-  body[data-page="portfolio"] .mars-worx-flag {
-    width: clamp(64px, 7.4cqw, 86px);
-  }
+body[data-page="portfolio"] .folio-hud-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 10px;
+  padding-bottom: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-2);
 }
 
-@media (max-width: 600px) {
-  body[data-page="portfolio"] .mars-astronaut {
-    width: 58px;
-    height: 78px;
-  }
+body[data-page="portfolio"] .folio-hud-status::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 6px 1px rgba(250, 167, 25, 0.65);
+}
 
-  body[data-page="portfolio"] .mars-worx-flag {
-    width: 63px;
-  }
+body[data-page="portfolio"] .folio-hud-title {
+  max-width: 24ch;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: calc(clamp(1.5rem, 2.2vw, 2.1rem) * var(--hud-scale));
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: var(--text);
+}
+
+body[data-page="portfolio"] .folio-hud-subtitle {
+  max-width: 34ch;
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: calc(clamp(0.88rem, 1.1vw, 1rem) * var(--hud-scale));
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+@keyframes folio-hud-in {
+  from { transform: perspective(1000px) rotateY(14deg) translateX(-12px); }
+  to   { transform: perspective(1000px) rotateY(14deg); }
+}
+
+@keyframes folio-hud-boot {
+  0%   { opacity: 0; }
+  12%  { opacity: 0.8; }
+  20%  { opacity: 0.1; }
+  34%  { opacity: 1; }
+  46%  { opacity: 0.45; }
+  60%, 100% { opacity: 1; }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  body[data-page="portfolio"] .folio-hud-title { max-width: 20ch; }
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+  body[data-page="portfolio"] .folio-hero { --hud-scale: 0.8; }
+}
+
+@media (min-width: 1800px) and (min-height: 950px) {
+  body[data-page="portfolio"] .folio-hero { --hud-scale: 1.15; }
+}
+
+@media (min-width: 2300px) and (min-height: 1250px) {
+  body[data-page="portfolio"] .folio-hero { --hud-scale: 1.4; }
+}
+
+@media (min-width: 3200px) and (min-height: 1800px) {
+  body[data-page="portfolio"] .folio-hero { --hud-scale: 1.85; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-
-  body[data-page="portfolio"] .mars-astronaut,
-  body[data-page="portfolio"] .mars-astronaut__gravity,
-  body[data-page="portfolio"] .mars-astronaut__walking,
-  body[data-page="portfolio"] .mars-astronaut__frame,
-  body[data-page="portfolio"] .mars-astronaut__frame--01,
-  body[data-page="portfolio"] .mars-astronaut__frame--02,
-  body[data-page="portfolio"] .mars-astronaut__frame--03,
-  body[data-page="portfolio"] .mars-astronaut__frame--04,
-  body[data-page="portfolio"] .mars-astronaut__frame--05,
-  body[data-page="portfolio"] .mars-astronaut__frame--06,
-  body[data-page="portfolio"] .mars-astronaut__frame--07,
-  body[data-page="portfolio"] .mars-astronaut__frame--08,
-  body[data-page="portfolio"] .mars-astronaut__frame--09,
-  body[data-page="portfolio"] .mars-astronaut__frame--10,
-  body[data-page="portfolio"] .mars-astronaut__kneel,
-  body[data-page="portfolio"] .mars-worx-flag,
-  body[data-page="portfolio"] .worx-eye,
-  body[data-page="portfolio"] .worx-eye-crescent {
-    animation: none !important;
-  }
-
-  body[data-page="portfolio"] .mars-astronaut,
-  body[data-page="portfolio"] .mars-worx-flag {
-    display: none !important;
-  }
+  body[data-page="portfolio"] .folio-hud-card { animation: none; }
 }
 
 

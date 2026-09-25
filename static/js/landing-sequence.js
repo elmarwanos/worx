@@ -6,10 +6,9 @@
    spacecraft frames specifically.
 
    WHY CANVAS, NOT STACKED <img> FRAMES:
-   Portfolio's astronaut (static/css/portfolio.css) swaps frames by
-   stacking every frame as its own <img> and toggling CSS opacity —
-   that works well for a small (10-frame), continuously-looping,
-   TIME-based cycle. This sequence is scroll-SCRUBBED: the frame
+   Stacking every frame as its own <img> and toggling CSS opacity
+   works for a small, continuously-looping, TIME-based cycle. This
+   sequence is scroll-SCRUBBED: the frame
    index can jump around non-monotonically as fast as the user
    flings the wheel, across up to 32 frames. Drawing the current
    frame onto one <canvas> via drawImage() avoids ever creating 32

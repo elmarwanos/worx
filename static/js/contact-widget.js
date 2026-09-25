@@ -41,7 +41,7 @@
         icon: "📍",
         label: "Studio",
         value: "Dubai Production City",
-        href: "https://maps.google.com/?q=Makateb+2+Dubai+Production+City",
+        href: "https://maps.google.com/?q=Publishing+Pavilion+Me%27aisem+First+Dubai+Production+City+Dubai",
         external: true
       }
     }

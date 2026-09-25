@@ -51,9 +51,9 @@
 
       <nav class="nav-links" aria-label="Main navigation">
         <a href="../index.html" data-nav="home">Home</a>
+        <a href="../about/index.html" data-nav="about">About</a>
         <a href="../services/index.html" data-nav="services">Services</a>
         <a href="../portfolio/index.html" data-nav="portfolio">Portfolio</a>
-        <a href="../about/index.html" data-nav="about">About</a>
         <a href="../blogs/index.html" data-nav="blogs">Blog</a>
         <a href="../contact/index.html" class="btn btn-primary" data-nav="contact">Let's Talk</a>
       </nav>
@@ -61,331 +61,227 @@
     </div>
   </header>
 
-  <main id="main">
+  <main id="main" class="blog-page">
 
-    <!-- HERO -->
-    <section class="page-hero blog-hero container">
-
-      <p class="eyebrow">Blog</p>
-
-      <h1>
-        Notes from the
-        <span class="gradient-text">workbench</span>
-      </h1>
-
-      <p data-reveal>
-        Engineering, strategy and experience design written by the people
-        who ship it, not a content farm.
-      </p>
-
+    <!-- Built by tools/blog-covers/build-posts.js from posts.js. Our Blog:
+         the category filter set as big type (active one lit with an
+         arrow), the newest post featured, then the card grid. -->
+    <section class="blog-head container">
+      <h1 class="sr-only">Worx by Glimpse blog: notes from the workbench</h1>
+      <p class="blog-eyebrow"><span class="blog-eyebrow-dot" aria-hidden="true"></span>Our Blog</p>
+      <div class="blog-cats" role="group" aria-label="Filter posts by category">
+        <button class="blog-cat is-active" type="button" data-filter="all" aria-pressed="true"><span class="blog-cat-arrow" aria-hidden="true">↳</span>All Categories</button>
+        <button class="blog-cat" type="button" data-filter="engineering" aria-pressed="false"><span class="blog-cat-arrow" aria-hidden="true">↳</span>Engineering</button>
+        <button class="blog-cat" type="button" data-filter="strategy" aria-pressed="false"><span class="blog-cat-arrow" aria-hidden="true">↳</span>Strategy</button>
+        <button class="blog-cat" type="button" data-filter="experience" aria-pressed="false"><span class="blog-cat-arrow" aria-hidden="true">↳</span>Experience Design</button>
+        <button class="blog-cat" type="button" data-filter="mobile" aria-pressed="false"><span class="blog-cat-arrow" aria-hidden="true">↳</span>Mobile Apps</button>
+        <button class="blog-cat" type="button" data-filter="seo" aria-pressed="false"><span class="blog-cat-arrow" aria-hidden="true">↳</span>SEO &amp; Growth</button>
+      </div>
     </section>
 
+    <section class="blog-list container" aria-label="Posts">
 
-    <!-- CATEGORIES -->
-    <section class="blog-categories container" data-reveal>
-
-      <div class="blog-category-heading">
-        <span class="blog-category-dot"></span>
-        <span>Our Blog</span>
-      </div>
-
-      <div class="blog-category-tree" aria-label="Blog categories">
-
-        <button class="blog-category blog-category-parent active" type="button" data-filter="all">
-          All Categories
-        </button>
-
-        <div class="blog-category-branches">
-
-          <button class="blog-category blog-category-child" type="button" data-filter="engineering">
-            <span class="category-branch" aria-hidden="true">↳</span>
-            <span>Engineering</span>
-          </button>
-
-          <button class="blog-category blog-category-child" type="button" data-filter="strategy">
-            <span class="category-branch" aria-hidden="true">↳</span>
-            <span>Strategy</span>
-          </button>
-
-          <button class="blog-category blog-category-child" type="button" data-filter="experience">
-            <span class="category-branch" aria-hidden="true">↳</span>
-            <span>Experience Design</span>
-          </button>
-
+      <article class="blog-featured" data-category="seo" data-reveal>
+        <a class="blog-featured-media" href="generative-search.html" tabindex="-1" aria-hidden="true">
+          <picture>
+            <source srcset="../static/assets/blog/generative-search.webp" type="image/webp">
+            <img src="../static/assets/blog/generative-search.jpg" alt="" width="1600" height="900" decoding="async">
+          </picture>
+        </a>
+        <div class="blog-featured-body">
+          <span class="blog-pill">SEO &amp; Growth</span>
+          <h2 class="blog-featured-title"><a href="generative-search.html">Getting found in AI answers: a practical guide to generative search</a></h2>
+          <p class="blog-byline"><span>By Worx</span><span class="blog-byline-dot" aria-hidden="true"></span><span>3 minutes read</span></p>
         </div>
+      </article>
 
+      <div class="blog-grid">
+        <article class="blog-card" data-category="seo">
+          <a class="blog-card-media" href="technical-seo-launch.html" tabindex="-1" aria-hidden="true">
+            <picture>
+            <source srcset="../static/assets/blog/technical-seo-launch.webp" type="image/webp">
+            <img src="../static/assets/blog/technical-seo-launch.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+          </picture>
+          </a>
+          <div class="blog-card-body">
+            <span class="blog-pill">SEO &amp; Growth</span>
+            <h3 class="blog-card-title"><a href="technical-seo-launch.html">Technical SEO to get right before launch day</a></h3>
+            <p class="blog-byline"><span>By Worx</span><span class="blog-byline-dot" aria-hidden="true"></span><span>3 minutes read</span></p>
+          </div>
+        </article>
+        <article class="blog-card" data-category="mobile">
+          <a class="blog-card-media" href="app-launch-checklist.html" tabindex="-1" aria-hidden="true">
+            <picture>
+            <source srcset="../static/assets/blog/app-launch-checklist.webp" type="image/webp">
+            <img src="../static/assets/blog/app-launch-checklist.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+          </picture>
+          </a>
+          <div class="blog-card-body">
+            <span class="blog-pill">Mobile Apps</span>
+            <h3 class="blog-card-title"><a href="app-launch-checklist.html">The app launch checklist we run before every release</a></h3>
+            <p class="blog-byline"><span>By Worx</span><span class="blog-byline-dot" aria-hidden="true"></span><span>3 minutes read</span></p>
+          </div>
+        </article>
+        <article class="blog-card" data-category="mobile">
+          <a class="blog-card-media" href="native-vs-cross-platform.html" tabindex="-1" aria-hidden="true">
+            <picture>
+            <source srcset="../static/assets/blog/native-vs-cross-platform.webp" type="image/webp">
+            <img src="../static/assets/blog/native-vs-cross-platform.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+          </picture>
+          </a>
+          <div class="blog-card-body">
+            <span class="blog-pill">Mobile Apps</span>
+            <h3 class="blog-card-title"><a href="native-vs-cross-platform.html">Native, cross-platform or PWA? Choosing your app approach</a></h3>
+            <p class="blog-byline"><span>By Worx</span><span class="blog-byline-dot" aria-hidden="true"></span><span>3 minutes read</span></p>
+          </div>
+        </article>
+        <article class="blog-card" data-category="experience">
+          <a class="blog-card-media" href="bilingual-websites.html" tabindex="-1" aria-hidden="true">
+            <picture>
+            <source srcset="../static/assets/blog/bilingual-websites.webp" type="image/webp">
+            <img src="../static/assets/blog/bilingual-websites.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+          </picture>
+          </a>
+          <div class="blog-card-body">
+            <span class="blog-pill">Experience Design</span>
+            <h3 class="blog-card-title"><a href="bilingual-websites.html">Designing bilingual websites that feel native in Arabic and English</a></h3>
+            <p class="blog-byline"><span>By Worx</span><span class="blog-byline-dot" aria-hidden="true"></span><span>3 minutes read</span></p>
+          </div>
+        </article>
+        <article class="blog-card" data-category="strategy">
+          <a class="blog-card-media" href="website-timeline.html" tabindex="-1" aria-hidden="true">
+            <picture>
+            <source srcset="../static/assets/blog/website-timeline.webp" type="image/webp">
+            <img src="../static/assets/blog/website-timeline.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+          </picture>
+          </a>
+          <div class="blog-card-body">
+            <span class="blog-pill">Strategy</span>
+            <h3 class="blog-card-title"><a href="website-timeline.html">How long does a custom website really take?</a></h3>
+            <p class="blog-byline"><span>By Worx</span><span class="blog-byline-dot" aria-hidden="true"></span><span>3 minutes read</span></p>
+          </div>
+        </article>
+        <article class="blog-card" data-category="engineering">
+          <a class="blog-card-media" href="headless-commerce.html" tabindex="-1" aria-hidden="true">
+            <picture>
+            <source srcset="../static/assets/blog/headless-commerce.webp" type="image/webp">
+            <img src="../static/assets/blog/headless-commerce.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+          </picture>
+          </a>
+          <div class="blog-card-body">
+            <span class="blog-pill">Engineering</span>
+            <h3 class="blog-card-title"><a href="headless-commerce.html">Headless commerce: when it's worth the switch</a></h3>
+            <p class="blog-byline"><span>By Worx</span><span class="blog-byline-dot" aria-hidden="true"></span><span>3 minutes read</span></p>
+          </div>
+        </article>
+        <article class="blog-card" data-category="engineering">
+          <a class="blog-card-media" href="performance-seo.html" tabindex="-1" aria-hidden="true">
+            <picture>
+            <source srcset="../static/assets/blog/performance-seo.webp" type="image/webp">
+            <img src="../static/assets/blog/performance-seo.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+          </picture>
+          </a>
+          <div class="blog-card-body">
+            <span class="blog-pill">Engineering</span>
+            <h3 class="blog-card-title"><a href="performance-seo.html">Why performance is your best SEO strategy</a></h3>
+            <p class="blog-byline"><span>By Worx</span><span class="blog-byline-dot" aria-hidden="true"></span><span>4 minutes read</span></p>
+          </div>
+        </article>
+        <article class="blog-card" data-category="strategy">
+          <a class="blog-card-media" href="choosing-your-stack.html" tabindex="-1" aria-hidden="true">
+            <picture>
+            <source srcset="../static/assets/blog/choosing-your-stack.webp" type="image/webp">
+            <img src="../static/assets/blog/choosing-your-stack.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+          </picture>
+          </a>
+          <div class="blog-card-body">
+            <span class="blog-pill">Strategy</span>
+            <h3 class="blog-card-title"><a href="choosing-your-stack.html">Choosing the right stack for your next build</a></h3>
+            <p class="blog-byline"><span>By Worx</span><span class="blog-byline-dot" aria-hidden="true"></span><span>5 minutes read</span></p>
+          </div>
+        </article>
+        <article class="blog-card" data-category="experience">
+          <a class="blog-card-media" href="ar-activations.html" tabindex="-1" aria-hidden="true">
+            <picture>
+            <source srcset="../static/assets/blog/ar-activations.webp" type="image/webp">
+            <img src="../static/assets/blog/ar-activations.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
+          </picture>
+          </a>
+          <div class="blog-card-body">
+            <span class="blog-pill">Experience Design</span>
+            <h3 class="blog-card-title"><a href="ar-activations.html">AR activations that actually activate</a></h3>
+            <p class="blog-byline"><span>By Worx</span><span class="blog-byline-dot" aria-hidden="true"></span><span>4 minutes read</span></p>
+          </div>
+        </article>
       </div>
 
-    </section>
-
-
-    <!-- BLOG LISTING -->
-    <section class="blog-listing">
-
-      <div class="container">
-
-
-        <!-- ARTICLE 01 -->
-        <article class="blog-feature" data-category="engineering" data-reveal>
-
-          <a
-            class="blog-feature-image"
-            href="performance-seo.html"
-            aria-label="Read Why performance is your best SEO strategy">
-
-            <div class="blog-image-placeholder blog-image-performance">
-              <span class="blog-art-code">&lt;/&gt;</span>
-              <span class="blog-art-title">FAST</span>
-            </div>
-
-          </a>
-
-
-          <div class="blog-feature-content">
-
-            <span class="blog-feature-category">
-              Engineering
-            </span>
-
-            <h2>
-              <a href="performance-seo.html">
-                Why performance is your best SEO strategy
-              </a>
-            </h2>
-
-            <p class="blog-feature-excerpt">
-              Google's Lighthouse doesn't lie. How we build sites that score
-              and why performance matters for ranking.
-            </p>
-
-            <a class="blog-read-more" href="performance-seo.html">
-              Read More
-            </a>
-
-          </div>
-
-        </article>
-
-
-        <!-- ARTICLE 02 -->
-        <article class="blog-feature blog-feature-reverse" data-category="strategy" data-reveal>
-
-          <a
-            class="blog-feature-image"
-            href="choosing-your-stack.html"
-            aria-label="Read Choosing the right stack for your next build">
-
-            <div class="blog-image-placeholder blog-image-strategy">
-
-              <span class="blog-stack blog-stack-one"></span>
-              <span class="blog-stack blog-stack-two"></span>
-              <span class="blog-stack blog-stack-three"></span>
-
-              <span class="blog-art-title">STACK</span>
-
-            </div>
-
-          </a>
-
-
-          <div class="blog-feature-content">
-
-            <span class="blog-feature-category">
-              Strategy
-            </span>
-
-            <h2>
-              <a href="choosing-your-stack.html">
-                Choosing the right stack for your next build
-              </a>
-            </h2>
-
-            <p class="blog-feature-excerpt">
-              CMS, headless or fully custom? A practical guide to choosing
-              the right platform for your next digital product.
-            </p>
-
-            <a class="blog-read-more" href="choosing-your-stack.html">
-              Read More
-            </a>
-
-          </div>
-
-        </article>
-
-
-        <!-- ARTICLE 03 -->
-        <article class="blog-feature" data-category="experience" data-reveal>
-
-          <a
-            class="blog-feature-image"
-            href="ar-activations.html"
-            aria-label="Read AR activations that actually activate">
-
-            <div class="blog-image-placeholder blog-image-experience">
-
-              <span class="blog-ring blog-ring-one"></span>
-              <span class="blog-ring blog-ring-two"></span>
-              <span class="blog-ring blog-ring-three"></span>
-
-              <span class="blog-art-title blog-art-ar">AR</span>
-
-            </div>
-
-          </a>
-
-
-          <div class="blog-feature-content">
-
-            <span class="blog-feature-category">
-              Experience Design
-            </span>
-
-            <h2>
-              <a href="ar-activations.html">
-                AR activations that actually activate
-              </a>
-            </h2>
-
-            <p class="blog-feature-excerpt">
-              What we learned shipping interactive experiences
-              for Expo-scale audiences.
-            </p>
-
-            <a class="blog-read-more" href="ar-activations.html">
-              Read More
-            </a>
-
-          </div>
-
-        </article>
-
-
-      </div>
-
+      <p class="blog-empty" hidden>No posts in this category yet. Check back soon.</p>
     </section>
 
   </main>
 
 
   <footer class="site-footer">
-
+    <div class="footer-glow" aria-hidden="true"></div>
     <div class="container">
+      <div class="footer-brand">
+        <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png" alt="Worx by Glimpse" width="132" height="181"></a>
+        <p class="footer-tagline">Your one-stop destination for innovative website and software development, bringing digital aspirations to life, one line of code at a time.</p>
+      </div>
 
-      <div class="footer-grid">
+      <div class="footer-social-row">
+        <span class="footer-rule" aria-hidden="true"></span>
+        <ul class="footer-social" aria-label="Worx by Glimpse on social media">
+          <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.06c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-4z"/></svg></a></li>
+          <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.2 12 2.2zm0 4.66a5.14 5.14 0 1 0 0 10.28 5.14 5.14 0 0 0 0-10.28zm0 8.48a3.34 3.34 0 1 1 0-6.68 3.34 3.34 0 0 1 0 6.68zm5.34-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg></a></li>
+          <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-7.6h2.56l.38-2.97H13.5V8.53c0-.86.24-1.45 1.47-1.45h1.57V4.43a21 21 0 0 0-2.29-.12c-2.27 0-3.82 1.39-3.82 3.93v2.19H7.87v2.97h2.56V21z"/></svg></a></li>
+          <li><a href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a></li>
+        </ul>
+        <span class="footer-rule" aria-hidden="true"></span>
+      </div>
 
-        <div class="footer-about">
-
-          <a class="brand brand--footer" href="../index.html">
-            <img
-              src="../static/assets/logo-light.png"
-              alt="Worx by Glimpse"
-              width="132"
-              height="181">
-          </a>
-
-          <p>
-            Your one-stop destination for innovative website and software development,
-            bringing digital aspirations to life, one line of code at a time.
-          </p>
-
-        </div>
-
-
-        <div>
-
-          <h4>Explore</h4>
-
+      <div class="footer-cols">
+        <div class="footer-col footer-col--contact">
+          <h4>Contact Us</h4>
           <ul>
+            <li>Publishing Pavilion Bldg - Unit 709 - Me'aisem First - Dubai Production City - Dubai</li>
+            <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
+            <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="../about/index.html">About us</a></li>
             <li><a href="../services/index.html">Services</a></li>
             <li><a href="../portfolio/index.html">Portfolio</a></li>
-            <li><a href="../about/index.html">About us</a></li>
             <li><a href="../blogs/index.html">Blog</a></li>
             <li><a href="../contact/index.html">Contact</a></li>
           </ul>
-
         </div>
-
-
-        <div>
-
-          <h4>Social</h4>
-
+        <div class="footer-col">
+          <h4>Build</h4>
           <ul>
-            <li>
-              <a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener">
-                LinkedIn
-              </a>
-            </li>
-
-            <li>
-              <a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener">
-                Instagram
-              </a>
-            </li>
-
-            <li>
-              <a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener">
-                Facebook
-              </a>
-            </li>
-
-            <li>
-              <a href="https://www.theglimpseproject.com" target="_blank" rel="noopener">
-                Glimpse
-              </a>
-            </li>
+            <li><a href="../services/web-development.html">Web Development</a></li>
+            <li><a href="../services/custom-platforms.html">Custom Platforms</a></li>
+            <li><a href="../services/mobile-apps.html">Mobile App Development</a></li>
           </ul>
-
         </div>
-
-
-        <div>
-
-          <h4>Contact</h4>
-
+        <div class="footer-col">
+          <h4>Experience &amp; Growth</h4>
           <ul>
-
-            <li>
-              <a href="mailto:Hello@worxbyglimpse.com">
-                Hello@worxbyglimpse.com
-              </a>
-            </li>
-
-            <li>
-              <a href="tel:+971555669847">
-                +971 55 566 9847
-              </a>
-            </li>
-
-            <li>
-              Unit 404 Makateb 2,<br>
-              Dubai Production City,<br>
-              PO Box 503417, Dubai, UAE
-            </li>
-
+            <li><a href="../services/ui-ux-design.html">UI &amp; UX Design</a></li>
+            <li><a href="../services/ar-vr.html">AR / VR &amp; Activations</a></li>
+            <li><a href="../services/seo-sem.html">SEO &amp; SEM</a></li>
           </ul>
-
         </div>
-
       </div>
-
 
       <div class="footer-bottom">
-
-        <span>
-          © <span id="footer-year">2026</span>
-          Worx by Glimpse. All rights reserved.
-        </span>
-
-        <span>
-          Built for businesses, by creatives.
-        </span>
-
+        <span>© <span id="footer-year">2026</span> Worx by Glimpse. All rights reserved.</span>
+        <span>Built for businesses, by creatives.</span>
       </div>
-
     </div>
-
   </footer>
 
 
@@ -397,37 +293,33 @@
   <script src="../static/js/animations.js"></script>
   <script src="../static/js/main.js"></script>
   <script src="../static/js/contact-widget.js"></script>
+  <script src="../static/js/blog-stars.js"></script>
 
-  <!-- Category filtering -->
+  <!-- Category filter: shows the posts in the chosen category (the
+       featured slot included); the grid reflows. -->
   <script>
-    const categoryButtons = document.querySelectorAll('.blog-category');
-    const blogArticles = document.querySelectorAll('.blog-feature');
-
-    categoryButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-
-        const selectedCategory = button.dataset.filter;
-
-        categoryButtons.forEach((item) => {
-          item.classList.remove('active');
+    (function () {
+      var buttons = document.querySelectorAll('.blog-cat');
+      var posts = document.querySelectorAll('.blog-featured, .blog-card');
+      var empty = document.querySelector('.blog-empty');
+      buttons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          var filter = button.dataset.filter;
+          var shown = 0;
+          buttons.forEach(function (b) {
+            var on = b === button;
+            b.classList.toggle('is-active', on);
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+          });
+          posts.forEach(function (post) {
+            var match = filter === 'all' || post.dataset.category === filter;
+            post.hidden = !match;
+            if (match) shown++;
+          });
+          empty.hidden = shown > 0;
         });
-
-        button.classList.add('active');
-
-        blogArticles.forEach((article) => {
-
-          const articleCategory = article.dataset.category;
-
-          if (selectedCategory === 'all' || selectedCategory === articleCategory) {
-            article.hidden = false;
-          } else {
-            article.hidden = true;
-          }
-
-        });
-
       });
-    });
+    })();
   </script>
 
 </body>

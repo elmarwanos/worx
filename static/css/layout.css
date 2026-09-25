@@ -188,54 +188,166 @@
 }
 
 /* ---- Footer ------------------------------------------------ */
+/* The stacked logo centred on a warm glow, the social row between two
+   rules that fade out to the edges, then the link columns, each
+   heading marked with a slim accent bar. */
 
 .site-footer {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   border-top: 1px solid var(--line);
-  background: linear-gradient(180deg, transparent, rgba(66, 29, 15, 0.35));
-  padding-block: clamp(56px, 8vw, 90px) 36px;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 0%, rgba(66, 29, 15, 0.55), transparent 70%),
+    linear-gradient(180deg, #120704 0%, #0e0503 100%);
+  padding-block: clamp(56px, 7vw, 88px) 32px;
   margin-top: var(--section-pad);
 }
 
-.footer-grid {
+/* soft ember glow breathing behind the logo */
+.footer-glow {
+  position: absolute;
+  left: 50%;
+  top: -140px;
+  z-index: -1;
+  width: min(760px, 110vw);
+  height: 460px;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(231, 125, 17, 0.2), rgba(192, 69, 39, 0.08) 55%, transparent);
+  filter: blur(8px);
+  pointer-events: none;
+  animation: footer-glow 9s ease-in-out infinite alternate;
+}
+
+@keyframes footer-glow {
+  from { opacity: 0.7; transform: translateX(-50%) scale(0.96); }
+  to   { opacity: 1;   transform: translateX(-50%) scale(1.04); }
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.brand--footer {
+  display: inline-block;
+  filter: drop-shadow(0 10px 30px rgba(231, 125, 17, 0.18));
+}
+
+.footer-tagline {
+  max-width: 46ch;
+  margin-top: 18px;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+/* ---- social row -------------------------------------------- */
+.footer-social-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 3vw, 36px);
+  margin: clamp(32px, 4vw, 48px) 0 clamp(40px, 5vw, 60px);
+}
+
+.footer-rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(254, 238, 207, 0.22));
+}
+
+.footer-rule:last-child {
+  background: linear-gradient(270deg, transparent, rgba(254, 238, 207, 0.22));
+}
+
+.footer-social {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-social a {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1.4fr;
-  gap: 48px;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(254, 238, 207, 0.14);
+  border-radius: 50%;
+  color: var(--text);
+  background: rgba(254, 238, 207, 0.03);
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.footer-social svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.footer-social a:hover,
+.footer-social a:focus-visible {
+  color: #150905;
+  border-color: var(--accent-2);
+  background: var(--accent-2);
+  box-shadow: 0 0 22px rgba(250, 167, 25, 0.45);
+  transform: translateY(-2px);
+}
+
+/* ---- link columns ------------------------------------------ */
+.footer-cols {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1.1fr 1.2fr;
+  gap: 40px;
   margin-bottom: 56px;
 }
 
-.footer-grid h4 {
-  font-size: 0.85rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 18px;
+.footer-col h4 {
+  margin-bottom: 22px;
+  padding-left: 12px;
+  border-left: 2px solid var(--accent-2);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  color: var(--text);
 }
 
-.footer-grid li {
-  margin-bottom: 10px;
-  color: var(--muted);
+.footer-col li {
+  margin-bottom: 14px;
   font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--muted);
 }
 
-.footer-grid a {
+.footer-col a {
+  position: relative;
   color: var(--muted);
-  font-size: 0.95rem;
   transition: color 0.25s ease;
 }
 
-.footer-grid a:hover {
-  color: var(--accent-2);
+/* a thin amber underline draws in on hover */
+.footer-col a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 1px;
+  background: var(--accent-2);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
 }
 
-.footer-about p {
-  max-width: 320px;
-  font-size: 0.95rem;
-  margin-top: 20px;
+.footer-col a:hover,
+.footer-col a:focus-visible {
+  color: var(--text);
 }
 
-.footer-tag {
-  display: block;
-  margin-top: 14px;
+.footer-col a:hover::after,
+.footer-col a:focus-visible::after {
+  transform: scaleX(1);
 }
 
 .footer-bottom {
@@ -249,15 +361,25 @@
   color: var(--muted);
 }
 
-@media (max-width: 860px) {
-  .footer-grid {
+@media (max-width: 960px) {
+  .footer-cols {
     grid-template-columns: 1fr 1fr;
+    gap: 36px 28px;
   }
 }
 
-/* Phones: the brand blurb gets the full row instead of half of it */
 @media (max-width: 560px) {
-  .footer-about {
-    grid-column: 1 / -1;
+  .footer-cols {
+    grid-template-columns: 1fr;
   }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-glow { animation: none; }
 }

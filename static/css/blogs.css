@@ -1,0 +1,339 @@
+/* ============================================================
+   WORX BLOG — index page (blogs/index.html)
+   "Our Blog" eyebrow, the category filter set as big type (the
+   active one lit, with an arrow), the latest post featured (art
+   left, title right), then a three-column grid of cards,
+   all with the Mars HUD covers (static/assets/blog).
+   A faint blueprint grid and an ember glow sit behind it all.
+   Article pages use blog-post.css.
+   ============================================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.blog-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-bottom: clamp(40px, 6vw, 90px);
+}
+
+/* blueprint grid, fading out toward the bottom */
+.blog-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(254, 238, 207, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(254, 238, 207, 0.045) 1px, transparent 1px);
+  background-size: 96px 96px;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+}
+
+/* star wind (static/js/blog-stars.js), over the grid, fading out
+   toward the posts so the grid of cards stays calm */
+.blog-stars {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  width: 100%;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%);
+}
+
+/* ember glow drifting behind the categories and the featured post */
+.blog-page::after {
+  content: "";
+  position: absolute;
+  right: -12%;
+  top: 60px;
+  z-index: -1;
+  width: min(900px, 90vw);
+  aspect-ratio: 1;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(192, 69, 39, 0.28), rgba(231, 125, 17, 0.1) 50%, transparent);
+  filter: blur(20px);
+  animation: blog-glow 14s ease-in-out infinite alternate;
+}
+
+@keyframes blog-glow {
+  from { transform: translate(0, 0) scale(1); opacity: 0.8; }
+  to   { transform: translate(-6%, 8%) scale(1.08); opacity: 1; }
+}
+
+/* ---- head: eyebrow + categories ------------------------------- */
+.blog-head {
+  padding-top: clamp(130px, 15vw, 190px);
+  padding-bottom: clamp(48px, 7vw, 96px);
+}
+
+.blog-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: clamp(18px, 2.4vw, 28px);
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+
+.blog-eyebrow-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 12px 2px rgba(250, 167, 25, 0.6);
+}
+
+.blog-cats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15em clamp(28px, 3.6vw, 52px);
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3.6vw, 3.1rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.blog-cat {
+  display: inline-flex;
+  align-items: baseline;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: rgba(254, 238, 207, 0.32);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.blog-cat:hover,
+.blog-cat:focus-visible {
+  color: rgba(254, 238, 207, 0.62);
+}
+
+.blog-cat.is-active {
+  color: var(--text);
+}
+
+/* the arrow only shows on the active category */
+.blog-cat-arrow {
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  margin-right: 0;
+  font-size: 0.62em;
+  font-weight: 500;
+  color: var(--accent-2);
+  opacity: 0;
+  transform: translate(-6px, -0.1em);
+  transition: width 0.3s ease, margin 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+.blog-cat.is-active .blog-cat-arrow {
+  width: 0.9em;
+  margin-right: 0.12em;
+  opacity: 1;
+  transform: translate(0, -0.1em);
+}
+
+/* ---- shared bits ---------------------------------------------- */
+.blog-pill {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 6px 12px;
+  border: 1px solid rgba(254, 238, 207, 0.16);
+  border-radius: 999px;
+  background: rgba(254, 238, 207, 0.05);
+  font-size: 0.8rem;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.blog-byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.blog-byline span:first-child {
+  color: var(--text);
+}
+
+.blog-byline-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.blog-featured-title a,
+.blog-card-title a {
+  color: var(--text);
+  background: linear-gradient(var(--accent-2), var(--accent-2)) 0 100% / 0 1px no-repeat;
+  transition: color 0.3s ease, background-size 0.4s ease;
+}
+
+.blog-featured:hover .blog-featured-title a,
+.blog-card:hover .blog-card-title a,
+.blog-featured-title a:focus-visible,
+.blog-card-title a:focus-visible {
+  color: var(--accent-2);
+}
+
+/* ---- featured post -------------------------------------------- */
+.blog-featured {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: clamp(28px, 4vw, 64px);
+  align-items: center;
+  margin-bottom: clamp(56px, 7vw, 100px);
+}
+
+.blog-featured[hidden],
+.blog-card[hidden] {
+  display: none;
+}
+
+/* the frame has the covers' exact 16:9 ratio, so the image fills it
+   edge to edge; clip-path (not just overflow) keeps the hover zoom
+   inside the rounded corners in every browser, so nothing bleeds */
+.blog-featured-media,
+.blog-card-media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 18px;
+  clip-path: inset(0 round 18px);
+  background: #150905;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+}
+
+.blog-featured-media {
+  aspect-ratio: 16 / 9;
+}
+
+.blog-featured-body {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.blog-featured-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3.2vw, 3rem);
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+}
+
+/* ---- grid ----------------------------------------------------- */
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(36px, 4vw, 56px) clamp(20px, 2.2vw, 32px);
+}
+
+.blog-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.blog-card-media {
+  aspect-ratio: 16 / 9; /* the covers' own ratio: nothing cropped */
+  margin-bottom: 22px;
+}
+
+.blog-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-inline: 4px;
+}
+
+.blog-card-title {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.5vw, 1.35rem);
+  font-weight: 500;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.blog-empty {
+  padding: 40px 0;
+  color: var(--muted);
+}
+
+/* ---- cover images (tools/blog-covers) ------------------------- */
+.blog-featured-media picture,
+.blog-card-media picture,
+.blog-featured-media img,
+.blog-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.blog-featured-media img,
+.blog-card-media img {
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.blog-featured:hover .blog-featured-media img,
+.blog-card:hover .blog-card-media img {
+  transform: scale(1.04);
+}
+
+/* ---- responsive ----------------------------------------------- */
+@media (max-width: 980px) {
+  .blog-featured {
+    grid-template-columns: 1fr;
+  }
+
+  .blog-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .blog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .blog-page::before {
+    background-size: 64px 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blog-page::after { animation: none; }
+  .blog-featured-media img,
+  .blog-card-media img,
+  .blog-cat-arrow { transition: none; }
+}

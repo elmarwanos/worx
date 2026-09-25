@@ -764,11 +764,16 @@
   pointer-events: none;
 }
 
+/* Frame 037 is already a 3/4 render with its own perspective, hatch
+   toward the viewer and the crew's side: shown flat, at its native angle.
+   A CSS rotateY on top of it double-foreshortened the hull (squeezed,
+   keystoned) and smeared the office interior. Big enough to read as the
+   giant being saluted, spire clear of the nav. */
 .tribute-ship {
   position: absolute;
-  left: 69%;
-  top: 70%;
-  width: 35%;
+  left: 70%;
+  top: 76%;
+  width: 38%;
   aspect-ratio: 1374 / 1145;
   transform: translate(-50%, -100%);
 }
@@ -776,8 +781,6 @@
 .tribute-drift {
   position: absolute;
   inset: 0;
-  /* turned so the open hatch faces left, straight at the crew */
-  transform: perspective(900px) rotateY(-30deg);
   transform-origin: 50% 100%;
   animation: tribute-drift 18s ease-in-out infinite alternate;
 }
@@ -938,43 +941,6 @@
 
 .tribute-drift .beacon { width: max(3px, 1%); }
 
-/* anamorphic flare off the hatch: a hot core and a long thin streak */
-.tribute-flare {
-  position: absolute;
-  z-index: 4;
-  left: 60%;
-  top: 55%;
-  width: 24%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(closest-side, rgba(255, 236, 200, 0.16), rgba(255, 180, 90, 0.05) 45%, transparent);
-  mix-blend-mode: screen;
-  animation: tribute-flare 6s ease-in-out infinite alternate;
-}
-
-.tribute-flare::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 900%;
-  height: 4%;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(90deg,
-    transparent,
-    rgba(120, 170, 255, 0.18) 30%,
-    rgba(255, 220, 170, 0.6) 50%,
-    rgba(120, 170, 255, 0.18) 70%,
-    transparent);
-  filter: blur(1px);
-}
-
-@keyframes tribute-flare {
-  0%   { opacity: 0.55; scale: 0.95; }
-  100% { opacity: 1;    scale: 1.08; }
-}
-
 .tribute-haze {
   position: absolute;
   z-index: 1;
@@ -996,9 +962,9 @@
 .tribute-crew {
   position: absolute;
   z-index: 2;
-  left: 44%;
+  left: 41%;
   top: 97%;
-  width: 21%;
+  width: 19%;
   aspect-ratio: 954 / 1020;
   transform: translate(-50%, -100%);
   animation: tribute-parallax 18s ease-in-out infinite alternate;
@@ -1977,8 +1943,8 @@
     --terrain-w: 170vw;
   }
 
-  .tribute-ship { left: 63%; top: 56%; width: 31%; }
-  .tribute-crew { left: 43%; top: 62%; width: 15%; }
+  .tribute-ship { left: 60%; top: 56%; width: 29%; }
+  .tribute-crew { left: 39%; top: 62%; width: 15%; }
 
   .story-site-body {
     left: 56%;
@@ -2049,8 +2015,8 @@
     --terrain-w: 230vw;
   }
 
-  .tribute-ship { left: 60%; top: 40%; width: 26%; }
-  .tribute-crew { left: 45%; top: 45%; width: 12%; }
+  .tribute-ship { left: 57%; top: 40%; width: 24%; }
+  .tribute-crew { left: 41%; top: 45%; width: 12%; }
 
   .story-site-body {
     left: 57%;
@@ -2284,7 +2250,6 @@
 
   .tribute-mote { animation: none; opacity: 0; }
 
-  .tribute-flare,
   .tribute-crew-glow,
   .tribute-lamp { animation: none; }
 

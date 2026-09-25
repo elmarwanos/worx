@@ -1,0 +1,7 @@
+{
+  "name": "blog-covers-build",
+  "private": true,
+  "description": "Renders the orange Mars feature images for the blog posts",
+  "scripts": { "build": "node build.js" },
+  "dependencies": { "sharp": "^0.34.0" }
+}

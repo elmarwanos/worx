@@ -186,6 +186,26 @@ body[data-page="blogs"] {
         linear-gradient(135deg, #2a130a 0%, #150905 52%, #3d180b 100%);
 }
 
+/* cover image (static/assets/blog, 16:9): the frame takes its ratio */
+.blog-feature-art--image {
+    height: auto;
+    aspect-ratio: 16 / 9;
+    clip-path: inset(0 round 30px);
+    background: #150905;
+}
+
+.blog-feature-art--image picture,
+.blog-feature-art--image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.blog-feature-art--image img {
+    object-fit: cover;
+    object-position: center 60%;
+}
+
 .feature-grid {
     position: absolute;
     inset: 0;

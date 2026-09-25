@@ -502,10 +502,10 @@
       --terrain-pos: center 54%;
     }
 
-    /* Size container: the astronaut/flag paths (portfolio.css) are in
-       cqw/cqh, i.e. measured on the hero box the terrain is laid out
-       in, so they stay on the ridge even when the hero is taller than
-       the viewport (landscape phones, short windows). */
+    /* Size container for the hero layers. rover-scene.js measures this
+       same box for its ridge path, so the rover stays on the ridge
+       even when the hero is taller than the viewport (landscape
+       phones, short windows). */
     body[data-page="portfolio"] .folio-camera {
       position: absolute;
       inset: 0;
@@ -701,9 +701,9 @@
       </button>
       <nav class="nav-links" aria-label="Main navigation">
         <a href="../index.html" data-nav="home">Home</a>
+        <a href="../about/index.html" data-nav="about">About</a>
         <a href="../services/index.html" data-nav="services">Services</a>
         <a href="../portfolio/index.html" data-nav="portfolio">Portfolio</a>
-        <a href="../about/index.html" data-nav="about">About</a>
         <a href="../blogs/index.html" data-nav="blogs">Blog</a>
         <a href="../contact/index.html" class="btn btn-primary" data-nav="contact">Let's Talk</a>
       </nav>
@@ -729,107 +729,28 @@
           <div class="mars-terrain-fx__storm"></div>
           <div class="mars-terrain-fx__dust"></div>
         </div>
-        <!-- Mars ridge astronaut — 10 FINAL walk frames + kneel + planted flag -->
-        <div class="mars-astronaut" aria-hidden="true">
-          <div class="mars-astronaut__gravity">
-            <div class="mars-astronaut__walking">
-              <img class="mars-astronaut__frame mars-astronaut__frame--01"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 001.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--02"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 002.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--03"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 003.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--04"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 004.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--05"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 005.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--06"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 006.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--07"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 007.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--08"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 008.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--09"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 009.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--10"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 010.png" alt="">
-            </div>
-            <img class="mars-astronaut__kneel" src="../static/assets/portfolio/astronaut/ASTRONAUT_KNEEL.png" alt="">
-          </div>
-        </div>
-
-        <svg class="mars-worx-flag" viewBox="0 0 337 360" role="img" aria-hidden="true" focusable="false">
-          <defs>
-            <!-- fabric shading -- the exact orange sampled from logo-dark.png's
-                 badge background (#e77d11), with subtle fold shading so it
-                 still reads as cloth instead of a flat digital rectangle.
-                 Static: no wave/turbulence filter is applied anywhere below. -->
-            <linearGradient id="worxClothShade" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#e77d11" />
-              <stop offset="18%" stop-color="#cf6d0d" />
-              <stop offset="40%" stop-color="#f08d29" />
-              <stop offset="65%" stop-color="#d0700e" />
-              <stop offset="100%" stop-color="#e77d11" />
-            </linearGradient>
-
-            <!-- flag-eye-solid.png is a mask here too (alpha, not luminance --
-                 the shape is painted solid black, which a default luminance mask
-                 would treat as fully-hidden): clips the crescent so it can slide
-                 left/right without ever spilling outside the eye's own outline. -->
-            <mask id="worxEyeClip" maskUnits="userSpaceOnUse" x="153.65" y="86" width="86.7" height="42"
-              style="mask-type:alpha">
-              <image x="153.65" y="86" width="86.7" height="42"
-                href="../static/assets/portfolio/astronaut/flag-eye-solid.png" />
-            </mask>
-          </defs>
-
-          <!-- flagpole: cropped straight from the original artwork -->
-          <image x="-2" y="48" width="88" height="298"
-            href="../static/assets/portfolio/astronaut/worx-flag-pole.png" />
-
-          <!-- cloth: a single static rect, no filter/animation -- the fabric
-               itself no longer moves. -->
-          <rect x="78" y="42" width="238" height="132" fill="url(#worxClothShade)" />
-
-          <!-- branding -->
-          <image x="173.71" y="50" width="46.58" height="30"
-            href="../static/assets/portfolio/astronaut/flag-swoosh.png" />
-
-          <!-- Worx eye: solid black almond (authentic logo-dark.png shape, no
-               synthetic white sclera) + the real orange crescent as a living
-               pupil that slides within it and blinks by squashing the whole
-               eye vertically -- the natural lens silhouette tapers to a line
-               at full closure, so there's no separate mask edge to seam. This
-               is the ONLY moving part of the flag. -->
-          <g class="worx-eye">
-            <image x="153.65" y="86" width="86.7" height="42"
-              href="../static/assets/portfolio/astronaut/flag-eye-solid.png" />
-            <g mask="url(#worxEyeClip)">
-              <g class="worx-eye-crescent">
-                <image x="153.65" y="86" width="86.7" height="42"
-                  href="../static/assets/portfolio/astronaut/flag-crescent.png" />
-              </g>
-            </g>
-          </g>
-
-          <text x="197" y="144" text-anchor="middle" font-family="Jost, sans-serif" font-weight="700"
-            font-size="16" letter-spacing="2" fill="#150905">WORX</text>
-          <text x="197" y="158" text-anchor="middle" font-family="Jost, sans-serif" font-weight="500"
-            font-size="8.5" letter-spacing="2.4" fill="#150905">&lt;like/magic&gt;</text>
-        </svg>
+        <!-- Summit scene (static/js/rover-scene.js): the flag behind, then
+             dust + rover + astronaut, then the lamps and beams -->
+        <canvas class="rover-scene rover-scene__flag" aria-hidden="true"></canvas>
+        <canvas class="rover-scene rover-scene__main" aria-hidden="true"></canvas>
+        <canvas class="rover-scene rover-scene__glow" aria-hidden="true"></canvas>
         <canvas id="mars3d" class="mars-3d-canvas" aria-hidden="true"></canvas>
         <div class="mars-ember-glow"></div>
         <canvas class="folio-hero-particles"></canvas>
         <div class="folio-grain"></div>
        </div>
       </div>
-      <div class="container folio-hero-inner">
-        <p class="eyebrow">Our Work</p>
-        <h1>Ideas, built to make an <span class="gradient-text">impact</span>.</h1>
-        <p class="folio-hero-lead" data-reveal>
-          Platforms, apps and campaigns for brands people already know
-          designed, built, and kept sharp long after launch.
-        </p>
+      <!-- Hero copy on the About page's caption card: the smoked-glass
+           HUD panel, bottom-left (static/css/portfolio.css, HERO CAPTION CARD) -->
+      <div class="folio-hero-caption">
+        <div class="folio-hud-card">
+          <p class="folio-hud-status"><span>Our Work</span></p>
+          <h1 class="folio-hud-title">Ideas, built to make an <span class="gradient-text">impact</span>.</h1>
+          <p class="folio-hud-subtitle">
+            Platforms, apps and campaigns for brands people already know
+            designed, built, and kept sharp long after launch.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -1365,43 +1286,61 @@
   </main>
 
   <footer class="site-footer">
+    <div class="footer-glow" aria-hidden="true"></div>
     <div class="container">
-      <div class="footer-grid">
-        <div class="footer-about">
-          <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png"
-              alt="Worx by Glimpse" width="132" height="181"></a>
-          <p>Your one-stop destination for innovative website and software development, bringing digital aspirations to
-            life, one line of code at a time.</p>
+      <div class="footer-brand">
+        <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png" alt="Worx by Glimpse" width="132" height="181"></a>
+        <p class="footer-tagline">Your one-stop destination for innovative website and software development, bringing digital aspirations to life, one line of code at a time.</p>
+      </div>
+
+      <div class="footer-social-row">
+        <span class="footer-rule" aria-hidden="true"></span>
+        <ul class="footer-social" aria-label="Worx by Glimpse on social media">
+          <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.06c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-4z"/></svg></a></li>
+          <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.2 12 2.2zm0 4.66a5.14 5.14 0 1 0 0 10.28 5.14 5.14 0 0 0 0-10.28zm0 8.48a3.34 3.34 0 1 1 0-6.68 3.34 3.34 0 0 1 0 6.68zm5.34-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg></a></li>
+          <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-7.6h2.56l.38-2.97H13.5V8.53c0-.86.24-1.45 1.47-1.45h1.57V4.43a21 21 0 0 0-2.29-.12c-2.27 0-3.82 1.39-3.82 3.93v2.19H7.87v2.97h2.56V21z"/></svg></a></li>
+          <li><a href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a></li>
+        </ul>
+        <span class="footer-rule" aria-hidden="true"></span>
+      </div>
+
+      <div class="footer-cols">
+        <div class="footer-col footer-col--contact">
+          <h4>Contact Us</h4>
+          <ul>
+            <li>Publishing Pavilion Bldg - Unit 709 - Me'aisem First - Dubai Production City - Dubai</li>
+            <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
+            <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
+          </ul>
         </div>
-        <div>
+        <div class="footer-col">
           <h4>Explore</h4>
           <ul>
+            <li><a href="../about/index.html">About us</a></li>
             <li><a href="../services/index.html">Services</a></li>
             <li><a href="../portfolio/index.html">Portfolio</a></li>
-            <li><a href="../about/index.html">About us</a></li>
             <li><a href="../blogs/index.html">Blog</a></li>
             <li><a href="../contact/index.html">Contact</a></li>
           </ul>
         </div>
-        <div>
-          <h4>Social</h4>
+        <div class="footer-col">
+          <h4>Build</h4>
           <ul>
-            <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener">LinkedIn</a>
-            </li>
-            <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener">Instagram</a></li>
-            <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener">Facebook</a></li>
-            <li><a href="https://www.theglimpseproject.com" target="_blank" rel="noopener">Glimpse</a></li>
+            <li><a href="../services/web-development.html">Web Development</a></li>
+            <li><a href="../services/custom-platforms.html">Custom Platforms</a></li>
+            <li><a href="../services/mobile-apps.html">Mobile App Development</a></li>
           </ul>
         </div>
-        <div>
-          <h4>Contact</h4>
+        <div class="footer-col">
+          <h4>Experience &amp; Growth</h4>
           <ul>
-            <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
-            <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
-            <li>Unit 404 Makateb 2,<br>Dubai Production City,<br>PO Box 503417, Dubai, UAE</li>
+            <li><a href="../services/ui-ux-design.html">UI &amp; UX Design</a></li>
+            <li><a href="../services/ar-vr.html">AR / VR &amp; Activations</a></li>
+            <li><a href="../services/seo-sem.html">SEO &amp; SEM</a></li>
           </ul>
         </div>
       </div>
+
       <div class="footer-bottom">
         <span>© <span id="footer-year">2026</span> Worx by Glimpse. All rights reserved.</span>
         <span>Built for businesses, by creatives.</span>
@@ -1421,6 +1360,7 @@
   <script src="../static/js/ambient-storm.js"></script>
   <script type="module" src="../static/js/portfolio-3d.js"></script>
   <script src="../static/js/portfolio.js"></script>
+  <script src="../static/js/rover-scene.js"></script>
 </body>
 
 </html>
