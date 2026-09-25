@@ -1,8 +1,8 @@
 /* ============================================================
-   Worx by Glimpse — about-story.js
+   Worx | about-story.js
    About page only. Four independent pieces:
 
-   1. Scene animation lifecycle — each .story-scene can own an
+   1. Scene animation lifecycle, each .story-scene can own an
       animation that plays while that scene is active. Right now
       only scene 0 (the GLIMPSE landing) has one: a 32-frame
       autoplay sequence, drawn onto .story-landing via
@@ -10,23 +10,23 @@
       requestAnimationFrame clock (time-based, not scroll-based),
       so it plays on its own the moment the scene becomes active,
       and it is cancelled the instant the scene stops being active.
-      sceneAnimations[] below is the reusable hook table — future
+      sceneAnimations[] below is the reusable hook table, future
       chapters (rover deployment, base construction, etc.) plug in
       the same way: { onEnter, onLeave }. onEnter also serves as
-      "onReEnter" — re-entering a scene just calls onEnter again,
+      "onReEnter", re-entering a scene just calls onEnter again,
       which is why the landing resets to frame 0 and replays every
       time the visitor scrolls back up to it.
 
-   2. Page-turn navigation — scrolling no longer scrubs anything.
+   2. Page-turn navigation, scrolling no longer scrubs anything.
       One wheel/trackpad gesture (or touch swipe) advances or
       retreats exactly one story page; goToPage() plays a fixed-
       duration GSAP tween (not a scrub) between the outgoing and
       incoming scene+text pair. Every other chapter sits at
       opacity 0 (autoAlpha, so it's also out of the tab order) the
-      whole time — see about.css's flat z-index layering for why
+      whole time, see about.css's flat z-index layering for why
       nothing "shows through" underneath.
 
-   3. Scroll capture — while the story is showing (window is at
+   3. Scroll capture, while the story is showing (window is at
       the very top of the page), wheel/touch input is intercepted
       and converted into goToPage() calls instead of scrolling the
       document. The one exception: scrolling forward from the last
@@ -39,18 +39,18 @@
       buffer) makes one gesture equal one page, even under a fast
       or "flung" trackpad gesture that fires many wheel events.
 
-   4. Star layer — same persistent canvas particle system as
+   4. Star layer, same persistent canvas particle system as
       before (adapted from Portfolio's initHero()), a child of
       #story so it can sit between the scene stack and the text
       stack in the same stacking context.
 
-   5. Landing composite — landing-fx.js (LandingFX) owns the landing
+   5. Landing composite, landing-fx.js (LandingFX) owns the landing
       clock: it grounds the ship on the terrain's calibrated line,
       cross-dissolves neighbouring frames for smooth motion, and adds
       the contact shadow / engine light on the terrain (flames and the
       main dust cloud are baked into the frames). This file just ticks
       it and uses the returned frame number to drive the bottom-left
-      descent narration (DESCENT_NARRATION) — the only HUD location on
+      descent narration (DESCENT_NARRATION), the only HUD location on
       this page; there is no separate top-right panel.
 
    Reduced motion / no-GSAP fallback: reduced motion keeps page
@@ -113,7 +113,7 @@
         console.info(
           "[about] landing sequence: " + info.loadedCount + "/" + info.total +
           " frame(s) found at " + (landingCanvas.dataset.landingBase || "(default path)") +
-          (info.loadedCount < info.total ? " — drop the remaining PNGs in to complete it." : "")
+          (info.loadedCount < info.total ? ", drop the remaining PNGs in to complete it." : "")
         );
         if (!landingFX) landingSeq.refreshPending();
       });
@@ -161,15 +161,15 @@
     }
 
     // Section 2's camera angle on the landed ship: left third, turned to
-    // face right (perspective warp, LandingFX still mode — a clean,
+    // face right (perspective warp, LandingFX still mode, a clean,
     // stationary ship with no dust). Narrow/portrait screens shift less.
     function summaryPose() {
       var wide = story.clientWidth / Math.max(1, story.clientHeight) > 1.1;
-      // A few degrees of yaw — a ship parked dead square to the camera
+      // A few degrees of yaw, a ship parked dead square to the camera
       // reads as a flat cutout; sitting very slightly turned toward the
       // hatch is what makes it look like it's actually resting on the
       // ground. dx keeps it left-of-centre without ever touching either
-      // edge — 034's own framing matches 033's almost exactly.
+      // edge, 034's own framing matches 033's almost exactly.
       return { dx: wide ? -0.14 : -0.05, yaw: wide ? 4 : 2 };
     }
 
@@ -335,7 +335,7 @@
     }
 
     // Clears the temporary descent narration and reveals the
-    // persistent opening caption — status swaps to its resting copy,
+    // persistent opening caption, status swaps to its resting copy,
     // title/subtitle play their staggered reveal for the first time.
     function revealFinalCaption() {
       var el = document.querySelector(".story-text--landing");
@@ -369,7 +369,7 @@
     // Staggered "mission text" reveal for the 8 story pages: status
     // line, then title (line-mask clip reveal), then subtitle. Pages
     // without a .story-status (the closing CTA scene) are left to the
-    // plain container fade goToPage() already does — nothing to stagger.
+    // plain container fade goToPage() already does, nothing to stagger.
     // ----------------------------------------------------------
     function textParts(el) {
       return {
@@ -460,7 +460,7 @@
       sceneAnimations[0] = {
         // Deliberately does NOT call playTextReveal: the landing page's
         // title/subtitle stay hidden until touchdown + settle, driven
-        // by playLanding()/revealFinalCaption() instead — see §25 of
+        // by playLanding()/revealFinalCaption() instead, see §25 of
         // the approved landing spec (temporary descent narration first,
         // persistent caption only once the ship has stopped moving).
         onEnter: function () {
@@ -470,7 +470,7 @@
         },
         onLeave: function (toIndex) {
           if (toIndex === 1 && landingFX) {
-            // Into Section 2: same shot, no teardown — stop the landing's
+            // Into Section 2: same shot, no teardown, stop the landing's
             // clock, keep frame 033 + storm alive, and cut to the new angle.
             playLanding.token = (playLanding.token || 0) + 1;
             cancelAnimationFrame(landingRAF);
@@ -547,7 +547,7 @@
        2b. Ascent page ("Link established" -> "Habitat online"): the
        landing shot flown the other way (landing-fx.js playAscent()).
        Plays on scene 0 + the landing canvases like Section 2 does. Two
-       live logs ride it — GLIMPSE-01's ascent log with a leader line to
+       live logs ride it, GLIMPSE-01's ascent log with a leader line to
        the ship (then to the orbiter it rejoins), and the WORX
        surface log with one to the habitat. When the links are up the
        caption lands like Section 1's, and two seconds later the story
@@ -606,7 +606,7 @@
         setWorx("dish", a < AS.insert ? "STOWED" : a < AS.rendezvous ? "SLEWING" : "TRACKING");
         setWorx("range", a >= AS.dock ? "RENDEZVOUS" : fmtDist(tele.dist));
         setWorx("uplink", a < AS.dock ? "STANDBY" : a < AS.link ? "ACQUIRING" : "LOCKED");
-        if (a < AS.dock) setWorx("signal", "—");
+        if (a < AS.dock) setWorx("signal", "-");
         else if (a < AS.link) setWorx("signal", "-" + (96 + Math.round(Math.random() * 14)) + " DBM");
         else setWorx("signal", "-" + Math.round(64 + 22 * Math.max(0, 1 - (a - AS.link) / 900)) + " DBM");
         setWorx("habitat", a < AS.link + 600 ? "STANDBY" : "ONLINE");
@@ -782,7 +782,7 @@
       if (sceneAnimations[toIndex]) sceneAnimations[toIndex].onEnter(fromIndex);
 
       // Section 2 (index 1) continues Section 1's shot on the same terrain
-      // (scene 0 stays up): between them only the text changes — no page
+      // (scene 0 stays up): between them only the text changes, no page
       // turn on the picture, so it plays as one continuous film.
       story.classList.toggle("has-sky", toIndex <= 1 || toIndex === ASCENT_IDX);
       var outScene = visibleScene(fromIndex);
@@ -837,7 +837,7 @@
         SCENE_DUR * 0.35);
     }
 
-    // Kick off the landing scene's own animation immediately on load —
+    // Kick off the landing scene's own animation immediately on load,
     // no scroll required to see the story "come alive".
     if (sceneAnimations[0]) sceneAnimations[0].onEnter();
 
@@ -849,8 +849,8 @@
     // Story only ever occupies the top viewport of the page (it's the
     // first thing in #main, and the header floats over it), so scrollY
     // is 0 exactly when the story is what's on screen. Forward input on
-    // the last page — and backward input once the footer has scrolled
-    // into view — is left alone so native scrolling takes over.
+    // the last page, and backward input once the footer has scrolled
+    // into view, is left alone so native scrolling takes over.
     function shouldIntercept(deltaY) {
       if (window.scrollY > 0) return false;
       if (deltaY > 0 && currentIndex === sceneCount - 1) return false;
@@ -865,11 +865,11 @@
     window.addEventListener("wheel", function (e) {
       if (!shouldIntercept(e.deltaY)) return;
       // Always swallow the event while we're capturing, even a
-      // sub-threshold tick — a trackpad fires dozens of tiny-delta wheel
+      // sub-threshold tick, a trackpad fires dozens of tiny-delta wheel
       // events per gesture, and leaving any of them unprevented lets the
       // browser scroll the document by a pixel or two. The "scroll"
       // safety net below then mistakes that leak for input that bypassed
-      // capture and fires an extra, unwanted page turn — the trackpad
+      // capture and fires an extra, unwanted page turn, the trackpad
       // feels like it's double/triple-navigating on a single swipe.
       e.preventDefault();
       if (Math.abs(e.deltaY) < WHEEL_MIN_DELTA) return;
@@ -903,7 +903,7 @@
     // Keyboard: PageDown/Space/ArrowDown and PageUp/ArrowUp turn a page
     // the same way a wheel/swipe gesture does. Without this, a keyboard
     // (or scrollbar-thumb drag, see the "scroll" listener below) bypasses
-    // the wheel/touch capture entirely — the browser just scrolls the
+    // the wheel/touch capture entirely, the browser just scrolls the
     // document past the pinned #story straight to the footer, so every
     // chapter after the first is silently skipped.
     var NAV_KEYS = { ArrowDown: 1, PageDown: 1, " ": 1, Spacebar: 1, ArrowUp: -1, PageUp: -1 };
@@ -923,7 +923,7 @@
     // browser scroll restoration, assistive input) would otherwise carry
     // the visitor past the pinned story and straight into the footer.
     // Snap back to the top and replay it as a single page turn instead.
-    // behavior: "instant" matters here — base.css sets smooth scrolling
+    // behavior: "instant" matters here, base.css sets smooth scrolling
     // globally, and a smooth scrollTo(0,0) racing an in-flight smooth
     // scroll (e.g. a dragged scrollbar thumb) settles somewhere between
     // the two instead of cleanly back at the top.
@@ -1012,13 +1012,13 @@
       ctx.fill();
     }
     ctx.globalAlpha = 1;
-    // A small, distant storm cell low on the horizon — procedural, not
+    // A small, distant storm cell low on the horizon, procedural, not
     // video, so its colour always matches the planet. The sky pages
     // (chapters 0-1, #story.has-sky) draw it and the orbiter on
     // landing-fx.js's canvas instead, so only the stars go on here.
     if (!ownSky) return;
     if (typeof AmbientStorm !== "undefined") AmbientStorm.draw(ctx, canvas.width, canvas.height, { alpha: 0.85 });
-    // The GLIMPSE mothership drifting past — same shared, wall-clock-driven
+    // The GLIMPSE mothership drifting past, same shared, wall-clock-driven
     // sprite landing-fx.js draws during the landing/summary chapters, so it
     // reads as one continuous pass overhead no matter which chapter you're on.
     if (typeof GlimpseOrbiter !== "undefined") GlimpseOrbiter.draw(ctx, canvas.width, canvas.height, { dpr: dpr });

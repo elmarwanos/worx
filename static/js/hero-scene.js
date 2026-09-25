@@ -1,7 +1,7 @@
 /* ============================================================
-   Worx by Glimpse — hero-scene.js
+   Worx | hero-scene.js
    A small Three.js "gem" replaces the flat brand tile in the
-   home hero — same tilted frame, same brand palette, now a live
+   home hero, same tilted frame, same brand palette, now a live
    faceted object that drifts and tilts toward the pointer.
 
    Progressive enhancement only: static/assets/tile-orange.png
@@ -20,7 +20,7 @@
   var reducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
   ).matches;
-  if (reducedMotion) return; // Keep the static tile — no motion to build here.
+  if (reducedMotion) return; // Keep the static tile, no motion to build here.
 
   var THREE;
   try {
@@ -28,7 +28,7 @@
       "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
     );
   } catch (err) {
-    return; // CDN unreachable — fallback tile stays visible.
+    return; // CDN unreachable, fallback tile stays visible.
   }
 
   // Brand palette (static/css/base.css :root)
@@ -50,7 +50,7 @@
       powerPreference: "low-power",
     });
   } catch (err) {
-    return; // No WebGL context available — fallback tile stays visible.
+    return; // No WebGL context available, fallback tile stays visible.
   }
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));

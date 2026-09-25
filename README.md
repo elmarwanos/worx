@@ -1,15 +1,15 @@
-# Worx by Glimpse — Website
+# Worx | Website
 
-Static, multi-page marketing site for **Worx by Glimpse**, the web & software
+Static, multi-page marketing site for **Worx**, the web & software
 development sister company of [The Glimpse Project](https://www.theglimpseproject.com).
 
-No build step, no framework — open `index.html` or serve the folder and it runs.
+No build step, no framework, open `index.html` or serve the folder and it runs.
 
 ## Structure
 
 ```
 Worx/
-├── index.html              Home — hero, stats, services, clients, process,
+├── index.html              Home, hero, stats, services, clients, process,
 │                           testimonials, blog teasers, FAQ, CTA
 ├── about/index.html        Intro, vision & mission, goals, process
 ├── services/
@@ -40,7 +40,7 @@ Worx/
     │   ├── nav.js            Header scroll state, mobile menu, active link
     │   ├── animations.js     GSAP: hero stagger, scroll reveals, counters, marquee
     │   ├── main.js           FAQ accordion, footer year
-    │   ├── contact-widget.js Floating "quick contact" dock — loaded on every
+    │   ├── contact-widget.js Floating "quick contact" dock, loaded on every
     │   │                     page except /contact (which has the full planner)
     │   └── contact.js        The /contact project planner wizard
     └── assets/
@@ -59,16 +59,16 @@ logo changes, regenerate them rather than editing the derivatives.
 
 ## Editing
 
-- **Colors / fonts / spacing** — everything is a CSS variable at the top of
+- **Colors / fonts / spacing**, everything is a CSS variable at the top of
   `static/css/base.css` (`:root`). The six brand colours from the palette are
   defined as `--brand-*` tokens; `--accent` (orange), `--accent-2` (amber) and
   `--accent-deep` (ember) are mapped from them. Dark surfaces (`--ink`,
   `--surface`, `--panel`) are derived from the cocoa brown.
-- **Content** — each page is plain HTML; copy lives where you'd expect it.
-- **Animations** — add `data-reveal` to any element to give it a scroll-in
+- **Content**, each page is plain HTML; copy lives where you'd expect it.
+- **Animations**, add `data-reveal` to any element to give it a scroll-in
   reveal. Stat counters use `data-count` / `data-suffix`. All motion respects
   `prefers-reduced-motion`.
-- **Navigation highlighting** — each page sets `<body data-page="...">`,
+- **Navigation highlighting**, each page sets `<body data-page="...">`,
   matched against `data-nav` on the header links.
 
 ## Running locally
@@ -85,8 +85,8 @@ python3 -m http.server 8000
 
 Loaded from CDN, no install needed:
 
-- [GSAP 3.12](https://gsap.com) + ScrollTrigger — scroll animations
-- Google Fonts — Jost (display, echoes the geometric wordmark), Inter (body),
+- [GSAP 3.12](https://gsap.com) + ScrollTrigger, scroll animations
+- Google Fonts, Jost (display, echoes the geometric wordmark), Inter (body),
   JetBrains Mono (the `<like/magic>` tag)
 
 If the CDN is unreachable, CSS fallbacks keep the site fully usable.

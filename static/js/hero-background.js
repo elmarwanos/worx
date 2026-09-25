@@ -1,17 +1,17 @@
 /* ============================================================
-   Worx by Glimpse — hero-background.js
+   Worx | hero-background.js
    A layered-silhouette depth backdrop behind the whole hero,
    inspired by two references (see the approved plan): Firewatch's
    flat scenery layers scrolling at different speeds, and the
    Perseverance Mars Rover one-pager's warm, hazy horizon of
    layered ridgelines. Recreated in Worx's own dark/ember palette
-   — not a literal copy of either site's imagery.
+   not a literal copy of either site's imagery.
 
    Three flat silhouette "ridges" sit low in the hero, nearest
    darkest and most detailed, farthest lightest and haziest
    (atmospheric perspective). As the visitor scrolls past the
-   hero, each ridge shifts vertically by its own amount — the
-   nearest moves most, the farthest barely at all — the same
+   hero, each ridge shifts vertically by its own amount, the
+   nearest moves most, the farthest barely at all, the same
    differential-speed trick both references use.
 
    Progressive enhancement only, same contract as hero-scene.js:
@@ -31,7 +31,7 @@
   var reducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
   ).matches;
-  if (reducedMotion) return; // Keep the static CSS blobs — no motion to build here.
+  if (reducedMotion) return; // Keep the static CSS blobs, no motion to build here.
 
   var THREE;
   try {
@@ -39,10 +39,10 @@
       "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
     );
   } catch (err) {
-    return; // CDN unreachable — fallback blobs stay visible.
+    return; // CDN unreachable, fallback blobs stay visible.
   }
 
-  // Brand palette (static/css/base.css :root) — same constants hero-scene.js uses.
+  // Brand palette (static/css/base.css :root), same constants hero-scene.js uses.
   var COCOA = 0x421d0f;
   var EMBER = 0xc04527;
   var ORANGE = 0xe57d23;
@@ -59,7 +59,7 @@
       powerPreference: "low-power",
     });
   } catch (err) {
-    return; // No WebGL context available — fallback blobs stay visible.
+    return; // No WebGL context available, fallback blobs stay visible.
   }
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -69,7 +69,7 @@
   var scene = new THREE.Scene();
   // Orthographic, not perspective: these are meant to read as flat
   // silhouette layers (like the references), not foreshortened 3D
-  // terrain — 1 scene unit ≈ 1 CSS pixel, which also makes the ridge
+  // terrain, 1 scene unit ≈ 1 CSS pixel, which also makes the ridge
   // math below easy to reason about.
   var camera = new THREE.OrthographicCamera(
     -width / 2, width / 2, height / 2, -height / 2, 0.1, 100
@@ -141,7 +141,7 @@
     });
   }
 
-  // ---- Pointer drift (smoothed), same technique as hero-scene.js —
+  // ---- Pointer drift (smoothed), same technique as hero-scene.js,
   // a small extra sense of depth, desktop-only in feel. ----
   var targetX = 0;
   var curX = 0;
@@ -188,7 +188,7 @@
       var p = mesh.userData.parallax;
       mesh.position.y = -scrollProgress * height * p;
       // Nearer layers (later in the array) drift a little more with
-      // the pointer — same "closer things move more" depth cue.
+      // the pointer, same "closer things move more" depth cue.
       mesh.position.x = curX * 14 * (i + 1);
     });
 

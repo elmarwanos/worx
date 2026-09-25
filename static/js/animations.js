@@ -1,5 +1,5 @@
 /* ============================================================
-   Worx by Glimpse — animations.js
+   Worx | animations.js
    GSAP-powered motion: hero word stagger, scroll reveals,
    stat counters and the client logo marquee.
    Requires gsap + ScrollTrigger (loaded from CDN in each page).

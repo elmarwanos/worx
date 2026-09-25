@@ -1,8 +1,8 @@
 /* ============================================================
-   Worx by Glimpse — contact-widget.js
+   Worx | contact-widget.js
    A floating "quick contact" dock that follows the viewport on
    every page. Every string and channel below comes from the
-   CONTACT dictionary — edit the data, not the markup.
+   CONTACT dictionary, edit the data, not the markup.
    Opened by its own button or by any [data-contact-open] trigger
    (e.g. the hero button on the home page).
    ============================================================ */
@@ -13,7 +13,7 @@
   // --- The dictionary --------------------------------------------
   var CONTACT = {
     title: "Let's talk",
-    intro: "Pick a channel or leave a note — we usually reply within a day.",
+    intro: "Pick a channel or leave a note, we usually reply within a day.",
     recipient: "Hello@worxbyglimpse.com",
     subjectPrefix: "Project enquiry from ",
     fabLabel: "Contact",
@@ -246,7 +246,7 @@
     }
     var subject = encodeURIComponent(CONTACT.subjectPrefix + data.name);
     var body = encodeURIComponent(
-      data.message + "\n\n— " + data.name + " (" + data.email + ")"
+      data.message + "\n\n- " + data.name + " (" + data.email + ")"
     );
     window.location.href =
       "mailto:" + CONTACT.recipient + "?subject=" + subject + "&body=" + body;

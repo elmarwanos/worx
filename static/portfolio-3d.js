@@ -4,9 +4,9 @@
         <head>
             <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Portfolio, Worx by Glimpse</title>
+                    <title>Portfolio, Worx</title>
                     <meta name="description"
-                        content="Selected work by Worx by Glimpse: Chaumet, Modon, Hyundai, Genesis, Kia, Hudayriyat, UAE Pavilion, Wealthface and more.">
+                        content="Selected work by Worx: Chaumet, Modon, Hyundai, Genesis, Kia, Hudayriyat, UAE Pavilion, Wealthface and more.">
 
                         <link rel="icon" type="image/png" sizes="32x32" href="../static/assets/favicon-32.png">
                             <link rel="apple-touch-icon" href="../static/assets/apple-touch-icon.png">
@@ -784,7 +784,7 @@
                                                                             <div class="footer-grid">
                                                                                 <div class="footer-about">
                                                                                     <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png"
-                                                                                        alt="Worx by Glimpse" width="132" height="181"></a>
+                                                                                        alt="Worx" width="132" height="181"></a>
                                                                                     <p>Your one-stop destination for innovative website and software development, bringing digital aspirations to
                                                                                         life, one line of code at a time.</p>
                                                                                 </div>
@@ -818,7 +818,7 @@
                                                                                         </div>
                                                                                 </div>
                                                                                 <div class="footer-bottom">
-                                                                                    <span>© <span id="footer-year">2026</span> Worx by Glimpse. All rights reserved.</span>
+                                                                                    <span>© <span id="footer-year">2026</span> Worx. All rights reserved.</span>
                                                                                     <span>Built for businesses, by creatives.</span>
                                                                                 </div>
                                                                             </div>

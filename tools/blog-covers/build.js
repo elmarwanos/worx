@@ -1,5 +1,5 @@
 /* ============================================================
-   Blog feature images — orange Mars covers
+   Blog feature images, orange Mars covers
    Renders one 1600x1200 cover per post into tools/blog-covers/out/
    (WebP + JPG fallback): a Mars plain graded to the site's ember
    palette under a dusk sky, one or two of the site's own Mars

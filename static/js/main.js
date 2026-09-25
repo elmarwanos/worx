@@ -1,8 +1,8 @@
 /* ============================================================
-   Worx by Glimpse — main.js
+   Worx | main.js
    Page behaviours that aren't navigation or animation:
    FAQ accordion, footer year.
-   (The /contact page has its own planner — static/js/contact.js.)
+   (The /contact page has its own planner, static/js/contact.js.)
    ============================================================ */
 
 (function () {

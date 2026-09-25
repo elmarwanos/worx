@@ -1,17 +1,17 @@
 /* ============================================================
-   Worx by Glimpse — ambient-storm.js
+   Worx | ambient-storm.js
    A small, procedural storm cell in the sky's top-right corner: no
    video, no stock footage. Five billows, each churning on its own
    two-term sine (an irregular "breathe" + drift, not one clean pulse),
-   so the whole cell keeps reshaping — swelling, shrinking, drifting
-   into and out of each other — instead of just scaling uniformly.
+   so the whole cell keeps reshaping, swelling, shrinking, drifting
+   into and out of each other, instead of just scaling uniformly.
    The whole cell carries a purple tint (billows, under-glow, core and
    lightning glow) in every section it appears in. Lightning is a
    genuine multi-pulse strike (2-4 irregular flickers, not a single
    smooth double-blink) in that same violet family, plus an occasional
    forked bolt.
 
-   Scope: every chapter — the plain star canvas (about-story.js,
+   Scope: every chapter, the plain star canvas (about-story.js,
    chapters 2+) and landing-fx.js's front canvas for chapters 0-1 (the
    landing shot and its still view), over their own storm wall.
    ============================================================ */
@@ -37,7 +37,7 @@
     ctx.restore();
   }
 
-  // One uniform violet tone for every billow — the ambient cell carries a
+  // One uniform violet tone for every billow, the ambient cell carries a
   // purple tint across every section it appears in. Distinct hues per
   // billow read as scattered "spotlights" rather than one storm mass, so
   // only opacity varies cell to cell.
@@ -45,7 +45,7 @@
 
   // Five billows, generated once: each has its own size-breathing period/
   // phase/amplitude (two summed sine terms) and its own slow drift, so
-  // no two ever swell or move in lockstep — the silhouette is always
+  // no two ever swell or move in lockstep, the silhouette is always
   // subtly reshaping.
   var seed = rng(90210);
   var CELLS = (function () {
@@ -76,10 +76,10 @@
     return { breathe: breathe, dx: dx, dy: dy };
   }
 
-  // The whole cell's own slow breath — on top of each billow's small
+  // The whole cell's own slow breath, on top of each billow's small
   // independent churn above. Paced off a real reference clip (a cloud
   // bloom that takes ~3s to swell, ~6s to roll at full size, ~3s to
-  // fade — about 12s end to end): quick to swell, slow to settle back,
+  // fade, about 12s end to end): quick to swell, slow to settle back,
   // and subtle rather than a rhythmic pulse, so it reads as weather
   // actually moving instead of a shape breathing in and out.
   var SURGE_PERIOD = 11000;
@@ -92,8 +92,8 @@
 
   // Modeled on real Mars/desert lightning photos: a mostly-vertical main
   // stroke (real strikes fall, they don't wander sideways across the
-  // sky) with a dense fan of thinner forks branching off it — mostly in
-  // the lower half, occasionally forking again — rather than one or two
+  // sky) with a dense fan of thinner forks branching off it, mostly in
+  // the lower half, occasionally forking again, rather than one or two
   // branches. Regenerated fresh per strike, seeded off the strike's own
   // trigger time, so no two flashes look alike.
   function buildBolt(rand) {
@@ -102,7 +102,7 @@
     var path = [[bx, by]];
     var s;
     for (s = 0; s < segs; s++) {
-      bx += (rand() - 0.5) * 0.09; // small jitter — it falls, it doesn't zigzag
+      bx += (rand() - 0.5) * 0.09; // small jitter, it falls, it doesn't zigzag
       by += 0.07 + rand() * 0.035;
       path.push([bx, by]);
     }
@@ -119,7 +119,7 @@
         if (rand() < 0.4) fdir *= -1;
       }
       branches.push(branch);
-      // Roughly half the time, a second-order fork off that branch —
+      // Roughly half the time, a second-order fork off that branch,
       // the fine fractal detail real strikes show near their tips.
       if (rand() < 0.5 && branch.length > 2) {
         var s2 = branch[1];
@@ -137,8 +137,8 @@
   }
 
   // A genuine strike: 2-4 irregular pulses (leader + restrikes), each
-  // its own brief rise-and-fall — real lightning flickers unevenly, it
-  // doesn't breathe in and out smoothly — plus a fresh bolt shape, cached
+  // its own brief rise-and-fall, real lightning flickers unevenly, it
+  // doesn't breathe in and out smoothly, plus a fresh bolt shape, cached
   // for the strike's lifetime so it flashes into place rather than
   // visibly crawling into shape frame to frame.
   function buildStrike(rand) {
@@ -191,7 +191,7 @@
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      // A dim, wide under-glow first — the sky up here (near the top of
+      // A dim, wide under-glow first, the sky up here (near the top of
       // .story-atmosphere's gradient) is close to black, so without a
       // brighter base light the billows below would blend straight into
       // it instead of reading as a lit storm cell.
@@ -216,7 +216,7 @@
       ]);
 
       // Lightning: lit through the planet's own dust rather than clean
-      // air — violet throughout, never bright white, so even the
+      // air, violet throughout, never bright white, so even the
       // hottest instant still reads as this atmosphere, not a studio
       // flash bulb.
       if (flash > 0.02) {
@@ -231,10 +231,10 @@
           ctx.lineJoin = "round";
           ctx.lineCap = "round";
           // Every stroke gets a soft additive glow pass first, then a
-          // thin bright core on top — a bolt reads as light, not a
+          // thin bright core on top, a bolt reads as light, not a
           // drawn line. Real lightning is genuinely white-hot at the
           // core (reference photos confirm it, even lighting an orange
-          // Mars sky) — the violet lives in the glow around it,
+          // Mars sky), the violet lives in the glow around it,
           // which is what ties it back into the cell's purple tint.
           var strokePath = function (pts, coreW, glowW, coreA, glowA) {
             ctx.beginPath();

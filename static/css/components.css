@@ -1,5 +1,5 @@
 /* ============================================================
-   Worx by Glimpse — components.css
+   Worx | components.css
    Buttons, cards, grids, testimonials, FAQ, forms, marquee.
    ============================================================ */
 
@@ -74,8 +74,8 @@
 }
 
 /* Three.js layered-ridge backdrop (static/js/hero-background.js).
-   The CSS blobs below stay visible — and keep doing their own GSAP
-   scroll parallax — until this script confirms WebGL is ready, so a
+   The CSS blobs below stay visible, and keep doing their own GSAP
+   scroll parallax, until this script confirms WebGL is ready, so a
    blocked CDN or unsupported browser never shows an empty hero. */
 .hero-bg-canvas {
   position: absolute;
@@ -154,7 +154,7 @@
   transform: rotate(4deg);
 }
 
-/* Three.js gem — sits in the same tilted frame as the fallback tile.
+/* Three.js gem, sits in the same tilted frame as the fallback tile.
    The PNG stays underneath and visible until hero-scene.js confirms
    WebGL initialised, so a blocked CDN / no-WebGL browser never shows
    an empty frame. */
@@ -661,7 +661,7 @@
   gap: 16px;
 }
 
-/* Floating action button — hidden until the page is scrolled */
+/* Floating action button, hidden until the page is scrolled */
 .qc-fab {
   display: inline-flex;
   align-items: center;
@@ -1050,7 +1050,7 @@
 }
 
 /* When a card group has an odd number of options, don't leave the
-   last one dangling alone on the left — let it span the full row. */
+   last one dangling alone on the left, let it span the full row. */
 .cw-options .cw-option:nth-child(odd):last-child {
   grid-column: 1 / -1;
 }

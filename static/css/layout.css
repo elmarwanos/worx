@@ -1,5 +1,5 @@
 /* ============================================================
-   Worx by Glimpse — layout.css
+   Worx | layout.css
    Header, navigation, footer and page-level scaffolding.
    ============================================================ */
 
@@ -382,4 +382,461 @@
 
 @media (prefers-reduced-motion: reduce) {
   .footer-glow { animation: none; }
+}
+
+/* ---- Services mega menu ------------------------------------- */
+/* Markup is generated into every header by tools/services/build.js;
+   nav.js opens it (hover intent, focus, Escape) and fills the
+   preview. Without JS it still opens on hover. */
+
+.nav-item--mega {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links .nav-mega-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-caret {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: transform 0.3s ease;
+}
+
+.nav-item--mega.is-open .nav-caret {
+  transform: rotate(180deg);
+}
+
+.nav-sub-toggle {
+  display: none;
+}
+
+.mega {
+  position: absolute;
+  left: 50%;
+  top: calc(100% - 6px);
+  width: min(1260px, 96vw);
+  transform: translate(-50%, 12px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 26px;
+  background:
+    radial-gradient(700px 300px at 85% 0%, rgba(229, 125, 35, 0.12), transparent 70%),
+    #0c0503;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.35s;
+}
+
+/* Hover bridge between the trigger and the panel */
+.mega::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -24px;
+  height: 24px;
+}
+
+.nav-item--mega.is-open .mega,
+html:not(.js) .nav-item--mega:hover .mega {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+  transition-delay: 0s;
+}
+
+.site-header.mega-open {
+  background: rgba(12, 5, 3, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.mega-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 2.1fr) minmax(300px, 1fr);
+  gap: 40px;
+  padding: 36px 40px 28px;
+}
+
+.mega-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 30px;
+}
+
+.mega-group + .mega-group {
+  margin-top: 26px;
+}
+
+.mega-group-title {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.mega-group-title span {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.mega-group ul {
+  list-style: none;
+}
+
+.nav-links .mega-group a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 2px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text);
+  transition: color 0.2s ease, padding 0.25s ease;
+}
+
+.nav-links .mega-group a::after {
+  display: none;
+}
+
+.mega-group a i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gradient);
+  box-shadow: 0 0 10px rgba(229, 125, 35, 0.6);
+}
+
+.mega-group a span {
+  flex: 1;
+}
+
+.mega-group a svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: 0.5;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.nav-links .mega-group a:hover,
+.nav-links .mega-group a:focus-visible,
+.nav-links .mega-group a.is-previewing {
+  color: var(--accent-2);
+  padding-left: 8px;
+}
+
+.mega-group a:hover svg,
+.mega-group a:focus-visible svg,
+.mega-group a.is-previewing svg {
+  opacity: 1;
+  transform: translateX(4px);
+}
+
+/* Right column: clients by default, a service preview on hover */
+.mega-side {
+  position: relative;
+  padding-left: 36px;
+  border-left: 1px solid var(--line);
+}
+
+.mega-side-title {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 500;
+  line-height: 1.12;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.mega-clients {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+
+.mega-client {
+  display: grid;
+  place-items: center;
+  height: 62px;
+  padding: 6px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+  color: var(--muted);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: color 0.25s ease, background 0.25s ease;
+}
+
+.nav-item--mega.is-open .mega-client,
+html:not(.js) .mega-client {
+  animation: mega-cell 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.mega-client:nth-child(4n + 2) { animation-delay: 0.04s !important; }
+.mega-client:nth-child(4n + 3) { animation-delay: 0.08s !important; }
+.mega-client:nth-child(4n + 4) { animation-delay: 0.12s !important; }
+.mega-client:nth-child(n + 5) { animation-delay: 0.1s; }
+.mega-client:nth-child(n + 9) { animation-delay: 0.16s; }
+.mega-client:nth-child(n + 13) { animation-delay: 0.22s; }
+
+@keyframes mega-cell {
+  to { opacity: 1; transform: none; }
+}
+
+.mega-client:hover {
+  color: var(--text);
+  background: rgba(250, 167, 25, 0.06);
+}
+
+.mega-client img {
+  max-width: 78%;
+  max-height: 30px;
+  object-fit: contain;
+  filter: grayscale(1) brightness(1.8);
+  opacity: 0.7;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+
+.mega-client:hover img {
+  filter: none;
+  opacity: 1;
+}
+
+/* Typographic wordmarks until real logo files are dropped in */
+.mega-client span { font-size: 0.8rem; line-height: 1.05; }
+.mega-client--chaumet span { font-family: Georgia, "Times New Roman", serif; text-transform: uppercase; letter-spacing: 0.3em; font-size: 0.7rem; }
+.mega-client--hyundai span { font-family: var(--font-body); font-style: italic; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.72rem; }
+.mega-client--modon span { font-family: var(--font-display); font-weight: 500; text-transform: uppercase; letter-spacing: 0.42em; font-size: 0.72rem; }
+.mega-client--genesis span { font-family: var(--font-display); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5em; font-size: 0.6rem; }
+.mega-client--kia span { font-family: var(--font-display); font-weight: 700; text-transform: uppercase; font-size: 1.35rem; letter-spacing: 0.04em; font-style: italic; }
+.mega-client--uae-pavilion span { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.56rem; }
+.mega-client--hudayriyat span { font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: 0.9rem; }
+.mega-client--wealthface span { font-family: var(--font-body); font-weight: 600; text-transform: lowercase; font-size: 0.86rem; letter-spacing: -0.02em; }
+.mega-client--hisense span { font-family: var(--font-body); font-weight: 700; font-size: 0.95rem; letter-spacing: -0.03em; }
+.mega-client--unicef span { font-family: var(--font-body); font-weight: 700; text-transform: lowercase; font-size: 1rem; }
+.mega-client--universal-pictures span { font-family: Georgia, "Times New Roman", serif; text-transform: uppercase; letter-spacing: 0.18em; font-size: 0.56rem; }
+.mega-client--roxy-cinemas span { font-family: var(--font-display); font-weight: 700; font-style: italic; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.72rem; }
+.mega-client--lg span { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; }
+.mega-client--tiara-dream span { font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: 0.86rem; letter-spacing: 0.04em; }
+.mega-client--duni span { font-family: var(--font-display); font-weight: 700; text-transform: lowercase; font-size: 1.1rem; }
+.mega-client--glimpse span { font-family: var(--font-display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.24em; font-size: 0.66rem; }
+
+.mega-preview {
+  animation: mega-preview 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes mega-preview {
+  from { opacity: 0; transform: translateX(10px); }
+}
+
+.mega-preview-div {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.mega-preview-name {
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1.08;
+  color: var(--text);
+}
+
+.mega-preview-short {
+  margin-top: 10px;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.mega-preview-subs {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.mega-preview-subs li {
+  padding: 4px 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  color: var(--text);
+}
+
+.mega-preview-subs li.is-more {
+  border-color: rgba(250, 167, 25, 0.5);
+  color: var(--accent-2);
+}
+
+.mega-preview-cta {
+  display: inline-block;
+  margin-top: 20px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--accent-2);
+}
+
+.mega-foot {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  padding: 16px 40px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.mega-foot b {
+  color: var(--accent-2);
+  font-weight: 500;
+}
+
+.nav-links .mega-foot .mega-all {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+}
+
+.nav-links .mega-foot .mega-all:hover {
+  color: var(--accent-2);
+}
+
+.nav-links .mega-foot .mega-all::after {
+  display: none;
+}
+
+.mega-foot .mega-cta {
+  padding: 10px 22px;
+  font-size: 0.85rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+@media (max-width: 1180px) and (min-width: 861px) {
+  .mega-panel { grid-template-columns: 1fr; }
+  .mega-side { display: none; }
+}
+
+/* Mobile: Services expands as an accordion inside the full-screen menu */
+@media (max-width: 860px) {
+  .site-header .nav-links {
+    justify-content: flex-start;
+    padding: 110px 8vw 60px;
+    overflow-y: auto;
+  }
+
+  .nav-item--mega {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .nav-sub-toggle {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-left: 6px;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    background: none;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .nav-sub-toggle svg {
+    width: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    transition: transform 0.3s ease;
+  }
+
+  .nav-item--mega.is-open .nav-sub-toggle svg {
+    transform: rotate(180deg);
+  }
+
+  .nav-caret {
+    display: none;
+  }
+
+  .mega {
+    position: static;
+    width: 100%;
+    display: none;
+    margin-top: 18px;
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    border-radius: 18px;
+    box-shadow: none;
+  }
+
+  .nav-item--mega.is-open .mega {
+    display: block;
+    transform: none;
+  }
+
+  .mega-panel {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .mega-cols {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .mega-group + .mega-group,
+  .mega-col + .mega-col {
+    margin-top: 18px;
+  }
+
+  .nav-links .mega-group a {
+    font-size: 1rem;
+  }
+
+  .mega-side {
+    display: none;
+  }
+
+  .mega-foot {
+    flex-wrap: wrap;
+    padding: 14px 20px 18px;
+    gap: 12px;
+  }
 }

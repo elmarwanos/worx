@@ -1,6 +1,6 @@
 /* ============================================================
-   Worx by Glimpse — landing-fx.js
-   "Sol 1 — First Light": the About storybook's opening shot.
+   Worx | landing-fx.js
+   "Sol 1, First Light": the About storybook's opening shot.
    Owns the landing's clock, a virtual camera, where (and how big)
    the ship frame is drawn, and every effect the frames can't carry.
 
@@ -21,7 +21,7 @@
      2.6s  SEPARATION  A flash lights the storm clouds from within, pyro
                        bolts fire and ablator embers shed as the real
                        aeroshell photo (glimpse-landing-00.png) peels
-                       away — tumbling, rim glowing hot, cooling as it
+                       away, tumbling, rim glowing hot, cooling as it
                        falls behind and to the side, out of frame, then
                        impacting the ground in the middle distance in a
                        flash + dust plume + kicked-up embers. The ship
@@ -47,7 +47,7 @@
    canvases) tilts down to follow the ship, pans with it, pushes in
    slowly and drifts like a handheld rig. Every frame reports the
    ship's on-screen position + telemetry (opts.onFrame) so the HUD can
-   track it — see about-story.js.
+   track it, see about-story.js.
 
    THE FRAMES (static/assets/about/glimpse_landing_frames_001-032)
    001-032: 2560x1440, ship centered, same size in every frame, only
@@ -106,7 +106,7 @@
     // match 032. 033 stays locked to 032's position (logo-aligned, no
     // movement at all through the dissolve); the few px its pads then
     // sit above the descent's terrain line just stand a little further
-    // back on the (continuous) terrain photo — see _drawPadContact.
+    // back on the (continuous) terrain photo, see _drawPadContact.
     logo: [852, 903.3], scale: 1.14, padW: [260, 280]
   };
   var SEQ_LOGO = [-31, -486.5];      // 001-032 logo square, relative to (hull center, feet)
@@ -154,7 +154,7 @@
 
   // The real aeroshell photo, tumbling away at separation (_drawShield).
   // Falls back to the old procedural dish (further down) if it hasn't
-  // decoded yet — separation never waits on it and never flashes a
+  // decoded yet, separation never waits on it and never flashes a
   // broken image.
   var SHIELD_IMG_SRC = "../static/assets/about/glimpse_landing_frames_001-032/glimpse-landing-00.png";
   var shieldImg = new Image();
@@ -166,7 +166,7 @@
   };
   shieldImg.src = SHIELD_IMG_SRC;
 
-  // Frame 034 — Section 2's ship, hatch open. Falls back to frame 033
+  // Frame 034, Section 2's ship, hatch open. Falls back to frame 033
   // (via the sequence, already loaded) if it hasn't decoded yet.
   var F34_IMG_SRC = "../static/assets/about/glimpse-landing-034-level.png";
   var f34Img = new Image();
@@ -321,16 +321,16 @@
   }
 
   /* ---------------------------------------------------------------
-     POSE — a new camera angle on the landed ship (Section 2 uses it to
+     POSE, a new camera angle on the landed ship (Section 2 uses it to
      put frame 033 on the left third, turned to face right). A 2D frame
      can't truly rotate, so the turn is an affine approximation around
      the ship's ground point: horizontal foreshortening (cos yaw) plus a
      slight vertical skew so the receding side sits a touch higher.
      Changes are a soft dissolve ("cut" to the new angle), never a slide:
-     the ship is landed, it doesn't move — the camera does.
+     the ship is landed, it doesn't move, the camera does.
      pose = { dx: shift as a fraction of the frame width, yaw: degrees }
      --------------------------------------------------------------- */
-  // fadeInOnly: skip the old angle entirely — the ship simply fades in at
+  // fadeInOnly: skip the old angle entirely, the ship simply fades in at
   // the new one (no moment where both framings are visible).
   LandingFX.prototype.setPose = function (pose, dissolveMs, fadeInOnly) {
     var now = performance.now();
@@ -360,7 +360,7 @@
   function applyM(m, x, y) { return m ? { x: m[0] * x + m[2] * y + m[4], y: m[1] * x + m[3] * y + m[5] } : { x: x, y: y }; }
 
   // Screen (CSS px) position of a point on the landed ship, given in
-  // frame-033 pixels — follows the pose and the camera. For HUD markers.
+  // frame-033 pixels, follows the pose and the camera. For HUD markers.
   // still: px/py are frame-034 px (Section 2's own ship art). Otherwise:
   // frame-033 px, as the rest of the landing sequence always was.
   LandingFX.prototype.shipPoint = function (px, py) {
@@ -656,7 +656,7 @@
     this._sepDone = true;
     var st = stateAt(SEP, this.groundY - this.horizonY, this.horizonY);
     var L = this._layout(st);
-    // Kept clean: separation reads as the flash alone — no shield body,
+    // Kept clean: separation reads as the flash alone, no shield body,
     // embers, pyro puffs or impact plume (spawners below are disabled).
     if (CLEAN_SEPARATION) return;
     // Pyro bolts at the shield's attach points.
@@ -680,7 +680,7 @@
   // Shield world state at elapsed e. It shares the ship's momentum at
   // separation (same glide path), lags slightly (no engines, more drag)
   // and drops away beneath it, accelerating, until it hits the ground
-  // well clear of the frame, off to the side of the landing site — it
+  // well clear of the frame, off to the side of the landing site, it
   // reads as background debris, never close enough to compete with the
   // ship for attention.
   LandingFX.prototype._shieldState = function (e) {
@@ -720,7 +720,7 @@
       this.smoke.push({ x: p.x, y: p.y, t: e, r: p.unit * 0.22, a: 0.12 * ss.heat + 0.03, seed: Math.random() * 10 });
     }
     // No ground-impact effect by design: the shield simply falls out of
-    // frame, well off to the side — it's gone before it would need one.
+    // frame, well off to the side, it's gone before it would need one.
     if (ss.q >= 1) sh.impacted = true;
   };
 
@@ -797,7 +797,7 @@
      Cloud ceiling: puffs live on a plane at altitude hgt in world
      space and move toward the camera (z falls, wrapping far -> near),
      projected like everything else: y = horizon - hgt / z, x = X / z,
-     size = 1 / z — so near billows are big and race overhead while far
+     size = 1 / z, so near billows are big and race overhead while far
      ones crawl, flatten and converge on the horizon (real parallax).
      Storm wall: big billows churning along the horizon line.
      Drawn into a low-res offscreen layer (distance softness, cheap),
@@ -1007,7 +1007,7 @@
   // Uneven ablation char + handling scuffs baked once into an offscreen
   // texture (same recipe as makePuffSprite): heavier charring toward the
   // rim (ablation eats the edge first, never symmetrically), scattered
-  // dark blotches and fine scratches — a flown, beaten-up aeroshell, not
+  // dark blotches and fine scratches, a flown, beaten-up aeroshell, not
   // a showroom render.
   var shieldScorchCanvas = null;
   function shieldScorchTexture() {
@@ -1047,13 +1047,13 @@
 
   // The shield + its weathering/heat tint, composited on an isolated,
   // fully-transparent offscreen buffer before ever touching the scene.
-  // "source-atop" only masks to whatever's already ON THAT CANVAS — the
+  // "source-atop" only masks to whatever's already ON THAT CANVAS, the
   // main scene canvas behind the shield is already fully opaque (sky,
   // storm, terrain), so tinting straight onto it would smear a faint
   // rectangle onto the background instead of hugging the shield's own
   // silhouette. Compositing here first, then drawing the one finished,
   // correctly-alpha-shaped sprite onto the scene, keeps the edge
-  // transparent and seamless. Fixed resolution — this is the source
+  // transparent and seamless. Fixed resolution, this is the source
   // photo's own aspect ratio, not the on-screen size, which changes
   // every frame as the shield recedes.
   var shieldBuf = null;
@@ -1070,10 +1070,10 @@
   // end as it falls away: a slow in-plane roll plus a vertical squash
   // that stands in for the tumble's other axis (a flat photo can't truly
   // turn in 3D). Desaturated and darkened first, then scuffed with the
-  // scorch texture above — the flight-worn look the ask was for, rather
+  // scorch texture above, the flight-worn look the ask was for, rather
   // than the clean manufacturing-photo original. A soft plasma-glow halo
-  // trails it, and a radial heat tint — cooling on the same exp() curve
-  // as the engine flames/embers elsewhere in this file — washes hottest
+  // trails it, and a radial heat tint, cooling on the same exp() curve
+  // as the engine flames/embers elsewhere in this file, washes hottest
   // at the rim.
   LandingFX.prototype._drawShieldPhoto = function (ctx, p, ss, r, fade, heat) {
     var w = r * 2.5, h = w / shieldImgAspect;
@@ -1086,7 +1086,7 @@
     var buf = shieldBuffer(), bw = buf.width, bh = buf.height;
     var bctx = buf.getContext("2d");
     bctx.clearRect(0, 0, bw, bh);
-    // Light weathering — just enough to read as flown hardware, matching
+    // Light weathering, just enough to read as flown hardware, matching
     // the ship's own subtle dirt/scuff rather than a heavily charred prop.
     if ("filter" in bctx) bctx.filter = "saturate(0.78) contrast(1.05) brightness(0.9)";
     bctx.drawImage(shieldImg, 0, 0, bw, bh);
@@ -1119,7 +1119,7 @@
   // concentric ablation bands, metallic rim catching the sky, stagnation
   // face glowing dull orange and cooling from the edge inward. Fallback
   // for the rare case the real photo (glimpse-landing-00.png) hasn't
-  // decoded yet by the time separation fires — separation never waits on
+  // decoded yet by the time separation fires, separation never waits on
   // it and never flashes a broken image.
   LandingFX.prototype._drawShieldProcedural = function (ctx, e) {
     var sh = this.shield;
@@ -1244,7 +1244,7 @@
     if (i1 === FINAL_IDX) {
       // 032 (dust storm, full width) -> 033 (settled, narrower): 033 is
       // laid OVER 032 rather than cross-added, and 032's wide dust fades
-      // late — so it still surrounds 033 while 033 arrives, and no edge
+      // late, so it still surrounds 033 while 033 arrives, and no edge
       // of 033's canvas can read against the scene. Both are pre-feathered.
       opts.mode = "over";
       opts.alphaA = 1 - Math.pow(t, 2.2);
@@ -1285,7 +1285,7 @@
   };
 
   /* ---------------------------------------------------------------
-     THRUST: live exhaust over the baked flames — flickering white-hot
+     THRUST: live exhaust over the baked flames, flickering white-hot
      core, shock diamonds, turbulent burning gas flowing down the
      plume, ground splash once the jets reach the surface.
      --------------------------------------------------------------- */
@@ -1315,7 +1315,7 @@
 
       // 1) Re-fire the PAINTED flame: the flame pixels of the current
       //    frames drawn back over themselves additively, stretched and
-      //    swayed by the flicker — the artwork itself now burns.
+      //    swayed by the flicker, the artwork itself now burns.
       if (seq) {
         for (var q = 0; q < 2; q++) {
           var k = q ? i1 : i0, wgt = q ? t : 1 - t;
@@ -1476,7 +1476,7 @@
   // 033 keeps 032's exact position (no movement through the dissolve),
   // which puts its pad soles a touch above the terrain line used by the
   // descent. The terrain photo is continuous, so the pads simply stand a
-  // little further back — the contact shadows go exactly under the soles.
+  // little further back, the contact shadows go exactly under the soles.
   LandingFX.prototype._padSoleY = function (L) {
     return L.rectFor(FINAL_IDX).y + F33.feet * L.k33;
   };
@@ -1842,14 +1842,14 @@
      Frame
      --------------------------------------------------------------- */
   /* ---------------------------------------------------------------
-     STILL — the landed ship alone, for a composed shot (Section 2):
+     STILL, the landed ship alone, for a composed shot (Section 2):
      frame 033 standing clean on the ground, no dust, debris, wisps,
      shockwave or haze; only the storm sky keeps drifting. The camera
      angle (pose) is a true perspective warp here, not the affine
      approximation: the frame is drawn in thin vertical slices, each
      scaled for its depth after a yaw about the ship's ground centre, so
      the receding side shrinks toward the horizon and the near side
-     grows — a far more convincing turn at larger angles.
+     grows, a far more convincing turn at larger angles.
      --------------------------------------------------------------- */
   LandingFX.prototype.setStill = function (on) {
     var was = this.still;
@@ -2033,7 +2033,7 @@
   };
 
   // Same idea as rectFor(FINAL_IDX), but for frame 034 (Section 2 only):
-  // its own (cx, feet) land on the layout's screen hull-centre/feet —
+  // its own (cx, feet) land on the layout's screen hull-centre/feet,
   // no SEQ_LOGO dissolve-continuity math, since 034 never dissolves in
   // from frame 032, it just appears.
   LandingFX.prototype._rectFor34 = function (L) {
@@ -2041,7 +2041,7 @@
     return { x: L.shipCX - F34.cx * k, y: L.feetY - F34.feet * k, w: F34.w * k, h: F34.h * k, k: k };
   };
 
-  // Frame-034 pixel -> canvas px under the pose, with perspective —
+  // Frame-034 pixel -> canvas px under the pose, with perspective,
   // identical math to _warpPoint, just against F34's own rect/cx/feet.
   LandingFX.prototype._warpPoint34 = function (L, pose, px, py) {
     var r = this._rectFor34(L), k = r.k;
@@ -2057,7 +2057,7 @@
     return { x: gx + dx + xr * Math.cos(yaw) * sc, y: ground - (gy - Y) * sc, s: sc };
   };
 
-  // Frame 034, warped the same way frame 033 is (see _drawShipWarped) —
+  // Frame 034, warped the same way frame 033 is (see _drawShipWarped),
   // sliced into vertical strips so the "turn to face right" pose reads
   // as perspective, not a flat skew. No dust-mask cleanup needed: unlike
   // 033's photographed dust, 034 is a clean render.
@@ -2082,7 +2082,7 @@
   // (the legs/pads are dust-tinted and would go too): everything above
   // the rim is kept, plus the hull underside, the two leg struts and the
   // foot pads (frame-033 px, after its roll bake); everything else below
-  // the rim — which is only dust and debris — is cut away, with a soft
+  // the rim, which is only dust and debris, is cut away, with a soft
   // (blurred) mask edge so nothing looks clipped.
   LandingFX.prototype._cleanFinal = function () {
     if (this._cleanF33) return this._cleanF33;
@@ -2133,7 +2133,7 @@
   };
 
   // The GLIMPSE mothership, drifting past in the far sky (glimpse-orbiter.js).
-  // Drawn straight in screen space — no camera transform — since at that
+  // Drawn straight in screen space, no camera transform, since at that
   // distance the terrain's push-in/shake would never actually move it.
   LandingFX.prototype._drawOrbiter = function (ctx) {
     if (this.reduceMotion || typeof GlimpseOrbiter === "undefined") return;
@@ -2152,9 +2152,9 @@
     if (this.sky) this.sky.draw(b, this);   // Martian night sky (sky-fx.js)
     // No storm wall here by design: that belongs to the active landing
     // shot (Section 1) alone. Section 2's calm, already-landed view
-    // matches every later chapter — sky + terrain, no swirling "smoke"
+    // matches every later chapter, sky + terrain, no swirling "smoke"
     // behind the ship.
-    // soft ground shadow + contact shadows under the (warped) pads —
+    // soft ground shadow + contact shadows under the (warped) pads,
     // frame 034's own three legs.
     var c = this._warpPoint34(L, pose, F34.cx, F34.feet);
     fillSoftEllipse(b, c.x, c.y, L.shipW * 0.52 * c.s, L.shipW * 0.07 * c.s, [
@@ -2220,7 +2220,7 @@
     var shieldInFront = this.shield && e - this.shield.t0 < 520;
     var b = this.backCtx, f = this.frontCtx;
     b.clearRect(0, 0, this.backCanvas.width, this.backCanvas.height);
-    if (this.sky) this.sky.draw(b, this);   // Martian night sky (sky-fx.js) — behind the storm
+    if (this.sky) this.sky.draw(b, this);   // Martian night sky (sky-fx.js), behind the storm
     this._drawStorm(b, e, stormRiseAt(e));
     this._drawSmoke(b, e);
     this._drawPlumes(b, e);
@@ -2285,7 +2285,7 @@
   };
 
   // After touchdown: dust clears to frame 033, wisps drift, beacon
-  // blinks, camera keeps drifting — until reset().
+  // blinks, camera keeps drifting, until reset().
   LandingFX.prototype.runIdle = function () {
     cancelAnimationFrame(this._idleRAF);
     if (this.reduceMotion) { this._render(DURATION_MS + CLEAR_MS, 0); return; }
@@ -2303,7 +2303,7 @@
   };
 
   /* ===============================================================
-     ASCENT — "Link established": the landing played back the other way.
+     ASCENT, "Link established": the landing played back the other way.
      The About storybook's second-to-last page (about-story.js) reuses
      this whole compositor (same sky, storm, camera rig, calibrated
      ground line and ship placement) and flies the ship home:
@@ -2322,10 +2322,10 @@
       10.6s  RENDEZVOUS  The ship reaches the exact point in the sky where
                          Section 1's descent began (frame 001's start),
                          just as the orbiter's pass crosses it
-                         (GlimpseOrbiter.syncX), and joins it — no
+                         (GlimpseOrbiter.syncX), and joins it, no
                          docking close-up.
       11.4s  BOOM IN     Rendezvous confirmed: the whole shot booms in on
-                         the habitat — a ~2x dolly push with a crane arc
+                         the habitat, a ~2x dolly push with a crane arc
                          and a settling roll, dust streaking past the lens,
                          the dome lights blooming as it lands. The sky
                          (stars, orbiter, storm cell) stays put, as far
@@ -2400,7 +2400,7 @@
   };
 
   // The GLIMPSE orbiter (glimpse-orbiter.js, its usual size and pass):
-  // where it is now, and where it will be at the rendezvous — the point
+  // where it is now, and where it will be at the rendezvous, the point
   // the ship flies to. Canvas px.
   LandingFX.prototype._ascentOrbiter = function (a) {
     var cw = this.frontCanvas.width, ch = this.frontCanvas.height;
@@ -2556,7 +2556,7 @@
   };
 
   // Exhaust column: puffs laid along the flight path that swell, drift
-  // and cool — a smoke trail hanging in the sky behind the ship.
+  // and cool, a smoke trail hanging in the sky behind the ship.
   LandingFX.prototype._updateAscentTrail = function (a, L, st, S) {
     var tr = this.ascent.trail;
     if (S.flying && S.alpha > 0.3 && a - this.ascent.lastTrail > 45) {
@@ -2631,8 +2631,8 @@
     }
   };
 
-  // Data links: each dish throws a beam up to the orbiter — locked on it,
-  // following it as it drifts along its pass — then packets stream along
+  // Data links: each dish throws a beam up to the orbiter, locked on it,
+  // following it as it drifts along its pass, then packets stream along
   // it and the dishes ping.
   LandingFX.prototype._drawLinks = function (f, r, orb, a) {
     if (!r || !(r.alpha > 0.5) || a < ASCENT.link) return;

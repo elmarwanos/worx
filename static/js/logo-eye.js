@@ -1,5 +1,5 @@
 /* ============================================================
-   Worx by Glimpse — logo-eye.js
+   Worx | logo-eye.js
    The crescent in the logo's eye follows the pointer, everywhere
    on the site: the header mark (mark.png) and the footer logo
    (logo-light.png).

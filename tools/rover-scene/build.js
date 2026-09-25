@@ -1,5 +1,5 @@
 /* ============================================================
-   Portfolio hero "Summit" scene — asset build
+   Portfolio hero "Summit" scene, asset build
    Resizes the full-size source PNGs (WORX_animation_assets, ~50 MB)
    to ~2x their on-screen size and writes a WebP + PNG pair for each
    frame into static/assets/portfolio/rover-scene/, the folder

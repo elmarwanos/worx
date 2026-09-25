@@ -1,5 +1,5 @@
 /* ============================================================
-   Worx by Glimpse - portfolio.css
+   Worx - portfolio.css
    Portfolio page only (portfolio/index.html).
 
    1. .folio-hero      - cinematic Mars hero (image slot + CSS
@@ -2172,7 +2172,7 @@ body[data-page="portfolio"] .site-header .nav-links {
 
 /* Every project visual is exactly the same size.
    2.05/1: the supplied recordings are all ~2.07-2.11:1 (wide
-   screen captures) — matching the media viewport closely to that
+   screen captures), matching the media viewport closely to that
    ratio means object-fit:cover on the real video below crops at
    most ~3% off either side, instead of the ~23% a 16:10 box forced. */
 .folio-editorial-grid .folio-scene,
@@ -2408,7 +2408,7 @@ body[data-page="portfolio"] .site-header .nav-links {
   display: none !important;
 }
 
-/* Keep every card equal size (2.05/1 — see note above) */
+/* Keep every card equal size (2.05/1, see note above) */
 .folio-editorial-grid .folio-scene,
 .folio-editorial-grid .folio-card:nth-child(n) .folio-scene {
   position: relative;
@@ -2589,7 +2589,7 @@ body[data-page="portfolio"] .folio-hero-inner {
 
 
 /* ============================================================
-   HERO COPY POSITION — raised for stronger visual balance
+   HERO COPY POSITION, raised for stronger visual balance
    ============================================================ */
 body[data-page="portfolio"] .folio-hero-inner {
   justify-content: flex-end !important;
@@ -2610,7 +2610,7 @@ body[data-page="portfolio"] .folio-hero-inner {
 
 
 /* ============================================================
-   SUMMIT SCENE — canvases drawn by static/js/rover-scene.js
+   SUMMIT SCENE, canvases drawn by static/js/rover-scene.js
    (rover drives up, astronaut plants the flag, rover drives off).
    Same layer slot and grade as the old CSS astronaut: the dusty,
    warm suit/rover grade on the main canvas, the flag kept closer to
@@ -2641,7 +2641,7 @@ body[data-page="portfolio"] .rover-scene__glow {
 
 
 /* ============================================================
-   HERO CAPTION CARD — the About page's chapter caption (about.css
+   HERO CAPTION CARD, the About page's chapter caption (about.css
    .story-text .hud-card / .hud-panel / .story-status / .story-title
    / .story-subtitle, compact caption format): a smoked-glass field
    that dissolves into the shot at its edges, tilted in 3D as if hung
@@ -2772,7 +2772,7 @@ body[data-page="portfolio"] .folio-hud-subtitle {
 
 
 /* ============================================================
-   PORTFOLIO CARD VIDEO PREVIEWS — FINAL
+   PORTFOLIO CARD VIDEO PREVIEWS, FINAL
    Local MP4 recordings replace the external live iframes.
    Each video autoplays muted and loops from the beginning.
 
@@ -2780,7 +2780,7 @@ body[data-page="portfolio"] .folio-hud-subtitle {
    2.05/1 to closely match the supplied recordings' own ~2.07-
    2.11:1 aspect ratio, so object-fit:cover here only trims a few
    percent off either edge instead of a quarter of the frame. The
-   video is the ONLY visual layer — no blurred duplicate, no
+   video is the ONLY visual layer, no blurred duplicate, no
    canvas capture, no second copy of the footage.
    ============================================================ */
 

@@ -1,5 +1,5 @@
 /* ============================================================
-   Worx by Glimpse — blog-stars.js
+   Worx | blog-stars.js
    "Star wind" behind the blog index: fine orange dust streaming past
    on a slow Martian wind, drawn on one canvas over the page's blueprint
    grid and ember glow (blogs.css), which stay as they are.

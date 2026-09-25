@@ -1,13 +1,13 @@
 /* ============================================================
-   Worx by Glimpse — sky-fx.js
+   Worx | sky-fx.js
    The Martian night sky above the landing site (Sections 1–2): a deep,
    layered, procedural star field plus Earth + Moon and Saturn, placed
    from the Martian celestial sphere for Sept 15, 2026 (reference graph):
 
-       azimuth  15°  Jupiter (in Cancer)        — behind the camera
-       azimuth  45°  Gemini                     — behind the camera
-       azimuth 195°  Saturn (in Pisces)          — in view, subtle
-       azimuth 240°  Earth & Moon (inner system) — in view, bright
+       azimuth  15°  Jupiter (in Cancer)       , behind the camera
+       azimuth  45°  Gemini                    , behind the camera
+       azimuth 195°  Saturn (in Pisces)         , in view, subtle
+       azimuth 240°  Earth & Moon (inner system), in view, bright
 
    The camera looks toward HEADING 218° with a ~110° horizontal field,
    so Earth·Moon and Saturn sit in this sky; Jupiter and Gemini are off
@@ -30,7 +30,7 @@
      horizon so it never touches the hills), and it is drawn on the back
      canvas BEFORE the storm, so storm billows and haze obscure it.
    - Parallax: drawn through the inverse of the virtual camera with a
-     2.5% residual — the world moves, the sky practically doesn't.
+     2.5% residual, the world moves, the sky practically doesn't.
    - A single, rare, faint meteor now and then.
    ============================================================ */
 
@@ -105,7 +105,7 @@
       return [r(), r()];
     }
 
-    // Layer 1 — distant: baked once.
+    // Layer 1, distant: baked once.
     var far = document.createElement("canvas");
     far.width = w; far.height = h;
     var fx = far.getContext("2d");
@@ -119,7 +119,7 @@
     }
     this._far = far;
 
-    // Layer 2 — mid, individually breathing.
+    // Layer 2, mid, individually breathing.
     this._mid = [];
     for (i = 0; i < nMid; i++) {
       var m = sample();
@@ -130,7 +130,7 @@
         warm: r() < 0.2, cool: r() < 0.15
       });
     }
-    // Layer 3 — hero: sparse, compositional.
+    // Layer 3, hero: sparse, compositional.
     this._hero = [];
     for (i = 0; i < 12; i++) {
       this._hero.push({

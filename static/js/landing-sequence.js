@@ -1,5 +1,5 @@
 /* ============================================================
-   Worx by Glimpse — landing-sequence.js
+   Worx | landing-sequence.js
    Generic scroll-scrubbed PNG frame-sequence controller. Used by
    the About storybook's GLIMPSE landing chapter (about-story.js);
    written with no page-specific assumptions so it isn't tied to
@@ -12,8 +12,8 @@
    index can jump around non-monotonically as fast as the user
    flings the wheel, across up to 32 frames. Drawing the current
    frame onto one <canvas> via drawImage() avoids ever creating 32
-   simultaneous DOM image layers, and — because the source images
-   are decoded once into memory during preload — each frame swap is
+   simultaneous DOM image layers, and, because the source images
+   are decoded once into memory during preload, each frame swap is
    a single cheap bitmap blit with no img.src reassignment, so there
    is no network re-fetch, no broken-image flash, and no layout
    thrash while scrubbing quickly in either direction.
@@ -24,7 +24,7 @@
        count: 32,          // total frame files
        pad: 3,              // glimpse-landing-001.png
        ext: ".png",
-       frameWidth: 2400,    // authoring canvas — must match every
+       frameWidth: 2400,    // authoring canvas, must match every
        frameHeight: 1350,   // exported frame exactly (16:9)
      });
      seq.preload().then(function (info) {
@@ -34,7 +34,7 @@
      seq.setFrame(frameIndex);    // call on every scroll update (0-based)
 
    MISSING FRAMES (expected until final artwork lands):
-   preload() never rejects — a 404 just marks that index as
+   preload() never rejects, a 404 just marks that index as
    unavailable. setFrame() only draws indices that loaded; asking
    for a missing one leaves whatever was last successfully drawn on
    screen (never flashes to a broken-image icon or a blank canvas
@@ -47,7 +47,7 @@
    the canvas element's computed style: 0 = top of the canvas box,
    1 = bottom, 0.5 = centered. This is the single knob for lining
    the artwork's own ground-contact line up with the live terrain
-   once real frames exist — no JS change needed, just that one CSS
+   once real frames exist, no JS change needed, just that one CSS
    value (about.css / an inline style override).
    ============================================================ */
 
@@ -183,8 +183,8 @@
   // Draws a given frame at an explicit rect instead of the automatic
   // "contain, anchored by --landing-anchor-y" placement setFrame()
   // uses. For callers (e.g. a compositor) that need the frame
-  // positioned by their own logic — perspective, centering, a
-  // calibrated ground line — while still getting setFrame()'s
+  // positioned by their own logic, perspective, centering, a
+  // calibrated ground line, while still getting setFrame()'s
   // preload/decode/"keep last good frame" guarantees for free. Always
   // redraws (no currentIndex short-circuit): a caller passing a custom
   // rect is by definition placing the frame somewhere setFrame()
@@ -200,16 +200,16 @@
 
   // Cross-dissolves frame a (at rectA) into frame b (at rectB) by t.
   // Both are drawn additively ("lighter") at (1-t) and t alpha onto the
-  // cleared canvas, which is an exact premultiplied blend — no double-
+  // cleared canvas, which is an exact premultiplied blend, no double-
   // dense overlap where both frames are opaque. opts:
   //   alpha       overall opacity (fade-in)
   //   filter      ctx.filter string applied to both draws
   //   fadeX       fraction of frame width feathered away at each side
   //   fadeBottom  fraction of frame height feathered away at the bottom
-  //   fadeA/fadeB { x, bottom } — feather each frame at its own rect
+  //   fadeA/fadeB { x, bottom }, feather each frame at its own rect
   //   mode        "over": layered dissolve (b over a) using alphaA/alphaB
   //   transform   [a, b, c, d, e, f] extra transform for the whole draw
-  //   rotate      { angle, x, y } — rotate the whole draw about (x, y)
+  //   rotate      { angle, x, y }, rotate the whole draw about (x, y)
   // The feathering removes the hard line where baked-in dust meets the
   // frame's own edge (see landing-fx.js).
   LandingSequence.prototype.drawBlend = function (a, rectA, b, rectB, t, opts) {

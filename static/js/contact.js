@@ -1,7 +1,7 @@
 /* ============================================================
-   Worx by Glimpse — contact.js
+   Worx | contact.js
    The /contact "project planner": five short questions, one at
-   a time, answered in plain language and interactive cards —
+   a time, answered in plain language and interactive cards,
    never a technical spec sheet. Worx makes the technical calls
    during discovery; the client just explains what they need.
 
@@ -18,7 +18,7 @@
    the form.
 
    Everything the questionnaire asks comes from the CONFIG block
-   at the top — edit the data, not the render code.
+   at the top, edit the data, not the render code.
    ============================================================ */
 
 (function () {
@@ -40,7 +40,7 @@
     { value: "website",    label: "Website",             desc: "A site that tells people who you are, or gets you found" },
     { value: "web-app",    label: "Web application",     desc: "Something people log into and actually use" },
     { value: "mobile-app", label: "Mobile application",  desc: "An app for iOS or Android" },
-    { value: "platform",   label: "Software / platform", desc: "A bigger system — for your team or your customers" },
+    { value: "platform",   label: "Software / platform", desc: "A bigger system, for your team or your customers" },
     { value: "unsure",     label: "Not sure yet",        desc: "Tell us the idea and we'll help shape it" }
   ];
 
@@ -54,7 +54,7 @@
     { value: "other",       label: "Something else" }
   ];
 
-  // Timeline — preserved as-is from the previous questionnaire.
+  // Timeline, preserved as-is from the previous questionnaire.
   var TIMELINE_OPTIONS = [
     { value: "lt-1m",    label: "Less than 1 month" },
     { value: "1-3m",     label: "1–3 months" },
@@ -63,7 +63,7 @@
     { value: "flexible", label: "Flexible" }
   ];
 
-  // Budget — a continuous AED slider, $1,000-equivalent increments.
+  // Budget, a continuous AED slider, $1,000-equivalent increments.
   var BUDGET_MIN = 5000;
   var BUDGET_MAX = 250000;
   var BUDGET_STEP = 1000;
@@ -75,7 +75,7 @@
     { id: "timeline", legend: "What's your timeline?",
       type: "radio", field: "timeline", options: TIMELINE_OPTIONS },
     { id: "budget",   legend: "What's your budget?",
-      hint: "A ballpark in AED — drag to adjust. We'll refine the exact figure together.", type: "budget" },
+      hint: "A ballpark in AED, drag to adjust. We'll refine the exact figure together.", type: "budget" },
     { id: "final",    legend: "Let's make it happen.",
       hint: "Tell us a little about you and your company so we can get back to you.", type: "final" }
   ];
@@ -101,6 +101,16 @@
     form: freshForm(),
     completedAt: null
   };
+
+  // Services picked in the mission builder on /services arrive as
+  // ?services=Web Development,SEO and seed the idea box.
+  try {
+    var picked = new URLSearchParams(window.location.search).get("services");
+    if (picked) {
+      state.form.idea = "Services I'm interested in: " +
+        picked.split(",").map(function (s) { return s.trim(); }).filter(Boolean).join(", ") + ".\n\n";
+    }
+  } catch (e) {}
 
   var firstRender = true;
 
@@ -162,7 +172,7 @@
   }
 
   /* ----------------------------------------------------------
-     4. PERSISTENCE  (best-effort — the questionnaire works without it)
+     4. PERSISTENCE  (best-effort, the questionnaire works without it)
      ---------------------------------------------------------- */
 
   function loadState() {
@@ -190,7 +200,7 @@
         stepIndex: state.stepIndex,
         form: state.form
       }));
-    } catch (e) { /* storage full or unavailable — carry on */ }
+    } catch (e) { /* storage full or unavailable, carry on */ }
   }
 
   function clearState() {
@@ -206,7 +216,7 @@
     var intro = document.getElementById("contact-intro");
     if (saved && saved.completedAt) {
       if (title) title.innerHTML = 'Good to <span class="gradient-text">hear from you</span>';
-      if (intro) intro.textContent = "We've already got your enquiry on file — send another any time.";
+      if (intro) intro.textContent = "We've already got your enquiry on file, send another any time.";
     } else if (saved && anyAnswered()) {
       if (title) title.innerHTML = 'Welcome <span class="gradient-text">back</span>';
       if (intro) intro.textContent = "Pick up right where you left off.";
@@ -228,15 +238,15 @@
   function buildFormspreePayload() {
     var f = state.form;
     return {
-      _subject: "New enquiry — " + (f.companyName || "Website project") +
+      _subject: "New enquiry, " + (f.companyName || "Website project") +
         (f.buildType ? " (" + labelFor(BUILD_OPTIONS, f.buildType) + ")" : ""),
       _replyto: f.email,
-      building: labelFor(BUILD_OPTIONS, f.buildType) || "—",
+      building: labelFor(BUILD_OPTIONS, f.buildType) || "-",
       idea: truncate(f.idea.trim(), IDEA_CAP),
-      goal: labelFor(GOAL_OPTIONS, f.goal) || "—",
+      goal: labelFor(GOAL_OPTIONS, f.goal) || "-",
       goalOther: f.goal === "other" ? f.goalOther.trim() : "",
-      timeline: labelFor(TIMELINE_OPTIONS, f.timeline) || "—",
-      budget: f.budget ? f.budget.label : "—",
+      timeline: labelFor(TIMELINE_OPTIONS, f.timeline) || "-",
+      budget: f.budget ? f.budget.label : "-",
       companyName: f.companyName,
       companyWebsite: f.companyWebsite.trim(),
       name: f.name,
@@ -277,7 +287,7 @@
     els.back.addEventListener("click", onBack);
     els.next.addEventListener("click", onNext);
     // No submit button in the form, so Enter in a text field would
-    // otherwise implicitly submit and reload the page — use it to
+    // otherwise implicitly submit and reload the page, use it to
     // advance instead, which doubles as free keyboard navigation.
     els.form.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -636,7 +646,7 @@
       .catch(function () {
         els.next.disabled = false;
         els.next.textContent = "Send my enquiry";
-        showError("Something went wrong sending your enquiry — please try again, or email us directly at hello@worxbyglimpse.com.");
+        showError("Something went wrong sending your enquiry, please try again, or email us directly at hello@worxbyglimpse.com.");
       });
   }
 
@@ -650,7 +660,7 @@
     var i = document.getElementById("contact-intro");
     var e = document.getElementById("contact-eyebrow");
     if (t) t.innerHTML = 'Let\'s get to <span class="gradient-text">work</span>';
-    if (i) i.textContent = "Tell us what you're trying to accomplish — in your own words. A few quick questions, no technical jargon.";
+    if (i) i.textContent = "Tell us what you're trying to accomplish, in your own words. A few quick questions, no technical jargon.";
     if (e) e.textContent = "Contact";
     hideResume();
     render();
@@ -701,11 +711,11 @@
     applyCopy(saved);
 
     if (saved && saved.completedAt) {
-      state.view = "success";           // already sent — offer to start another
+      state.view = "success";           // already sent, offer to start another
     } else if (saved && anyAnswered()) {
-      showResume();                     // half-finished — offer to resume
+      showResume();                     // half-finished, offer to resume
     } else {
-      state.stepIndex = 0;              // nothing meaningful saved — start clean
+      state.stepIndex = 0;              // nothing meaningful saved, start clean
     }
 
     render();

@@ -1,14 +1,14 @@
 /* ============================================================
-   Worx by Glimpse — portfolio.js
+   Worx | portfolio.js
    Portfolio page only. Small, self-contained pieces:
 
-   1. initShots()     — one shared auto-scroll for every project
+   1. initShots()    , one shared auto-scroll for every project
                         preview: duplicates the screenshot once
                         for a seamless loop, and only animates
                         cards near the viewport.
-   2. initHero()      — drifting-particle atmosphere over the
+   2. initHero()     , drifting-particle atmosphere over the
                         Mars hero image.
-   3. initSky()       — the About page's night sky (stars,
+   3. initSky()      , the About page's night sky (stars,
                         storm cell, GLIMPSE orbiter) behind
                         the Mars terrain.
 
@@ -60,15 +60,15 @@
   }
 
   /* ----------------------------------------------------------
-     1b. Project video previews — play only near/in view
+     1b. Project video previews, play only near/in view
      Videos keep autoplay's visible behaviour (muted/looping,
      starts as soon as it is near the viewport) but stop
      buffering and decoding while scrolled well away, instead of
      all 18 clips loading and playing at once on page load.
 
-     rootMargin is generous (600px) so play() — which is what
+     rootMargin is generous (600px) so play(), which is what
      actually makes the browser start fetching/decoding beyond the
-     preload="metadata" hint — fires well before a card is
+     preload="metadata" hint, fires well before a card is
      scrolled into view, giving it time to have a real frame ready
      instead of popping in on a black/blank frame.
      ---------------------------------------------------------- */
@@ -202,7 +202,7 @@
   }
 
   /* ----------------------------------------------------------
-     3. Mars hero sky — the About page's sky behind the terrain
+     3. Mars hero sky, the About page's sky behind the terrain
      Same shared modules about-story.js draws on its star canvas:
      sky-fx.js (stars, Earth · Moon, Saturn, meteor), ambient-storm.js
      (the violet storm cell) and glimpse-orbiter.js (the GLIMPSE pass).

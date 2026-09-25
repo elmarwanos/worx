@@ -1,7 +1,7 @@
 /* ============================================================
-   Worx by Glimpse — glimpse-orbiter.js
+   Worx | glimpse-orbiter.js
    The GLIMPSE mothership: a small, distant silhouette that drifts
-   left-to-right across the sky, on loop, forever — the ship the
+   left-to-right across the sky, on loop, forever, the ship the
    lander (the "001-032" frames) undocked from before its descent,
    and will one day return to for ascent. Purely ambient: one shared,
    stateless, wall-clock-driven draw() call, so it stays in perfect
@@ -9,15 +9,15 @@
    screen:
 
      - about-story.js's plain star canvas (.story-stars, chapters
-       2-9 — everything after the landing/summary pages)
-     - landing-fx.js's front canvas (chapters 0-1 — the landing and
+       2-9, everything after the landing/summary pages)
+     - landing-fx.js's front canvas (chapters 0-1, the landing and
        its Mission Control summary), drawn straight in screen space
        so camera shake/push-in never touches it: it's meant to read
        as impossibly far away, well beyond the terrain and storm.
 
    Both call sites pass plain canvas-pixel dimensions and get back
    the same silhouette, at the same point in its pass, blinking in
-   the same rhythm — because both just ask "where is it right now?"
+   the same rhythm, because both just ask "where is it right now?"
    off performance.now(), with no per-caller state to fall out of
    sync.
    ============================================================ */
@@ -26,7 +26,7 @@
   "use strict";
 
   var IMG_SRC = "../static/assets/about/glimpse_landing_frames_001-032/glimpse-landing-000.png";
-  var PASS_MS = 84000;      // one full edge-to-edge pass — slow enough to feel orbital, not busy
+  var PASS_MS = 84000;      // one full edge-to-edge pass, slow enough to feel orbital, not busy
   var BLINK_PERIOD = 1100;  // frequent satellite-style double-strobe, not a smooth breathing pulse
 
   var img = new Image();
@@ -76,7 +76,7 @@
       var span = w + h * 0.55;
       var x = -h * 0.28 + ((((t % PASS_MS) + PASS_MS) % PASS_MS) / PASS_MS) * span;
       // Genuinely far: nearer than the fixed background bodies (Earth ·
-      // Moon, Saturn — effectively at infinity) but still small enough
+      // Moon, Saturn, effectively at infinity) but still small enough
       // that it reads as a point with a shape, not a hero prop.
       var ih = Math.max(4.5 * dpr, h * 0.0075);
       var iw = ih * aspect;
@@ -111,7 +111,7 @@
       ctx.beginPath(); ctx.arc(bx, by, Math.max(0.8, ih * 0.05), 0, 6.2832); ctx.fill();
       ctx.restore();
 
-      // Label, trailing behind its direction of travel — same family as
+      // Label, trailing behind its direction of travel, same family as
       // sky-fx.js's fixed star labels ("SATURN" / "EARTH · MOON"), sized
       // a step below them (it sits right next to its own small craft
       // icon rather than floating alone against empty sky, so the same

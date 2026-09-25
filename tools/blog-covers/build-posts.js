@@ -1,5 +1,5 @@
 /* ============================================================
-   Blog pages — builds the article pages and the blog index from
+   Blog pages, builds the article pages and the blog index from
    posts.js, using blogs/performance-seo.html as the page template
    (header, share bar, reading layout, CTA, footer, scripts).
 
@@ -94,7 +94,7 @@ posts.forEach((p) => {
     return;
   }
   let html = template;
-  html = html.replace(/<title>[^<]*<\/title>/, `<title>${p.title} | Worx by Glimpse</title>`);
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${p.title} | Worx</title>`);
   html = html.replace(/(<meta name="description"\s+content=")[^"]*(")/, "$1" + esc(p.intro) + "$2");
   html = html.replace(/(<p class="blog-post-category">)[^<]*(<\/p>)/, "$1" + p.category.replace("&", "&amp;") + "$2");
   html = html.replace(/(<h1>)[^<]*(<\/h1>)/, "$1" + p.title + "$2");
@@ -150,7 +150,7 @@ const main = `  <main id="main" class="blog-page">
          the category filter set as big type (active one lit with an
          arrow), the newest post featured, then the card grid. -->
     <section class="blog-head container">
-      <h1 class="sr-only">Worx by Glimpse blog: notes from the workbench</h1>
+      <h1 class="sr-only">Worx blog: notes from the workbench</h1>
       <p class="blog-eyebrow"><span class="blog-eyebrow-dot" aria-hidden="true"></span>Our Blog</p>
       <div class="blog-cats" role="group" aria-label="Filter posts by category">
 ${cats}

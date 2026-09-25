@@ -1,5 +1,5 @@
 /* ============================================================
-   PORTFOLIO HERO — "SUMMIT" (one seamless loop, ~40s)
+   PORTFOLIO HERO, "SUMMIT" (one seamless loop, ~40s)
 
    The rover crawls in from the left along the ridge at a real
    buggy's pace, easing off on the climbs, brakes (nose dips, dust

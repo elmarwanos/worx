@@ -1,30 +1,30 @@
 /* ============================================================
-   Worx by Glimpse — about.css
+   Worx | about.css
    About page only: a one-viewport, wheel/swipe-paged storybook.
-   Each gesture turns exactly one page (about-story.js) — this file
+   Each gesture turns exactly one page (about-story.js), this file
    only owns the persistent environment and the per-chapter look.
 
-   Layering (all siblings inside #story, so z-index compares flatly —
+   Layering (all siblings inside #story, so z-index compares flatly,
    see about-story.js for why): atmosphere (0) < scene stack (1) <
-   landing back layer — contact shadow + back dust (2) < landing ship
-   canvas (3) < landing front layer — engine exhaust + front dust (4)
+   landing back layer, contact shadow + back dust (2) < landing ship
+   canvas (3) < landing front layer, engine exhaust + front dust (4)
    < ember glow (4, later in the DOM) < turn shadow (5) < stars (6) < text stack (7). There is no
    top-right HUD; the only narrative/status readout is the bottom-left
    .story-status inside the text stack (about-story.js). Persistent
    layers (atmosphere, the three landing canvases, stars) never move
    during a page turn; only the per-chapter scene/text pair being
    turned does. The landing canvases are persistent in that same
-   sense — they only fade in/out together when scene 0 (the landing
+   sense, they only fade in/out together when scene 0 (the landing
    chapter) is entered/left (about-story.js).
 
    --story-ground-y (below, on the landing canvases) is the single
    calibrated value both the ship's placement and every ground-level
    effect (shadow, dust origin) read to agree on where the terrain
-   photo actually becomes solid, visible ground — see landing-fx.js's
+   photo actually becomes solid, visible ground, see landing-fx.js's
    file header for how it's used.
 
    Each .story-scene's terrain is set via an inline background-image
-   (about/index.html) so a future chapter image is a one-line swap —
+   (about/index.html) so a future chapter image is a one-line swap,
    nothing here or in about-story.js changes.
    ============================================================ */
 
@@ -44,7 +44,7 @@
 
 /* GSAP/ScrollTrigger failed to load: fall back to a plain stacked
    scroll so every chapter and the footer stay reachable. No pin,
-   no turn — just visible, ordered content. */
+   no turn, just visible, ordered content. */
 #story.story--fallback {
   height: auto;
   overflow: visible;
@@ -78,7 +78,7 @@
 
 /* ---- Persistent atmosphere (never turns) ----------------------- */
 /* Dark-to-ember vertical gradient standing in for the source photo's
-   sky, plus a screened warm glow near the horizon — same recipe as
+   sky, plus a screened warm glow near the horizon, same recipe as
    the Portfolio Mars hero's .mars-ember-glow (radial + screen). */
 
 .story-atmosphere {
@@ -127,7 +127,7 @@
 
 /* Distant hills + near landing ground. The photo is scaled to the
    box's width (background-size: 100% auto, 2:1 source, so the image
-   is 0.5 × --terrain-w tall) and shifted up by 0.12 × --terrain-w —
+   is 0.5 × --terrain-w tall) and shifted up by 0.12 × --terrain-w,
    i.e. the box's top edge is always 24% down the source image,
    whatever the viewport's aspect ratio. The hill ridge (≈28–36% down
    the source) therefore sits just under the box's top, and the photo's
@@ -143,7 +143,7 @@
    GROUND-LINE MATH (read by --story-ground-y below): the ship's legs
    rest at 82% of #story's height. On every tested aspect (16:9,
    16:10, 21:9, tablet and phone portrait) that line falls at 60–85%
-   down the source image — the close-in, fully-opaque rocky
+   down the source image, the close-in, fully-opaque rocky
    foreground, well below the hills. */
 .story-terrain {
   --terrain-w: 110vw;
@@ -347,7 +347,7 @@
 
 /* Traverse page beacons: the same anti-collision double blink the
    landed ship's spire strobe uses in Sections 1-2 (landing-fx.js: two
-   70ms flashes 230ms apart, every 1.8s) — red on the ship's spire and
+   70ms flashes 230ms apart, every 1.8s), red on the ship's spire and
    the rover's antenna, amber on the rover's two masts (the second one
    half a cycle late, so the rover always has a light going). */
 .rover-beacons {
@@ -1095,7 +1095,7 @@
 .tribute-crew-shadow--a { left: 8%;  width: 38%; }
 .tribute-crew-shadow--b { left: 54%; width: 40%; }
 
-/* Burnt-orange atmospheric veil — the Portfolio Mars hero's
+/* Burnt-orange atmospheric veil, the Portfolio Mars hero's
    .mars-photo-grade recipe (portfolio/index.html, "MARS DISTANCE
    TREATMENT"), on every chapter so the whole storybook shares the
    hero's orange light. The 90deg layer keeps the copy side dark. */
@@ -1116,7 +1116,7 @@
       rgba(125, 39, 8, 0.10) 100%);
 }
 
-/* Persistent ember glow (never turns) — the Portfolio hero's
+/* Persistent ember glow (never turns), the Portfolio hero's
    .mars-ember-glow at the same .72 strength. Sits above the landing
    canvases so the ship catches the same warm light as the terrain. */
 .story-ember {
@@ -1181,7 +1181,7 @@
 }
 
 /* Engine exhaust + the dust allowed to occlude the lower landing gear
-   — drawn last so it always paints on top of the ship art. */
+   drawn last so it always paints on top of the ship art. */
 .story-landing-front {
   position: absolute;
   inset: 0;
@@ -1225,7 +1225,7 @@
   pointer-events: none;
 }
 
-/* Touchdown / separation flash — opacity driven per tick by landing-fx.js. */
+/* Touchdown / separation flash, opacity driven per tick by landing-fx.js. */
 .story-flash {
   opacity: 0;
   background: radial-gradient(ellipse 70% 60% at 50% 72%,
@@ -1248,7 +1248,7 @@
 }
 
 /* Film grain: one noise tile (generated by landing-fx.js) jittered
-   by a stepped animation — no per-frame JS. */
+   by a stepped animation, no per-frame JS. */
 .story-grain {
   inset: -60%;
   opacity: 0.075;
@@ -1385,7 +1385,7 @@
 }
 
 /* ---- Landing (page 1 of 8) --------------------------------------- */
-/* A compact cinematic caption, not a hero headline — the Mars landing
+/* A compact cinematic caption, not a hero headline, the Mars landing
    itself is the hero. Sized larger than .story-status but well short
    of the other story pages' display type, and narrow enough to stay
    clear of the centered ship (see landing-fx.js). No scroll
@@ -1429,7 +1429,7 @@
 /* Borderless: a smoked-glass field that dissolves into the shot at its
    edges, so the panels read as projected into the scene rather than
    boxed on top of it. The glass (and its fade mask) lives on ::before,
-   behind the content, so only the glass dissolves — text stays crisp. */
+   behind the content, so only the glass dissolves, text stays crisp. */
 .hud-panel {
   position: relative;
   isolation: isolate;
@@ -1968,7 +1968,7 @@
   }
 
   /* Portrait: contain-fit makes the 16:9 frame screen-width, so the
-     ship would be tiny — scale up and let the dust run off-screen. */
+     ship would be tiny, scale up and let the dust run off-screen. */
   .story-landing-back {
     --landing-scale: 1.25;
     --story-horizon-y: 0.52;
@@ -2153,7 +2153,7 @@
 
 /* Big screens: scale the HUD and captions up with the frame so they
    don't shrink to specks on 1080p+, 1440p/ultrawide and 4K displays
-   (height matters too — a 3440×1440 ultrawide is scaled like 1440p). */
+   (height matters too, a 3440×1440 ultrawide is scaled like 1440p). */
 @media (min-width: 1800px) and (min-height: 950px) {
   #story { --hud-scale: 1.15; }
 
@@ -2197,7 +2197,7 @@
 
 /* about-story.js swaps the page-turn tween properties down to a
    plain opacity crossfade (no rotateX/scale/shadow) when this query
-   matches; the mission-text stagger is skipped the same way — this
+   matches; the mission-text stagger is skipped the same way, this
    block only has to mop up the CSS-only bit: no status scan-line
    sweep. */
 
