@@ -767,9 +767,9 @@
 .tribute-ship {
   position: absolute;
   left: 69%;
-  top: 68%;
-  width: 29%;
-  aspect-ratio: 1565 / 1249;
+  top: 70%;
+  width: 35%;
+  aspect-ratio: 1374 / 1145;
   transform: translate(-50%, -100%);
 }
 
@@ -794,7 +794,7 @@
   width: 100%;
   height: auto;
   /* farther off: a touch of the plain's haze */
-  filter: brightness(0.88) saturate(0.8) contrast(0.94) sepia(0.12);
+  filter: brightness(0.96) saturate(0.92) contrast(1.02) sepia(0.04);
 }
 
 .tribute-ship-shadow {
@@ -816,7 +816,7 @@
   width: 44%;
   height: 48%;
   border-radius: 30%;
-  background: radial-gradient(closest-side, rgba(255, 190, 110, 0.28), rgba(255, 160, 70, 0.08) 60%, transparent);
+  background: radial-gradient(closest-side, rgba(255, 190, 110, 0.1), rgba(255, 160, 70, 0.03) 60%, transparent);
   mix-blend-mode: screen;
   animation: tribute-interior 6s ease-in-out infinite alternate;
 }
@@ -838,7 +838,7 @@
   aspect-ratio: 1.6;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(closest-side, rgba(150, 110, 255, 0.4), rgba(220, 80, 200, 0.14) 55%, transparent);
+  background: radial-gradient(closest-side, rgba(150, 110, 255, 0.14), rgba(220, 80, 200, 0.05) 55%, transparent);
   mix-blend-mode: screen;
   animation: tribute-screen 4.2s steps(1, end) infinite;
 }
@@ -864,8 +864,8 @@
   clip-path: polygon(28% 0, 71% 0, 100% 100%, 0 100%);
   background: linear-gradient(180deg,
     rgba(255, 196, 120, 0) 0%,
-    rgba(255, 190, 110, 0.2) 30%,
-    rgba(250, 170, 90, 0.12) 65%,
+    rgba(255, 190, 110, 0.07) 30%,
+    rgba(250, 170, 90, 0.05) 65%,
     rgba(250, 170, 90, 0) 100%);
   filter: blur(10px);
   mix-blend-mode: screen;
@@ -948,7 +948,7 @@
   aspect-ratio: 1;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(closest-side, rgba(255, 236, 200, 0.55), rgba(255, 180, 90, 0.18) 45%, transparent);
+  background: radial-gradient(closest-side, rgba(255, 236, 200, 0.16), rgba(255, 180, 90, 0.05) 45%, transparent);
   mix-blend-mode: screen;
   animation: tribute-flare 6s ease-in-out infinite alternate;
 }
@@ -1977,7 +1977,7 @@
     --terrain-w: 170vw;
   }
 
-  .tribute-ship { left: 63%; top: 54%; width: 26%; }
+  .tribute-ship { left: 63%; top: 56%; width: 31%; }
   .tribute-crew { left: 43%; top: 62%; width: 15%; }
 
   .story-site-body {
@@ -2049,7 +2049,7 @@
     --terrain-w: 230vw;
   }
 
-  .tribute-ship { left: 60%; top: 38%; width: 22%; }
+  .tribute-ship { left: 60%; top: 40%; width: 26%; }
   .tribute-crew { left: 45%; top: 45%; width: 12%; }
 
   .story-site-body {

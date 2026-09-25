@@ -8,13 +8,15 @@
      0.0s  ENTRY       A fireball tears across the far sky from the
                        upper right: plasma head, glowing wake that
                        cools into a lingering smoke trail.
-     (always)  STORM SKY  The sky is a planetary storm seen from the surface:
+     6.3s  STORM SKY  Kicked up by the jets as they near the ground (the
+                       sky before that is the same clear night sky as every
+                       other chapter). A planetary storm seen from the surface:
                        a cloud ceiling in true perspective (big, fast
                        billows overhead; small, flat, slow ones converging
                        on the horizon) rolling in toward the camera, and a
                        towering storm wall churning along the horizon.
-                       Always there, always orange, never still: every
-                       billow slowly swells and shrinks as it drifts.
+                       Once risen it stays, always orange, never still:
+                       every billow slowly swells and shrinks as it drifts.
                        Faint lightning pulses deep inside the wall.
      2.6s  SEPARATION  A flash lights the storm clouds from within, pyro
                        bolts fire and ablator embers shed as the real
@@ -803,6 +805,11 @@
      faint lightning, then composited as the farthest layer.
      --------------------------------------------------------------- */
   var STORM_Z_NEAR = 1.1, STORM_Z_FAR = 16;
+  // The storm is dust thrown up by the descent: none while the ship is
+  // still high, rising as the jets near the ground (just before the final
+  // hover) and fully up by touchdown.
+  var STORM_RISE_AT = HOVER - 500, STORM_RISE_MS = 2400;
+  function stormRiseAt(e) { return easeInOutSine(clamp01((e - STORM_RISE_AT) / STORM_RISE_MS)); }
   var LIGHTNING_AT = [4300, 7900, 12600, 17900];   // then every ~6.7s
 
   LandingFX.prototype._stormModel = function () {
@@ -841,7 +848,9 @@
     return { I: I, seed: t };
   }
 
-  LandingFX.prototype._drawStorm = function (ctx, e) {
+  LandingFX.prototype._drawStorm = function (ctx, e, strength) {
+    if (strength == null) strength = 1;
+    if (strength <= 0.003) return;
     var model = this._stormModel();
     var cw = this.backCanvas.width, ch = this.backCanvas.height;
     var hz = ch * this.horizonY;
@@ -952,7 +961,7 @@
     }
 
     ctx.save();
-    ctx.globalAlpha = 0.95;
+    ctx.globalAlpha = 0.95 * strength;
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(sc, 0, 0, cw, ch);
     ctx.restore();
@@ -2212,7 +2221,7 @@
     var b = this.backCtx, f = this.frontCtx;
     b.clearRect(0, 0, this.backCanvas.width, this.backCanvas.height);
     if (this.sky) this.sky.draw(b, this);   // Martian night sky (sky-fx.js) — behind the storm
-    this._drawStorm(b, e);
+    this._drawStorm(b, e, stormRiseAt(e));
     this._drawSmoke(b, e);
     this._drawPlumes(b, e);
     this._drawTrail(b, e);
