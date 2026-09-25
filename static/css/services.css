@@ -2143,7 +2143,7 @@
   border-radius: 50%;
   border: 1.5px solid var(--line-strong);
   background: var(--ink);
-  transition: border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+  transition: border-color 0.12s linear, background 0.12s linear, box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .cx-wp-dot::after {
@@ -2187,7 +2187,7 @@
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--muted);
-  transition: color 0.4s ease, transform 0.4s ease;
+  transition: color 0.15s linear, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .cx-wp-label span {
@@ -2212,36 +2212,249 @@
 }
 
 .cx-ship {
+  --jet-w: clamp(76px, 6.6vw, 116px);
   position: absolute;
   left: 0;
   top: 0;
-  width: 56px;
-  height: 56px;
-  margin: -28px 0 0 -28px;
+  width: 0;
+  height: 0;
   z-index: 3;
   will-change: transform;
 }
 
-.cx-ship svg {
+/* ---- Rocket man: the painted jetpack plumes are the base layer; live
+   flames, embers and heat glow sit on top at the two nozzles, so the
+   still image breathes like a cinemagraph. */
+.cx-jet {
+  --thrust: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--jet-w);
+  aspect-ratio: 1441 / 985;
+  /* centre on the torso, and cancel the image's own -30deg heading so
+     the JS rotation points him straight down the flight path */
+  translate: -52% -48%;
+  rotate: 30deg;
+  transition: scale 0.35s ease;
+  animation: cx-jet-bob 3.2s ease-in-out infinite;
+}
+
+.cx-ship.is-flipped .cx-jet {
+  rotate: -30deg;
+  scale: -1 1;
+}
+
+.cx-jet-img {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Seat him in the scene: warm space-light grade, a soft ambient
+     shadow and a faint amber rim from his own exhaust */
+  filter:
+    saturate(0.92) brightness(0.94) sepia(0.08)
+    drop-shadow(0 0 1px rgba(255, 170, 80, 0.35))
+    drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
+}
+
+@keyframes cx-jet-bob {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-1.2%, 1.6%) rotate(-1.2deg); }
+}
+
+/* Plume: a box anchored at a nozzle, rotated down the exhaust line */
+.cx-jet-plume {
+  position: absolute;
+  z-index: 1;
+  width: 62%;
+  height: 16%;
+  transform-origin: 0 50%;
+  translate: 0 -50%;
+  scale: calc(0.85 + var(--thrust) * 0.55) 1;
+  transition: scale 0.3s ease;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.cx-jet-plume--l { left: 35.6%; top: 46.1%; rotate: 123deg; }
+.cx-jet-plume--r { left: 64.9%; top: 57.6%; rotate: 111deg; }
+
+.cx-jet-plume > i {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  border-radius: 50%;
+  transform-origin: 0 50%;
+}
+
+.cx-jet-outer {
   width: 100%;
   height: 100%;
-  overflow: visible;
-  filter: drop-shadow(0 0 12px rgba(250, 167, 25, 0.6));
+  margin-top: -8%;
+  translate: 0 -42%;
+  background: radial-gradient(ellipse 100% 50% at 0 50%, rgba(255, 120, 30, 0.75), rgba(229, 80, 20, 0.35) 45%, transparent 72%);
+  filter: blur(3px);
+  animation: cx-flick-a 0.19s ease-in-out infinite alternate;
 }
 
-.cx-ship-body { fill: var(--brand-cream); }
-.cx-ship-fin { fill: var(--brand-ember); }
-.cx-ship-window { fill: var(--brand-orange); stroke: var(--ink); stroke-width: 1.5; }
-
-.cx-ship-flame {
-  fill: var(--brand-amber);
-  transform-origin: 22px 32px;
-  animation: cx-flame 0.12s ease-in-out infinite alternate;
+.cx-jet-mid {
+  width: 66%;
+  height: 62%;
+  translate: 0 -50%;
+  background: radial-gradient(ellipse 100% 50% at 0 50%, rgba(255, 196, 90, 0.95), rgba(255, 140, 40, 0.55) 50%, transparent 75%);
+  filter: blur(1.5px);
+  animation: cx-flick-b 0.13s ease-in-out infinite alternate;
 }
 
-@keyframes cx-flame {
-  from { transform: scaleX(0.7); opacity: 0.8; }
-  to { transform: scaleX(1.2); opacity: 1; }
+.cx-jet-core {
+  width: 30%;
+  height: 34%;
+  translate: 0 -50%;
+  background: radial-gradient(ellipse 100% 50% at 0 50%, #fff, rgba(255, 244, 214, 0.9) 40%, transparent 78%);
+  filter: blur(0.6px);
+  animation: cx-flick-c 0.08s linear infinite alternate;
+}
+
+.cx-jet-plume--r > i { animation-delay: -0.07s; }
+
+@keyframes cx-flick-a {
+  from { transform: scale(0.92, 0.9); opacity: 0.8; }
+  to { transform: scale(1.08, 1.12); opacity: 1; }
+}
+
+@keyframes cx-flick-b {
+  from { transform: scale(0.88, 0.94); opacity: 0.85; }
+  to { transform: scale(1.1, 1.06); opacity: 1; }
+}
+
+@keyframes cx-flick-c {
+  from { transform: scale(0.9, 0.9); }
+  to { transform: scale(1.12, 1.08); }
+}
+
+/* Embers shed down the exhaust */
+.cx-jet-sparks {
+  position: absolute;
+  inset: 0;
+}
+
+.cx-jet-sparks i {
+  position: absolute;
+  left: 4%;
+  top: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #ffd488;
+  box-shadow: 0 0 6px 1px rgba(255, 170, 60, 0.9);
+  opacity: 0;
+  animation: cx-ember 0.9s linear infinite;
+  animation-delay: calc(var(--s) * -0.13s);
+}
+
+.cx-jet-sparks i:nth-child(odd) { --dy: -1; }
+.cx-jet-sparks i:nth-child(even) { --dy: 1; }
+.cx-jet-sparks i:nth-child(3n) { animation-duration: 1.2s; width: 2px; height: 2px; }
+
+@keyframes cx-ember {
+  0% { transform: translate(0, 0); opacity: 0; }
+  12% { opacity: 1; }
+  100% { transform: translate(calc(var(--jet-w) * 0.62), calc(var(--dy) * var(--jet-w) * 0.09)); opacity: 0; }
+}
+
+/* Nozzle flare and heat bloom */
+.cx-jet-nozzle {
+  position: absolute;
+  z-index: 3;
+  width: 9%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 18%, rgba(255, 214, 140, 0.8) 34%, rgba(255, 140, 40, 0) 70%);
+  mix-blend-mode: screen;
+  animation: cx-flick-c 0.07s linear infinite alternate;
+  pointer-events: none;
+}
+
+.cx-jet-nozzle--l { left: 35.6%; top: 46.1%; }
+.cx-jet-nozzle--r { left: 64.9%; top: 57.6%; }
+
+.cx-jet-heat {
+  position: absolute;
+  z-index: 0;
+  left: 18%;
+  top: 36%;
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(250, 140, 30, 0.45), transparent 65%);
+  filter: blur(10px);
+  animation: cx-heat 0.6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes cx-heat {
+  from { opacity: calc(0.55 + var(--thrust) * 0.3); }
+  to { opacity: calc(0.8 + var(--thrust) * 0.2); }
+}
+
+/* Live exhaust canvas (jet-fire.js). The CSS plumes above stay as a
+   fallback for browsers without canvas. */
+.cx-jet-fire {
+  position: absolute;
+  z-index: 1;
+  left: -80%;
+  top: -20%;
+  width: 180%;
+  height: 180%;
+  pointer-events: none;
+}
+
+.cx-jet.has-fire .cx-jet-plume,
+.cx-jet.has-fire .cx-jet-nozzle {
+  display: none;
+}
+
+/* The rocket man flies in front of the waypoints; labels keep a soft
+   shadow so they stay readable, and the dot he sits on steps aside */
+.cx-flight-points { z-index: 2; }
+/* Ignition burst the moment the trail reaches a mark */
+.cx-wp-dot::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 236, 190, 0.95), rgba(250, 167, 25, 0.5) 40%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cx-wp.is-arriving .cx-wp-dot::before {
+  animation: cx-wp-burst 0.6s ease-out;
+}
+
+@keyframes cx-wp-burst {
+  0% { transform: scale(0.4); opacity: 1; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+.cx-wp-label { text-shadow: 0 1px 8px rgba(10, 5, 3, 0.9); }
+
+@media (max-width: 900px) {
+  .cx-ship { --jet-w: clamp(68px, 16vw, 92px); }
+}
+
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  .cx-ship { --jet-w: 62px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-jet,
+  .cx-jet-plume > i,
+  .cx-jet-nozzle,
+  .cx-jet-heat { animation: none; }
+  .cx-jet-sparks { display: none; }
 }
 
 .cx-flight-pad {
@@ -4215,3 +4428,197 @@
 }
 
 .sm-screen.is-on .sm-typing { animation-delay: 3s; }
+
+/* ================================================================
+   Responsive pass: every viewport from 360px phones to 2560px
+   ultrawides, including short laptop screens (MacBook 1280x800,
+   1366x768 with browser chrome).
+   ================================================================ */
+
+/* Wide decorative layers (grain, AR floor, star-map sweep, footage
+   wall) must never widen the page. `clip` (not `hidden`) keeps sticky
+   and GSAP pinning working. */
+html,
+body {
+  overflow-x: clip;
+}
+
+.cx-main {
+  overflow-x: clip;
+}
+
+/* ---- Web scene: score ring. Number and label stacked in flow, so
+   "100" and "PERFORMANCE" can never touch at any size. */
+.sw-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+}
+
+.sw-score b {
+  position: relative;
+  margin-top: 0;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.15rem, 2.1vw, 2rem);
+}
+
+.sw-score span {
+  position: relative;
+  bottom: auto;
+  font-size: clamp(0.4rem, 0.62vw, 0.54rem);
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+/* ---- Platform scene: keep the "Systems in sync" card clear of the
+   CLOUD and DATA nodes. */
+.sp-graph {
+  width: 78%;
+  height: 78%;
+}
+
+.sp-dash {
+  width: 38%;
+  right: -1%;
+}
+
+@media (max-width: 600px) {
+  .sp-dash { padding: 10px 12px; }
+  .sp-rows { display: none; }
+}
+
+/* ---- Flight plan: the pinned section must fit one screen ------- */
+.cx-flight-pin {
+  height: 100vh;
+  height: 100svh;
+  min-height: 0;
+}
+
+@media (min-width: 901px) {
+  /* Card beside the heading and map, spanning the full height,
+     instead of stacked under the heading where it ran off-screen. */
+  .cx-flight-pin {
+    grid-template-rows: auto minmax(0, 1fr);
+    padding-top: clamp(96px, 13vh, 120px);
+    padding-bottom: clamp(24px, 5vh, 50px);
+  }
+
+  .cx-flight-head { grid-column: 1; }
+
+  .cx-flight-head h2 { font-size: clamp(2.2rem, min(5vw, 8vh), 4.8rem); }
+
+  .cx-flight-card {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    align-self: center;
+    max-height: 100%;
+  }
+
+  .cx-flight-map { min-height: 0; }
+}
+
+/* Short laptop screens: tighten the card so it always fits */
+@media (min-width: 901px) and (max-height: 820px) {
+  .cx-flight-card { padding: 20px 22px 18px; }
+  .cx-flight-card h3 { margin-top: 10px; font-size: clamp(1.5rem, 4vh, 2rem); }
+  .cx-flight-card > p { min-height: 0; font-size: 0.88rem; }
+  .cx-flight-checklist {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+    font-size: 0.78rem;
+  }
+  .cx-flight-meter { margin-top: 12px; }
+  .cx-flight-head p:last-child { margin-top: 8px; font-size: 0.95rem; }
+}
+
+@media (min-width: 901px) and (max-height: 640px) {
+  .cx-flight-head p:last-child { display: none; }
+  .cx-flight-crew { display: none; }
+}
+
+/* Phones and portrait tablets: heading, map, card in one screen */
+@media (max-width: 900px) {
+  .cx-flight-pin {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 84px 6vw 20px;
+  }
+
+  .cx-flight-head h2 { font-size: clamp(2rem, 9vw, 3.4rem); }
+  .cx-flight-head p:last-child { margin-top: 8px; font-size: 0.92rem; }
+  .cx-flight-map { min-height: 0; margin-inline: 4vw; }
+  .cx-flight-card h3 { margin-top: 10px; font-size: 1.5rem; }
+  .cx-flight-crew { margin-top: 10px; }
+  .cx-flight-meter { margin-top: 12px; }
+}
+
+@media (max-width: 900px) and (max-height: 760px) {
+  .cx-flight-head p:last-child { display: none; }
+  .cx-flight-crew { display: none; }
+}
+
+/* Landscape phones: side by side, the only layout that fits 390px tall */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  .cx-flight-pin {
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 42%);
+    grid-template-rows: auto minmax(0, 1fr);
+    padding: 70px 5vw 14px;
+  }
+  .cx-flight-head { grid-column: 1; }
+  .cx-flight-head h2 { font-size: 1.8rem; }
+  .cx-flight-card { grid-column: 2; grid-row: 1 / -1; align-self: center; padding: 14px 16px; }
+  .cx-flight-card h3 { font-size: 1.25rem; }
+  .cx-flight-card > p { font-size: 0.8rem; }
+}
+
+/* ---- Manifesto (pinned): fit short screens ----------------------- */
+@media (max-height: 820px) {
+  .cx-manifesto-pin { padding-block: 96px 40px; }
+  .cx-manifesto-text { font-size: clamp(1.7rem, min(4.6vw, 6.4vh), 4.2rem); }
+  .cx-telemetry { margin-top: clamp(24px, 5vh, 48px); }
+  .cx-tele { padding: 14px 16px 16px; }
+}
+
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  .cx-manifesto-pin { padding-block: 70px 20px; }
+  .cx-manifesto-text { font-size: clamp(1.2rem, 6vh, 1.8rem); }
+  .cx-telemetry { grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 16px; }
+  .cx-tele { padding: 10px 12px 12px; }
+}
+
+/* ---- Fleet panels (horizontal, pinned): fit short laptop screens */
+@media (min-width: 901px) and (max-height: 820px) {
+  .cx-h .cx-panel { padding-block: 96px 64px; }
+  .cx-panel-copy h3 { font-size: clamp(2.2rem, min(5vw, 8vh), 4.6rem); }
+  .cx-panel-idx { margin-bottom: 12px; }
+  .cx-panel-copy > p:not(.cx-panel-idx) { margin-top: 14px; }
+  .cx-svc-list { margin-top: 16px; }
+  .cx-svc-list a { padding-block: 8px; }
+  .cx-scene { max-height: 62vh; }
+  .cx-fleet-title { font-size: clamp(2.8rem, min(8vw, 13vh), 7.5rem); }
+}
+
+@media (min-width: 901px) and (max-height: 680px) {
+  .cx-svc-list span { display: none; }
+  .cx-panel-copy > p:not(.cx-panel-idx) { font-size: 0.95rem; }
+}
+
+/* ---- Ultrawide: stop content stretching into thin lines ---------- */
+@media (min-width: 1920px) {
+  .cx-panel { gap: clamp(60px, 6vw, 140px); }
+  .cx-scene { max-width: 760px; }
+  .cx-flight-pin { grid-template-columns: minmax(0, 1fr) minmax(340px, 440px); }
+}
+
+/* Phones: manifesto and its four stat cards fit one pinned screen */
+@media (max-width: 600px) {
+  .cx-manifesto-pin { padding-block: 84px 24px; }
+  .cx-manifesto-text { font-size: clamp(1.35rem, min(6.4vw, 3.6vh), 1.9rem); }
+  .cx-telemetry { gap: 10px; margin-top: 24px; }
+  .cx-tele { padding: 12px 14px 14px; }
+}

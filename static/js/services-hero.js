@@ -4,7 +4,8 @@
    back-lit by a sun rising over its limb. One fullscreen WebGL
    fragment shader: surface noise, layered atmosphere, faint
    night-side city lights and a filmic tone map.
-   The sun rises on load and climbs further as you scroll.
+   The planet turns on its axis and the sun drifts along the horizon
+   with it; the sun rises on load and climbs further as you scroll.
    Falls back to the CSS eclipse when WebGL is unavailable.
    ============================================================ */
 
@@ -37,12 +38,16 @@
     " float limb=-.335+uRise*.22;",
     " vec2 C=vec2(0.,limb-R);",
     " vec2 q=pp-C;float d=length(q);",
-    " vec2 S=vec2(.0,limb+mix(-.03,.022,uSun));",
-    " vec2 up=normalize(S-C);",
+    // One spin phase drives both the surface rotation and the sun's
+    // drift along the horizon, so the sun tracks the planet's axis.
+    " float spin=uTime*.045;",
+    " float sa=sin(spin*2.2)*.22;",
+    " vec2 up=vec2(sin(sa),cos(sa));",
+    " vec2 S=C+up*(R+mix(-.03,.022,uSun));",
     " vec3 sunCol=vec3(1.,.74,.42);",
     " vec3 ember=vec3(.85,.24,.08);",
     " vec3 amber=vec3(1.,.62,.24);",
-    " float vis=clamp((S.y-limb+.012)/.034,0.,1.);",
+    " float vis=clamp((length(S-C)-R+.012)/.034,0.,1.);",
     " float mask=smoothstep(R+.0012,R-.0012,d);",
     " vec3 col=vec3(0.);",
 
@@ -65,7 +70,7 @@
     " if(d<R+.002){",
     "  vec3 n=vec3(q/R,sqrt(max(1.-dot(q,q)/(R*R),0.)));",
     "  vec3 L=normalize(vec3(up*.14,-1.));",
-    "  float t=uTime*.003;",
+    "  float t=spin;",
     "  vec3 nr=vec3(n.x*cos(t)-n.z*sin(t),n.y,n.x*sin(t)+n.z*cos(t));",
     "  float land=fbm(nr*3.2);",
     "  float dune=fbm(nr*16.+land*2.);",

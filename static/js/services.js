@@ -787,6 +787,9 @@
     var guide = $(".cx-flight-guide", section);
     var trail = $(".cx-flight-trail", section);
     var ship = $(".cx-ship", section);
+    var jet = $(".cx-jet", section);
+    var lastThrustP = 0;
+    var thrustTimer;
     var pointsBox = $(".cx-flight-points", section);
     var card = $(".cx-flight-card", section);
     var num = $("[data-stage-num]", card);
@@ -799,25 +802,26 @@
 
     // name, description, status, services on deck (catalogue slugs)
     var STAGES = [
-      ["Consultation", "We listen first. Goals, audience, constraints and ambitions, mapped before a single pixel moves.", "Ignition",
-        ["ui-ux-design", "artificial-intelligence", "erp-crm"]],
-      ["Deliberation", "We weigh every route: stack, scope, timeline and risk, so you never have to guess.", "Climbing",
-        ["web-development", "custom-platforms", "cloud"]],
-      ["Solutions", "Architecture, design direction and a clear plan, laid out on paper for you to see.", "Climbing",
-        ["custom-platforms", "erp-crm", "branding"]],
-      ["Evaluation", "You review, we refine. Nothing is locked until it is exactly right.", "Course check",
-        ["ui-ux-design", "copywriting", "video-animation"]],
-      ["Finalisation", "Scope, timeline and budget signed off. The flight path is set.", "Locked in",
-        ["it-outsourcing", "erp-crm", "cloud"]],
-      ["Execution", "Design, build, test and launch, with progress you can see every step of the way.", "Full thrust",
-        ["web-development", "ecommerce", "mobile-apps", "branding", "ar-vr"]],
-      ["Management", "Updates, security and growth for the long haul. We stay in orbit with you.", "In orbit",
-        ["web-development", "mobile-apps", "it-outsourcing", "cloud", "artificial-intelligence"]]
+      ["Imagine", "It starts as a spark. We dream it up with you: the idea, the audience and what success looks like.", "Ignition",
+        ["branding", "ui-ux-design", "artificial-intelligence"]],
+      ["Think", "We pressure-test the idea: research, users, market and risk, so every decision has a reason.", "Climbing",
+        ["ui-ux-design", "copywriting", "erp-crm"]],
+      ["Plan", "Scope, stack, timeline and budget, laid out as one clear flight plan you sign off.", "Course set",
+        ["custom-platforms", "cloud", "it-outsourcing"]],
+      ["Create", "Brand, interface, words and motion take shape. You see it, feel it and shape it with us.", "Taking shape",
+        ["branding", "ui-ux-design", "video-animation", "copywriting"]],
+      ["Build", "Engineers bring it to life: code, content, integrations and intelligence, tested at every step.", "Full thrust",
+        ["web-development", "ecommerce", "mobile-apps", "ar-vr", "artificial-intelligence"]],
+      ["Refine", "We tune speed, polish details and fix what data and real users tell us. Nothing ships half-done.", "Course check",
+        ["web-development", "mobile-apps", "ui-ux-design"]],
+      ["Deliver", "Launch day, and every day after: hosting, security, updates and growth. We stay in orbit with you.", "In orbit",
+        ["cloud", "it-outsourcing", "web-development", "mobile-apps"]]
     ];
 
     var len = 0;
     var wps = [];
-    var fractions = [0.03, 0.18, 0.33, 0.49, 0.64, 0.8, 0.97];
+    var wpLen = [];
+    var fractions = [0.004, 0.18, 0.33, 0.49, 0.64, 0.8, 0.97];
     var current = -1;
     var lastProgress = 0;
 
@@ -846,6 +850,7 @@
       trail.style.strokeDasharray = len;
 
       pointsBox.innerHTML = "";
+      wpLen = fractions.map(function (f) { return len * f; });
       wps = fractions.map(function (f, i) {
         var p = trail.getPointAtLength(len * f);
         var before = trail.getPointAtLength(Math.max(0, len * f - 20));
@@ -872,13 +877,34 @@
       var pt = trail.getPointAtLength(at);
       var ahead = trail.getPointAtLength(Math.min(len, at + 2));
       var angle = Math.atan2(ahead.y - pt.y, ahead.x - pt.x) * 180 / Math.PI;
+      // Heading leftwards: mirror the rocket man instead of flying upside down
+      var flip = Math.abs(angle) > 90;
+      if (flip) angle = angle > 0 ? angle - 180 : angle + 180;
+      ship.classList.toggle("is-flipped", flip);
       ship.style.transform = "translate(" + pt.x + "px," + pt.y + "px) rotate(" + angle + "deg)";
+      // Scrolling harder opens the throttle; the plumes ease back when you stop
+      var thrust = Math.min(1, Math.abs(p - lastThrustP) * 40);
+      lastThrustP = p;
+      if (thrust > 0.05 && jet) {
+        jet.style.setProperty("--thrust", thrust.toFixed(2));
+        clearTimeout(thrustTimer);
+        thrustTimer = setTimeout(function () { jet.style.setProperty("--thrust", 0); }, 160);
+      }
       meter.style.transform = "scaleX(" + p + ")";
 
+      // One source of truth: a mark is reached the instant the lit trail
+      // (and the rocket man riding its tip) arrives at it. Dots, labels,
+      // the card and the checklist all switch on that same frame.
       var stage = 0;
-      for (var i = 0; i < fractions.length; i++) if (p >= fractions[i] - 0.02) stage = i;
+      for (var i = 0; i < wpLen.length; i++) if (at >= wpLen[i] - 1) stage = i;
       wps.forEach(function (wp, i) {
-        wp.classList.toggle("is-done", p >= fractions[i] - 0.02);
+        var reached = at >= wpLen[i] - 1;
+        if (reached && !wp.classList.contains("is-done") && current !== -1) {
+          wp.classList.remove("is-arriving");
+          void wp.offsetWidth;
+          wp.classList.add("is-arriving");
+        }
+        wp.classList.toggle("is-done", reached);
         wp.classList.toggle("is-current", i === stage);
       });
       if (stage !== current) setStage(stage);
