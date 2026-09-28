@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /partials/
+Disallow: /tools/
+
+Sitemap: https://worxbyglimpse.com/sitemap.xml
