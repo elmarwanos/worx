@@ -14,10 +14,11 @@
 /* ---- 1. Hero ----------------------------------------------- */
 
 .ct-hero {
+  --ct-layout: side;   /* read by contact-scene.js: where the radar goes */
   position: relative;
   display: flex;
   align-items: center;
-  min-height: max(100svh, 760px);
+  min-height: max(100svh, 680px);
   padding: clamp(130px, 16vh, 170px) 0 clamp(90px, 12vh, 130px);
   isolation: isolate;
   overflow: hidden;
@@ -97,7 +98,7 @@
   color: rgba(254, 238, 207, 0.7);
 }
 
-.ct-card-call { flex: 1; }
+.ct-card-call { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .ct-card-sig { color: var(--accent-2); transition: color 0.3s ease; }
 
 /* the eyebrow as About's status line */
@@ -291,15 +292,73 @@
   100% { box-shadow: 0 0 0 0 rgba(250, 167, 25, 0); }
 }
 
-@media (max-width: 1024px) {
-  .ct-card { width: min(100%, 560px); transform: perspective(900px) rotateY(10deg) rotateX(2deg); }
+/* Hero sizes. Side by side (the card left, the radar in the room to
+   its right) on laptops, desktops and landscape tablets; stacked on
+   portrait tablets and phones, where the card sits on top and the
+   hero keeps a band under it for the radar, so the sky is seen (and
+   answers the channel key) instead of hiding behind the headline. */
+
+/* wide screens: the card grows with the room */
+@media (min-width: 1600px) {
+  .ct-card { width: clamp(500px, 30vw, 620px); font-size: 1.08rem; }
+  .ct-hero h1 { font-size: clamp(3.8rem, 3.6vw, 5rem); }
+  .ct-hero #contact-intro { font-size: 1.06rem; }
+}
+
+@media (min-width: 2200px) {
+  .ct-card { width: clamp(640px, 28vw, 780px); }
+  .ct-hero h1 { font-size: 5.2rem; }
+  .ct-hero #contact-intro { font-size: 1.14rem; }
+  .ct-card-head { font-size: 0.7rem; }
+  .ct-rows li { font-size: 0.74rem; }
+}
+
+/* short laptops (1280x720, 1366x768): the whole card above the fold */
+@media (min-width: 1025px) and (max-height: 820px) {
+  .ct-hero { min-height: max(100svh, 600px); padding: 104px 0 64px; }
+  .ct-rows { margin-top: 12px; }
+  .ct-card-actions { margin-top: 18px; }
+}
+
+/* landscape tablets and small windows: a narrower card, side by side */
+@media (max-width: 1024px) and (orientation: landscape) {
+  .ct-card { width: clamp(300px, 52%, 480px); transform: perspective(900px) rotateY(12deg) rotateX(2deg); }
+}
+
+/* phones on their side: short, so no full-height hero */
+@media (max-height: 520px) and (orientation: landscape) {
+  .ct-hero { min-height: 0; padding: 96px 0 48px; }
+  .ct-rows { display: none; }
+  .ct-card-actions { margin-top: 16px; }
+}
+
+/* portrait tablets and phones: stacked */
+@media (max-width: 1024px) and (orientation: portrait) {
+  .ct-hero {
+    --ct-layout: stacked;
+    align-items: flex-start;
+    min-height: 100svh;
+    padding: clamp(112px, 14vw, 150px) 0 calc(50vw + 60px);
+  }
+  .ct-sky::after { height: 12%; }
+  .ct-card { width: min(100%, max(580px, 64vw)); transform: perspective(900px) rotateY(8deg) rotateX(2deg); }
 }
 
 @media (max-width: 760px) {
-  .ct-hero { min-height: 0; padding-top: 120px; }
-  .ct-card { transform: none; }
+  .ct-hero { min-height: 0; padding-top: 108px; }
+  .ct-card { transform: none; padding-inline: 0; }
   .ct-card::before { inset: -20px -16px; }
+  .ct-card-actions { gap: 12px; }
   .ct-open, .ct-card-actions .bc-call { width: 100%; }
+  .ct-card-actions .bc-call-arrow { margin-left: auto; }
+}
+
+@media (max-width: 380px) {
+  .ct-card-head { font-size: 0.56rem; letter-spacing: 0.12em; }
+  .ct-rows li { font-size: 0.6rem; letter-spacing: 0.1em; }
+  .ct-open { gap: 10px; padding-right: 16px; }
+  .ct-open-txt b { font-size: 0.95rem; }
+  .bc-call-txt b { font-size: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -310,8 +369,9 @@
 /* ---- 2. The console ----------------------------------------- */
 
 .ct-console {
+  --ct-pad: clamp(20px, 4vw, 52px);
   position: relative;
-  padding: clamp(20px, 4vw, 52px);
+  padding: var(--ct-pad);
   padding-top: 0;
   border-radius: calc(var(--radius) * 1.4);
   background:
@@ -361,8 +421,8 @@
   align-items: center;
   gap: 18px;
   min-height: 64px;
-  margin-inline: calc(clamp(20px, 4vw, 52px) * -1);
-  padding-inline: clamp(24px, 4vw, 52px);
+  margin-inline: calc(var(--ct-pad) * -1);
+  padding-inline: max(22px, var(--ct-pad));
   margin-bottom: clamp(20px, 3vw, 34px);
   border-bottom: 1px solid var(--line);
   font-family: var(--font-mono);
@@ -656,8 +716,13 @@
   border-color: transparent;
 }
 
-a.ct-ch:hover {
-  transform: translateY(-4px);
+@media (hover: hover) {
+  a.ct-ch:hover { transform: translateY(-4px); }
+}
+
+/* touch: a press answers instead of a hover that sticks */
+@media (hover: none) {
+  a.ct-ch:active { transform: scale(0.985); border-color: var(--line-strong); }
 }
 
 .ct-ch:hover::after,
@@ -797,10 +862,78 @@ a.ct-ch:focus-visible {
   .ct-ch--social { grid-column: span 6; }
 }
 
+/* phones: one column of compact cards, the arrow riding the label row */
 @media (max-width: 620px) {
-  .ct-channels { grid-template-columns: 1fr; }
-  .ct-ch { grid-column: 1 / -1 !important; min-height: 0; }
-  .ct-ch-value { margin-top: 18px; }
+  .ct-channels { grid-template-columns: 1fr; gap: 10px; }
+  .ct-ch { grid-column: 1 / -1 !important; min-height: 0; gap: 6px; padding: 18px 18px 20px; }
+  .ct-ch-value { margin-top: 10px; }
+  .ct-ch--email .ct-ch-value,
+  .ct-ch--phone .ct-ch-value { font-size: clamp(1.3rem, 6.4vw, 1.6rem); }
+  .ct-ch-arrow { top: 14px; right: 14px; width: 38px; height: 38px; }
+  .ct-ch-links a { min-height: 44px; }
+  .ct-ch-meta a { min-height: 44px; }
+  .ct-channels-head { margin-bottom: 22px; }
+  .ct-channels-head p { max-width: none; }
+}
+
+/* ---- 4. Page widths ----------------------------------------- */
+
+/* the cinema rails (blog-cinema.js) sit at the screen's edges on
+   pointer screens past 1100px: keep the page clear of them, as the
+   blog does; wide screens get a wider deck */
+@media (min-width: 1101px) and (hover: hover) {
+  .ct-hero-grid,
+  #contact-planner,
+  #contact-channels { width: min(1180px, 100% - 240px); }
+}
+
+@media (min-width: 1600px) {
+  .ct-hero-grid,
+  #contact-planner,
+  #contact-channels { width: min(1320px, 100% - 240px); }
+  .ct-console .cw-stage { max-width: 760px; }
+  .ct-console .cw-stage--wide { max-width: none; }
+}
+
+@media (min-width: 2200px) {
+  .ct-hero-grid,
+  #contact-planner,
+  #contact-channels { width: min(1480px, 100% - 280px); }
+  .ct-console .cw-stage { max-width: 820px; }
+  .ct-console .cw-stage--wide { max-width: none; }
+}
+
+/* phones: a slimmer gutter, and the console nearly edge to edge so
+   the questions keep their width */
+@media (max-width: 560px) {
+  .ct-hero-grid,
+  #contact-planner,
+  #contact-channels { width: calc(100% - 32px); }
+
+  .ct-console { --ct-pad: 16px; border-radius: var(--radius); }
+  .ct-console::after { inset: 8px; }
+  .ct-console-bar { min-height: 52px; }
+
+  .ct-console .cw-stage { margin-top: 20px; }
+  .ct-console .cw-legend { font-size: clamp(1.55rem, 7.4vw, 1.9rem); margin-bottom: 16px; }
+
+  /* compact answer cards: five of them fit a phone screen or two */
+  .ct-console .cw-options { gap: 10px; }
+  .ct-console .cw-option,
+  .ct-console .cw-options--build .cw-option { min-height: 0; padding: 15px 16px; }
+  .ct-console .cw-options--build .cw-option-label { font-size: 1.02rem; }
+  .ct-console .cw-option-body::before { top: 16px; right: 14px; }
+  .ct-console .cw-followup { margin-top: 18px; padding: 16px; }
+  .ct-console .cw-textarea-lg { min-height: 140px; }
+
+  .ct-console .cw-nav { margin-top: 26px; padding-top: 18px; }
+  .ct-console .cw-nav .btn { min-width: 0; }
+  .ct-console .cw-step-count { font-size: 0.66rem; letter-spacing: 0.16em; }
+}
+
+/* tablets: question 1 in two columns, "Not sure yet" across the row */
+@media (min-width: 561px) and (max-width: 860px) {
+  .ct-console .cw-options--build .cw-option:last-child { width: 100%; min-height: 0; }
 }
 
 /* ---- Reduced motion ----------------------------------------- */

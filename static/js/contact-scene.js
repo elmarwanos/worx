@@ -155,8 +155,24 @@
       c.textAlign = "left";
     };
 
+    // where the title card sits, so the table takes the room it leaves:
+    // beside it on wide screens, in the band under it when the hero
+    // stacks (contact.css sets --ct-layout); re-read on resize and
+    // every second while the card's fonts and boot settle
+    var card = document.querySelector(".ct-card"), hero = sky.closest(".ct-hero");
+    var box = null, stacked = false, boxAt = -1e9;
+    var measure = function () {
+      boxAt = now();
+      stacked = !!hero && getComputedStyle(hero).getPropertyValue("--ct-layout").trim() === "stacked";
+      if (!card) { box = null; return; }
+      var s = sky.getBoundingClientRect(), b = card.getBoundingClientRect();
+      box = { l: b.left - s.left, r: b.right - s.left, t: b.top - s.top, b: b.bottom - s.top };
+    };
+    window.addEventListener("resize", measure);
+
     loop(sky, function (t) {
       var f = fit(sky), c = f.ctx, w = f.w, h = f.h;
+      if (now() - boxAt > 1000) measure();
       var el = t - t0;
       var dt = lastT ? Math.min(64, t - lastT) : 16;
       lastT = t;
@@ -175,10 +191,25 @@
       }
 
       // the table: tilted (K squashes the disc), turning a touch with the pointer
-      var ox = (mobile ? 0.72 : 0.66) * w - px * 16;
-      var oy = (mobile ? 0.3 : 0.56) * h - py * 10;
-      var R = Math.min(w * (mobile ? 0.6 : 0.3), h * 0.6);
-      var K = (mobile ? 0.5 : 0.4) + py * 0.03;
+      var ox, oy, R, K = (mobile ? 0.5 : 0.4) + py * 0.03;
+      var band = stacked && box ? h - box.b - 12 : 0;
+      if (band > 200) {
+        // stacked: the table fills the band under the card, clear of it
+        // (its far contacts reach 0.68R up, its label 0.42R + 44 down)
+        K = 0.42 + py * 0.03;
+        R = Math.min(w * 0.46, (band - 44) / 1.1, 560);
+        ox = w * 0.5 - px * 12;
+        oy = box.b + 12 + Math.max(0, (band - 44 - R * 1.1) * 0.35) + R * 0.68 - py * 6;
+      } else if (box && !stacked && w - box.r > 220) {
+        // beside the card: sized to the room right of it, never under it
+        R = Math.max(120, Math.min(w * 0.3, h * 0.6, (w - box.r - 24) * 0.48));
+        ox = Math.min(Math.max(0.66 * w, box.r + 24 + R * 1.02), w - R * 0.9) - px * 16;
+        oy = 0.56 * h - py * 10;
+      } else {
+        ox = 0.72 * w - px * 16;
+        oy = 0.3 * h - py * 10;
+        R = Math.min(w * 0.6, h * 0.6);
+      }
       var P = function (a, r) { return [ox + Math.cos(a) * r * R, oy + Math.sin(a) * r * R * K]; };
       var surge = Math.max(0, 1 - (t - surgeAt) / 1600);
       var heat = Math.max(charge, surge);
@@ -317,10 +348,15 @@
       c.fillText("DXB · 25.02°N 55.20°E", ox, oy + R * K + 22);
       c.textAlign = "left";
 
-      // Mars, and the relay to it (not on phones: the headline needs the room)
-      if (!mobile) {
-        var mx = w * 0.93 - px * 26, my = h * 0.15 - py * 18;
-        var cx = (ox + mx) / 2 + 40, cy = Math.min(oy - bh, my) - h * 0.12;
+      // Mars, and the relay to it: top right on wide screens; beside the
+      // card when the hero stacks and there's room; not on phones (the
+      // headline needs the room)
+      var mars = band > 200 ? (box && w - box.r > 130 ? [(box.r + w) / 2 + 10, box.t + 64] : null)
+        : !mobile ? [w * 0.93, h * 0.15] : null;
+      if (mars) {
+        var mx = mars[0] - px * 26, my = mars[1] - py * 18;
+        var cx = band > 200 ? mx + 36 : (ox + mx) / 2 + 40;
+        var cy = band > 200 ? (my + oy - bh) / 2 : Math.min(oy - bh, my) - h * 0.12;
         c.setLineDash([2, 6]);
         c.strokeStyle = "rgba(" + CREAM + "," + (0.16 + heat * 0.3).toFixed(3) + ")";
         c.lineWidth = 1;
