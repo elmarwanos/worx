@@ -718,6 +718,17 @@
     }) : null;
     var current = 0, auto = null, held = false, DUR = 7000, swapT = null;
     mod.style.setProperty("--mod-dur", DUR / 1000 + "s");
+    // phones fly through every module instead of tabbing between them
+    // (home.css "the flight through the modules"): all divisions are in
+    // the page, and the scroll, not a timer, picks the world
+    var phone = window.matchMedia("(max-width: 700px)");
+    var nEl = q("[data-mod-n]", mod);
+    var ticks = qa(".hm-mod-ticks i", mod);
+    var flightMarks = function () {
+      if (nEl) nEl.textContent = ("0" + (current + 1)).slice(-2);
+      ticks.forEach(function (t, j) { t.classList.toggle("is-on", j === current); t.classList.toggle("is-past", j < current); });
+      panels.forEach(function (p, j) { p.classList.toggle("is-current", j === current); });
+    };
 
     var SVGNS = "http://www.w3.org/2000/svg";
     var lines = document.createElementNS(SVGNS, "svg");
@@ -782,7 +793,8 @@
         // restart the timer underline
         if (on) { t.classList.remove("is-active"); void t.offsetWidth; t.classList.add("is-active"); }
       });
-      panels.forEach(function (p, j) { p.hidden = j !== current; });
+      panels.forEach(function (p, j) { p.hidden = !phone.matches && j !== current; });
+      flightMarks();
       if (focus) tabs[current].focus();
       // the pill row (narrow screens) glides the chosen division into view,
       // without moving the page
@@ -816,7 +828,7 @@
     var startAuto = function () {
       clearInterval(auto);
       mod.classList.remove("is-paused");
-      if (held || reduced || !modOn) return;
+      if (held || reduced || !modOn || phone.matches) return;
       restartLine();
       auto = setInterval(function () { select(current + 1); }, DUR);
     };
@@ -828,16 +840,69 @@
     whileVisible(mod, function (on) {
       modOn = on;
       if (!on) { clearInterval(auto); return; }
+      if (phone.matches) { flight(); return; }
       if (!modSeen || held) return;
       startAuto();
     });
 
+    // phones: the plate docks under the header; whichever module's head
+    // has reached its lower edge is the one on screen, and every service
+    // (and head) that slides under the plate fades out of its way
+    var docks = qa(".hm-mod-panel-head, .hm-mod-panel a", mod);
+    var plateTop = function () { return parseFloat(getComputedStyle(visual).top) || 0; };
+    var flightT = 0;
+    var flight = function () {
+      flightT = 0;
+      if (!phone.matches) return;
+      var sr = stage.getBoundingClientRect();
+      if (sr.bottom < 0 || sr.top > window.innerHeight) return;
+      // short screens (phones on their side) keep the plate in the flow:
+      // there the switch line is mid-screen and nothing docks
+      var stuck = getComputedStyle(visual).position === "sticky";
+      var line = stuck ? visual.getBoundingClientRect().bottom : window.innerHeight * 0.5;
+      var at = 0;
+      panels.forEach(function (p, j) { if (p.getBoundingClientRect().top <= line + 60) at = j; });
+      if (at !== current) select(at);
+      docks.forEach(function (d) { d.classList.toggle("is-docked", stuck && d.getBoundingClientRect().top < line - 4); });
+    };
+    window.addEventListener("scroll", function () {
+      if (phone.matches && !flightT) flightT = requestAnimationFrame(flight);
+    }, { passive: true });
+    // a pill (or an arrow key) on a phone flies the page to its module
+    var flyTo = function (i) {
+      var head = panels[i].getBoundingClientRect().top + window.scrollY;
+      var stuck = getComputedStyle(visual).position === "sticky";
+      var to = head - (stuck ? plateTop() + visual.offsetHeight + 16 : 88);
+      // the first module sits right under the plate: fly to the plate itself
+      if (!i && stuck) to = Math.min(to, stage.getBoundingClientRect().top + window.scrollY - plateTop());
+      window.scrollTo({ top: to, behavior: reduced ? "auto" : "smooth" });
+    };
+    var setMode = function () {
+      if (phone.matches) {
+        clearInterval(auto);
+        panels.forEach(function (p) { p.hidden = false; });
+        flight();
+      } else {
+        docks.forEach(function (d) { d.classList.remove("is-docked"); });
+        panels.forEach(function (p, j) { p.hidden = j !== current; });
+        if (modSeen && modOn) startAuto();
+      }
+      flightMarks();
+    };
+    if (phone.addEventListener) phone.addEventListener("change", setMode); else if (phone.addListener) phone.addListener(setMode);
+    setMode();
+
     tabs.forEach(function (t, i) {
-      t.addEventListener("click", function () { hold(); select(i); });
+      t.addEventListener("click", function () {
+        if (phone.matches) { flyTo(i); return; }
+        hold(); select(i);
+      });
       t.addEventListener("keydown", function (e) {
         var d = e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : e.key === "ArrowUp" || e.key === "ArrowLeft" ? -1 : 0;
         if (!d) return;
-        e.preventDefault(); hold(); select(current + d, true);
+        e.preventDefault();
+        if (phone.matches) { var to = (current + d + tabs.length) % tabs.length; tabs[to].focus(); flyTo(to); return; }
+        hold(); select(current + d, true);
       });
     });
     mod.addEventListener("pointerenter", function (e) { if (!held && e.pointerType === "mouse") pauseAuto(); });
