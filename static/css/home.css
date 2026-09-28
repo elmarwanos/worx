@@ -306,79 +306,25 @@
   transform: scale(1.06);
 }
 
-/* the film: fades in over the generated one once it plays; its collapse
-   into the singularity is directed per frame by home.js (--k) */
+/* the film: shown over the generated one once it plays */
 .hx-video {
-  --k: 0;
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0;
   --rx: 0;
   --ry: 0;
-  --sx: 0px;
-  --sy: 0px;
-  --pk: 0;
-  --vo: 1;
-  /* 3D: the film leans with the pointer (a window into real space) and
-     shakes with the violent moments (home.js --rx/--ry, --sx/--sy).
-     The collapse (--pk): the frame holds still while its light heats,
-     softens and burns brighter, until the film dissolves (--vo) into
-     the point of light (.hx-star). */
+  /* 3D: the film leans with the pointer (a window into real space,
+     home.js --rx/--ry) */
   transform:
-    translate3d(var(--sx), var(--sy), 0)
     perspective(1400px) rotateX(calc(var(--ry) * -2.2deg)) rotateY(calc(var(--rx) * 3deg))
     scale(1.06);
-  /* no zoom in the collapse: the frame holds, its light burns, softens
-     and is drawn into the point */
-  filter: blur(calc(var(--pk) * var(--pk) * 5px)) brightness(calc(1 + var(--pk) * 1.25)) contrast(calc(1 + var(--pk) * 0.25)) saturate(calc(1 + var(--pk) * 0.45));
-  opacity: var(--vo);
-  will-change: transform, filter, opacity;
+  will-change: transform;
 }
 
 .hx:not(.has-film) .hx-video { opacity: 0 !important; }
 .hx.has-film .hx-gl { opacity: 0; transition: opacity 1.4s ease; }
-
-/* volumetric dust in depth, over the film */
-.hx-dust {
-  position: absolute;
-  inset: -4%;
-  width: 108%;
-  height: 108%;
-  pointer-events: none;
-}
-
-/* the collapse's inward rush: light streaming down into the point */
-.hx-rush {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0;
-  background:
-    repeating-conic-gradient(from 0deg at 50% 50%, rgba(255, 214, 160, 0) 0deg, rgba(255, 214, 160, 0.22) 1.2deg, rgba(255, 214, 160, 0) 3deg, rgba(255, 214, 160, 0) 7deg);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 2%, #000 12%, #000 40%, transparent 75%);
-  mask-image: radial-gradient(circle at 50% 50%, transparent 2%, #000 12%, #000 40%, transparent 75%);
-  mix-blend-mode: screen;
-}
-
-/* anamorphic flare: a long amber-white streak through the brightest light */
-.hx-flare {
-  position: absolute;
-  left: -10%;
-  right: -10%;
-  top: 50%;
-  height: 2px;
-  margin-top: -1px;
-  pointer-events: none;
-  opacity: 0;
-  /* brand light only: amber wings, a cream-white core */
-  background: linear-gradient(90deg, transparent, rgba(250, 167, 25, 0.35) 20%, rgba(255, 244, 228, 1) 50%, rgba(250, 167, 25, 0.35) 80%, transparent);
-  box-shadow: 0 0 18px 4px rgba(255, 210, 160, 0.45), 0 0 60px 10px rgba(229, 125, 35, 0.2);
-  mix-blend-mode: screen;
-}
 
 /* film grain: one generated noise tile, stepped around */
 .hx-grain {
@@ -480,88 +426,13 @@
 
 @keyframes hx-sweep { to { transform: translateX(120%); } }
 
-/* the singularity the universe collapses into, and the flash it
-   erupts from as the film begins */
-.hx-point,
+/* the flash the film erupts from as it begins */
 .hx-flash {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   opacity: 0;
-}
-
-/* THE POINT OF LIGHT (the reference: a white-hot core, radiating
-   spikes, a screen-wide anamorphic flare), in the Worx palette.
-   --s: 0 = gone, ~0.12 = the pen-point, 1 = blazing, >1 = erupting */
-.hx-star {
-  --s: 0;
-  opacity: 1 !important;
-  mix-blend-mode: screen;
-}
-
-.hx-star i {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  display: block;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.hx-star-core {
-  width: calc(1.2vmin + var(--s) * 7vmin);
-  height: calc(1.2vmin + var(--s) * 7vmin);
-  background: radial-gradient(circle, #fff 0 18%, rgba(255, 244, 222, 0.95) 30%, rgba(250, 167, 25, 0.55) 55%, rgba(229, 125, 35, 0) 72%);
-  opacity: min(1, calc(var(--s) * 7));
-  filter: blur(calc(0.2px + var(--s) * 1px));
-}
-
-.hx-star-glow {
-  width: calc(var(--s) * 120vmin);
-  height: calc(var(--s) * 120vmin);
-  background: radial-gradient(circle, rgba(255, 196, 120, 0.55), rgba(229, 125, 35, 0.22) 30%, rgba(192, 69, 39, 0.08) 55%, transparent 72%);
-  opacity: min(1, calc(var(--s) * 1.4));
-}
-
-/* spikes of light, two sets turning against each other */
-.hx-star-rays {
-  width: calc(var(--s) * 150vmin);
-  height: calc(var(--s) * 150vmin);
-  background: repeating-conic-gradient(from 0deg, rgba(255, 226, 180, 0) 0deg, rgba(255, 226, 180, 0.5) 0.7deg, rgba(255, 190, 110, 0) 2.4deg, rgba(255, 190, 110, 0) 13deg);
-  -webkit-mask-image: radial-gradient(circle, #000 0%, rgba(0, 0, 0, 0.6) 22%, transparent 62%);
-  mask-image: radial-gradient(circle, #000 0%, rgba(0, 0, 0, 0.6) 22%, transparent 62%);
-  opacity: min(1, calc(var(--s) * 1.2));
-  animation: hx-rays 26s linear infinite;
-}
-
-.hx-star-rays--b {
-  width: calc(var(--s) * 110vmin);
-  height: calc(var(--s) * 110vmin);
-  background: repeating-conic-gradient(from 7deg, rgba(255, 150, 60, 0) 0deg, rgba(255, 170, 80, 0.45) 1.1deg, rgba(255, 150, 60, 0) 3.4deg, rgba(255, 150, 60, 0) 23deg);
-  animation-duration: 38s;
-  animation-direction: reverse;
-}
-
-@keyframes hx-rays { to { transform: translate(-50%, -50%) rotate(360deg); } }
-
-/* the anamorphic flare: a hot thin line and a soft wide band */
-.hx-star-streak {
-  width: calc(var(--s) * 160vw);
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, transparent, rgba(229, 125, 35, 0.35) 18%, rgba(255, 214, 160, 0.95) 44%, #fff 50%, rgba(255, 214, 160, 0.95) 56%, rgba(229, 125, 35, 0.35) 82%, transparent);
-  box-shadow: 0 0 10px 1px rgba(255, 200, 130, 0.7);
-  opacity: min(1, calc(var(--s) * 2.5));
-}
-
-.hx-star-streak--soft {
-  width: calc(var(--s) * 120vw);
-  height: calc(var(--s) * 7vmin);
-  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(250, 167, 25, 0.42), rgba(192, 69, 39, 0.1) 55%, transparent 75%);
-  box-shadow: none;
-  filter: blur(6px);
 }
 
 .hx-flash {
@@ -590,8 +461,7 @@
     linear-gradient(180deg, rgba(8, 3, 2, 0.5) 0%, rgba(8, 3, 2, 0) 20%, rgba(8, 3, 2, 0) 62%, rgba(8, 3, 2, 0.72) 100%);
 }
 
-/* glare shield: while the Big Bang burns white (home.js sets --glare),
-   a dark bloom rises behind the copy so the headline never washes out */
+/* a dark bloom behind the copy so the headline never washes out */
 .hx-shade::after {
   content: "";
   position: absolute;
@@ -600,7 +470,7 @@
   bottom: 0;
   height: 40%;
   background: radial-gradient(ellipse 50% 70% at 50% 100%, rgba(6, 2, 1, 0.7), transparent 75%);
-  opacity: calc(0.3 + var(--glare, 0) * 0.7);
+  opacity: 0.3;
 }
 
 /* the film's letterbox: in while the universe is born and dies,
@@ -3915,11 +3785,10 @@
 
 /* ---- reduced motion --------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  .hx-grain, .hx-dust { display: none; }
+  .hx-grain { display: none; }
   .hm-stage { transform: none !important; }
   .hm-arc-trail, .hm-arc-craft { display: none; }
   .hm-fclock-ladder li.is-now, .hm-stage.is-live .hm-stage-st i, .hm-fclock.is-go .hm-fclock-row::after { animation: none; }
-  .hx-star-rays { animation: none; }
   .hx.is-born .hx-card-word span { animation: none; opacity: 1; }
   .hx-line > span,
   .hm-split-line > span { transform: none !important; transition: none !important; }
