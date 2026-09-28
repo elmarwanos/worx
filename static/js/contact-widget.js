@@ -6,7 +6,7 @@
    channel below comes from the CONTACT dictionary, edit the data,
    not the markup.
    The console opens from any [data-contact-open] trigger and from
-   every "Get a Quote" CTA; without JS those CTAs keep
+   every "Quick Enquiry" CTA; without JS those CTAs keep
    their own link to the contact page.
    ============================================================ */
 
@@ -15,11 +15,11 @@
 
   // --- The dictionary --------------------------------------------
   var CONTACT = {
-    title: "Get a Quote",
+    title: "Quick Enquiry",
     intro: "Pick a channel or leave a note, we usually reply within a day.",
     recipient: "Hello@worxbyglimpse.com",
     subjectPrefix: "Project enquiry from ",
-    ctaText: /get a quote|talk to mission control/i,
+    ctaText: /quick enquiry|get a quote|talk to mission control/i,
     whatsapp: {
       href: "https://wa.me/971555669847",
       greeting: "Hi Worx, I'd like to talk about a project.",

@@ -109,7 +109,7 @@ function megaMenu(prefix) {
             <div class="mega-foot">
               <span><b>${services.length}</b> services · <b>${capRounded}+</b> capabilities · one crew</span>
               <a href="${prefix}services/index.html" class="mega-all">View all services <span aria-hidden="true">→</span></a>
-              <a href="${prefix}contact/index.html" class="btn btn-primary mega-cta">Get a Quote</a>
+              <a href="${prefix}contact/index.html" class="btn btn-primary mega-cta">Quick Enquiry</a>
             </div>
           </div>
         </div>`;
