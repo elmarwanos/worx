@@ -172,7 +172,6 @@
 
     // ---- THE FILM ------------------------------------------------
     var video = q(".hx-video", hx);
-    var pointEl = q(".hx-point", hx);
     var flashEl = q(".hx-flash", hx);
     // The film's journey, as the flight recorder reads it: from the
     // pen-point singularity, through the expansion, down to the inner
@@ -212,10 +211,18 @@
     var ticksEl = q("[data-hx-ticks]", hx);
     var headEl = q("[data-hx-head]", hx);
     var ticks = [];
+    // the film is cut here (seconds): the footage after it carries its own
+    // text, so the title card takes over before that plays
+    var FILM_END = 8.5;
+    var COLLAPSE = 1.6;    // seconds: the readout counts down to the singularity
+    // the closing title card (seconds after the cut): black, WORX appears
+    // straight away, then the headline and actions return under it. The
+    // film plays once; the card is where it rests.
+    var CARD = { born: 0, final: 1.2 };
     var filmOn = false;
 
     // ---- cinematic layers --------------------------------------------
-    var dustCv = q(".hx-dust", hx), flareEl = q(".hx-flare", hx), grainEl = q(".hx-grain", hx);
+    var grainEl = q(".hx-grain", hx);
     if (grainEl) {
       var gc = document.createElement("canvas"); gc.width = gc.height = 160;
       var gx = gc.getContext("2d"), gi = gx.createImageData(160, 160);
@@ -223,96 +230,35 @@
       gx.putImageData(gi, 0, 0);
       grainEl.style.backgroundImage = "url(" + gc.toDataURL() + ")";
     }
-    // three depths of dust: far specks, mid motes, near out-of-focus bokeh
-    var dust = [], dctx = dustCv ? dustCv.getContext("2d") : null, dW = 0, dH = 0;
-    var seedDust = function () {
-      if (!dustCv) return;
-      dW = dustCv.width = Math.round(dustCv.clientWidth);
-      dH = dustCv.height = Math.round(dustCv.clientHeight);
-      dust = [];
-      var n = Math.min(220, Math.round(dW * dH / 7000));
-      for (var i = 0; i < n; i++) {
-        var z = Math.random();
-        dust.push({ x: Math.random() * dW, y: Math.random() * dH, z: z < 0.62 ? 0.2 + Math.random() * 0.3 : z < 0.93 ? 0.5 + Math.random() * 0.3 : 0.85 + Math.random() * 0.15, p: Math.random() * 6.28 });
-      }
-    };
-    seedDust();
-    var dustW = window.innerWidth;
-    window.addEventListener("resize", function () { if (window.innerWidth !== dustW) { dustW = window.innerWidth; seedDust(); } });
     var ptr = { x: 0, y: 0, tx: 0, ty: 0 };
     window.addEventListener("pointermove", function (e) {
       ptr.tx = e.clientX / window.innerWidth * 2 - 1;
       ptr.ty = e.clientY / window.innerHeight * 2 - 1;
     }, { passive: true });
-    var drawDust = function (now, surge, dt) {
-      if (!dctx) return;
-      dctx.clearRect(0, 0, dW, dH);
-      var cx = dW / 2, cy = dH / 2;
-      for (var i = 0; i < dust.length; i++) {
-        var m = dust[i];
-        // drift + a surge that throws everything outward from the centre
-        var dx = m.x - cx, dy = m.y - cy, dl = Math.sqrt(dx * dx + dy * dy) + 1;
-        var v = (6 + Math.abs(surge) * 900) * m.z * dt;
-        var dir = surge < 0 ? -1 : 1;
-        m.x += dx / dl * v * (0.3 + Math.abs(surge)) * dir - 10 * m.z * dt;
-        m.y += dy / dl * v * (0.3 + Math.abs(surge)) * dir - 3 * m.z * dt + Math.sin(now * 0.0005 + m.p) * 0.08;
-        if (surge < -0.2 && dl < 24) {
-          // swallowed by the point: reborn at the edge of the frame
-          var ang = Math.random() * 6.283, rr = Math.max(dW, dH) * 0.6;
-          m.x = cx + Math.cos(ang) * rr; m.y = cy + Math.sin(ang) * rr;
-        }
-        if (m.x < -30 || m.x > dW + 30 || m.y < -30 || m.y > dH + 30) {
-          // reborn near the centre during a surge (streaming out), else anywhere
-          if (surge > 0.2) { m.x = cx + (Math.random() - 0.5) * dW * 0.3; m.y = cy + (Math.random() - 0.5) * dH * 0.3; }
-          else { m.x = dW + 20; m.y = Math.random() * dH; }
-        }
-        // parallax: nearer dust slides further with the pointer
-        var px2 = m.x - ptr.x * 60 * m.z * m.z, py2 = m.y - ptr.y * 36 * m.z * m.z;
-        var tw = 0.6 + 0.4 * Math.sin(now * 0.0021 + m.p);
-        if (m.z > 0.85) {
-          var r = 10 + (m.z - 0.85) * 160;
-          var g = dctx.createRadialGradient(px2, py2, 0, px2, py2, r);
-          g.addColorStop(0, "rgba(255,196,130," + (0.12 * tw).toFixed(3) + ")");
-          g.addColorStop(0.6, "rgba(229,125,35," + (0.05 * tw).toFixed(3) + ")");
-          g.addColorStop(1, "rgba(229,125,35,0)");
-          dctx.fillStyle = g;
-          dctx.beginPath(); dctx.arc(px2, py2, r, 0, 6.283); dctx.fill();
-        } else {
-          var a2 = (0.18 + 0.5 * m.z) * tw;
-          dctx.fillStyle = "rgba(255," + (170 + (m.z * 60 | 0)) + ",110," + a2.toFixed(3) + ")";
-          var sz = 0.6 + m.z * 2.2;
-          if (Math.abs(surge) > 0.3) {
-            // streaks while the universe is flung outward
-            dctx.strokeStyle = dctx.fillStyle; dctx.lineWidth = sz;
-            dctx.beginPath(); dctx.moveTo(px2, py2); dctx.lineTo(px2 - dx / dl * v * 3 * dir, py2 - dy / dl * v * 3 * dir); dctx.stroke();
-          } else dctx.fillRect(px2, py2, sz, sz);
-        }
-      }
-    };
-    var shakeAt = function (t) {
-      // violent moments in the film: the Bang, the collisions, ignition
-      var s2 = Math.max(0, 1 - t / 0.9) * 14;
-      if (t > 5.2 && t < 6.6) s2 = Math.max(s2, 4 + 3 * Math.sin((t - 5.2) * 9));
-      if (t > 6.8 && t < 7.3) s2 = Math.max(s2, 7 * (1 - (t - 6.8) / 0.5));
-      return s2;
-    };
-    var flareAt = function (t) {
-      return Math.max(0, 1 - Math.abs(t - 0.12) / 0.7) * 1.0 + Math.max(0, 1 - Math.abs(t - 7.0) / 0.5) * 0.6;
+    // the flight recorder at rest in the singularity
+    var restRecorder = function () {
+      if (lastLabel !== "SINGULARITY") { lastLabel = "SINGULARITY"; scramble(labelEl, "SINGULARITY", 520); }
+      timeEl.textContent = "0 s";
+      auEl.textContent = "0.00";
+      reelEl.style.transform = "scaleX(0)";
+      headEl.style.left = "0%";
+      ticks.forEach(function (em) { em.classList.remove("is-past", "is-now"); });
     };
 
     if (video && !reduced && freeze == null) {
-      var wpx = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2);
-      video.src = video.getAttribute(wpx > 2200 ? "data-src-1440" : wpx > 1100 ? "data-src-1080" : "data-src-720");
+      // one HQ file for every screen; the per-resolution pick is parked
+      // until the other qualities are re-encoded from the new film
+      // var wpx = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2);
+      // video.src = video.getAttribute(wpx > 2200 ? "data-src-1440" : wpx > 1100 ? "data-src-1080" : "data-src-720");
+      video.src = video.getAttribute("data-src");
       video.load();
-      var state = "wait", inView = true, lastNow = 0;
-      var setState = function (st) { state = st; };
-      // the film plays once and rests on its last frame
-      var endFilm = function () {
-        setState("end");
-        pointEl.style.setProperty("--s", "0");
-        flashEl.style.opacity = "0";
-        flareEl.style.opacity = "0";
-        hxStage.style.setProperty("--glare", "0");
+      var state = "wait", stateT0 = 0, inView = true;
+      var setState = function (st) { state = st; stateT0 = performance.now(); };
+      var startCard = function () {
+        video.pause();
+        hx.classList.add("is-card");
+        hx.classList.remove("is-born", "is-final");
+        setState("card");
       };
       var playFilm = function () {
         try { video.currentTime = 0; } catch (e) {}
@@ -330,35 +276,32 @@
       var begin = function () { if (state === "wait") { hx.classList.add("has-film"); if (film) film.pause(); playFilm(); } };
       video.addEventListener("canplaythrough", begin);
       setTimeout(function () { if (video.readyState >= 3) begin(); }, 2500);
-      video.addEventListener("ended", function () { if (state === "film") endFilm(); });
+      video.addEventListener("ended", function () { if (state === "film") startCard(); });
       if ("IntersectionObserver" in window) new IntersectionObserver(function (en) {
         inView = en[0].isIntersecting;
         if (!inView) video.pause(); else if (state === "film") { var p3 = video.play(); if (p3 && p3.catch) p3.catch(function () {}); }
       }).observe(hx);
 
       (function direct(now) {
-        var dt = lastNow ? Math.min(0.05, (now - lastNow) / 1000) : 0.016;
-        lastNow = now;
         if (!inView || document.hidden) { requestAnimationFrame(direct); return; }   // resting off screen
         ptr.x += (ptr.tx - ptr.x) * 0.05; ptr.y += (ptr.ty - ptr.y) * 0.05;
         video.style.setProperty("--rx", ptr.x.toFixed(3));
         video.style.setProperty("--ry", ptr.y.toFixed(3));
-        var surge = 0;
-
-        if (state === "film" && !video.paused) {
-          var t = video.currentTime, d = video.duration || 11.05;
-          var eruptS = t < 0.55 ? 1.3 * (1 - smooth(t / 0.55)) : 0;
-          pointEl.style.setProperty("--s", eruptS.toFixed(4));
+        if (state === "card" && inView) {
+          var ct = (now - stateT0) / 1000;
+          restRecorder();
+          if (ct >= CARD.born && !hx.classList.contains("is-born")) hx.classList.add("is-born");
+          if (ct >= CARD.final && !hx.classList.contains("is-final")) hx.classList.add("is-final");
+          flashEl.style.opacity = "0";
+        } else if (state === "film" && !video.paused) {
+          var t = video.currentTime, d = Math.min(video.duration || FILM_END, FILM_END);
+          // the film plays untouched to the cut; k only drives the
+          // readout's countdown to the singularity over its last seconds
+          var k = clamp01((t - (d - COLLAPSE)) / COLLAPSE);
+          if (t >= d - 0.04) startCard();
           // eruption flash as the film begins
           var e = t < 0.5 ? 1 - t / 0.5 : 0;
           flashEl.style.opacity = (e * e).toFixed(3);
-          flareEl.style.opacity = Math.min(1, flareAt(t)).toFixed(3);
-          surge = Math.max(t < 1.2 ? 1 - t / 1.2 : 0, t > 5.2 && t < 6.4 ? 0.35 : 0);
-          var sh = shakeAt(t);
-          video.style.setProperty("--sx", (Math.sin(now * 0.09) * Math.cos(now * 0.043) * sh).toFixed(2) + "px");
-          video.style.setProperty("--sy", (Math.cos(now * 0.077) * Math.sin(now * 0.051) * sh).toFixed(2) + "px");
-          var glare = t < 1.9 ? 1 - smooth((t - 1.1) / 0.8) : 0;
-          hxStage.style.setProperty("--glare", glare.toFixed(3));
           // the flight recorder: chapter, cosmic age, scale
           var ci = 0;
           for (var i = 0; i < CHAPTERS.length; i++) if (t >= CHAPTERS[i][0]) ci = i;
@@ -368,10 +311,15 @@
           var cosmic = logLerp(c0[2], c1[2], kk), au = logLerp(c0[3], c1[3], kk);
           if (t < 0.25) { cosmic = logLerp(5.4e-44, 1e-32, t / 0.25); au = logLerp(1e-30, 1e-6, t / 0.25); }
           var label = c0[1];
+          if (k > 0.02) {
+            label = k > 0.82 ? "SINGULARITY" : "COLLAPSE";
+            cosmic = logLerp(13.8e9 * YR, 5.4e-44, k);
+            au = logLerp(1, 1e-30, Math.pow(k, 0.7));
+          }
           if (label !== lastLabel) { lastLabel = label; scramble(labelEl, label, 520); }
           timeEl.textContent = fmtTime(cosmic);
           auEl.textContent = fmtAU(au);
-          var f = t / d;
+          var f = k > 0.02 ? 1 - k : t / d;
           reelEl.style.transform = "scaleX(" + f.toFixed(4) + ")";
           headEl.style.left = (f * 100).toFixed(2) + "%";
           if (!ticks.length && d) {
@@ -383,11 +331,10 @@
             });
           }
           ticks.forEach(function (em, j) {
-            em.classList.toggle("is-past", j < ci);
-            em.classList.toggle("is-now", j === ci);
+            em.classList.toggle("is-past", j < ci && k <= 0.02);
+            em.classList.toggle("is-now", j === ci && k <= 0.02);
           });
         }
-        if (inView && state !== "wait") drawDust(now, surge, dt);
         requestAnimationFrame(direct);
       })(performance.now());
     }
@@ -397,7 +344,7 @@
 
     // The CTA headline: one line of code, edited by hand. It only runs
     // while the headline is on screen with the two actions (the hero is
-    // .is-ready); each time they arrive it starts
+    // .is-ready and not on its title card); each time they arrive it starts
     // again from the plain sentence. A chain of timeouts, one per key.
     //   NATURAL -> DELETING -> BRANDED TYPING -> BRANDED -> DELETING ->
     //   NATURAL TYPING -> NATURAL -> ...
@@ -451,6 +398,9 @@
             later(step, keyDelay(target.charAt(text.length), prev));
           })();
         };
+        // about how long the way back takes: a held backspace over the
+        // brand line, a beat, then the plain words typed
+        var UNDO = 150 + (BRANDED.length - KEEP - 1) * 42 + 280 + (NATURAL.length - KEEP) * 92;
         var typing = function (on) { say.classList.toggle("is-typing", on); };
         var cycle = function (holdNatural) {
           typing(false);
@@ -460,8 +410,18 @@
               later(function () {
                 type(BRANDED, function () {        // BRANDED TYPING
                   typing(false);
-                  // BRANDED, the brand line, held longest
+                  // BRANDED, the brand line, held longest. While the film
+                  // plays, the actions leave with it (the title card), so
+                  // the hold is fitted to what is left of the reel: the
+                  // plain sentence comes back just before they go. Too
+                  // little left to undo it gracefully: the brand line
+                  // simply stays until the card.
                   var hold = 3400;
+                  if (video && hx.classList.contains("has-film") && !video.paused && video.duration) {
+                    var left = (Math.min(video.duration, FILM_END) - video.currentTime) * 1000;
+                    hold = Math.min(3400, left - UNDO - 250);
+                    if (hold < 1600) return;
+                  }
                   later(function () {
                     typing(true);
                     backspace(function () {        // DELETING
@@ -479,7 +439,7 @@
           clearTimeout(sayT); running = false;
           text = NATURAL; paint(text); typing(false);
         };
-        var shown = function () { return hx.classList.contains("is-ready") && heroSeen && !document.hidden; };
+        var shown = function () { return hx.classList.contains("is-ready") && (!hx.classList.contains("is-card") || hx.classList.contains("is-final")) && heroSeen && !document.hidden; };
         var sync = function () {
           if (shown() && !running) { running = true; cycle(2200); }   // first read, while the reveal settles
           else if (!shown() && running) stop();
@@ -1617,7 +1577,6 @@
   });
 
   // Martian dust: slow embers on a thin wind, quickening with scroll.
-  // (its own scope: the hero's film dust above uses the same names)
   (function () {
     var dust = q(".hm-dust");
     if (dust && !reduced) {

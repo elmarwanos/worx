@@ -176,22 +176,24 @@
           <canvas class="hx-gl" aria-hidden="true"></canvas>
           <!-- THE FILM: the universe's birth to the solar system, cleaned,
                graded and looped by tools/hero-video/build.py; home.js
-               picks the resolution, directs the collapse into the point and
-               the eruption back out, and runs the chapter readout. The
+               plays it, cuts it before its closing text and runs the
+               chapter readout. The
                cosmos.js film above plays until this one is ready. -->
           <video class="hx-video" muted playsinline preload="auto" poster="static/assets/home/hero-poster.jpg" aria-hidden="true"
-            data-src-1440="static/assets/home/hero-1080.mp4"
+            data-src="static/assets/home/hero-1080-hq.mp4"></video>
+          <!-- the other qualities, not used for now (home.js plays the one
+               file above on every screen):
+            data-src-1440="static/assets/home/hero-1440.mp4"
             data-src-1080="static/assets/home/hero-1080.mp4"
-            data-src-720="static/assets/home/hero-1080.mp4"></video>
-          <!-- the cinematic layers over the film: volumetric dust in depth
-               (it tilts with the pointer for a 3D feel), the inward rush of the
-               collapse, an anamorphic flare for the brightest moments, grain -->
-          <canvas class="hx-dust" aria-hidden="true"></canvas>
-          <span class="hx-rush" aria-hidden="true"></span>
-          <span class="hx-flare" aria-hidden="true"></span>
+            data-src-720="static/assets/home/hero-720.mp4" -->
+          <!-- film grain over the film -->
           <span class="hx-grain" aria-hidden="true"></span>
-          <!-- the point of light the Big Bang erupts out of (home.js drives --s) -->
-          <span class="hx-star hx-point" aria-hidden="true"><i class="hx-star-rays"></i><i class="hx-star-rays hx-star-rays--b"></i><i class="hx-star-glow"></i><i class="hx-star-streak"></i><i class="hx-star-streak hx-star-streak--soft"></i><i class="hx-star-core"></i></span>
+          <!-- THE TITLE CARD, where the film comes to rest: black, then
+               WORX appears and holds (no loop), with the headline and the
+               actions back under it -->
+          <div class="hx-card" aria-hidden="true">
+            <div class="hx-card-word"><span style="--o:1.5">W</span><span style="--o:0.5">O</span><span style="--o:-0.5">R</span><span style="--o:-1.5">X</span></div>
+          </div>
           <span class="hx-flash" aria-hidden="true"></span>
           <span class="hx-shade" aria-hidden="true"></span>
           <span class="hx-bars" aria-hidden="true"><i></i><i></i></span>
