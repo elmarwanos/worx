@@ -316,7 +316,7 @@
     els.steps.innerHTML = "";
     // Question 1's cards get the full page width; every other question
     // stays in the narrow conversational column.
-    els.stage.classList.toggle("cw-stage--wide", step.id === "build");
+    els.stage.classList.toggle("cw-stage--wide", step.id === "build" || step.id === "final");
 
     var legend = h("legend", { "class": "cw-legend", tabindex: "-1" }, [step.legend]);
     var fieldset = h("fieldset", { "class": "cw-step" }, [
@@ -374,40 +374,67 @@
     return group;
   }
 
-  // --- Question 1's cards: each is a mission module with a blueprint ---
-  // The blueprint draws itself in as the card arrives, comes alive under
-  // the pointer (each in its own way, contact.css) and glows once picked;
-  // the card tilts toward the pointer. Purely decorative: the radio and
-  // its label are unchanged.
+  // --- The answer cards: every choice is a mission module -------------
+  // Each card gets a blueprint that draws itself in as the card arrives,
+  // comes alive under the pointer (one motion per blueprint, named by its
+  // class in contact.css: ba-type, ba-bars, ba-swipe, ba-nudge, ba-data,
+  // ba-spin, ba-spin-r, ba-pulse, ba-lift) and glows once picked; the card
+  // tilts toward the pointer and locks on when chosen. Purely decorative:
+  // the radio and its label are unchanged.
   var BUILD_ART = {
-    "website": '<rect x="6" y="6" width="108" height="60" rx="5"/><path d="M6 16h108"/><circle cx="13" cy="11" r="1.6"/><circle cx="19" cy="11" r="1.6"/><circle cx="25" cy="11" r="1.6"/><g class="ba-a"><path d="M16 28h44"/><path d="M16 36h32"/><path d="M16 44h38"/></g><rect class="ba-b" x="72" y="24" width="32" height="30" rx="3"/><path class="ba-b" d="M72 48l10-9 7 6 6-4 9 7"/>',
-    "web-app": '<rect x="6" y="6" width="108" height="60" rx="5"/><path d="M30 6v60"/><g class="ba-a"><path d="M12 18h12"/><path d="M12 26h12"/><path d="M12 34h12"/></g><g class="ba-b"><path d="M44 56V42"/><path d="M56 56V32"/><path d="M68 56V46"/><path d="M80 56V26"/><path d="M92 56V38"/></g><circle class="ba-c" cx="102" cy="16" r="4"/>',
-    "mobile-app": '<rect x="42" y="4" width="36" height="64" rx="7"/><path d="M54 9h12"/><g class="ba-a"><rect x="47" y="16" width="26" height="18" rx="2"/><path d="M47 42h26"/><path d="M47 49h18"/><path d="M47 56h22"/></g><g class="ba-c"><path d="M26 30l-8 6 8 6"/><path d="M94 30l8 6-8 6"/></g>',
-    "platform": '<circle cx="60" cy="36" r="8"/><circle cx="20" cy="16" r="5"/><circle cx="100" cy="16" r="5"/><circle cx="20" cy="56" r="5"/><circle cx="100" cy="56" r="5"/><g class="ba-l"><path d="M25 18l28 13"/><path d="M95 18l-28 13"/><path d="M25 54l28-13"/><path d="M95 54l-28-13"/></g><g class="ba-p"><path d="M25 18l28 13"/><path d="M95 54l-28-13"/></g>',
-    "unsure": '<g class="ba-o"><ellipse cx="60" cy="36" rx="40" ry="13"/></g><g class="ba-o2"><ellipse cx="60" cy="36" rx="20" ry="30"/></g><circle class="ba-s" cx="60" cy="36" r="4"/><circle class="ba-c" cx="100" cy="36" r="2.4"/><circle class="ba-c" cx="60" cy="6" r="1.8"/>'
+    "website": '<rect x="6" y="6" width="108" height="60" rx="5"/><path d="M6 16h108"/><circle cx="13" cy="11" r="1.6"/><circle cx="19" cy="11" r="1.6"/><circle cx="25" cy="11" r="1.6"/><g class="ba-type"><path d="M16 28h44"/><path d="M16 36h32"/><path d="M16 44h38"/></g><g class="ba-pulse"><rect x="72" y="24" width="32" height="30" rx="3"/><path d="M72 48l10-9 7 6 6-4 9 7"/></g>',
+    "web-app": '<rect x="6" y="6" width="108" height="60" rx="5"/><path d="M30 6v60"/><path d="M12 18h12"/><path d="M12 26h12"/><path d="M12 34h12"/><g class="ba-bars"><path d="M44 56V42"/><path d="M56 56V32"/><path d="M68 56V46"/><path d="M80 56V26"/><path d="M92 56V38"/></g><circle class="ba-pulse" cx="102" cy="16" r="4"/>',
+    "mobile-app": '<rect x="42" y="4" width="36" height="64" rx="7"/><path d="M54 9h12"/><g class="ba-swipe"><rect x="47" y="16" width="26" height="18" rx="2"/><path d="M47 42h26"/><path d="M47 49h18"/><path d="M47 56h22"/></g><g class="ba-nudge"><path d="M26 30l-8 6 8 6"/><path d="M94 30l8 6-8 6"/></g>',
+    "platform": '<circle class="ba-pulse" cx="60" cy="36" r="8"/><circle cx="20" cy="16" r="5"/><circle cx="100" cy="16" r="5"/><circle cx="20" cy="56" r="5"/><circle cx="100" cy="56" r="5"/><path d="M25 18l28 13"/><path d="M95 18l-28 13"/><path d="M25 54l28-13"/><path d="M95 54l-28-13"/><g class="ba-data"><path d="M25 18l28 13"/><path d="M95 54l-28-13"/></g>',
+    "unsure": '<g class="ba-spin"><ellipse cx="60" cy="36" rx="40" ry="13"/></g><g class="ba-spin-r"><ellipse cx="60" cy="36" rx="20" ry="30"/></g><circle class="ba-pulse" cx="60" cy="36" r="4"/><circle cx="100" cy="36" r="2.4"/><circle cx="60" cy="6" r="1.8"/>'
+  };
+  var GOAL_ART = {
+    "customers": '<circle cx="36" cy="30" r="7"/><path d="M22 58c2-9 8-13 14-13s12 4 14 13"/><circle cx="84" cy="30" r="7"/><path d="M70 58c2-9 8-13 14-13s12 4 14 13"/><g class="ba-lift"><circle cx="60" cy="22" r="8"/><path d="M44 62c3-11 9-16 16-16s13 5 16 16"/></g>',
+    "sell-more": '<g class="ba-bars"><path d="M24 62V48"/><path d="M42 62V40"/><path d="M60 62V32"/><path d="M78 62V24"/></g><g class="ba-type"><path d="M18 42l22-12 16 6 30-22"/></g><path d="M78 14h10v10"/>',
+    "credibility": '<path d="M60 6l28 10v17c0 16-12 26-28 33-16-7-28-17-28-33V16z"/><g class="ba-type"><path d="M47 35l9 9 17-18"/></g><g class="ba-pulse"><path d="M60 14l18 7v12c0 11-8 18-18 23"/></g>',
+    "launch": '<g class="ba-lift"><path d="M60 6c10 8 14 20 14 32l-6 10H52l-6-10c0-12 4-24 14-32z"/><circle cx="60" cy="28" r="5"/><path d="M46 38l-8 9 8 4"/><path d="M74 38l8 9-8 4"/></g><g class="ba-nudge"><path d="M55 54l-2 8"/><path d="M60 54v11"/><path d="M65 54l2 8"/></g>',
+    "efficiency": '<g class="ba-spin"><circle cx="42" cy="36" r="14"/><path d="M42 16v6"/><path d="M42 50v6"/><path d="M22 36h6"/><path d="M56 36h6"/><path d="M28 22l4 4"/><path d="M52 46l4 4"/><path d="M28 50l4-4"/><path d="M52 26l4-4"/></g><circle cx="42" cy="36" r="5"/><g class="ba-type"><path d="M90 12l-12 22h12l-10 24"/></g>',
+    "replace": '<rect x="10" y="20" width="30" height="30" rx="4"/><g class="ba-pulse"><rect x="80" y="20" width="30" height="30" rx="4"/></g><g class="ba-nudge"><path d="M48 29h24l-6-6"/><path d="M72 43H48l6 6"/></g>',
+    "other": '<g class="ba-pulse"><path d="M60 8l6 20 20 6-20 6-6 20-6-20-20-6 20-6z"/></g><g class="ba-spin"><circle cx="92" cy="18" r="2.4"/><circle cx="28" cy="56" r="2.8"/><circle cx="96" cy="58" r="1.8"/></g>'
+  };
+  // timelines are trajectories: the further off, the longer the flight
+  var TIMELINE_ART = {
+    "lt-1m": '<circle cx="12" cy="58" r="3"/><path d="M12 58Q30 30 48 44"/><circle class="ba-pulse" cx="50" cy="45" r="5"/><g class="ba-data"><path d="M12 58Q30 30 48 44"/></g>',
+    "1-3m": '<circle cx="12" cy="58" r="3"/><path d="M12 58Q46 12 78 40"/><circle class="ba-pulse" cx="81" cy="42" r="6"/><g class="ba-data"><path d="M12 58Q46 12 78 40"/></g>',
+    "3-6m": '<circle cx="12" cy="58" r="3"/><path d="M12 58Q60 -2 104 36"/><circle class="ba-pulse" cx="107" cy="38" r="7"/><g class="ba-data"><path d="M12 58Q60 -2 104 36"/></g>',
+    "6m-plus": '<circle class="ba-pulse" cx="60" cy="36" r="8"/><ellipse cx="60" cy="36" rx="48" ry="18"/><g class="ba-spin"><circle cx="108" cy="36" r="3"/></g><path d="M18 36h-8"/>',
+    "flexible": '<path d="M30 36C30 20 54 20 60 36C66 52 90 52 90 36C90 20 66 20 60 36C54 52 30 52 30 36Z"/><g class="ba-data"><path d="M30 36C30 20 54 20 60 36C66 52 90 52 90 36C90 20 66 20 60 36C54 52 30 52 30 36Z"/></g>'
   };
   var BUILD_CODE = { "website": "WEB", "web-app": "APP", "mobile-app": "MOB", "platform": "SYS", "unsure": "IDEA" };
   var fineHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  function dressBuildCards(group) {
+  // art: value -> blueprint; code(i, value): the card's module code
+  function dressCards(group, art, code, rowLayout) {
+    group.classList.add("cw-modules");
+    if (rowLayout) group.classList.add("cw-modules--row");
     var cards = group.querySelectorAll(".cw-option");
     Array.prototype.forEach.call(cards, function (card, i) {
       var input = card.querySelector("input");
       var v = input ? input.value : "";
-      var art = document.createElement("span");
-      art.className = "cw-build-art";
-      art.setAttribute("aria-hidden", "true");
-      art.innerHTML = '<svg viewBox="0 0 120 72">' + (BUILD_ART[v] || "") + "</svg>" +
-        '<span class="cw-build-code">MODULE 0' + (i + 1) + " · " + (BUILD_CODE[v] || "") + "</span>";
+      var box = document.createElement("span");
+      box.className = "cw-art";
+      box.setAttribute("aria-hidden", "true");
+      box.innerHTML = '<svg viewBox="0 0 120 72">' + (art[v] || "") + "</svg>";
+      var tag = document.createElement("span");
+      tag.className = "cw-art-code";
+      tag.setAttribute("aria-hidden", "true");
+      tag.textContent = code(i, v);
       // every stroke draws in (pathLength 1 makes one dash fit any shape)
-      Array.prototype.forEach.call(art.querySelectorAll("path, rect, circle, ellipse"), function (el, k) {
+      Array.prototype.forEach.call(box.querySelectorAll("path, rect, circle, ellipse"), function (el, k) {
         el.setAttribute("pathLength", "1");
         el.style.setProperty("--k", k);
       });
       card.style.setProperty("--i", i);
-      card.insertBefore(art, card.querySelector(".cw-option-body"));
+      var body = card.querySelector(".cw-option-body");
+      card.insertBefore(box, body);
+      body.insertBefore(tag, body.firstChild);
       var vf = document.createElement("span");
-      vf.className = "cw-build-vf";
+      vf.className = "cw-art-vf";
       vf.setAttribute("aria-hidden", "true");
       card.appendChild(vf);
       if (!fineHover || reducedMotion) return;
@@ -431,6 +458,10 @@
       if (!card) return;
       card.classList.remove("is-locking"); void card.offsetWidth; card.classList.add("is-locking");
     });
+  }
+  var pad2c = function (n) { return (n < 9 ? "0" : "") + (n + 1); };
+  function dressBuildCards(group) {
+    dressCards(group, BUILD_ART, function (i, v) { return "MODULE " + pad2c(i) + " · " + (BUILD_CODE[v] || ""); }, false);
   }
 
   // --- Question 1: what to build + their idea, in their own words ----
@@ -471,14 +502,16 @@
     var box = h("div", null);
     var otherWrap = h("div", { "class": "cw-reveal", hidden: state.form.goal !== "other" });
 
-    box.appendChild(renderCards(GOAL_OPTIONS, "goal", state.form.goal,
+    var goalCards = renderCards(GOAL_OPTIONS, "goal", state.form.goal,
       "What do you want it to achieve?", function (value) {
         state.form.goal = value;
         clearError();
         otherWrap.hidden = value !== "other";
         renderProgress();
         saveState();
-      }, "cw-options--goal"));
+      }, "cw-options--goal");
+    dressCards(goalCards, GOAL_ART, function (i) { return "OBJECTIVE " + pad2c(i); }, true);
+    box.appendChild(goalCards);
 
     otherWrap.appendChild(buildControl(
       { id: "goalOther", label: "Tell us a bit more (optional)", type: "text", required: false,
@@ -492,97 +525,192 @@
 
   // --- Timeline: preserved single-choice cards ------------------------
   function renderRadio(step) {
-    return renderCards(step.options, step.field, state.form[step.field], step.legend, function (value) {
+    var cards = renderCards(step.options, step.field, state.form[step.field], step.legend, function (value) {
       state.form[step.field] = value;
       clearError();
       renderProgress();
       renderNav();
       saveState();
-    });
+    }, "cw-options--timeline");
+    if (step.field === "timeline") dressCards(cards, TIMELINE_ART, function (i) { return "TRAJECTORY " + pad2c(i); }, true);
+    return cards;
   }
 
-  // --- Budget: continuous AED slider, $1,000-equivalent steps ---------
+  // --- Budget: the thrust reactor ------------------------------------
+  // A gauge the budget drives: its arc fills and its needle swings as the
+  // figure climbs, the figure counts up to where the slider is, and the
+  // mission tier the amount buys is named beneath it. Quick picks for a
+  // thumb; the slider itself (keyboard and screen readers) underneath.
+  var BUDGET_TIERS = [
+    { max: 20000, name: "Launchpad", desc: "A focused site, a landing page or an MVP." },
+    { max: 60000, name: "Low orbit", desc: "A full website, a store or a first app." },
+    { max: 150000, name: "Deep orbit", desc: "Web apps, platforms and their integrations." },
+    { max: Infinity, name: "Interstellar", desc: "Enterprise systems, built across platforms." }
+  ];
+  var BUDGET_PICKS = [15000, 40000, 90000, 180000, 250000];
+  function tierOf(a) { for (var i = 0; i < BUDGET_TIERS.length; i++) if (a < BUDGET_TIERS[i].max) return i; return BUDGET_TIERS.length - 1; }
+  function shortAED(a) { return a >= 1000 ? Math.round(a / 1000) + "K" : String(a); }
+
   function renderBudget() {
     if (!state.form.budget) applyBudget(DEFAULT_BUDGET_AMOUNT);
     var amount = budgetAmount();
-    var wrap = h("div", null);
+    var wrap = h("div", { "class": "cw-reactor" });
 
-    var value = h("p", {
-      "class": "cw-budget-value", role: "status", "aria-live": "polite"
-    }, [formatAED(amount)]);
+    // the gauge: a half ring of ticks, the fill arc, the needle
+    var ticks = "";
+    for (var t = 0; t <= 40; t++) {
+      var ang = Math.PI * (1 - t / 40), major = t % 10 === 0;
+      var r1 = major ? 88 : 93, r2 = 100;
+      ticks += '<line x1="' + (120 + Math.cos(ang) * r1).toFixed(1) + '" y1="' + (124 - Math.sin(ang) * r1).toFixed(1) + '" x2="' + (120 + Math.cos(ang) * r2).toFixed(1) + '" y2="' + (124 - Math.sin(ang) * r2).toFixed(1) + '"' + (major ? ' class="is-major"' : "") + "/>";
+    }
+    var gauge = h("div", { "class": "cw-gauge", "aria-hidden": "true" });
+    gauge.innerHTML =
+      '<svg viewBox="0 0 240 136">' +
+        '<defs><linearGradient id="cw-gauge-g" x1="0" x2="1"><stop offset="0" stop-color="#c04527"/><stop offset=".55" stop-color="#e57d23"/><stop offset="1" stop-color="#faa719"/></linearGradient></defs>' +
+        '<g class="cw-gauge-ticks">' + ticks + "</g>" +
+        '<path class="cw-gauge-track" d="M28 124A92 92 0 0 1 212 124" pathLength="1"/>' +
+        '<path class="cw-gauge-fill" d="M28 124A92 92 0 0 1 212 124" pathLength="1"/>' +
+        '<g class="cw-gauge-needle"><path d="M120 124L120 44"/><circle cx="120" cy="44" r="3"/></g>' +
+        '<circle class="cw-gauge-hub" cx="120" cy="124" r="7"/>' +
+      "</svg>" +
+      '<span class="cw-gauge-glow"></span>';
+
+    var tierName = h("p", { "class": "cw-reactor-tier" });
+    var value = h("p", { "class": "cw-budget-value", role: "status", "aria-live": "polite" }, [formatAED(amount)]);
+    var tierDesc = h("p", { "class": "cw-reactor-desc" });
+    var read = h("div", { "class": "cw-reactor-read" }, [tierName, value, tierDesc]);
 
     var range = h("input", {
       type: "range", "class": "cw-range",
       min: String(BUDGET_MIN), max: String(BUDGET_MAX), step: String(BUDGET_STEP), value: String(amount),
       "aria-label": "Budget range in AED", "aria-valuetext": formatAED(amount)
     });
-    // Gradient fill left of the thumb (read by .cw-range in CSS)
-    function paintRange(a) {
-      range.style.setProperty("--cw-fill",
-        ((a - BUDGET_MIN) / (BUDGET_MAX - BUDGET_MIN) * 100).toFixed(2) + "%");
+
+    // the figure counts toward the slider rather than jumping
+    var shown = amount, raf = 0, lastTier = -1;
+    function countTo(a) {
+      if (reducedMotion) { shown = a; value.textContent = formatAED(a); return; }
+      cancelAnimationFrame(raf);
+      (function step() {
+        shown += (a - shown) * 0.22;
+        if (Math.abs(a - shown) < 60) shown = a;
+        value.textContent = formatAED(Math.round(shown / 100) * 100);
+        if (shown !== a) raf = requestAnimationFrame(step);
+      })();
     }
-    paintRange(amount);
-    range.addEventListener("input", function () {
-      var a = parseInt(range.value, 10) || DEFAULT_BUDGET_AMOUNT;
-      paintRange(a);
+    function paint(a) {
+      var p = (a - BUDGET_MIN) / (BUDGET_MAX - BUDGET_MIN);
+      range.style.setProperty("--cw-fill", (p * 100).toFixed(2) + "%");
+      wrap.style.setProperty("--p", p.toFixed(4));
+      var ti = tierOf(a);
+      wrap.setAttribute("data-tier", ti);
+      if (ti !== lastTier) {
+        tierName.textContent = "Mission class · " + BUDGET_TIERS[ti].name;
+        tierDesc.textContent = BUDGET_TIERS[ti].desc;
+        if (lastTier !== -1) { wrap.classList.remove("is-shift"); void wrap.offsetWidth; wrap.classList.add("is-shift"); }
+        lastTier = ti;
+      }
+      picks.forEach(function (b) { b.classList.toggle("is-on", +b.getAttribute("data-amount") === a); });
+    }
+    function set(a, fromPick) {
+      a = Math.max(BUDGET_MIN, Math.min(BUDGET_MAX, a));
+      if (fromPick) range.value = String(a);
       applyBudget(a);
-      value.textContent = formatAED(a);
+      paint(a);
+      countTo(a);
       range.setAttribute("aria-valuetext", formatAED(a));
       renderProgress();
       saveState();
+    }
+    var picks = BUDGET_PICKS.map(function (a) {
+      var b = h("button", { type: "button", "class": "cw-pick", "data-amount": String(a) }, ["AED " + shortAED(a) + (a >= BUDGET_MAX ? "+" : "")]);
+      b.addEventListener("click", function () { set(a, true); });
+      return b;
     });
+    range.addEventListener("input", function () { set(parseInt(range.value, 10) || DEFAULT_BUDGET_AMOUNT, false); });
 
-    wrap.appendChild(value);
+    wrap.appendChild(h("div", { "class": "cw-reactor-core" }, [gauge, read]));
+    wrap.appendChild(h("div", { "class": "cw-picks", role: "group", "aria-label": "Quick budget picks" }, picks));
     wrap.appendChild(range);
     wrap.appendChild(h("div", { "class": "cw-range-scale", "aria-hidden": "true" }, [
       h("span", null, [formatAED(BUDGET_MIN)]),
-      h("span", null, [formatAED(BUDGET_MAX)])
+      h("span", null, [formatAED(BUDGET_MAX) + "+"])
     ]));
+    paint(amount);
     return wrap;
   }
 
-  // --- Final: company + personal details, then send -------------------
+  // --- Final: the crew manifest and the mission ticket ----------------
+  // The details are a numbered manifest; beside it (above it on a phone)
+  // the mission ticket fills in live: the brief so far, then the crew as
+  // they type, stamped "Cleared for launch" once everything needed is in.
+  // It lifts off when the enquiry is sent (contact.css "the ticket").
   function renderFinal() {
-    var box = h("div", null);
+    var box = h("div", { "class": "cw-final" });
+    var f = state.form;
 
-    box.appendChild(h("div", { "class": "cw-field-group" }, [
-      h("p", { "class": "cw-field-group-title" }, ["Company"]),
-      buildControl(
-        { id: "companyName", label: "Company name", type: "text", required: true, placeholder: "Acme Trading LLC",
-          autocomplete: "organization" },
-        state.form.companyName,
-        function (v) { state.form.companyName = v; clearError(); saveState(); }
-      ),
-      buildControl(
-        { id: "companyWebsite", label: "Company website (optional)", type: "text", required: false, placeholder: "https://",
-          autocomplete: "url", inputmode: "url", spellcheck: "false" },
-        state.form.companyWebsite,
-        function (v) { state.form.companyWebsite = v; saveState(); }
-      )
-    ]));
+    var ticketId = "WX-" + String(Date.now()).slice(-5);
+    var row = function (k, cls) {
+      var v = h("b", { "class": cls || null });
+      return { el: h("div", { "class": "cw-ticket-row" }, [h("span", null, [k]), v]), v: v };
+    };
+    var tBuild = row("Build"), tGoal = row("Objective"), tTime = row("Trajectory"), tBudget = row("Budget");
+    var tCompany = row("Company", "is-crew"), tName = row("Crew", "is-crew"), tMail = row("Channel", "is-crew");
+    var stamp = h("span", { "class": "cw-ticket-stamp" }, ["Cleared for launch"]);
+    var ticket = h("aside", { "class": "cw-ticket", "aria-label": "Your mission ticket" }, [
+      h("p", { "class": "cw-ticket-head" }, [h("i", { "aria-hidden": "true" }), "Mission ticket ", h("span", null, [ticketId])]),
+      h("div", { "class": "cw-ticket-rows" }, [tBuild.el, tGoal.el, tTime.el, tBudget.el]),
+      h("div", { "class": "cw-ticket-tear", "aria-hidden": "true" }),
+      h("div", { "class": "cw-ticket-rows" }, [tCompany.el, tName.el, tMail.el]),
+      h("div", { "class": "cw-ticket-foot" }, [h("span", { "class": "cw-ticket-code", "aria-hidden": "true" }), stamp])
+    ]);
+    els.ticket = ticket;
 
-    box.appendChild(h("div", { "class": "cw-field-group" }, [
-      h("p", { "class": "cw-field-group-title" }, ["Personal"]),
-      buildControl(
-        { id: "name", label: "Your name", type: "text", required: true, placeholder: "Jane Doe",
-          autocomplete: "name" },
-        state.form.name,
-        function (v) { state.form.name = v; clearError(); saveState(); }
-      ),
-      buildControl(
-        { id: "email", label: "Email", type: "email", required: true, placeholder: "jane@company.com",
-          autocomplete: "email", spellcheck: "false" },
-        state.form.email,
-        function (v) { state.form.email = v; clearError(); saveState(); }
-      ),
-      buildControl(
-        { id: "phone", label: "Phone / WhatsApp", type: "tel", required: true, placeholder: "+971 50 000 0000",
-          autocomplete: "tel" },
-        state.form.phone,
-        function (v) { state.form.phone = v; clearError(); saveState(); }
-      )
-    ]));
+    var put = function (r, text, empty) {
+      var v = text && String(text).trim();
+      if (r.v.textContent === (v || empty)) return;
+      r.v.textContent = v || empty;
+      r.el.classList.toggle("is-empty", !v);
+      if (v && !reducedMotion) { r.el.classList.remove("is-fresh"); void r.el.offsetWidth; r.el.classList.add("is-fresh"); }
+    };
+    var updateTicket = function () {
+      put(tBuild, labelFor(BUILD_OPTIONS, f.buildType), "Not set");
+      put(tGoal, f.goal === "other" ? (f.goalOther || "Something else") : labelFor(GOAL_OPTIONS, f.goal), "Not set");
+      put(tTime, labelFor(TIMELINE_OPTIONS, f.timeline), "Not set");
+      put(tBudget, formatAED(budgetAmount()), "Not set");
+      put(tCompany, f.companyName, "Awaiting");
+      put(tName, f.name, "Awaiting");
+      put(tMail, f.email, "Awaiting");
+      ticket.classList.toggle("is-cleared", !!(f.companyName.trim() && f.name.trim() && validEmail(f.email) && f.phone.trim()));
+    };
 
+    var n = 0;
+    var field = function (def, key) {
+      n++;
+      var c = buildControl(def, f[key], function (v) { f[key] = v; clearError(); saveState(); updateTicket(); });
+      c.style.setProperty("--i", n);
+      var lab = c.querySelector("label");
+      lab.insertBefore(h("span", { "class": "cw-field-n", "aria-hidden": "true" }, [pad2(n)]), lab.firstChild);
+      return c;
+    };
+
+    var manifest = h("div", { "class": "cw-manifest" }, [
+      h("div", { "class": "cw-field-group" }, [
+        h("p", { "class": "cw-field-group-title" }, ["Company"]),
+        field({ id: "companyName", label: "Company name", type: "text", required: true, placeholder: "Acme Trading LLC", autocomplete: "organization" }, "companyName"),
+        field({ id: "companyWebsite", label: "Company website (optional)", type: "text", required: false, placeholder: "https://", autocomplete: "url", inputmode: "url", spellcheck: "false" }, "companyWebsite")
+      ]),
+      h("div", { "class": "cw-field-group" }, [
+        h("p", { "class": "cw-field-group-title" }, ["Crew"]),
+        field({ id: "name", label: "Your name", type: "text", required: true, placeholder: "Jane Doe", autocomplete: "name" }, "name"),
+        field({ id: "email", label: "Email", type: "email", required: true, placeholder: "jane@company.com", autocomplete: "email", spellcheck: "false" }, "email"),
+        field({ id: "phone", label: "Phone / WhatsApp", type: "tel", required: true, placeholder: "+971 50 000 0000", autocomplete: "tel" }, "phone")
+      ])
+    ]);
+
+    box.appendChild(manifest);
+    box.appendChild(ticket);
+    updateTicket();
     return box;
   }
 
@@ -701,25 +829,61 @@
     return false;
   }
 
+  // The jump between questions: the question on screen streaks away, a
+  // readout flashes the jump ("JUMP · 03 / 05") and the next one arrives
+  // from the other side; back runs it the other way (contact.css
+  // "the jump").
+  var jumping = false;
+  function jump(dir, change) {
+    var old = els.steps.querySelector(".cw-step");
+    if (reducedMotion || !old || jumping) { change(); return; }
+    jumping = true;
+    if (!els.jump) {
+      els.jump = h("div", { "class": "cw-jump", "aria-hidden": "true" }, [
+        h("span", { "class": "cw-jump-streaks" }, [h("i"), h("i"), h("i"), h("i"), h("i"), h("i")]),
+        h("span", { "class": "cw-jump-read" })
+      ]);
+      els.stage.appendChild(els.jump);
+    }
+    var to = state.stepIndex + dir;
+    els.jump.querySelector(".cw-jump-read").textContent = "JUMP · " + pad2(to + 1) + " / " + pad2(STEPS.length);
+    els.stage.classList.remove("is-jump-fwd", "is-jump-back"); void els.stage.offsetWidth;
+    els.stage.classList.add(dir > 0 ? "is-jump-fwd" : "is-jump-back");
+    old.classList.add(dir > 0 ? "is-out-fwd" : "is-out-back");
+    window.setTimeout(function () {
+      change();
+      var fresh = els.steps.querySelector(".cw-step");
+      if (fresh) fresh.classList.add(dir > 0 ? "is-in-fwd" : "is-in-back");
+      jumping = false;
+      window.setTimeout(function () { els.stage.classList.remove("is-jump-fwd", "is-jump-back"); }, 700);
+    }, 330);
+  }
+
   function onNext() {
-    if (!validateStep()) return;
+    if (jumping || !validateStep()) return;
     clearError();
     if (isLastStep()) { submitEnquiry(); return; }
-    state.stepIndex++;
-    render();
-    saveState();
+    jump(1, function () {
+      state.stepIndex++;
+      render();
+      saveState();
+    });
   }
 
   function onBack() {
-    if (state.stepIndex > 0) state.stepIndex--;
+    if (jumping) return;
     clearError();
-    render();
-    saveState();
+    jump(-1, function () {
+      if (state.stepIndex > 0) state.stepIndex--;
+      render();
+      saveState();
+    });
   }
 
   function submitEnquiry() {
     els.next.disabled = true;
     els.next.textContent = "Sending…";
+    if (els.ticket) els.ticket.classList.add("is-launching");
     clearError();
 
     fetch(FORMSPREE_ENDPOINT, {
@@ -732,11 +896,15 @@
           
         state.completedAt = Date.now();
         saveState();
-        state.view = "success";
-        render();
+        // a beat for the ticket's lift-off before the result
+        window.setTimeout(function () {
+          state.view = "success";
+          render();
+        }, reducedMotion ? 0 : 750);
           
       })
       .catch(function () {
+        if (els.ticket) els.ticket.classList.remove("is-launching");
         els.next.disabled = false;
         els.next.textContent = "Send my enquiry";
         showError("Something went wrong sending your enquiry, please try again, or email us directly at hello@worxbyglimpse.com.");

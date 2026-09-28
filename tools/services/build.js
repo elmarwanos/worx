@@ -38,8 +38,13 @@ const LOGO_DIR = path.join(ROOT, 'static/assets/clients');
 
 function clientCell(slug, name, prefix) {
   const ext = ['svg', 'png', 'webp'].find((e) => fs.existsSync(path.join(LOGO_DIR, slug + '.' + e)));
+  // a logo is drawn as a mask filled with the cell's own colour (layout.css
+  // .mega-logo), so every brand sits in the menu's cream, lit on hover. The
+  // url sits on the element itself so it resolves against the page (inside
+  // a custom property it would resolve against the stylesheet).
+  const src = "url(\x27" + prefix + "static/assets/clients/" + slug + "." + ext + "\x27)";
   const inner = ext
-    ? '<img src="' + prefix + 'static/assets/clients/' + slug + '.' + ext + '" alt="' + esc(name) + '" loading="lazy">'
+    ? '<span class="mega-logo" role="img" aria-label="' + esc(name) + '" style="-webkit-mask-image: ' + src + "; mask-image: " + src + '"></span>'
     : '<span>' + esc(name) + '</span>';
   return '<li class="mega-client mega-client--' + slug + (ext ? ' has-logo' : '') + '">' + inner + '</li>';
 }
@@ -94,7 +99,7 @@ function megaMenu(prefix) {
               </div>
               <aside class="mega-side" aria-live="polite">
                 <div class="mega-default">
-                  <p class="mega-side-title">Trusted by brands<br>across the region</p>
+                  <p class="mega-side-title">Trusted by brands<br>across the world</p>
                   <ul class="mega-clients">${CLIENTS.map(([slug, name]) => clientCell(slug, name, prefix)).join("")}</ul>
                 </div>
                 <div class="mega-preview" hidden>

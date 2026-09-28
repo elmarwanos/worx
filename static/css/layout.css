@@ -1547,7 +1547,37 @@ html:not(.js) .mega-client {
   }
 }
 
-/* Typographic wordmarks until real logo files are dropped in */
+/* The brands' own logos (static/assets/clients), drawn as masks filled
+   with the cell's colour: the muted cream at rest, the text colour on
+   hover, whatever colours the original files are in */
+.mega-client .mega-logo {
+  display: block;
+  width: 76%;
+  height: 26px;
+  background: currentColor;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  transition: background-color 0.25s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .mega-client:hover .mega-logo { transform: scale(1.06); }
+}
+
+/* the tall marks (emblems, stacked lockups) get a little more height */
+.mega-client--hyundai .mega-logo,
+.mega-client--unicef .mega-logo,
+.mega-client--universal-pictures .mega-logo,
+.mega-client--hudayriyat .mega-logo,
+.mega-client--tiara-dream .mega-logo,
+.mega-client--uae-pavilion .mega-logo,
+.mega-client--chaumet .mega-logo { height: 34px; }
+
+/* Typographic wordmarks for any brand without a logo file */
 .mega-client span { font-size: 0.8rem; line-height: 1.05; }
 .mega-client--chaumet span { font-family: Georgia, "Times New Roman", serif; text-transform: uppercase; letter-spacing: 0.3em; font-size: 0.7rem; }
 .mega-client--hyundai span { font-family: var(--font-body); font-style: italic; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.72rem; }

@@ -311,8 +311,8 @@
   fab.addEventListener("click", markSeen);
   bubble.addEventListener("click", markSeen);
 
-  // the incoming message, once a visit: a moment after the beacon
-  // first docks, the crew types, then speaks, then leaves it be
+  // the crew's message: it only ever comes up under the pointer (or
+  // keyboard focus), never on its own at load
   var bubbleTimers = [];
   var bubbleDone = seen();
   function clearBubbleTimers() {
@@ -356,17 +356,7 @@
   bubble.addEventListener("pointerleave", hoverOut);
   fab.addEventListener("focus", function () { hoverIn({ pointerType: "" }); });
   fab.addEventListener("blur", function () { hoverOut({ pointerType: "" }); });
-  function cueBubble() {
-    if (bubbleDone) return;
-    bubbleDone = true;
-    var later = function (fn, ms) { bubbleTimers.push(window.setTimeout(fn, ms)); };
-    later(function () { if (shown && !isOpen) waWrap.classList.add("is-typing"); }, 2600);
-    later(function () {
-      waWrap.classList.remove("is-typing");
-      if (shown && !isOpen) waWrap.classList.add("is-talking");
-    }, 4400);
-    later(function () { waWrap.classList.remove("is-talking"); }, 12400);
-  }
+  // (the beacon never speaks up on its own: its line only comes on hover)
   closeBtn.addEventListener("click", function () {
     close();
   });
@@ -454,8 +444,7 @@
     if (show === shown) return;
     shown = show;
     dock.classList.toggle("is-ready", show);
-    if (show) cueBubble();
-    else waWrap.classList.remove("is-typing", "is-talking");
+    if (!show) waWrap.classList.remove("is-typing", "is-talking");
     // while it's faded out, keep the button out of the Tab order and
     // away from screen readers too
     fab.tabIndex = show ? 0 : -1;

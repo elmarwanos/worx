@@ -689,16 +689,20 @@
       // needle plays (CSS scroll-snap lands it there)
       var settleT = null;
       if (band) {
+        // settled: tune to what is under the needle (scrollend where the
+        // browser has it, a short quiet spell otherwise)
+        var settle = function () {
+          if (performance.now() < autoUntil) return;
+          var st = underNeedle();
+          if (st && st.getAttribute("data-industry") !== current) pick(st.getAttribute("data-industry"), "tune");
+        };
+        if ("onscrollend" in band) band.addEventListener("scrollend", settle);
         band.addEventListener("scroll", function () {
           var near = underNeedle();
           [].forEach.call(band.querySelectorAll("[data-industry]"), function (st) { st.classList.toggle("is-near", st === near); });
           if (performance.now() < autoUntil) return;
           clearTimeout(settleT);
-          settleT = setTimeout(function () {
-            if (performance.now() < autoUntil) return;
-            var st = underNeedle();
-            if (st && st.getAttribute("data-industry") !== current) pick(st.getAttribute("data-industry"), "tune");
-          }, 160);
+          settleT = setTimeout(settle, "onscrollend" in band ? 400 : 160);
         }, { passive: true });
         // arrows tune station to station
         band.addEventListener("keydown", function (e) {
@@ -712,8 +716,12 @@
           var btn = band.querySelector('[data-industry="' + nk + '"]');
           if (btn) btn.focus({ preventScroll: true });
         });
-        var recentre = function () { centre(current, false); };
-        window.addEventListener("resize", recentre);
+        // re-centre only when the band itself changes width: phones fire
+        // resize as the address bar comes and goes mid-scroll, and a
+        // re-centre then would snap the band back under the thumb
+        var bandW = band.clientWidth;
+        var recentre = function () { bandW = band.clientWidth; centre(current, false); };
+        window.addEventListener("resize", function () { if (band.clientWidth !== bandW) recentre(); });
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(recentre);
         recentre();
       }
