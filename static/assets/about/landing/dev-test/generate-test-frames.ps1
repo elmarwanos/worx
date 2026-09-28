@@ -1,4 +1,4 @@
-# TEMPORARY DEV SCRIPT — generates 32 placeholder test-landing PNG frames
+# TEMPORARY DEV SCRIPT, generates 32 placeholder test-landing PNG frames
 # to exercise the LandingSequence frame-sequence architecture before real
 # GLIMPSE mothership artwork exists. Not part of the production build;
 # safe to delete along with this whole dev-test/ folder once approved.

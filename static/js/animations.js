@@ -1,6 +1,7 @@
 /* ============================================================
-   Worx by Glimpse — animations.js
-   GSAP-powered motion: hero word stagger, scroll reveals,
+   Worx | animations.js
+   GSAP-powered motion: hero word stagger, interior page-hero
+   entrance, batched scroll reveals,
    stat counters and the client logo marquee.
    Requires gsap + ScrollTrigger (loaded from CDN in each page).
    ============================================================ */
@@ -8,7 +9,14 @@
 (function () {
   "use strict";
 
-  if (typeof gsap === "undefined") return; // CDN failed: CSS fallbacks apply
+  var root = document.documentElement;
+
+  // CDN failed: flag it so animations.css shows everything that
+  // would otherwise wait for GSAP to reveal it.
+  if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
+    root.classList.add("no-gsap");
+    return;
+  }
 
   gsap.registerPlugin(ScrollTrigger);
 
@@ -16,6 +24,32 @@
     "(prefers-reduced-motion: reduce)"
   ).matches;
   if (reducedMotion) return;
+
+  var EASE = "power3.out";
+
+  // --- Interior page hero (.page-hero): a calm opening shot ------
+  // Eyebrow, headline, then the intro line rise out of a soft blur
+  // in sequence on load. Their initial state lives in animations.css
+  // (.wx-motion .page-hero > *) so nothing flashes before this runs.
+  root.classList.add("wx-motion");
+  var pageHero = document.querySelector(".page-hero");
+  if (pageHero) {
+    var heroBits = Array.prototype.slice.call(pageHero.children);
+    gsap.fromTo(
+      heroBits,
+      { opacity: 0, y: 28, filter: "blur(6px)" },
+      {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 1.05,
+        ease: EASE,
+        stagger: 0.14,
+        delay: 0.1,
+        clearProps: "filter",
+      }
+    );
+  }
 
   // --- Hero headline: split into words and stagger in ----------
   var heroTitle = document.querySelector(".hero h1");
@@ -40,26 +74,53 @@
 
   // --- Generic scroll reveals ----------------------------------
   // Any element with [data-reveal] fades/slides in on entry.
-  // Siblings inside the same parent stagger automatically.
-  var revealGroups = new Map();
-  document.querySelectorAll("[data-reveal]").forEach(function (el) {
-    var parent = el.parentElement;
-    if (!revealGroups.has(parent)) revealGroups.set(parent, []);
-    revealGroups.get(parent).push(el);
+  // Elements are batched as they cross the line, so siblings that
+  // enter together stagger, while cards further down a stacked
+  // (phone) grid wait for their own moment instead of playing
+  // off-screen with the first one. The page hero is handled above.
+  var reveals = gsap.utils.toArray("[data-reveal]").filter(function (el) {
+    return !(pageHero && pageHero.contains(el));
   });
 
-  revealGroups.forEach(function (els) {
-    gsap.to(els, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      ease: "power2.out",
-      stagger: 0.12,
-      scrollTrigger: {
-        trigger: els[0],
-        start: "top 86%",
+  if (reveals.length) {
+    ScrollTrigger.batch(reveals, {
+      start: "top 88%",
+      once: true,
+      onEnter: function (batch) {
+        gsap.to(batch, {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: EASE,
+          stagger: 0.1,
+          overwrite: true,
+        });
       },
     });
+
+    // Anything sitting below the last reachable trigger line (e.g. a
+    // short page on a very tall screen) still shows once the visitor
+    // reaches the bottom.
+    ScrollTrigger.create({
+      trigger: document.body,
+      start: "bottom bottom+=2",
+      once: true,
+      onEnter: function () {
+        var late = reveals.filter(function (el) {
+          return parseFloat(getComputedStyle(el).opacity) < 0.01 &&
+            !gsap.isTweening(el);
+        });
+        if (late.length) {
+          gsap.to(late, { opacity: 1, y: 0, duration: 0.9, ease: EASE, stagger: 0.08 });
+        }
+      },
+    });
+  }
+
+  // Re-measure once fonts and images have settled so trigger lines
+  // match the final layout.
+  window.addEventListener("load", function () {
+    ScrollTrigger.refresh();
   });
 
   // --- Stat counters -------------------------------------------

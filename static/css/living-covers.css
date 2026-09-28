@@ -1,0 +1,117 @@
+/* ============================================================
+   Worx | living-covers.css
+   The blog's cover art, alive, wherever it appears (the home page's
+   field notes, the blog index, each article's monitor): the camera
+   pushes in slowly and drifts; embers rise past the lens at two
+   depths; the hologram at the heart of each cover breathes light;
+   every so often a sweep of light crosses the glass; and under the
+   pointer the picture shifts with depth (living-covers.js).
+   Same image files, so a new cover is alive everywhere at once.
+   Only covers on screen animate (.lc-on); reduced motion: still.
+   ============================================================ */
+.lc {
+  --mx: 0;
+  --my: 0;
+  --lc-hov: 0;
+  position: relative;
+  isolation: isolate;
+}
+
+.lc.lc.lc img {
+  transform: scale(calc(1.03 + var(--lc-hov) * 0.03)) translate(calc(var(--mx) * -9px), calc(var(--my) * -7px));
+  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s ease;
+  animation: lc-push 22s ease-in-out infinite alternate paused;
+  animation-delay: calc(var(--lc-i, 0) * -3.7s);
+}
+
+.lc:hover { --lc-hov: 1; }
+
+@keyframes lc-push {
+  0% { scale: 1; translate: 0 0; }
+  50% { scale: 1.06; translate: -1.2% 0.6%; }
+  100% { scale: 1.09; translate: 1% -1%; }
+}
+
+.lc-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  transform: translate(calc(var(--mx) * 12px), calc(var(--my) * 9px));
+  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* embers, two depths, rising past the lens */
+.lc-fx::before,
+.lc-fx::after {
+  content: "";
+  position: absolute;
+  inset: -40% 0 0;
+  background-repeat: repeat;
+  mix-blend-mode: screen;
+  animation: lc-rise 14s linear infinite paused;
+}
+
+.lc-fx::before {
+  background-image:
+    radial-gradient(1.4px 1.4px at 12% 80%, rgba(255, 214, 140, 0.95), transparent 60%),
+    radial-gradient(1px 1px at 38% 30%, rgba(250, 167, 25, 0.9), transparent 60%),
+    radial-gradient(1.6px 1.6px at 64% 62%, rgba(255, 190, 110, 0.9), transparent 60%),
+    radial-gradient(1px 1px at 86% 18%, rgba(254, 238, 207, 0.85), transparent 60%),
+    radial-gradient(1.2px 1.2px at 52% 92%, rgba(250, 167, 25, 0.85), transparent 60%);
+  background-size: 180px 160px;
+  opacity: 0.8;
+}
+
+.lc-fx::after {
+  background-image:
+    radial-gradient(2.4px 2.4px at 20% 40%, rgba(255, 200, 120, 0.7), transparent 60%),
+    radial-gradient(2px 2px at 70% 75%, rgba(250, 167, 25, 0.6), transparent 60%),
+    radial-gradient(2.8px 2.8px at 90% 30%, rgba(255, 170, 90, 0.5), transparent 60%);
+  background-size: 320px 280px;
+  filter: blur(0.6px);
+  opacity: 0.55;
+  animation-duration: 9s;
+}
+
+@keyframes lc-rise {
+  from { background-position: 0 0; }
+  to { background-position: 40px -560px; }
+}
+
+/* the hologram's light, breathing, and the sweep across the glass */
+.lc-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 34% 40% at 50% 58%, rgba(255, 176, 90, 0.34), transparent 70%),
+    linear-gradient(105deg, transparent 40%, rgba(254, 238, 207, 0.16) 50%, transparent 60%) -150% 0 / 55% 100% no-repeat;
+  mix-blend-mode: screen;
+  animation: lc-breathe 5.5s ease-in-out infinite paused, lc-sweep 9s ease-in-out infinite paused;
+  animation-delay: calc(var(--lc-i, 0) * -1.3s), calc(var(--lc-i, 0) * -2.1s);
+}
+
+@keyframes lc-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@keyframes lc-sweep {
+  0%, 70% { background-position: 0 0, -150% 0; }
+  100% { background-position: 0 0, 250% 0; }
+}
+
+.lc.lc.lc.lc-on img,
+.lc.lc-on .lc-fx::before,
+.lc.lc-on .lc-fx::after,
+.lc.lc-on .lc-glow { animation-play-state: running; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lc.lc.lc img, .lc-fx::before, .lc-fx::after, .lc-glow { animation: none !important; }
+  .lc.lc.lc img, .lc-fx { transition: none; }
+}

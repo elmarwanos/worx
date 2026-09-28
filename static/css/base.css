@@ -1,5 +1,5 @@
 /* ============================================================
-   Worx by Glimpse — base.css
+   Worx | base.css
    Design tokens, reset, typography and shared utilities.
    Edit the :root variables to re-theme the whole site.
    ============================================================ */
@@ -30,7 +30,7 @@
   --gradient: linear-gradient(100deg, var(--brand-ember) 0%, var(--brand-orange) 55%, var(--brand-amber) 100%);
   --on-accent: #1a0a04;      /* text on orange / amber */
 
-  /* Typography — Jost echoes the geometric wordmark in the logo */
+  /* Typography, Jost echoes the geometric wordmark in the logo */
   --font-display: "Jost", "Futura", "Century Gothic", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;

@@ -3,369 +3,952 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Worx by Glimpse — Web &amp; Software Development, Dubai</title>
-  <meta name="description" content="Worx by Glimpse is a Dubai-based web and software development studio. Plan. Design. Create. Websites, mobile apps and custom platforms built for businesses, by creatives.">
+  <title>Home - Worx</title>
+  <meta name="description" content="Worx is a Dubai-based web and software development studio, Glimpse's in-house engineering crew. Websites, mobile apps and custom platforms for the region's boldest brands.">
+  <meta name="theme-color" content="#150905">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Worx | Web &amp; Software Development, Dubai">
+  <meta property="og:description" content="Websites, mobile apps and custom platforms for the region's boldest brands, built in the UAE by Glimpse's in-house development studio.">
+  <meta property="og:image" content="static/assets/home/hero-poster.jpg">
+  <meta name="twitter:card" content="summary_large_image">
 
   <link rel="icon" type="image/png" sizes="32x32" href="static/assets/favicon-32.png">
   <link rel="apple-touch-icon" href="static/assets/apple-touch-icon.png">
   <meta name="theme-color" content="#150905">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="static/css/base.css">
   <link rel="stylesheet" href="static/css/layout.css">
   <link rel="stylesheet" href="static/css/components.css">
   <link rel="stylesheet" href="static/css/animations.css">
+  <link rel="stylesheet" href="static/css/home.css">
+  <link rel="stylesheet" href="static/css/living-covers.css">
 </head>
 <body data-page="home">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- ====== Header ====== -->
-  <header class="site-header">
-    <div class="container nav-bar">
+  <!--WORX:HEADER-->
+<header class="site-header">
+    <div class="nav-bar">
       <a class="brand" href="index.html"><img class="brand-mark" src="static/assets/mark.png" alt="" width="40" height="40"><span class="brand-text">WORX<small>&lt;like/magic&gt;</small></span></a>
-      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-      <nav class="nav-links" aria-label="Main navigation">
+      <nav class="nav-links" id="site-nav" aria-label="Main navigation">
         <a href="index.html" data-nav="home">Home</a>
-        <a href="services/index.html" data-nav="services">Services</a>
-        <a href="portfolio/index.html" data-nav="portfolio">Portfolio</a>
         <a href="about/index.html" data-nav="about">About</a>
+        <!--WORX:GEN mega-->
+        <div class="nav-item nav-item--mega">
+          <a href="services/index.html" data-nav="services" class="nav-mega-trigger" aria-haspopup="true" aria-expanded="false">Services<svg class="nav-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
+          <button class="nav-sub-toggle" type="button" aria-label="Show all services" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div class="mega" role="region" aria-label="All services">
+            <div class="mega-panel">
+              <div class="mega-cols">
+            <div class="mega-col">
+              <div class="mega-group">
+                <p class="mega-group-title"><span>01</span>Development</p>
+                <ul>
+                <li><a href="services/web-development.html" data-mega-item data-division="Development" data-short="Fast, secure, search-friendly websites on the right stack." data-subs="Sitecore|Ibexa DXP|SharePoint|WordPress|Drupal|Joomla|ASP.NET|AngularJS|Ruby on Rails" data-more="8"><i aria-hidden="true"></i><span>Web Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="services/ecommerce-development.html" data-mega-item data-division="Development" data-short="Storefronts that sell, from boutique brands to marketplaces." data-subs="Shopify|Shopify Plus|WooCommerce|Magento|BigCommerce|Mirakl marketplaces|Headless commerce" data-more="0"><i aria-hidden="true"></i><span>E-commerce Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="services/custom-platforms.html" data-mega-item data-division="Development" data-short="Portals, dashboards and tools built around your workflow." data-subs="Web portals|Dashboards &amp; tooling|Integrations|Smart automation|Interactive configurators|Security &amp; compliance" data-more="0"><i aria-hidden="true"></i><span>Custom Platforms</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                </ul>
+              </div>
+              <div class="mega-group">
+                <p class="mega-group-title"><span>05</span>IT &amp; Enterprise</p>
+                <ul>
+                <li><a href="services/erp-crm.html" data-mega-item data-division="IT &amp; Enterprise" data-short="One connected system for finance, people, supply and sales." data-subs="NetSuite|SAP|Microsoft Dynamics 365|Oracle Cloud|Odoo|CRM development" data-more="0"><i aria-hidden="true"></i><span>ERP &amp; CRM</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="services/it-outsourcing.html" data-mega-item data-division="IT &amp; Enterprise" data-short="Vetted specialists who join your team in days." data-subs="Hire scrum masters|Hire project managers|Hire SQA engineers|Hire ReactJS developers|Hire NodeJS developers|Hire .NET developers|Hire React Native developers|Hire mobile app developers|Hire SharePoint developers" data-more="3"><i aria-hidden="true"></i><span>IT Resource Outsourcing</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="services/cloud-transformation.html" data-mega-item data-division="IT &amp; Enterprise" data-short="Move to the cloud and keep it secure, fast and affordable." data-subs="Digital cloud transformation|Cloud migration|AWS|Microsoft Azure|Security &amp; compliance" data-more="0"><i aria-hidden="true"></i><span>Cloud Transformation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="mega-col">
+              <div class="mega-group">
+                <p class="mega-group-title"><span>02</span>Mobile</p>
+                <ul>
+                <li><a href="services/mobile-apps.html" data-mega-item data-division="Mobile" data-short="Native and cross-platform apps, maintained for years." data-subs="iOS apps|Android apps|Flutter|React Native|Hybrid apps|Progressive web apps|Event &amp; kiosk apps|Unity &amp; 3D apps|Backend &amp; APIs" data-more="1"><i aria-hidden="true"></i><span>Mobile App Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                </ul>
+              </div>
+              <div class="mega-group">
+                <p class="mega-group-title"><span>04</span>Emerging Tech</p>
+                <ul>
+                <li><a href="services/artificial-intelligence.html" data-mega-item data-division="Emerging Tech" data-short="Chatbots, automation and search that work while you sleep." data-subs="AI chatbots|Robotic process automation|AI enterprise search|Metaverse development" data-more="0"><i aria-hidden="true"></i><span>Artificial Intelligence</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="services/ar-vr.html" data-mega-item data-division="Emerging Tech" data-short="Immersive activations engineered to stop crowds." data-subs="Augmented reality|Virtual reality|Mixed reality|Interactive activations|3D &amp; Unity|Event support" data-more="0"><i aria-hidden="true"></i><span>AR / VR &amp; Mixed Reality</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="mega-col">
+              <div class="mega-group">
+                <p class="mega-group-title"><span>03</span>Design &amp; Creative</p>
+                <ul>
+                <li><a href="services/ui-ux-design.html" data-mega-item data-division="Design &amp; Creative" data-short="Research-driven interfaces that make the right action obvious." data-subs="UX design|UX audit|UX workshops|Landing page design|Responsive web design|Design systems|Prototyping|PSD to HTML|Graphic design" data-more="1"><i aria-hidden="true"></i><span>UI/UX Design</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="services/digital-branding.html" data-mega-item data-division="Design &amp; Creative" data-short="Identities with a point of view, from logo to packaging." data-subs="Logo design|Corporate identity|Brand guidelines|Packaging design|Brochure design|Business card design" data-more="0"><i aria-hidden="true"></i><span>Digital Branding &amp; Creatives</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="services/video-animation.html" data-mega-item data-division="Design &amp; Creative" data-short="Explainers, product videos and walkthroughs that move people." data-subs="Explainer videos|Character animation|Whiteboard animation|Product demo videos|Video game trailers|Medical animation|3D architectural walkthroughs" data-more="0"><i aria-hidden="true"></i><span>2D/3D Video Animation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="services/copywriting.html" data-mega-item data-division="Design &amp; Creative" data-short="Words that sound like you and sell like a pro." data-subs="Website copy|Ad &amp; campaign copy|Brand voice|Content writing|Arabic &amp; English translation" data-more="0"><i aria-hidden="true"></i><span>Copywriting</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                </ul>
+              </div>
+            </div>
+              </div>
+              <aside class="mega-side" aria-live="polite">
+                <div class="mega-default">
+                  <p class="mega-side-title">Trusted by brands<br>across the world</p>
+                  <ul class="mega-clients"><li class="mega-client mega-client--chaumet has-logo"><span class="mega-logo" role="img" aria-label="Chaumet" style="-webkit-mask-image: url('static/assets/clients/chaumet.svg'); mask-image: url('static/assets/clients/chaumet.svg')"></span></li><li class="mega-client mega-client--hyundai has-logo"><span class="mega-logo" role="img" aria-label="Hyundai" style="-webkit-mask-image: url('static/assets/clients/hyundai.svg'); mask-image: url('static/assets/clients/hyundai.svg')"></span></li><li class="mega-client mega-client--modon has-logo"><span class="mega-logo" role="img" aria-label="Modon" style="-webkit-mask-image: url('static/assets/clients/modon.svg'); mask-image: url('static/assets/clients/modon.svg')"></span></li><li class="mega-client mega-client--genesis has-logo"><span class="mega-logo" role="img" aria-label="Genesis" style="-webkit-mask-image: url('static/assets/clients/genesis.png'); mask-image: url('static/assets/clients/genesis.png')"></span></li><li class="mega-client mega-client--kia has-logo"><span class="mega-logo" role="img" aria-label="Kia" style="-webkit-mask-image: url('static/assets/clients/kia.svg'); mask-image: url('static/assets/clients/kia.svg')"></span></li><li class="mega-client mega-client--uae-pavilion has-logo"><span class="mega-logo" role="img" aria-label="UAE Pavilion" style="-webkit-mask-image: url('static/assets/clients/uae-pavilion.png'); mask-image: url('static/assets/clients/uae-pavilion.png')"></span></li><li class="mega-client mega-client--hudayriyat has-logo"><span class="mega-logo" role="img" aria-label="Hudayriyat" style="-webkit-mask-image: url('static/assets/clients/hudayriyat.svg'); mask-image: url('static/assets/clients/hudayriyat.svg')"></span></li><li class="mega-client mega-client--wealthface has-logo"><span class="mega-logo" role="img" aria-label="Wealthface" style="-webkit-mask-image: url('static/assets/clients/wealthface.png'); mask-image: url('static/assets/clients/wealthface.png')"></span></li><li class="mega-client mega-client--hisense has-logo"><span class="mega-logo" role="img" aria-label="Hisense" style="-webkit-mask-image: url('static/assets/clients/hisense.svg'); mask-image: url('static/assets/clients/hisense.svg')"></span></li><li class="mega-client mega-client--unicef has-logo"><span class="mega-logo" role="img" aria-label="UNICEF" style="-webkit-mask-image: url('static/assets/clients/unicef.svg'); mask-image: url('static/assets/clients/unicef.svg')"></span></li><li class="mega-client mega-client--universal-pictures has-logo"><span class="mega-logo" role="img" aria-label="Universal Pictures" style="-webkit-mask-image: url('static/assets/clients/universal-pictures.svg'); mask-image: url('static/assets/clients/universal-pictures.svg')"></span></li><li class="mega-client mega-client--roxy-cinemas has-logo"><span class="mega-logo" role="img" aria-label="Roxy Cinemas" style="-webkit-mask-image: url('static/assets/clients/roxy-cinemas.png'); mask-image: url('static/assets/clients/roxy-cinemas.png')"></span></li><li class="mega-client mega-client--lg has-logo"><span class="mega-logo" role="img" aria-label="LG" style="-webkit-mask-image: url('static/assets/clients/lg.svg'); mask-image: url('static/assets/clients/lg.svg')"></span></li><li class="mega-client mega-client--tiara-dream has-logo"><span class="mega-logo" role="img" aria-label="Tiara Dream" style="-webkit-mask-image: url('static/assets/clients/tiara-dream.svg'); mask-image: url('static/assets/clients/tiara-dream.svg')"></span></li><li class="mega-client mega-client--duni has-logo"><span class="mega-logo" role="img" aria-label="Duni" style="-webkit-mask-image: url('static/assets/clients/duni.png'); mask-image: url('static/assets/clients/duni.png')"></span></li><li class="mega-client mega-client--glimpse has-logo"><span class="mega-logo" role="img" aria-label="Glimpse" style="-webkit-mask-image: url('static/assets/clients/glimpse.svg'); mask-image: url('static/assets/clients/glimpse.svg')"></span></li></ul>
+                </div>
+                <div class="mega-preview" hidden>
+                  <p class="mega-preview-div"></p>
+                  <p class="mega-preview-name"></p>
+                  <p class="mega-preview-short"></p>
+                  <ul class="mega-preview-subs"></ul>
+                  <span class="mega-preview-cta">Explore <span aria-hidden="true">→</span></span>
+                </div>
+              </aside>
+            </div>
+            <div class="mega-foot">
+              <span><b>13</b> services · <b>100+</b> capabilities · one crew</span>
+              <a href="services/index.html" class="mega-all">View all services <span aria-hidden="true">→</span></a>
+              <a href="contact/index.html" class="btn btn-primary mega-cta">Quick Enquiry</a>
+            </div>
+          </div>
+        </div>
+        <!--/WORX:GEN mega-->
+        <a href="portfolio/index.html" data-nav="portfolio">Portfolio</a>
         <a href="blogs/index.html" data-nav="blogs">Blog</a>
-        <a href="contact/index.html" class="btn btn-primary" data-nav="contact">Let's Talk</a>
+        <a href="contact/index.html" data-nav="contact" class="nav-link--panel">Make Contact</a>
+        <!-- in the mobile menu panel only: language + direct contact -->
+        <div class="nav-panel-foot">
+          <div class="lang-switch" role="group" aria-label="Language">
+            <span class="lang-thumb" aria-hidden="true"></span>
+            <button type="button" class="lang-opt is-active" data-lang="en" lang="en" aria-pressed="true">EN</button>
+            <button type="button" class="lang-opt" data-lang="ar" lang="ar" aria-pressed="false">AR</button>
+          </div>
+          <a class="nav-circle" href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a>
+          <a class="nav-circle" href="tel:+971555669847" aria-label="Call +971 55 566 9847"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
+        </div>
       </nav>
+      <div class="nav-actions">
+        <div class="lang-switch" role="group" aria-label="Language">
+          <span class="lang-thumb" aria-hidden="true"></span>
+          <button type="button" class="lang-opt is-active" data-lang="en" lang="en" aria-pressed="true">EN</button>
+          <button type="button" class="lang-opt" data-lang="ar" lang="ar" aria-pressed="false">AR</button>
+        </div>
+        <a class="btn-spark" href="contact/index.html" data-nav="contact"><span class="btn-spark-bg" aria-hidden="true"></span><span class="btn-spark-txt"><span class="btn-spark-long">Make Contact</span><span class="btn-spark-short">Make Contact</span></span></a>
+        <a class="nav-circle nav-circle--bar" href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a>
+        <a class="nav-circle nav-circle--bar" href="tel:+971555669847" aria-label="Call +971 55 566 9847"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
+      </div>
+      <span class="nav-progress" aria-hidden="true"></span>
     </div>
   </header>
+  <!--/WORX:HEADER-->
 
-  <main id="main">
+  <main id="main" class="hm">
+    <canvas class="hm-dust" aria-hidden="true"></canvas>
+    <nav class="hm-rail" aria-label="Mission stages"><ol></ol><span class="hm-rail-fill" aria-hidden="true"></span></nav>
+    <aside class="hm-comms" aria-label="Worx on social media">
+      <span class="hm-comms-tag" aria-hidden="true">COMMS</span>
+      <span class="hm-comms-signal" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="hm-comms-line" aria-hidden="true"></span>
+      <ul class="hm-comms-list">
+        <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.06c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-4z"/></svg><span class="hm-comms-tip">CH-01 · LinkedIn</span></a></li>
+        <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.2 12 2.2zm0 4.66a5.14 5.14 0 1 0 0 10.28 5.14 5.14 0 0 0 0-10.28zm0 8.48a3.34 3.34 0 1 1 0-6.68 3.34 3.34 0 0 1 0 6.68zm5.34-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg><span class="hm-comms-tip">CH-02 · Instagram</span></a></li>
+        <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-7.6h2.56l.38-2.97H13.5V8.53c0-.86.24-1.45 1.47-1.45h1.57V4.43a21 21 0 0 0-2.29-.12c-2.27 0-3.82 1.39-3.82 3.93v2.19H7.87v2.97h2.56V21z"/></svg><span class="hm-comms-tip">CH-03 · Facebook</span></a></li>
+        <li><a href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg><span class="hm-comms-tip">CH-04 · Email</span></a></li>
+      </ul>
+      <span class="hm-comms-line" aria-hidden="true"></span>
+      <span class="hm-comms-freq" aria-hidden="true">FREQ <b data-freq>97.10</b></span>
+      <span class="hm-comms-status" aria-hidden="true"><i></i>OPEN CHANNEL</span>
+    </aside>
 
-    <!-- ====== Hero ====== -->
-    <section class="hero">
-      <canvas class="hero-bg-canvas" id="hero-bg-canvas" aria-hidden="true"></canvas>
-      <div class="hero-blob hero-blob--amber"></div>
-      <div class="hero-blob hero-blob--ember"></div>
-      <div class="container hero-inner">
-        <div class="hero-art hero-art--3d" aria-hidden="true">
-          <img class="hero-art-fallback" src="static/assets/tile-orange.png" alt="" width="480" height="480">
-          <canvas class="hero-canvas" id="hero-canvas"></canvas>
+    <!-- Every visual on this page is generated in code, live, sharp at any
+         resolution: the films and planets by static/js/cosmos.js (WebGL),
+         the illustrations as inline SVG. Nothing to download but the code;
+         the case study films are the real project recordings. -->
+
+    <!-- ====== 00 · Hero: THE GRAND TOUR, a 14 s looping film ======
+         Singularity, Big Bang, the solar system flown outward, Big Crunch,
+         singularity again (cosmos.js). The frame fills the screen, then
+         gathers itself into a floating rounded window as you scroll
+         (home.js), like the header does. -->
+    <section class="hx" id="launch-pad" data-stage="00" data-stage-name="Launch" aria-label="Worx, web and software development">
+      <div class="hx-stage">
+        <div class="hx-frame">
+          <div class="hx-fallback" aria-hidden="true"></div>
+          <canvas class="hx-gl" aria-hidden="true"></canvas>
+          <!-- THE FILM: the universe's birth to the solar system, cleaned,
+               graded and looped by tools/hero-video/build.py; home.js
+               picks the resolution, directs the collapse into the point and
+               the eruption back out, and runs the chapter readout. The
+               cosmos.js film above plays until this one is ready. -->
+          <video class="hx-video" muted playsinline preload="auto" poster="static/assets/home/hero-poster.jpg" aria-hidden="true"
+            data-src-1440="static/assets/home/hero-1440.mp4"
+            data-src-1080="static/assets/home/hero-1080.mp4"
+            data-src-720="static/assets/home/hero-720.mp4"></video>
+          <!-- the cinematic layers over the film: volumetric dust in depth
+               (it tilts with the pointer for a 3D feel), the inward rush of the
+               collapse, an anamorphic flare for the brightest moments, grain -->
+          <canvas class="hx-dust" aria-hidden="true"></canvas>
+          <span class="hx-rush" aria-hidden="true"></span>
+          <span class="hx-flare" aria-hidden="true"></span>
+          <span class="hx-grain" aria-hidden="true"></span>
+          <!-- THE TITLE CARD, where the film comes to rest: the pen-point
+               dies out, black, then WORX appears and holds (no loop), with
+               the headline and the actions back under it -->
+          <div class="hx-card" aria-hidden="true">
+            <div class="hx-card-word"><span style="--o:1.5">W</span><span style="--o:0.5">O</span><span style="--o:-0.5">R</span><span style="--o:-1.5">X</span></div>
+          </div>
+          <!-- the point of light: everything collapses into it, WORX is born
+               from it, the Big Bang erupts out of it (home.js drives --s) -->
+          <span class="hx-star hx-point" aria-hidden="true"><i class="hx-star-rays"></i><i class="hx-star-rays hx-star-rays--b"></i><i class="hx-star-glow"></i><i class="hx-star-streak"></i><i class="hx-star-streak hx-star-streak--soft"></i><i class="hx-star-core"></i></span>
+          <span class="hx-flash" aria-hidden="true"></span>
+          <span class="hx-shade" aria-hidden="true"></span>
+          <span class="hx-bars" aria-hidden="true"><i></i><i></i></span>
         </div>
-        <p class="eyebrow">Plan. Design. Create.</p>
-        <h1>We build digital that Worx.</h1>
-        <p class="tagline" data-reveal>
-          Worx is Glimpse's in-house development studio. We design and build
-          websites, mobile apps and custom platforms — clean code, sharp
-          design, built for businesses, by creatives.
-        </p>
-        <div class="hero-cta" data-reveal>
-          <a href="contact/index.html" class="btn btn-primary">Start a project</a>
-          <a href="portfolio/index.html" class="btn btn-ghost">See our work</a>
-          <button type="button" class="btn btn-ghost" data-contact-open>Talk to us</button>
+
+        <div class="hx-hud hx-hud--tl" aria-hidden="true">
+          <span class="hx-dot"></span>WORX · MISSION CONTROL
+          <small>25.2048° N · 55.2708° E · DUBAI</small>
         </div>
-      </div>
-      <span class="hero-scroll-hint">Scroll</span>
-    </section>
-
-    <!-- ====== Stats ====== -->
-    <section class="container">
-      <div class="stats-grid">
-        <div class="stat" data-reveal>
-          <strong data-count="300" data-suffix="+">0</strong>
-          <span>Projects delivered</span>
+        <div class="hx-hud hx-hud--tr" aria-hidden="true">
+          <span>LOCAL <time data-hx-clock>--:--</time> GST</span>
+          <small>SIGNAL <b>LOCKED</b></small>
         </div>
-        <div class="stat" data-reveal>
-          <strong data-count="12" data-suffix="+">0</strong>
-          <span>Loyal clients</span>
-        </div>
-        <div class="stat" data-reveal>
-          <strong data-count="95" data-suffix="%">0</strong>
-          <span>Client satisfaction</span>
-        </div>
-        <div class="stat" data-reveal>
-          <strong data-count="10" data-suffix="%+">0</strong>
-          <span>Growth per year</span>
-        </div>
-      </div>
-    </section>
 
-    <!-- ====== Who we are ====== -->
-    <section class="section container">
-      <div class="section-head">
-        <p class="eyebrow">Who we are</p>
-        <h2 data-reveal>Where creativity meets <span class="gradient-text">functionality</span></h2>
-        <p data-reveal>
-          Nestled in the heart of the UAE, Worx blends local expertise with a
-          global perspective. While Glimpse masters the marketing, Worx writes
-          the clean, maintainable code underneath — so every launch lands with
-          both style and substance.
-        </p>
-      </div>
-      <div class="card-grid card-grid--4">
-        <article class="card" data-reveal>
-          <div class="card-icon">⚙️</div>
-          <h3>Workflows that work</h3>
-          <p>A mastered project methodology that keeps every build on time and on spec.</p>
-        </article>
-        <article class="card" data-reveal>
-          <div class="card-icon">🧩</div>
-          <h3>All-in-one solution</h3>
-          <p>Strategy, design, development and launch — one team, end to end.</p>
-        </article>
-        <article class="card" data-reveal>
-          <div class="card-icon">🤝</div>
-          <h3>Real support</h3>
-          <p>Proactive, priority support long after launch day. We stay reachable.</p>
-        </article>
-        <article class="card" data-reveal>
-          <div class="card-icon">⚡</div>
-          <h3>Smart automation</h3>
-          <p>Automation tools across our pipeline keep productivity high and costs honest.</p>
-        </article>
-      </div>
-    </section>
-
-    <!-- ====== Services ====== -->
-    <section class="section container">
-      <div class="section-head">
-        <p class="eyebrow">What we do</p>
-        <h2 data-reveal>Services built around <span class="gradient-text">your build</span></h2>
-      </div>
-      <div class="card-grid">
-        <article class="card" data-reveal>
-          <div class="card-icon">🌐</div>
-          <h3>Web Development</h3>
-          <p>Fast, secure, SEO-first websites — from landing pages to enterprise CMS builds.</p>
-          <a class="card-link" href="services/web-development.html">Explore →</a>
-        </article>
-        <article class="card" data-reveal>
-          <div class="card-icon">📱</div>
-          <h3>Mobile Apps</h3>
-          <p>Native and cross-platform apps for iOS and Android, designed to be used daily.</p>
-          <a class="card-link" href="services/mobile-apps.html">Explore →</a>
-        </article>
-        <article class="card" data-reveal>
-          <div class="card-icon">🎨</div>
-          <h3>UI &amp; UX Design</h3>
-          <p>Wireframes to polished interfaces — research-driven design that converts.</p>
-          <a class="card-link" href="services/ui-ux-design.html">Explore →</a>
-        </article>
-        <article class="card" data-reveal>
-          <div class="card-icon">🛠️</div>
-          <h3>Custom Platforms</h3>
-          <p>Tailored portals, dashboards and tools when off-the-shelf won't cut it.</p>
-          <a class="card-link" href="services/custom-platforms.html">Explore →</a>
-        </article>
-        <article class="card" data-reveal>
-          <div class="card-icon">🔍</div>
-          <h3>SEO &amp; SEM</h3>
-          <p>Studied keywords and clean structure that fit squarely within Google's standards.</p>
-          <a class="card-link" href="services/seo-sem.html">Explore →</a>
-        </article>
-        <article class="card" data-reveal>
-          <div class="card-icon">🥽</div>
-          <h3>AR / VR &amp; Activations</h3>
-          <p>Interactive activations, augmented and virtual reality experiences that stop crowds.</p>
-          <a class="card-link" href="services/ar-vr.html">Explore →</a>
-        </article>
-      </div>
-    </section>
-
-    <!-- ====== Client marquee ====== -->
-    <section class="marquee" aria-label="Clients we have worked with">
-      <div class="marquee-track">
-        <!-- List appears twice for a seamless loop -->
-        <span>Chaumet</span><span>Hyundai</span><span>Modon</span><span>Genesis</span>
-        <span>Kia</span><span>UAE Pavilion</span><span>Hudayriyat</span><span>Wealthface</span>
-        <span>Hisense</span><span>UNICEF</span><span>Universal Pictures</span><span>Roxy Cinemas</span>
-        <span>Chaumet</span><span>Hyundai</span><span>Modon</span><span>Genesis</span>
-        <span>Kia</span><span>UAE Pavilion</span><span>Hudayriyat</span><span>Wealthface</span>
-        <span>Hisense</span><span>UNICEF</span><span>Universal Pictures</span><span>Roxy Cinemas</span>
-      </div>
-    </section>
-
-    <!-- ====== Process ====== -->
-    <section class="section container">
-      <div class="section-head">
-        <p class="eyebrow">How we work</p>
-        <h2 data-reveal>Seven steps. <span class="gradient-text">Zero surprises.</span></h2>
-      </div>
-      <ol class="sequence">
-        <li data-reveal>Consultation</li>
-        <li data-reveal>Deliberation</li>
-        <li data-reveal>Solutions</li>
-        <li data-reveal>Evaluation</li>
-        <li data-reveal>Finalisation</li>
-        <li data-reveal>Execution</li>
-        <li data-reveal>Management</li>
-      </ol>
-    </section>
-
-    <!-- ====== Testimonials ====== -->
-    <section class="section container">
-      <div class="section-head">
-        <p class="eyebrow">From our clients</p>
-        <h2 data-reveal>Never disappointed, <span class="gradient-text">always surprised</span></h2>
-      </div>
-      <div class="card-grid">
-        <article class="quote-card" data-reveal>
-          <blockquote>We've been working with the Worx team for over two years and their work is professional with impressive speed!</blockquote>
-          <cite><strong>Simon</strong> Hyundai</cite>
-        </article>
-        <article class="quote-card" data-reveal>
-          <blockquote>The team understands the requirements of the UAE and GCC region which made the Chaumet e-commerce website a huge success! Kudos to everyone at Worx.</blockquote>
-          <cite><strong>Monique</strong> Chaumet</cite>
-        </article>
-        <article class="quote-card" data-reveal>
-          <blockquote>I have worked with Glimpse on various real estate projects and they continue to exceed expectations. Worx is our trusted partner.</blockquote>
-          <cite><strong>Mohd.</strong> Modon</cite>
-        </article>
-      </div>
-    </section>
-
-    <!-- ====== Blog teasers ====== -->
-    <section class="section container">
-      <div class="section-head">
-        <p class="eyebrow">Latest updates</p>
-        <h2 data-reveal>Notes from the <span class="gradient-text">workbench</span></h2>
-      </div>
-      <div class="card-grid">
-        <article class="card" data-reveal>
-          <h3>Why performance is your best SEO strategy</h3>
-          <p>Google's Lighthouse doesn't lie. How we build sites that score — and why it matters for ranking.</p>
-          <a class="card-link" href="blogs/performance-seo.html">Read →</a>
-        </article>
-        <article class="card" data-reveal>
-          <h3>Choosing the right stack for your next build</h3>
-          <p>CMS, headless or fully custom? A plain-language guide to picking the platform you won't regret.</p>
-          <a class="card-link" href="blogs/choosing-your-stack.html">Read →</a>
-        </article>
-        <article class="card" data-reveal>
-          <h3>AR activations that actually activate</h3>
-          <p>What we learned shipping interactive experiences for Expo-scale audiences.</p>
-          <a class="card-link" href="blogs/ar-activations.html">Read →</a>
-        </article>
-      </div>
-    </section>
-
-    <!-- ====== FAQ ====== -->
-    <section class="section container">
-      <div class="section-head">
-        <p class="eyebrow">FAQs</p>
-        <h2 data-reveal>Questions, answered</h2>
-      </div>
-      <div class="faq-list">
-        <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">
-            What does Worx actually do?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>We plan, design and develop digital products: websites, mobile apps, e-commerce, custom platforms and interactive AR/VR activations. As Glimpse's in-house development studio, we also wire every build into a full marketing launch.</p>
+        <!-- no copy over the film: it is the hero. The headline stays for
+             search engines and screen readers; the two actions float low. -->
+        <div class="hx-copy container">
+          <h1 class="visually-hidden">Worx: we build digital that Worx. Websites, apps and platforms for the region's boldest brands, built in the UAE by Glimpse's in-house development studio.</h1>
+          <!-- the CTA moment's headline: home.js edits the last three words
+               like a line of code, "Works, Like Magic." <-> "Worx, <like/magic>".
+               Screen readers get the sentence once; the typing is hidden. -->
+          <p class="hx-say" data-hx-say>
+            <span class="visually-hidden">Your Digital Vision Works, Like Magic.</span>
+            <span class="hx-say-v" aria-hidden="true"><span class="hx-say-fix">Your Digital Vision</span> <span class="hx-say-edit"><span class="hx-say-sizer">Works, Like Magic.</span><span class="hx-say-sizer">Worx, <span class="hx-say-code">&lt;like/magic&gt;</span></span><span class="hx-say-live"><span data-hx-typed>Works, Like Magic.</span><i class="hx-caret"></i></span></span></span>
+          </p>
+          <div class="hx-cta">
+            <a class="btn-spark btn-spark--lg btn-spark--face" href="contact/index.html"><span class="btn-spark-bg" aria-hidden="true"></span><span class="btn-spark-txt">Quick Enquiry</span><span class="btn-face" aria-hidden="true"><img src="static/assets/home/marwan-face.webp" alt="" width="44" height="44" decoding="async"></span></a>
+            <a class="hm-ghost" href="#archive"><span>See our work</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           </div>
         </div>
-        <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">
-            How is Worx different from Glimpse?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Glimpse is the award-winning marketing agency; Worx is its sister company focused on engineering. Glimpse prepares the platforms and social networks, Worx writes the clean, maintainable code. Together you get a launch that is both loud and solid.</p>
+
+        <!-- the cosmic flight recorder: the film's chapter, the universe's
+             age and its scale, and the reel (home.js follows the film) -->
+        <div class="hx-telemetry" aria-hidden="true">
+          <span class="hx-now">NOW <b data-hx-label>SINGULARITY</b></span>
+          <span class="hx-time">T+ <b data-hx-time>0 s</b></span>
+          <span class="hx-au"><b data-hx-au>0.00</b> AU</span>
+          <span class="hx-reel"><i data-hx-reel></i><span class="hx-reel-ticks" data-hx-ticks></span><span class="hx-reel-head" data-hx-head></span></span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====== 01 · Partners ====== -->
+    <section class="hm-partners" id="partners" data-stage="01" data-stage-name="Partners" aria-labelledby="partners-title">
+      <div class="container hm-head hm-head--center">
+        <p class="hm-kicker"><i class="hm-dot" aria-hidden="true"></i>Mission partners</p>
+        <h2 id="partners-title" class="hm-h2" data-split>Trusted by the world’s boldest brands.</h2>
+      </div>
+      <div class="hm-marquee" aria-hidden="true">
+        <div class="hm-marquee-row" data-dir="1">
+          <span class="bm bm--chaumet">Chaumet</span><span class="bm bm--hyundai">Hyundai</span><span class="bm bm--modon">Modon</span><span class="bm bm--genesis">Genesis</span><span class="bm bm--kia">Kia</span><span class="bm bm--uae-pavilion">UAE Pavilion</span><span class="bm bm--hudayriyat">Hudayriyat</span><span class="bm bm--wealthface">wealthface</span>
+        </div>
+        <div class="hm-marquee-row" data-dir="-1">
+          <span class="bm bm--hisense">Hisense</span><span class="bm bm--unicef">unicef</span><span class="bm bm--universal">Universal Pictures</span><span class="bm bm--roxy">Roxy Cinemas</span><span class="bm bm--lg">LG</span><span class="bm bm--tiara">Tiara Dream</span><span class="bm bm--duni">duni</span><span class="bm bm--glimpse">Glimpse</span>
+        </div>
+      </div>
+      <p class="visually-hidden">Clients include Chaumet, Hyundai, Modon, Genesis, Kia, UAE Pavilion, Hudayriyat, Wealthface, Hisense, UNICEF, Universal Pictures, Roxy Cinemas, LG, Tiara Dream, Duni and Glimpse.</p>
+      <ul class="hm-regions container" aria-label="Where we deliver">
+        <li><i></i>Headquartered in Dubai, UAE</li>
+        <li>UAE</li>
+        <li>Lebanon</li>
+        <li>Saudi Arabia</li>
+        <li>South Korea</li>
+        <li>USA</li>
+      </ul>
+    </section>
+
+    <!-- ====== 02 · Mission archive (work) ====== -->
+    <!-- Desktop: the section pins and vertical scroll carries the track
+         sideways. Touch / narrow: a native swipe track with snap. -->
+    <section class="hm-archive" id="archive" data-stage="02" data-stage-name="Archive" aria-labelledby="archive-title">
+      <div class="hm-archive-pin">
+        <div class="container hm-head hm-head--split">
+          <div>
+            <p class="hm-kicker"><i class="hm-dot" aria-hidden="true"></i>Mission archive</p>
+            <h2 id="archive-title" class="hm-h2" data-split>Launched, live and still flying</h2>
+          </div>
+          <div class="hm-head-aside">
+            <p>From luxury e-commerce to Expo-scale activations: a few of the missions we've built, shipped and kept in orbit.</p>
+            <a class="hm-ghost" href="portfolio/index.html"><span>All projects</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           </div>
         </div>
-        <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">
-            How long does a typical website take?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>A marketing site usually takes 4–8 weeks from kickoff to launch; larger platforms and apps run 3–6 months. Our seven-step sequence keeps timelines visible from day one, so you always know what's next.</p>
+
+        <div class="hm-track-wrap">
+          <ol class="hm-track">
+            <li class="hm-case"><a href="portfolio/index.html">
+              <div class="hm-case-media"><div class="hm-case-poster" aria-hidden="true"><span>Hyundai</span></div><video muted loop playsinline preload="none" data-src="static/assets/portfolio/videos/Hyundai.mp4"></video></div>
+              <div class="hm-case-body"><h3>Hyundai</h3><p>A rapidly built iPad app for Hyundai Motors Group, presented at Expo 2020's Korean pavilion.</p><ul><li>App</li><li>Automotive</li></ul></div>
+            </a></li>
+            <li class="hm-case"><a href="portfolio/index.html">
+              <div class="hm-case-media"><div class="hm-case-poster" aria-hidden="true"><span>The Glimpse Project</span></div><video muted loop playsinline preload="none" data-src="static/assets/portfolio/videos/Glimpse.mp4"></video></div>
+              <div class="hm-case-body"><h3>The Glimpse Project</h3><p>Our own studio site, designed in-house, built by Worx, and tuned to rank among the best on Google's Lighthouse.</p><ul><li>Website</li><li>Creative studio</li></ul></div>
+            </a></li>
+            <li class="hm-case"><a href="portfolio/index.html">
+              <div class="hm-case-media"><div class="hm-case-poster" aria-hidden="true"><span>Genesis</span></div><video muted loop playsinline preload="none" data-src="static/assets/portfolio/videos/Genesis.mp4"></video></div>
+              <div class="hm-case-body"><h3>Genesis</h3><p>Web development and upkeep for the Genesis MEA pages, supporting the marque's regional luxury launch.</p><ul><li>Web</li><li>Automotive</li></ul></div>
+            </a></li>
+            <li class="hm-case"><a href="portfolio/index.html">
+              <div class="hm-case-media"><div class="hm-case-poster" aria-hidden="true"><span>LG</span></div><video muted loop playsinline preload="none" data-src="static/assets/portfolio/videos/LG.mp4"></video></div>
+              <div class="hm-case-body"><h3>LG &amp; LG Kitchen Planner</h3><p>Interactive planning tools that let customers visualise and configure LG's kitchen range before they buy.</p><ul><li>Web tool</li><li>Electronics</li></ul></div>
+            </a></li>
+            <li class="hm-case"><a href="portfolio/index.html">
+              <div class="hm-case-media"><div class="hm-case-poster" aria-hidden="true"><span>Hisense</span></div><video muted loop playsinline preload="none" data-src="static/assets/portfolio/videos/Hisense.mp4"></video></div>
+              <div class="hm-case-body"><h3>Hisense</h3><p>Regional campaign web builds and content rollouts for one of the world's fastest-growing appliance brands.</p><ul><li>Campaign sites</li><li>Electronics</li></ul></div>
+            </a></li>
+            <li class="hm-case"><a href="portfolio/index.html">
+              <div class="hm-case-media"><div class="hm-case-poster" aria-hidden="true"><span>Sail Naxos</span></div><video muted loop playsinline preload="none" data-src="static/assets/portfolio/videos/Sail%20Naxos.mp4"></video></div>
+              <div class="hm-case-body"><h3>Sail Naxos</h3><p>Website design and development for Sail Naxos, supporting the operator's sailing tours and island excursions.</p><ul><li>Website</li><li>Travel</li></ul></div>
+            </a></li>
+            <li class="hm-case"><a href="portfolio/index.html">
+              <div class="hm-case-media"><div class="hm-case-poster" aria-hidden="true"><span>Chaumet</span></div><video muted loop playsinline preload="none" data-src="static/assets/portfolio/videos/chaumet.mp4"></video></div>
+              <div class="hm-case-body"><h3>Chaumet</h3><p>Tailor-made online flagship for the 240-year-old jewellery Maison, built for luxury shoppers across MENA.</p><ul><li>E-commerce</li><li>Luxury</li></ul></div>
+            </a></li>
+            <li class="hm-case"><a href="portfolio/index.html">
+              <div class="hm-case-media"><div class="hm-case-poster" aria-hidden="true"><span>Modon</span></div><video muted loop playsinline preload="none" data-src="static/assets/portfolio/videos/Modon.mp4"></video></div>
+              <div class="hm-case-body"><h3>Modon</h3><p>Ongoing care of the corporate site for one of the UAE's leading sustainable developers: Drupal, SEO and press.</p><ul><li>Web</li><li>Real estate</li></ul></div>
+            </a></li>
+            <li class="hm-case hm-case--more"><a href="portfolio/index.html">
+              <span class="hm-case-more-n">+10</span>
+              <span class="hm-case-more-t">more missions in the archive</span>
+              <span class="hm-ghost"><span>Open the portfolio</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a></li>
+          </ol>
+        </div>
+
+        <div class="container hm-track-foot" aria-hidden="true">
+          <span class="hm-track-count"><b data-track-now>01</b> / 08</span>
+          <span class="hm-track-bar"><i data-track-bar></i></span>
+          <span class="hm-track-hint">Scroll to travel</span>
+        </div>
+      </div>
+    </section>
+
+
+    <div class="hm-limb" aria-hidden="true"><svg viewBox="0 0 1600 240" preserveAspectRatio="none"><defs><linearGradient id="limb-ga" x1="0" x2="1"><stop offset="0" stop-color="#c04527" stop-opacity="0"/><stop offset=".5" stop-color="#faa719"/><stop offset="1" stop-color="#c04527" stop-opacity="0"/></linearGradient></defs><path class="hm-limb-glow" d="M-40 240 Q800 -20 1640 240" stroke="url(#limb-ga)"/><path class="hm-limb-line" d="M-40 240 Q800 -20 1640 240" stroke="url(#limb-ga)" pathLength="100"/></svg><span class="hm-limb-tag">ENTERING · MISSION MODULES</span></div>
+
+    <!-- ====== 03 · Mission modules (services) ====== -->
+    <section class="hm-modules section" id="modules" data-stage="03" data-stage-name="Modules" aria-labelledby="modules-title">
+      <div class="container">
+        <div class="hm-head hm-head--split">
+          <div>
+            <p class="hm-kicker"><i class="hm-dot" aria-hidden="true"></i>Mission modules</p>
+            <h2 id="modules-title" class="hm-h2" data-split>Everything you need to launch, under one roof</h2>
+          </div>
+          <div class="hm-head-aside">
+            <p>13 services, 100+ capabilities, one crew. Pick a module to see what's on board.</p>
           </div>
         </div>
-        <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">
-            Do you maintain sites after launch?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Yes — most of our client relationships are long-term. We handle updates, security patches, on-page SEO and new features for brands like Modon, Genesis and Hudayriyat years after the original launch.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">
-            Which industries do you work with?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Real estate, automotive, luxury retail, fintech, government and entertainment — from Chaumet to the UAE Pavilion. If it needs to exist online, we've probably built something like it.</p>
+
+        <div class="hm-mod" data-mod>
+          <ol class="hm-mod-list" role="tablist" aria-label="Service divisions">
+            <li><button type="button" role="tab" class="is-active" aria-selected="true" aria-controls="mod-dev" id="mod-tab-dev"><i class="hm-dot" aria-hidden="true"></i>Development</button></li>
+            <li><button type="button" role="tab" aria-selected="false" aria-controls="mod-mobile" id="mod-tab-mobile"><i class="hm-dot" aria-hidden="true"></i>Mobile</button></li>
+            <li><button type="button" role="tab" aria-selected="false" aria-controls="mod-design" id="mod-tab-design"><i class="hm-dot" aria-hidden="true"></i>Design &amp; Creative</button></li>
+            <li><button type="button" role="tab" aria-selected="false" aria-controls="mod-emerging" id="mod-tab-emerging"><i class="hm-dot" aria-hidden="true"></i>Emerging Tech</button></li>
+            <li><button type="button" role="tab" aria-selected="false" aria-controls="mod-it" id="mod-tab-it"><i class="hm-dot" aria-hidden="true"></i>IT &amp; Enterprise</button></li>
+          </ol>
+
+          <div class="hm-mod-stage">
+            <!-- each division has its own computer-science world (code-worlds.js):
+                 Development = a file compiling into a city, Mobile = the app's
+                 view tree, Design = a CSS grid building a page, Emerging Tech =
+                 a neural net in latent space + an AR anchor, IT = the topology -->
+            <div class="hm-mod-visual" aria-hidden="true">
+              <canvas class="hm-mod-gl"></canvas>
+              <span class="hm-mod-label"><b data-mod-world>SRC / CORE</b><small data-mod-caption>Where code compiles into product</small></span>
+              <!-- phones: the flight counter, which module the scroll has docked at -->
+              <span class="hm-mod-flight"><b data-mod-n>01</b> / 05<span class="hm-mod-ticks"><i class="is-on"></i><i></i><i></i><i></i><i></i></span></span>
+            </div>
+
+            <div class="hm-mod-panel is-active" role="tabpanel" id="mod-dev" aria-labelledby="mod-tab-dev">
+              <p class="hm-mod-panel-head" aria-hidden="true"><span>MODULE 01 / 05</span>Development</p>
+              <a href="services/web-development.html"><b>Web Development</b><span>Fast, secure, search-friendly websites on the right stack.</span></a>
+              <a href="services/ecommerce-development.html"><b>E-commerce Development</b><span>Storefronts that sell, from boutique brands to marketplaces.</span></a>
+              <a href="services/custom-platforms.html"><b>Custom Platforms</b><span>Portals, dashboards and tools built around your workflow.</span></a>
+              <a href="services/seo-sem.html"><b>SEO &amp; SEM</b><span>Studied keywords and clean structure that Google rewards.</span></a>
+            </div>
+            <div class="hm-mod-panel" role="tabpanel" id="mod-mobile" aria-labelledby="mod-tab-mobile" hidden>
+              <p class="hm-mod-panel-head" aria-hidden="true"><span>MODULE 02 / 05</span>Mobile</p>
+              <a href="services/mobile-apps.html"><b>Mobile App Development</b><span>Native and cross-platform apps, designed to be used daily and maintained for years.</span></a>
+              <a href="services/mobile-apps.html"><b>iOS &amp; Android</b><span>Swift, Kotlin, Flutter and React Native, chosen for the job, not the trend.</span></a>
+              <a href="services/mobile-apps.html"><b>Progressive web apps</b><span>App-like experiences that install from the browser.</span></a>
+            </div>
+            <div class="hm-mod-panel" role="tabpanel" id="mod-design" aria-labelledby="mod-tab-design" hidden>
+              <p class="hm-mod-panel-head" aria-hidden="true"><span>MODULE 03 / 05</span>Design &amp; Creative</p>
+              <a href="services/ui-ux-design.html"><b>UI / UX Design</b><span>Research-driven interfaces that make the right action obvious.</span></a>
+              <a href="services/digital-branding.html"><b>Digital Branding &amp; Creatives</b><span>Identities with a point of view, from logo to packaging.</span></a>
+              <a href="services/video-animation.html"><b>2D / 3D Video Animation</b><span>Explainers, product videos and walkthroughs that move people.</span></a>
+              <a href="services/copywriting.html"><b>Copywriting</b><span>Words that sound like you and sell like a pro, in English and Arabic.</span></a>
+            </div>
+            <div class="hm-mod-panel" role="tabpanel" id="mod-emerging" aria-labelledby="mod-tab-emerging" hidden>
+              <p class="hm-mod-panel-head" aria-hidden="true"><span>MODULE 04 / 05</span>Emerging Tech</p>
+              <a href="services/artificial-intelligence.html"><b>Artificial Intelligence</b><span>Chatbots, automation and search that work while you sleep.</span></a>
+              <a href="services/ar-vr.html"><b>AR / VR &amp; Mixed Reality</b><span>Immersive activations engineered to stop crowds.</span></a>
+            </div>
+            <div class="hm-mod-panel" role="tabpanel" id="mod-it" aria-labelledby="mod-tab-it" hidden>
+              <p class="hm-mod-panel-head" aria-hidden="true"><span>MODULE 05 / 05</span>IT &amp; Enterprise</p>
+              <a href="services/erp-crm.html"><b>ERP &amp; CRM</b><span>One connected system for finance, people, supply and sales.</span></a>
+              <a href="services/cloud-transformation.html"><b>Cloud Transformation</b><span>Move to the cloud and keep it secure, fast and affordable.</span></a>
+              <a href="services/it-outsourcing.html"><b>IT Resource Outsourcing</b><span>Vetted specialists who join your team in days.</span></a>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ====== CTA ====== -->
-    <section class="section container">
-      <div class="cta-band" data-reveal>
-        <h2>Let's get to <span class="gradient-text">work</span></h2>
-        <p>Tell us what you're building. We'll tell you exactly how we'd build it — timeline, stack and all.</p>
-        <a href="contact/index.html" class="btn btn-primary">Start the conversation</a>
+    <!-- ====== 04 · Why Worx ====== -->
+    <section class="hm-why section" id="why" data-stage="04" data-stage-name="Why Worx" aria-labelledby="why-title">
+      <div class="container">
+        <div class="hm-head hm-head--center">
+          <p class="hm-kicker"><i class="hm-dot" aria-hidden="true"></i>Why Worx</p>
+          <h2 id="why-title" class="hm-h2" data-split>Four reasons crews choose to fly with us</h2>
+        </div>
+        <!-- a star chart: each reason is a constellation, strung on one
+             ecliptic (drawn by home.js through the four figures) -->
+        <div class="hm-chart" data-chart>
+          <svg class="hm-chart-grid" viewBox="0 0 1200 600" preserveAspectRatio="none" aria-hidden="true"><path d="M-20 520 Q600 380 1220 520 M-20 380 Q600 240 1220 380 M-20 240 Q600 100 1220 240 M-20 100 Q600 -40 1220 100"/><path d="M150 0 Q180 300 150 600 M450 0 Q460 300 450 600 M750 0 Q740 300 750 600 M1050 0 Q1020 300 1050 600"/></svg>
+          <ol class="hm-chart-list">
+            <li class="hm-star" style="--i:0">
+              <svg class="hm-star-fig" viewBox="0 0 240 200" aria-hidden="true"><path class="ln" pathLength="1" d="M22 172 L68 150 L92 112 L140 98 L160 60 L212 36"/><path class="ln ln--faint" pathLength="1" d="M22 186 H218"/><circle class="st" cx="22" cy="172" r="2.6" style="--t:0.00s"/><circle class="st" cx="68" cy="150" r="2.2" style="--t:0.37s"/><circle class="st" cx="92" cy="112" r="3" style="--t:0.74s"/><circle class="st" cx="140" cy="98" r="2.2" style="--t:1.11s"/><circle class="st" cx="160" cy="60" r="2.6" style="--t:1.48s"/><circle class="st st--a" cx="212" cy="36" r="4.2" style="--t:0.25s"/></svg>
+              <p class="hm-star-cat"><b>I</b> · SCALA <span>The ladder</span></p>
+              <h3>Workflows that work</h3>
+              <p class="hm-star-text">A mastered project methodology that keeps every build on time and on spec.</p>
+            </li>
+            <li class="hm-star" style="--i:1">
+              <svg class="hm-star-fig" viewBox="0 0 240 200" aria-hidden="true"><path class="ln" pathLength="1" d="M120 38 L66 69 L66 131 L120 162 L174 131 L174 69 Z"/><path class="ln ln--faint" pathLength="1" d="M120 100 L120 38 M120 100 L66 69 M120 100 L66 131 M120 100 L120 162 M120 100 L174 131 M120 100 L174 69"/><circle class="st" cx="120" cy="38" r="3" style="--t:0.00s"/><circle class="st" cx="66" cy="69" r="2.4" style="--t:0.37s"/><circle class="st" cx="66" cy="131" r="3" style="--t:0.74s"/><circle class="st" cx="120" cy="162" r="2.4" style="--t:1.11s"/><circle class="st" cx="174" cy="131" r="3" style="--t:1.48s"/><circle class="st" cx="174" cy="69" r="2.4" style="--t:0.25s"/><circle class="st st--a" cx="120" cy="100" r="4.4" style="--t:0.62s"/></svg>
+              <p class="hm-star-cat"><b>II</b> · CORONA <span>The crew</span></p>
+              <h3>All-in-one crew</h3>
+              <p class="hm-star-text">Strategy, design, development and launch: one team, end to end, no hand-offs.</p>
+            </li>
+            <li class="hm-star" style="--i:2">
+              <svg class="hm-star-fig" viewBox="0 0 240 200" aria-hidden="true"><path class="ln" pathLength="1" d="M120 40 L104 92 L94 152 L120 176 L146 152 L136 92 Z M104 92 L136 92 M94 152 L146 152"/><path class="wave" d="M132.6 30.1 A16 16 0 0 1 132.6 49.9"/><path class="wave w2" d="M142.1 22.8 A28 28 0 0 1 142.1 57.2"/><path class="wave w3" d="M151.5 15.4 A40 40 0 0 1 151.5 64.6"/><path class="wave" d="M107.4 30.1 A16 16 0 0 0 107.4 49.9"/><path class="wave w2" d="M97.9 22.8 A28 28 0 0 0 97.9 57.2"/><path class="wave w3" d="M88.5 15.4 A40 40 0 0 0 88.5 64.6"/><circle class="st st--a" cx="120" cy="40" r="4.2" style="--t:0.00s"/><circle class="st" cx="104" cy="92" r="2.4" style="--t:0.37s"/><circle class="st" cx="136" cy="92" r="2.4" style="--t:0.74s"/><circle class="st" cx="94" cy="152" r="2.8" style="--t:1.11s"/><circle class="st" cx="146" cy="152" r="2.8" style="--t:1.48s"/><circle class="st" cx="120" cy="176" r="2.2" style="--t:0.25s"/></svg>
+              <p class="hm-star-cat"><b>III</b> · PHARUS <span>The beacon</span></p>
+              <h3>Real support</h3>
+              <p class="hm-star-text">Proactive, priority support long after launch day. We stay reachable.</p>
+            </li>
+            <li class="hm-star" style="--i:3">
+              <svg class="hm-star-fig" viewBox="0 0 240 200" aria-hidden="true"><path id="why-loop" class="ln" pathLength="1" d="M212.0 100.0 L211.4 107.5 L209.7 114.6 L206.9 121.2 L203.3 126.9 L199.0 131.7 L194.1 135.5 L189.0 138.2 L183.7 139.8 L178.5 140.6 L173.3 140.5 L168.2 139.7 L163.4 138.3 L158.8 136.4 L154.4 134.1 L150.2 131.4 L146.3 128.5 L142.6 125.3 L139.0 121.9 L135.6 118.5 L132.3 114.9 L129.1 111.2 L126.1 107.5 L123.0 103.8 L120.0 100.0 L117.0 96.2 L113.9 92.5 L110.9 88.8 L107.7 85.1 L104.4 81.5 L101.0 78.1 L97.4 74.7 L93.7 71.5 L89.8 68.6 L85.6 65.9 L81.2 63.6 L76.6 61.7 L71.8 60.3 L66.7 59.5 L61.5 59.4 L56.3 60.2 L51.0 61.8 L45.9 64.5 L41.0 68.3 L36.7 73.1 L33.1 78.8 L30.3 85.4 L28.6 92.5 L28.0 100.0 L28.6 107.5 L30.3 114.6 L33.1 121.2 L36.7 126.9 L41.0 131.7 L45.9 135.5 L51.0 138.2 L56.3 139.8 L61.5 140.6 L66.7 140.5 L71.8 139.7 L76.6 138.3 L81.2 136.4 L85.6 134.1 L89.8 131.4 L93.7 128.5 L97.4 125.3 L101.0 121.9 L104.4 118.5 L107.7 114.9 L110.9 111.2 L113.9 107.5 L117.0 103.8 L120.0 100.0 L123.0 96.2 L126.1 92.5 L129.1 88.8 L132.3 85.1 L135.6 81.5 L139.0 78.1 L142.6 74.7 L146.3 71.5 L150.2 68.6 L154.4 65.9 L158.8 63.6 L163.4 61.7 L168.2 60.3 L173.3 59.5 L178.5 59.4 L183.7 60.2 L189.0 61.8 L194.1 64.5 L199.0 68.3 L203.3 73.1 L206.9 78.8 L209.7 85.4 L211.4 92.5 Z"/><circle class="st st--a" cx="212" cy="100" r="3.6" style="--t:0.00s"/><circle class="st" cx="163" cy="138" r="2.3" style="--t:0.37s"/><circle class="st" cx="120" cy="100" r="2.8" style="--t:0.74s"/><circle class="st" cx="77" cy="62" r="2.3" style="--t:1.11s"/><circle class="st" cx="28" cy="100" r="2.8" style="--t:1.48s"/><circle class="st" cx="77" cy="138" r="2.3" style="--t:0.25s"/><circle class="st" cx="120" cy="100" r="2.8" style="--t:0.62s"/><circle class="st" cx="163" cy="62" r="2.3" style="--t:0.99s"/><circle class="st st--run" r="3.2"><animateMotion dur="7s" repeatCount="indefinite"><mpath href="#why-loop"/></animateMotion></circle></svg>
+              <p class="hm-star-cat"><b>IV</b> · ORBIS <span>The loop</span></p>
+              <h3>Smart automation</h3>
+              <p class="hm-star-text">Automation across our pipeline keeps quality high and costs honest.</p>
+            </li>
+          </ol>
+        </div>
       </div>
     </section>
 
+
+    <div class="hm-limb" aria-hidden="true"><svg viewBox="0 0 1600 240" preserveAspectRatio="none"><defs><linearGradient id="limb-gb" x1="0" x2="1"><stop offset="0" stop-color="#c04527" stop-opacity="0"/><stop offset=".5" stop-color="#faa719"/><stop offset="1" stop-color="#c04527" stop-opacity="0"/></linearGradient></defs><path class="hm-limb-glow" d="M-40 240 Q800 -20 1640 240" stroke="url(#limb-gb)"/><path class="hm-limb-line" d="M-40 240 Q800 -20 1640 240" stroke="url(#limb-gb)" pathLength="100"/></svg><span class="hm-limb-tag">ENTERING · TELEMETRY</span></div>
+
+    <!-- ====== 05 · Telemetry ====== -->
+    <section class="hm-telemetry" id="telemetry" data-stage="05" data-stage-name="Telemetry" aria-labelledby="tele-title">
+      <!-- the trajectory: 2019 launch to now, a comet riding it with scroll -->
+      <svg class="hm-tl-orbit" viewBox="0 0 1600 600" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="orbit-g" x1="0" x2="1"><stop offset="0" stop-color="#c04527" stop-opacity=".1"/><stop offset=".6" stop-color="#e57d23" stop-opacity=".55"/><stop offset="1" stop-color="#faa719"/></linearGradient>
+          <linearGradient id="dial-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c04527"/><stop offset=".55" stop-color="#e57d23"/><stop offset="1" stop-color="#faa719"/></linearGradient>
+        </defs>
+        <path id="orbit-path" class="hm-tl-orbit-path" d="M-20 560 C 380 540, 700 420, 980 250 S 1450 40, 1640 20" pathLength="100"/>
+      </svg>
+      <span class="hm-tl-comet" aria-hidden="true"><i></i></span>
+      <span class="hm-tl-mark hm-tl-mark--start" aria-hidden="true"><b>2019</b>LAUNCH · DUBAI</span>
+      <span class="hm-tl-mark hm-tl-mark--end" aria-hidden="true"><b data-tl-now>NOW</b>STILL ACCELERATING</span>
+
+      <div class="container hm-tl">
+        <div class="hm-tl-head">
+          <p class="hm-kicker"><i class="hm-dot" aria-hidden="true"></i>Telemetry</p>
+          <h2 id="tele-title" class="hm-h2" data-split>In orbit since 2019. Still accelerating.</h2>
+          <p>Local expertise, a global perspective, and a crew that sticks around long after launch day.</p>
+        </div>
+
+        <!-- mission odometer: the years roll from launch to today -->
+        <div class="hm-odo" aria-label="Building since 2019">
+          <span class="hm-odo-label">MISSION YEAR</span>
+          <div class="hm-odo-digits" data-odo aria-hidden="true"></div>
+          <span class="hm-odo-elapsed">MISSION ELAPSED · <b data-odo-elapsed>0</b> YEARS</span>
+        </div>
+
+        <ul class="hm-dials">
+            <li class="hm-dial" style="--p:0.86">
+              <svg viewBox="0 0 200 200" aria-hidden="true">
+                <circle class="hm-dial-ticks" cx="100" cy="100" r="92"/>
+                <circle class="hm-dial-track" cx="100" cy="100" r="78"/>
+                <circle class="hm-dial-sweep" cx="100" cy="100" r="92" pathLength="100"/>
+                <circle class="hm-dial-arc" cx="100" cy="100" r="78" pathLength="100" stroke="url(#dial-g)"/>
+                <g class="hm-dial-needle"><circle cx="100" cy="22" r="5"/></g>
+              </svg>
+              <div class="hm-dial-read"><strong><span data-tele="300">0</span>+</strong><span>Projects delivered</span></div>
+              <p class="hm-dial-status" aria-hidden="true"><i></i>NOMINAL</p>
+            </li>
+            <li class="hm-dial" style="--p:0.95">
+              <svg viewBox="0 0 200 200" aria-hidden="true">
+                <circle class="hm-dial-ticks" cx="100" cy="100" r="92"/>
+                <circle class="hm-dial-track" cx="100" cy="100" r="78"/>
+                <circle class="hm-dial-sweep" cx="100" cy="100" r="92" pathLength="100"/>
+                <circle class="hm-dial-arc" cx="100" cy="100" r="78" pathLength="100" stroke="url(#dial-g)"/>
+                <g class="hm-dial-needle"><circle cx="100" cy="22" r="5"/></g>
+              </svg>
+              <div class="hm-dial-read"><strong><span data-tele="95">0</span>%</strong><span>Client satisfaction</span></div>
+              <p class="hm-dial-status" aria-hidden="true"><i></i>OPTIMAL</p>
+            </li>
+            <li class="hm-dial" style="--p:0.6">
+              <svg viewBox="0 0 200 200" aria-hidden="true">
+                <circle class="hm-dial-ticks" cx="100" cy="100" r="92"/>
+                <circle class="hm-dial-track" cx="100" cy="100" r="78"/>
+                <circle class="hm-dial-sweep" cx="100" cy="100" r="92" pathLength="100"/>
+                <circle class="hm-dial-arc" cx="100" cy="100" r="78" pathLength="100" stroke="url(#dial-g)"/>
+                <g class="hm-dial-needle"><circle cx="100" cy="22" r="5"/></g>
+              </svg>
+              <div class="hm-dial-read"><strong><span data-tele="12">0</span>+</strong><span>Loyal long-term clients</span></div>
+              <p class="hm-dial-status" aria-hidden="true"><i></i>LOCKED</p>
+            </li>
+            <li class="hm-dial" style="--p:0.5">
+              <svg viewBox="0 0 200 200" aria-hidden="true">
+                <circle class="hm-dial-ticks" cx="100" cy="100" r="92"/>
+                <circle class="hm-dial-track" cx="100" cy="100" r="78"/>
+                <circle class="hm-dial-sweep" cx="100" cy="100" r="92" pathLength="100"/>
+                <circle class="hm-dial-arc" cx="100" cy="100" r="78" pathLength="100" stroke="url(#dial-g)"/>
+                <g class="hm-dial-needle"><circle cx="100" cy="22" r="5"/></g>
+              </svg>
+              <div class="hm-dial-read"><strong><span data-tele="10">0</span>%+</strong><span>Growth, every year</span></div>
+              <p class="hm-dial-status" aria-hidden="true"><i></i>CLIMBING</p>
+            </li>
+        </ul>
+      </div>
+
+      <div class="hm-tl-ticker" aria-hidden="true">
+        <div class="hm-tl-ticker-row">
+          <span>DOWNLINK</span><b>PROJECTS 300+</b><span>·</span><b>SATISFACTION 95%</b><span>·</span><b>LONG-TERM CLIENTS 12+</b><span>·</span><b>GROWTH 10%+ / YR</b><span>·</span><b>HQ DUBAI · UAE</b><span>·</span><b>IN ORBIT SINCE 2019</b><span>·</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 06 · Flight plan (process) ====== -->
+    <!-- Each stage card sticks and the next one stacks over it; the covered
+         ones tip back and sink into the deck (home.js). -->
+    <section class="hm-flight section" id="flight" data-stage="06" data-stage-name="Flight plan" aria-labelledby="flight-title">
+      <div class="container hm-flight-grid">
+        <div class="hm-flight-lead">
+          <p class="hm-kicker"><i class="hm-dot" aria-hidden="true"></i>Flight plan</p>
+          <h2 id="flight-title" class="hm-h2" data-split>Seven stages. Zero surprises.</h2>
+          <p>A countdown you can see from day one, so you always know what's next.</p>
+          <!-- the countdown board: split-flap digits that click through every
+               number on the way, the stage it is reading, a ladder of the
+               seven stages; at T-00 it goes to liftoff (home.js) -->
+          <div class="hm-fclock" data-fclock aria-hidden="true">
+            <div class="hm-fclock-row"><span class="hm-fclock-t">T</span><span class="hm-fclock-sign">&minus;</span><span class="hm-flap" data-flap><span class="hm-flap-h hm-flap-top"><i>0</i></span><span class="hm-flap-h hm-flap-bot"><i>0</i></span><span class="hm-flap-h hm-flap-fall"><i>0</i></span><span class="hm-flap-h hm-flap-rise"><i>0</i></span></span><span class="hm-flap" data-flap><span class="hm-flap-h hm-flap-top"><i>6</i></span><span class="hm-flap-h hm-flap-bot"><i>6</i></span><span class="hm-flap-h hm-flap-fall"><i>6</i></span><span class="hm-flap-h hm-flap-rise"><i>6</i></span></span></div>
+            <div class="hm-fclock-meta"><span data-fclock-n>STAGE 01 / 07</span><b data-fclock-name>CONSULTATION</b></div>
+            <ol class="hm-fclock-ladder"><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ol>
+          </div>
+        </div>
+        <ol class="hm-stack">
+          <li class="hm-stage" data-t="-06" data-n="06"><span class="hm-stage-t">T-06</span><div><h3>Consultation</h3><p>We listen first: your goals, your audience, your constraints, your definition of a win.</p></div><span class="hm-stage-st" aria-hidden="true"><i></i><b></b></span><span class="hm-stage-fuel" aria-hidden="true"></span></li>
+          <li class="hm-stage" data-t="-05" data-n="05"><span class="hm-stage-t">T-05</span><div><h3>Deliberation</h3><p>We weigh the options and pick the right stack, scope and timeline, in plain language.</p></div><span class="hm-stage-st" aria-hidden="true"><i></i><b></b></span><span class="hm-stage-fuel" aria-hidden="true"></span></li>
+          <li class="hm-stage" data-t="-04" data-n="04"><span class="hm-stage-t">T-04</span><div><h3>Solutions</h3><p>Architecture, user flows and designs you can click through before a line of code is written.</p></div><span class="hm-stage-st" aria-hidden="true"><i></i><b></b></span><span class="hm-stage-fuel" aria-hidden="true"></span></li>
+          <li class="hm-stage" data-t="-03" data-n="03"><span class="hm-stage-t">T-03</span><div><h3>Evaluation</h3><p>Reviews and testing with your team, until every screen earns its place.</p></div><span class="hm-stage-st" aria-hidden="true"><i></i><b></b></span><span class="hm-stage-fuel" aria-hidden="true"></span></li>
+          <li class="hm-stage" data-t="-02" data-n="02"><span class="hm-stage-t">T-02</span><div><h3>Finalisation</h3><p>Polish, content, performance tuning and sign-off.</p></div><span class="hm-stage-st" aria-hidden="true"><i></i><b></b></span><span class="hm-stage-fuel" aria-hidden="true"></span></li>
+          <li class="hm-stage" data-t="-01" data-n="01"><span class="hm-stage-t">T-01</span><div><h3>Execution</h3><p>Build, QA and a calm, rehearsed launch.</p></div><span class="hm-stage-st" aria-hidden="true"><i></i><b></b></span><span class="hm-stage-fuel" aria-hidden="true"></span></li>
+          <li class="hm-stage hm-stage--go" data-t="00" data-n="00"><span class="hm-stage-t">T-00</span><div><h3>Management <em>· liftoff</em></h3><p>Support, updates and growth long after launch day. This is where most of our partnerships really begin.</p></div><span class="hm-stage-st" aria-hidden="true"><i></i><b></b></span><span class="hm-stage-fuel" aria-hidden="true"></span></li>
+        </ol>
+      </div>
+    </section>
+
+
+    <div class="hm-limb" aria-hidden="true"><svg viewBox="0 0 1600 240" preserveAspectRatio="none"><defs><linearGradient id="limb-gc" x1="0" x2="1"><stop offset="0" stop-color="#c04527" stop-opacity="0"/><stop offset=".5" stop-color="#faa719"/><stop offset="1" stop-color="#c04527" stop-opacity="0"/></linearGradient></defs><path class="hm-limb-glow" d="M-40 240 Q800 -20 1640 240" stroke="url(#limb-gc)"/><path class="hm-limb-line" d="M-40 240 Q800 -20 1640 240" stroke="url(#limb-gc)" pathLength="100"/></svg><span class="hm-limb-tag">ENTERING · COMMS RANGE</span></div>
+
+    <!-- ====== 07 · Transmissions (testimonials) ====== -->
+    <section class="hm-tx section" id="comms" data-stage="07" data-stage-name="Comms" aria-labelledby="tx-title">
+      <div class="container">
+        <div class="hm-head hm-head--split">
+          <div>
+            <p class="hm-kicker"><i class="hm-dot" aria-hidden="true"></i>Transmissions received</p>
+            <h2 id="tx-title" class="hm-h2" data-split>Never disappointed, always surprised</h2>
+          </div>
+          <div class="hm-tx-nav">
+            <button type="button" class="hm-round" data-tx-prev aria-label="Previous message"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+            <button type="button" class="hm-round" data-tx-next aria-label="Next message"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </div>
+        </div>
+        <div class="hm-tx-deck" data-tx aria-live="polite">
+          <figure class="hm-tx-card is-active">
+            <p class="hm-tx-meta" aria-hidden="true"><span>INCOMING TRANSMISSION</span><b data-decode>SIGNAL LOCKED</b></p>
+            <div class="hm-tx-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <blockquote>We've been working with the Worx team for over two years and their work is professional with impressive speed!</blockquote>
+            <figcaption><span class="hm-avatar" aria-hidden="true">S</span><b>Simon</b><span>Hyundai</span></figcaption>
+          </figure>
+          <figure class="hm-tx-card">
+            <p class="hm-tx-meta" aria-hidden="true"><span>INCOMING TRANSMISSION</span><b data-decode>SIGNAL LOCKED</b></p>
+            <div class="hm-tx-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <blockquote>The team understands the requirements of the UAE and GCC region which made the Chaumet e-commerce website a huge success! Kudos to everyone at Worx.</blockquote>
+            <figcaption><span class="hm-avatar" aria-hidden="true">M</span><b>Monique</b><span>Chaumet</span></figcaption>
+          </figure>
+          <figure class="hm-tx-card">
+            <p class="hm-tx-meta" aria-hidden="true"><span>INCOMING TRANSMISSION</span><b data-decode>SIGNAL LOCKED</b></p>
+            <div class="hm-tx-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <blockquote>I have worked with Glimpse on various real estate projects and they continue to exceed expectations. Worx is our trusted partner.</blockquote>
+            <figcaption><span class="hm-avatar" aria-hidden="true">M</span><b>Mohd.</b><span>Modon</span></figcaption>
+          </figure>
+        </div>
+        <div class="hm-tx-dots" aria-hidden="true"><i class="is-active"></i><i></i><i></i></div>
+      </div>
+    </section>
+
+    <!-- ====== 08 · Field notes (blog) ====== -->
+    <section class="hm-notes section" id="notes" data-stage="08" data-stage-name="Field notes" aria-labelledby="notes-title">
+      <div class="container">
+        <div class="hm-head hm-head--split">
+          <div>
+            <p class="hm-kicker"><i class="hm-dot" aria-hidden="true"></i>Field notes</p>
+            <h2 id="notes-title" class="hm-h2" data-split>Notes from the workbench</h2>
+          </div>
+          <div class="hm-head-aside"><a class="hm-ghost" href="blogs/index.html"><span>All articles</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+        <div class="hm-notes-grid">
+          <a class="hm-note" href="blogs/performance-seo.html">
+            <span class="hm-note-img"><img src="static/assets/blog/Performance%20SEO.webp" alt="" loading="lazy" decoding="async"></span>
+            <span class="hm-note-tag">SEO &amp; Growth</span>
+            <h3>Why performance is your best SEO strategy</h3>
+            <p>Google's Lighthouse doesn't lie. How we build sites that score, and why it matters for ranking.</p>
+          </a>
+          <a class="hm-note" href="blogs/choosing-your-stack.html">
+            <span class="hm-note-img"><img src="static/assets/blog/Choosing%20Your%20Stack.webp" alt="" loading="lazy" decoding="async"></span>
+            <span class="hm-note-tag">Engineering</span>
+            <h3>Choosing the right stack for your next build</h3>
+            <p>CMS, headless or fully custom? A plain-language guide to picking the platform you won't regret.</p>
+          </a>
+          <a class="hm-note" href="blogs/ar-activations.html">
+            <span class="hm-note-img"><img src="static/assets/blog/AR%20Activations.webp" alt="" loading="lazy" decoding="async"></span>
+            <span class="hm-note-tag">Experience Design</span>
+            <h3>AR activations that actually activate</h3>
+            <p>What we learned shipping interactive experiences for Expo-scale audiences.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 09 · Mission briefing (FAQ) ====== -->
+    <section class="hm-faq section" id="briefing" data-stage="09" data-stage-name="Briefing" aria-labelledby="faq-title">
+      <div class="container hm-faq-grid">
+        <div class="hm-faq-lead">
+          <p class="hm-kicker"><i class="hm-dot" aria-hidden="true"></i>Mission briefing</p>
+          <h2 id="faq-title" class="hm-h2" data-split>Questions, answered</h2>
+          <p>Still curious? <a href="contact/index.html">Talk to a real person</a>, usually within the hour.</p>
+        </div>
+        <!-- the briefing terminal: an index of questions, and one screen the
+             chosen answer decrypts onto (home.js). Narrow screens: the same
+             items fold into an accordion. All answers stay in the page. -->
+        <div class="brf" data-brf style="--n:11">
+          <div class="brf-screen" aria-hidden="true">
+            <div class="brf-bar"><span><i class="brf-rec"></i>SECURE CHANNEL · WX-09</span><span data-brf-status>DECRYPTED</span></div>
+            <span class="brf-scan"></span>
+            <span class="brf-corners"></span>
+            <div class="brf-foot">
+              <span class="brf-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="brf-prog"><i data-brf-prog></i></span>
+              <span data-brf-count>BRIEFING 01 / 11</span>
+            </div>
+          </div>
+          <div class="brf-item is-open">
+            <button type="button" class="brf-q" id="brf-q1" aria-expanded="true" aria-controls="brf-a1"><span class="brf-id">BRF-01</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>What does Worx build?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a1" role="region" aria-labelledby="brf-q1">
+              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">What does Worx build?</span></h3>
+              <p class="brf-a-p visually-hidden">We plan, design and develop digital products: websites, e-commerce, mobile apps, custom platforms, AI tools and AR/VR activations. As Glimpse's in-house development studio, we also wire every build into the marketing that launches it.</p>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 01 · scope</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">we</span><span class="t-p">: </span><span class="t-s">"Plan, design and develop digital products."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">build</span><span class="t-p">: </span><span class="t-p">[</span><span class="t-s">"Websites"</span><span class="t-p">, </span><span class="t-s">"E-commerce"</span><span class="t-p">, </span><span class="t-s">"Mobile apps"</span><span class="t-p">, </span><span class="t-s">"Custom platforms"</span><span class="t-p">, </span><span class="t-s">"AI tools"</span><span class="t-p">, </span><span class="t-s">"AR / VR"</span><span class="t-p">]</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">plus</span><span class="t-p">: </span><span class="t-s">"As Glimpse's in-house studio, we wire every build into the marketing that launches it."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
+          <div class="brf-item">
+            <button type="button" class="brf-q" id="brf-q2" aria-expanded="false" aria-controls="brf-a2"><span class="brf-id">BRF-02</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>How much does a website cost?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a2" role="region" aria-labelledby="brf-q2" hidden>
+              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">How much does a website cost?</span></h3>
+              <p class="brf-a-p visually-hidden">It depends on what the site needs to do, so we don't sell off a price list. After a free consultation we define the scope with you and send a fixed-price proposal, so you know exactly what you're paying for before a single line of code is written.</p>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 02 · cost</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">short</span><span class="t-p">: </span><span class="t-s">"It depends on what your site needs to do."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">priceList</span><span class="t-p">: </span><span class="t-b">false</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">how</span><span class="t-p">: </span><span class="t-s">"Free consultation → we scope it together → fixed-price proposal."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">youKnow</span><span class="t-p">: </span><span class="t-s">"Exactly what you're paying for, before any code is written."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
+          <div class="brf-item">
+            <button type="button" class="brf-q" id="brf-q3" aria-expanded="false" aria-controls="brf-a3"><span class="brf-id">BRF-03</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>How long does it take to design and build a website?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a3" role="region" aria-labelledby="brf-q3" hidden>
+              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">How long does it take to design and build a website?</span></h3>
+              <p class="brf-a-p visually-hidden">A marketing site usually takes 4–8 weeks from kickoff to launch; larger platforms and apps run 3–6 months. The countdown is agreed on day one and you can see it the whole way.</p>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 03 · timeline</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">marketingSite</span><span class="t-p">: </span><span class="t-s">"4–8 weeks, kickoff to launch."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">platformOrApp</span><span class="t-p">: </span><span class="t-s">"3–6 months."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">countdown</span><span class="t-p">: </span><span class="t-s">"Agreed on day one, visible the whole way."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
+          <div class="brf-item">
+            <button type="button" class="brf-q" id="brf-q4" aria-expanded="false" aria-controls="brf-a4"><span class="brf-id">BRF-04</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>Custom-built or template: which is right for me?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a4" role="region" aria-labelledby="brf-q4" hidden>
+              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">Custom-built or template: which is right for me?</span></h3>
+              <p class="brf-a-p visually-hidden">A template is quick and fine for a simple presence. A custom build is shaped around your brand, your content and the way your customers buy, and it grows with you. We'll recommend the one that fits your goals and budget, not the one that's bigger.</p>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 04 · approach</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">template</span><span class="t-p">: </span><span class="t-s">"Quick, and fine for a simple presence."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">custom</span><span class="t-p">: </span><span class="t-s">"Shaped around your brand, content and customers, and it grows with you."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">ourAdvice</span><span class="t-p">: </span><span class="t-s">"The one that fits your goals and budget, not the bigger one."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
+          <div class="brf-item">
+            <button type="button" class="brf-q" id="brf-q5" aria-expanded="false" aria-controls="brf-a5"><span class="brf-id">BRF-05</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>What are the stages of a Worx project?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a5" role="region" aria-labelledby="brf-q5" hidden>
+              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">What are the stages of a Worx project?</span></h3>
+              <p class="brf-a-p visually-hidden">Seven: Consultation, Deliberation, Solutions, Evaluation, Finalisation, Execution and Management. You click through designs before development starts, and every stage ends with your sign-off.</p>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 05 · process</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">stages</span><span class="t-p">: </span><span class="t-p">[</span><span class="t-s">"Consultation"</span><span class="t-p">, </span><span class="t-s">"Deliberation"</span><span class="t-p">, </span><span class="t-s">"Solutions"</span><span class="t-p">, </span><span class="t-s">"Evaluation"</span><span class="t-p">, </span><span class="t-s">"Finalisation"</span><span class="t-p">, </span><span class="t-s">"Execution"</span><span class="t-p">, </span><span class="t-s">"Management"</span><span class="t-p">]</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">beforeCode</span><span class="t-p">: </span><span class="t-s">"You click through the designs first."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">signOff</span><span class="t-p">: </span><span class="t-s">"Yours, at the end of every stage."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
+          <div class="brf-item">
+            <button type="button" class="brf-q" id="brf-q6" aria-expanded="false" aria-controls="brf-a6"><span class="brf-id">BRF-06</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>Do you handle SEO, or is that separate?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a6" role="region" aria-labelledby="brf-q6" hidden>
+              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">Do you handle SEO, or is that separate?</span></h3>
+              <p class="brf-a-p visually-hidden">Both. Clean structure, speed and technical SEO are part of every build we ship. If you want to keep climbing after launch, SEO &amp; SEM runs as its own ongoing service with the same team.</p>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 06 · seo</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">inEveryBuild</span><span class="t-p">: </span><span class="t-s">"Clean structure, speed and technical SEO."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">afterLaunch</span><span class="t-p">: </span><span class="t-s">"SEO &amp; SEM as its own ongoing service, with the same team."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
+          <div class="brf-item">
+            <button type="button" class="brf-q" id="brf-q7" aria-expanded="false" aria-controls="brf-a7"><span class="brf-id">BRF-07</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>Can you redesign my site without losing Google rankings?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a7" role="region" aria-labelledby="brf-q7" hidden>
+              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">Can you redesign my site without losing Google rankings?</span></h3>
+              <p class="brf-a-p visually-hidden">That's the plan for every redesign: we map your existing pages, carry over what's ranking, redirect every old address to its new home and watch Search Console closely after launch.</p>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 07 · redesign</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">keepRankings</span><span class="t-p">: </span><span class="t-b">true</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">plan</span><span class="t-p">: </span><span class="t-p">[</span><span class="t-s">"Map your existing pages"</span><span class="t-p">, </span><span class="t-s">"Carry over what ranks"</span><span class="t-p">, </span><span class="t-s">"Redirect every old address"</span><span class="t-p">, </span><span class="t-s">"Watch Search Console after launch"</span><span class="t-p">]</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
+          <div class="brf-item">
+            <button type="button" class="brf-q" id="brf-q8" aria-expanded="false" aria-controls="brf-a8"><span class="brf-id">BRF-08</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>Do you build bilingual Arabic and English websites?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a8" role="region" aria-labelledby="brf-q8" hidden>
+              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">Do you build bilingual Arabic and English websites?</span></h3>
+              <p class="brf-a-p visually-hidden">Yes. Right-to-left layouts, Arabic typography and copy that's written, not just translated, in English and Arabic.</p>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 08 · language</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">bilingual</span><span class="t-p">: </span><span class="t-b">true</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">layouts</span><span class="t-p">: </span><span class="t-s">"Right-to-left, with proper Arabic typography."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">copy</span><span class="t-p">: </span><span class="t-s">"Written in English and Arabic, not just translated."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
+          <div class="brf-item">
+            <button type="button" class="brf-q" id="brf-q9" aria-expanded="false" aria-controls="brf-a9"><span class="brf-id">BRF-09</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>Do you work with businesses outside Dubai?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a9" role="region" aria-labelledby="brf-q9" hidden>
+              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">Do you work with businesses outside Dubai?</span></h3>
+              <p class="brf-a-p visually-hidden">Yes. We're headquartered in Dubai and deliver across the UAE, Saudi Arabia and Lebanon, as well as for clients in South Korea and the USA.</p>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 09 · regions</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">headquarters</span><span class="t-p">: </span><span class="t-s">"Dubai"</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">deliver</span><span class="t-p">: </span><span class="t-p">[</span><span class="t-s">"UAE"</span><span class="t-p">, </span><span class="t-s">"Saudi Arabia"</span><span class="t-p">, </span><span class="t-s">"Lebanon"</span><span class="t-p">, </span><span class="t-s">"South Korea"</span><span class="t-p">, </span><span class="t-s">"USA"</span><span class="t-p">]</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
+          <div class="brf-item">
+            <button type="button" class="brf-q" id="brf-q10" aria-expanded="false" aria-controls="brf-a10"><span class="brf-id">BRF-10</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>What happens after launch?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a10" role="region" aria-labelledby="brf-q10" hidden>
+              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">What happens after launch?</span></h3>
+              <p class="brf-a-p visually-hidden">Most of our partnerships really begin there. We handle updates, security patches, on-page SEO and new features for brands like Modon, Genesis and Hudayriyat, years after the original launch.</p>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 10 · support</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">launchDay</span><span class="t-p">: </span><span class="t-s">"Where most of our partnerships really begin."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">weHandle</span><span class="t-p">: </span><span class="t-p">[</span><span class="t-s">"Updates"</span><span class="t-p">, </span><span class="t-s">"Security patches"</span><span class="t-p">, </span><span class="t-s">"On-page SEO"</span><span class="t-p">, </span><span class="t-s">"New features"</span><span class="t-p">]</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">forYears</span><span class="t-p">: </span><span class="t-s">"For brands like Modon, Genesis and Hudayriyat."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
+          <div class="brf-item">
+            <button type="button" class="brf-q" id="brf-q11" aria-expanded="false" aria-controls="brf-a11"><span class="brf-id">BRF-11</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>How is Worx different from Glimpse?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a11" role="region" aria-labelledby="brf-q11" hidden>
+              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">How is Worx different from Glimpse?</span></h3>
+              <p class="brf-a-p visually-hidden">Glimpse is the award-winning marketing agency; Worx is its sister company focused on engineering. Glimpse prepares the platforms and social networks, Worx writes the clean, maintainable code. One team, from idea to launch.</p>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 11 · crew</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">glimpse</span><span class="t-p">: </span><span class="t-s">"The award-winning marketing agency."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">worx</span><span class="t-p">: </span><span class="t-s">"Its sister company, focused on engineering."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">together</span><span class="t-p">: </span><span class="t-s">"One team, from idea to launch."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <div class="hm-limb" aria-hidden="true"><svg viewBox="0 0 1600 240" preserveAspectRatio="none"><defs><linearGradient id="limb-gd" x1="0" x2="1"><stop offset="0" stop-color="#c04527" stop-opacity="0"/><stop offset=".5" stop-color="#faa719"/><stop offset="1" stop-color="#c04527" stop-opacity="0"/></linearGradient></defs><path class="hm-limb-glow" d="M-40 240 Q800 -20 1640 240" stroke="url(#limb-gd)"/><path class="hm-limb-line" d="M-40 240 Q800 -20 1640 240" stroke="url(#limb-gd)" pathLength="100"/></svg><span class="hm-limb-tag">ENTERING · LAUNCH WINDOW</span></div>
+
+    <!-- ====== 10 · Launch (final CTA) ====== -->
+    <!-- The finale is a launch console under a launch in progress: the crew's
+         go / no-go poll, the ignition (the project CTA: it arms on hover and
+         lifts off on click), the next kickoff window counting down. -->
+    <section class="hm-launch" id="liftoff" data-stage="10" data-stage-name="Liftoff" aria-labelledby="launch-title" data-launch>
+      <!-- the sky of a launch in progress: the planned trajectory, dashed,
+           and a craft riding it with its contrail; the launch light rising
+           from the ignition; a ground glow that becomes the footer's ink -->
+      <div class="hm-launch-sky" aria-hidden="true">
+        <svg class="hm-launch-arc" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="trail-g" gradientUnits="userSpaceOnUse" x1="0" y1="900" x2="1600" y2="0"><stop offset="0" stop-color="#c04527"/><stop offset=".55" stop-color="#e57d23"/><stop offset="1" stop-color="#faa719"/></linearGradient>
+            <radialGradient id="craft-g"><stop offset="0" stop-color="#fff4dc"/><stop offset=".35" stop-color="#faa719"/><stop offset="1" stop-color="#e57d23" stop-opacity="0"/></radialGradient>
+          </defs>
+          <path class="hm-arc-guide" d="M-80 980 C 360 820, 820 560, 1680 -60"/>
+          <path class="hm-arc-trail t3" pathLength="1" d="M-80 980 C 360 820, 820 560, 1680 -60" style="--L:.42"/>
+          <path class="hm-arc-trail t2" pathLength="1" d="M-80 980 C 360 820, 820 560, 1680 -60" style="--L:.2"/>
+          <path class="hm-arc-trail t1" pathLength="1" d="M-80 980 C 360 820, 820 560, 1680 -60" style="--L:.06"/>
+          <g class="hm-arc-craft"><circle r="22" fill="url(#craft-g)" opacity=".55"/><circle r="3.2" fill="#fff4dc"/><animateMotion dur="11s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;.8;1" calcMode="linear" path="M-80 980 C 360 820, 820 560, 1680 -60"/></g>
+        </svg>
+        <span class="hm-launch-ground"></span>
+      </div>
+      <div class="container hm-launch-inner">
+        <div class="hm-launch-copy">
+          <p class="hm-kicker"><i class="hm-dot" aria-hidden="true"></i>Ready for launch</p>
+          <h2 id="launch-title" class="hm-h2 hm-h2--xl" data-split>Your next mission starts here</h2>
+          <p>Tell us what you're building. We'll tell you exactly how we'd build it: timeline, stack and all.</p>
+        </div>
+
+        <div class="hm-console">
+          <div class="hm-console-panel hm-poll" aria-hidden="true">
+            <p class="hm-console-h">GO / NO-GO POLL</p>
+            <ol>
+              <li><span>Strategy</span><b>GO</b></li>
+              <li><span>Design</span><b>GO</b></li>
+              <li><span>Engineering</span><b>GO</b></li>
+              <li><span>Support</span><b>GO</b></li>
+              <li class="hm-poll-you"><span>Your project</span><b data-poll-you>AWAITING</b></li>
+            </ol>
+          </div>
+
+          <div class="hm-ignite">
+            <a class="hm-ignite-btn" href="contact/index.html" data-ignite>
+              <svg class="hm-ignite-ring" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="ign-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c04527"/><stop offset=".55" stop-color="#e57d23"/><stop offset="1" stop-color="#faa719"/></linearGradient></defs><g class="hm-ignite-ticks"><line x1="100" y1="4" x2="100" y2="12" transform="rotate(0 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(5 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(10 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(15 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(20 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(25 100 100)"/><line x1="100" y1="4" x2="100" y2="12" transform="rotate(30 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(35 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(40 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(45 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(50 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(55 100 100)"/><line x1="100" y1="4" x2="100" y2="12" transform="rotate(60 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(65 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(70 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(75 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(80 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(85 100 100)"/><line x1="100" y1="4" x2="100" y2="12" transform="rotate(90 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(95 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(100 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(105 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(110 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(115 100 100)"/><line x1="100" y1="4" x2="100" y2="12" transform="rotate(120 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(125 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(130 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(135 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(140 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(145 100 100)"/><line x1="100" y1="4" x2="100" y2="12" transform="rotate(150 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(155 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(160 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(165 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(170 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(175 100 100)"/><line x1="100" y1="4" x2="100" y2="12" transform="rotate(180 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(185 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(190 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(195 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(200 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(205 100 100)"/><line x1="100" y1="4" x2="100" y2="12" transform="rotate(210 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(215 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(220 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(225 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(230 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(235 100 100)"/><line x1="100" y1="4" x2="100" y2="12" transform="rotate(240 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(245 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(250 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(255 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(260 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(265 100 100)"/><line x1="100" y1="4" x2="100" y2="12" transform="rotate(270 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(275 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(280 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(285 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(290 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(295 100 100)"/><line x1="100" y1="4" x2="100" y2="12" transform="rotate(300 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(305 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(310 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(315 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(320 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(325 100 100)"/><line x1="100" y1="4" x2="100" y2="12" transform="rotate(330 100 100)" class="maj"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(335 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(340 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(345 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(350 100 100)"/><line x1="100" y1="7" x2="100" y2="12" transform="rotate(355 100 100)"/></g><circle class="hm-ignite-track" cx="100" cy="100" r="86"/><circle class="hm-ignite-charge" cx="100" cy="100" r="86" pathLength="1"/></svg>
+              <span class="hm-ignite-core"><span class="hm-ignite-state" aria-hidden="true">IGNITION</span><span class="hm-ignite-label">Start a project</span></span>
+              <span class="hm-ignite-wave" aria-hidden="true"></span>
+            </a>
+            <button type="button" class="hm-ghost" data-contact-open><span>Talk to us now</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </div>
+
+          <div class="hm-console-panel hm-window" aria-hidden="true">
+            <p class="hm-console-h">NEXT KICKOFF WINDOW</p>
+            <p class="hm-window-t">T&minus; <b data-window-t>--:--:--</b></p>
+            <p class="hm-window-d" data-window-d>&nbsp;</p>
+            <p class="hm-window-s"><i></i>LAUNCH WINDOW OPEN</p>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- ====== Footer ====== -->
-  <footer class="site-footer">
+  <!--WORX:FOOTER-->
+<footer class="site-footer">
     <div class="container">
-      <div class="footer-grid">
-        <div class="footer-about">
-          <a class="brand brand--footer" href="index.html"><img src="static/assets/logo-light.png" alt="Worx by Glimpse" width="132" height="181"></a>
-          <p>Your one-stop destination for innovative website and software development — bringing digital aspirations to life, one line of code at a time.</p>
-        </div>
-        <div>
-          <h4>Explore</h4>
+      <div class="footer-brand">
+        <a class="brand brand--footer" href="index.html"><img src="static/assets/logo-light.png" alt="Worx" width="132" height="181"></a>
+        <p class="footer-tagline">Your one-stop destination for innovative website and software development, bringing digital aspirations to life, one line of code at a time.</p>
+      </div>
+
+      <div class="footer-social-row">
+        <span class="footer-rule" aria-hidden="true"></span>
+        <ul class="footer-social" aria-label="Worx on social media">
+          <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.06c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-4z"/></svg></a></li>
+          <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.2 12 2.2zm0 4.66a5.14 5.14 0 1 0 0 10.28 5.14 5.14 0 0 0 0-10.28zm0 8.48a3.34 3.34 0 1 1 0-6.68 3.34 3.34 0 0 1 0 6.68zm5.34-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg></a></li>
+          <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-7.6h2.56l.38-2.97H13.5V8.53c0-.86.24-1.45 1.47-1.45h1.57V4.43a21 21 0 0 0-2.29-.12c-2.27 0-3.82 1.39-3.82 3.93v2.19H7.87v2.97h2.56V21z"/></svg></a></li>
+          <li><a href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a></li>
+        </ul>
+        <span class="footer-rule" aria-hidden="true"></span>
+      </div>
+
+      <nav class="footer-cols" aria-label="Footer">
+        <div class="footer-col footer-col--contact">
+          <h4>Contact Us</h4>
           <ul>
+            <li>Publishing Pavilion Bldg - Unit 709 - Me'aisem First - Dubai Production City - Dubai</li>
+            <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
+            <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
+            <li class="footer-cta-item"><a class="footer-cta" href="contact/index.html">Quick Enquiry <span aria-hidden="true">→</span></a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Overview</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about/index.html">About us</a></li>
             <li><a href="services/index.html">Services</a></li>
             <li><a href="portfolio/index.html">Portfolio</a></li>
-            <li><a href="about/index.html">About us</a></li>
             <li><a href="blogs/index.html">Blog</a></li>
             <li><a href="contact/index.html">Contact</a></li>
           </ul>
         </div>
-        <div>
-          <h4>Social</h4>
+        <div class="footer-col">
+          <h4>Development</h4>
           <ul>
-            <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener">LinkedIn</a></li>
-            <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener">Instagram</a></li>
-            <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener">Facebook</a></li>
-            <li><a href="https://www.theglimpseproject.com" target="_blank" rel="noopener">Glimpse</a></li>
+            <li><a href="services/web-development.html">Web Development</a></li>
+            <li><a href="services/ecommerce-development.html">E-commerce Development</a></li>
+            <li><a href="services/custom-platforms.html">Custom Platforms</a></li>
+            <li><a href="services/mobile-apps.html">Mobile App Development</a></li>
+            <li><a href="services/seo-sem.html">SEO &amp; SEM</a></li>
           </ul>
         </div>
-        <div>
-          <h4>Contact</h4>
+        <div class="footer-col">
+          <h4>Design &amp; Creative</h4>
           <ul>
-            <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
-            <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
-            <li>Unit 404 Makateb 2,<br>Dubai Production City,<br>PO Box 503417, Dubai, UAE</li>
+            <li><a href="services/ui-ux-design.html">UI / UX Design</a></li>
+            <li><a href="services/digital-branding.html">Digital Branding &amp; Creatives</a></li>
+            <li><a href="services/video-animation.html">2D / 3D Video Animation</a></li>
+            <li><a href="services/copywriting.html">Copywriting</a></li>
           </ul>
         </div>
-      </div>
+        <div class="footer-col">
+          <h4>Emerging &amp; Enterprise</h4>
+          <ul>
+            <li><a href="services/artificial-intelligence.html">Artificial Intelligence</a></li>
+            <li><a href="services/ar-vr.html">AR / VR &amp; Mixed Reality</a></li>
+            <li><a href="services/erp-crm.html">ERP &amp; CRM</a></li>
+            <li><a href="services/cloud-transformation.html">Cloud Transformation</a></li>
+            <li><a href="services/it-outsourcing.html">IT Resource Outsourcing</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <!-- The WORX wordmark, drawn in outline across the full width and
+         sunk into the bottom edge, lit from below. A slow light runs
+         along its stroke; on hover the letters fill in under the
+         pointer (main.js). Decorative: the logo above carries the name. -->
+    <div class="footer-mark" aria-hidden="true">
+      <svg class="footer-mark-svg" viewBox="0 0 1000 232" preserveAspectRatio="xMidYMax meet">
+        <defs>
+          <linearGradient id="footer-mark-stroke" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#c04527"/>
+            <stop offset="0.55" stop-color="#e57d23"/>
+            <stop offset="1" stop-color="#faa719"/>
+          </linearGradient>
+          <linearGradient id="footer-mark-shine" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+            <stop offset="0" stop-color="#feeecf" stop-opacity="0"/>
+            <stop offset="0.5" stop-color="#feeecf" stop-opacity="0.9"/>
+            <stop offset="1" stop-color="#feeecf" stop-opacity="0"/>
+            <animateTransform class="footer-mark-anim" attributeName="gradientTransform" type="translate" values="-1 0; 1.2 0" dur="9s" repeatCount="indefinite"/>
+          </linearGradient>
+        </defs>
+        <text class="footer-mark-base" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+        <text class="footer-mark-shine" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+        <text class="footer-mark-knock" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+      </svg>
+      <svg class="footer-mark-svg footer-mark-fill" viewBox="0 0 1000 232" preserveAspectRatio="xMidYMax meet">
+        <text x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+      </svg>
+    </div>
+
+    <div class="container">
       <div class="footer-bottom">
-        <span>© <span id="footer-year">2026</span> Worx by Glimpse. All rights reserved.</span>
-        <span>Built for businesses, by creatives.</span>
+        <span>© <span id="footer-year">2026</span> Worx. All rights reserved.</span>
+        <span class="footer-where">Dubai, UAE <span aria-hidden="true">·</span> <time class="footer-clock" data-tz="Asia/Dubai">--:--</time> GST</span>
+        <a class="footer-top" href="#main">Back to top <span aria-hidden="true">↑</span></a>
       </div>
     </div>
   </footer>
+  <!--/WORX:FOOTER-->
 
   <!-- GSAP from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 
   <script src="static/js/nav.js"></script>
+  <script src="static/js/logo-eye.js"></script>
   <script src="static/js/animations.js"></script>
   <script src="static/js/main.js"></script>
+  <script src="static/js/reticle.js"></script>
   <script src="static/js/contact-widget.js"></script>
-  <script type="module" src="static/js/hero-scene.js"></script>
-  <script type="module" src="static/js/hero-background.js"></script>
+  <script src="static/js/cosmos.js"></script>
+  <script src="static/js/code-worlds.js"></script>
+  <script src="static/js/home.js"></script>
+  <script src="static/js/living-covers.js"></script>
 </body>
 </html>

@@ -1,0 +1,166 @@
+/* ============================================================
+   Worx | ignite.css
+   The ignition: the home page's "Start a project" key (Ready for
+   launch), shared by every Start a project CTA on the site. A ring of
+   ticks turning slowly round a charge track, and the gradient core
+   (IGNITION / Start a project) breathing in the middle. Pointed at, the
+   ring charges, the ticks warm and the core leans in; pressed, the core
+   kicks, a pressure wave leaves the ring and the page goes (ignite.js
+   builds the ring and runs the liftoff).
+   ============================================================ */
+
+.ig-btn {
+  --ig-size: clamp(180px, 17vw, 230px);
+  --ig-ease: cubic-bezier(0.135, 0.9, 0.15, 1);
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  place-items: center;
+  width: var(--ig-size);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  color: var(--on-accent);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* the launch light: a soft column rising out of the ignition */
+.ig-btn::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  z-index: -1;
+  width: 80%;
+  height: 90vh;
+  max-height: 520px;
+  transform: translateX(-50%);
+  transform-origin: 50% 100%;
+  background: linear-gradient(0deg, rgba(250, 167, 25, 0.24), rgba(229, 125, 35, 0.06) 35%, transparent 80%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 42%, #000 58%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 42%, #000 58%, transparent);
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.7s ease, transform 0.9s var(--ig-ease);
+}
+
+.ig-btn:hover::before,
+.ig-btn:focus-visible::before,
+.ig-btn.is-armed::before { opacity: 0.85; }
+.ig-btn.is-launch::before { opacity: 1; transform: translateX(-50%) scaleX(1.6); }
+
+.ig-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ig-ticks {
+  transform-origin: 100px 100px;
+  animation: ig-spin 60s linear infinite;
+}
+
+@keyframes ig-spin { to { transform: rotate(360deg); } }
+
+.ig-ticks line {
+  stroke: rgba(254, 238, 207, 0.22);
+  stroke-width: 1;
+  transition: stroke 0.4s ease;
+}
+
+.ig-ticks line.maj { stroke: rgba(254, 238, 207, 0.5); }
+
+.ig-track {
+  fill: none;
+  stroke: rgba(254, 238, 207, 0.08);
+  stroke-width: 2;
+}
+
+.ig-charge {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transform: rotate(-90deg);
+  transform-origin: 100px 100px;
+  transition: stroke-dashoffset 0.9s var(--ig-ease);
+}
+
+.ig-core {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 64%;
+  aspect-ratio: 1;
+  padding: 0 8px;
+  border-radius: 50%;
+  background: var(--gradient);
+  box-shadow: 0 0 0 10px rgba(229, 125, 35, 0.08), 0 18px 50px -12px rgba(229, 125, 35, 0.7);
+  text-align: center;
+  transition: transform 0.5s var(--ig-ease), box-shadow 0.5s ease;
+  animation: ig-breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes ig-breathe { 50% { box-shadow: 0 0 0 16px rgba(229, 125, 35, 0.05), 0 18px 60px -12px rgba(229, 125, 35, 0.85); } }
+
+.ig-state {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.26em;
+  opacity: 0.7;
+}
+
+.ig-label {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+/* armed: the ring charges, the ticks warm, the core leans in */
+.ig-btn:hover .ig-charge,
+.ig-btn:focus-visible .ig-charge,
+.ig-btn.is-armed .ig-charge,
+.ig-btn.is-launch .ig-charge { stroke-dashoffset: 0; }
+
+.ig-btn:hover .ig-ticks line,
+.ig-btn:focus-visible .ig-ticks line,
+.ig-btn.is-armed .ig-ticks line { stroke: rgba(250, 167, 25, 0.55); }
+
+.ig-btn:hover .ig-core,
+.ig-btn:focus-visible .ig-core {
+  transform: scale(1.05);
+  animation: none;
+  box-shadow: 0 0 0 14px rgba(229, 125, 35, 0.12), 0 22px 70px -10px rgba(250, 167, 25, 0.9);
+}
+
+.ig-btn:focus-visible { outline: none; }
+.ig-btn:focus-visible .ig-track { stroke: rgba(250, 167, 25, 0.6); }
+
+/* liftoff: the core kicks, a pressure wave leaves the ring */
+.ig-wave {
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  border: 2px solid rgba(250, 167, 25, 0.8);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ig-btn.is-launch .ig-core { animation: ig-kick 0.7s var(--ig-ease) both; }
+.ig-btn.is-launch .ig-wave { animation: ig-wave-out 0.8s ease-out both; }
+
+@keyframes ig-kick { 30% { transform: scale(0.9); } 100% { transform: scale(1.12); } }
+@keyframes ig-wave-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(2.6); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ig-ticks, .ig-core { animation: none !important; }
+  .ig-btn::before, .ig-charge, .ig-core { transition: none; }
+}

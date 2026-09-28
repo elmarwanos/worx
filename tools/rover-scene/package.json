@@ -1,0 +1,11 @@
+{
+  "name": "rover-scene-build",
+  "private": true,
+  "description": "Resizes the Portfolio hero rover-scene frames to web-sized WebP + PNG",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "sharp": "^0.34.0"
+  }
+}

@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio, Worx by Glimpse</title>
+  <title>Portfolio - Worx</title>
   <meta name="description"
-    content="Selected work by Worx by Glimpse: Chaumet, Modon, Hyundai, Genesis, Kia, Hudayriyat, UAE Pavilion, Wealthface and more.">
+    content="Selected work by Worx: Chaumet, Modon, Hyundai, Genesis, Kia, Hudayriyat, UAE Pavilion, Wealthface and more.">
 
   <link rel="icon" type="image/png" sizes="32x32" href="../static/assets/favicon-32.png">
   <link rel="apple-touch-icon" href="../static/assets/apple-touch-icon.png">
@@ -22,30 +22,12 @@
   <link rel="stylesheet" href="../static/css/components.css">
   <link rel="stylesheet" href="../static/css/animations.css">
   <link rel="stylesheet" href="../static/css/portfolio.css">
+  <link rel="stylesheet" href="../static/css/ignite.css">
 
   <style>
-    /* Portfolio hero: new full-screen panoramic Mars image */
-    body[data-page="portfolio"] .site-header {
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      width: 100% !important;
-      z-index: 100 !important;
-      background: transparent !important;
-      background-image: none !important;
-      border: 0 !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-    }
-
-    body[data-page="portfolio"] .site-header::before,
-    body[data-page="portfolio"] .site-header::after {
-      content: none !important;
-      display: none !important;
-    }
-
+    /* Portfolio hero: new full-screen panoramic Mars image. (The shared
+       header is transparent over the hero and floats as a glass pill once
+       scrolled, layout.css, so it needs no overrides here.) */
     body[data-page="portfolio"] main {
       margin-top: 0 !important;
       padding-top: 0 !important;
@@ -458,7 +440,7 @@
 
   <style>
     /* ============================================================
-       HERO COPY POSITION — raised for stronger visual balance
+       HERO COPY POSITION, raised for stronger visual balance
        ============================================================ */
     body[data-page="portfolio"] .folio-hero-inner {
       justify-content: flex-end !important;
@@ -478,723 +460,1053 @@
     }
   </style>
 
+
+  <style>
+    /* ============================================================
+       MARS HERO, one landscape under the About page's sky
+       mars-hero-terrain.webp is a single plate: the original ridge
+       (same pixels, so the astronaut's path still lands on it),
+       colour-matched to the About ground, carrying its pebble grain up
+       the slopes, hazing with distance, and running down into the
+       About boulder field. Its sky is transparent.
+
+       .folio-camera        wraps every layer for a slow push-in
+       .folio-sky           About's .story-atmosphere gradient + glow
+       .folio-sky-canvas    stars, Earth·Moon, Saturn, storm, GLIMPSE
+       .mars-terrain-base   solid backing so no star shows through ground
+       .mars-photo          the terrain plate, About's terrain treatment
+       .mars-photo-grade    About's .story-grade, clipped to the terrain
+       .mars-terrain-fx     storm bounce light + creeping dust, clipped
+       .folio-grain         About's film grain over the whole frame
+       ============================================================ */
+    body[data-page="portfolio"] .folio-hero-media {
+      --terrain-img: url("../static/assets/portfolio/mars-hero-terrain.webp");
+      --terrain-pos: center 54%;
+    }
+
+    /* Size container for the hero layers. rover-scene.js measures this
+       same box for its ridge path, so the rover stays on the ridge
+       even when the hero is taller than the viewport (landscape
+       phones, short windows). */
+    body[data-page="portfolio"] .folio-camera {
+      position: absolute;
+      inset: 0;
+      container-type: size;
+      transform-origin: 56% 62%;
+      animation: folioPushIn 46s ease-in-out infinite alternate;
+    }
+
+    @keyframes folioPushIn {
+      from { transform: scale(1); }
+      to { transform: scale(1.045) translate3d(-.4%, .3%, 0); }
+    }
+
+    body[data-page="portfolio"] .folio-sky,
+    body[data-page="portfolio"] .folio-sky-canvas,
+    body[data-page="portfolio"] .mars-terrain-base,
+    body[data-page="portfolio"] .mars-terrain-fx {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* The About page's sky as it reads on screen: the same deep top, but
+       the lower sky is dust, not red: a warm grey-brown haze band where
+       the air thickens toward the ridge (About gets it from its landing
+       plate; here it's painted, since the terrain photo has none). */
+    body[data-page="portfolio"] .folio-sky {
+      background: linear-gradient(180deg,
+        #1f0a04 0%,
+        #2c0f05 24%,
+        #3b1608 40%,
+        #52230f 52%,
+        #5e2c17 62%,
+        #4a1d0c 100%);
+    }
+
+    body[data-page="portfolio"] .folio-sky::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg,
+          transparent 22%,
+          rgba(150, 96, 68, 0.14) 32%,
+          rgba(176, 116, 84, 0.3) 41%,
+          rgba(160, 104, 76, 0.26) 48%,
+          rgba(120, 72, 48, 0.1) 58%,
+          transparent 70%),
+        radial-gradient(ellipse 85% 55% at 50% 105%,
+          rgba(229, 125, 35, 0.14) 0%,
+          transparent 70%);
+    }
+
+    /* Everything that belongs to the ground is clipped to its outline. */
+    body[data-page="portfolio"] .mars-terrain-base,
+    body[data-page="portfolio"] .mars-photo-grade,
+    body[data-page="portfolio"] .mars-terrain-fx {
+      -webkit-mask-image: var(--terrain-img);
+      mask-image: var(--terrain-img);
+      -webkit-mask-size: cover;
+      mask-size: cover;
+      -webkit-mask-position: var(--terrain-pos);
+      mask-position: var(--terrain-pos);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      transform: scale(1.01);
+    }
+
+    body[data-page="portfolio"] .mars-terrain-base {
+      background: #150905;
+    }
+
+    /* About's .story-terrain treatment */
+    body[data-page="portfolio"] .mars-photo {
+      background-image: var(--terrain-img) !important;
+      background-position: var(--terrain-pos) !important;
+      opacity: .9 !important;
+      filter: saturate(.85) contrast(.95) brightness(.88) !important;
+    }
+
+    /* About's .story-grade, plus a soft pool of shade under the copy */
+    body[data-page="portfolio"] .mars-photo-grade {
+      background:
+        radial-gradient(ellipse 58% 50% at 32% 80%,
+          rgba(21, 9, 5, .62) 0%,
+          rgba(21, 9, 5, .28) 55%,
+          transparent 82%),
+        linear-gradient(180deg,
+          rgba(45, 13, 4, 0.28) 0%,
+          rgba(92, 28, 7, 0.34) 42%,
+          rgba(150, 50, 10, 0.40) 72%,
+          rgba(67, 18, 5, 0.55) 100%),
+        linear-gradient(90deg,
+          rgba(21, 9, 5, 0.45) 0%,
+          rgba(88, 25, 6, 0.14) 46%,
+          rgba(125, 39, 8, 0.10) 100%) !important;
+    }
+
+    body[data-page="portfolio"] .mars-terrain-fx {
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* Violet bounce light from the storm cell, opacity driven by its
+       lightning (portfolio.js initSky). */
+    body[data-page="portfolio"] .mars-terrain-fx__storm {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      background: radial-gradient(ellipse 60% 70% at 86% 30%,
+        rgba(206, 140, 214, .55) 0%,
+        rgba(161, 71, 157, .22) 40%,
+        transparent 75%);
+      mix-blend-mode: screen;
+    }
+
+    /* Low dust creeping across the plain at the mountain's foot. */
+    body[data-page="portfolio"] .mars-terrain-fx__dust {
+      position: absolute;
+      top: 50%;
+      height: 26%;
+      left: -30%;
+      right: -30%;
+      background:
+        radial-gradient(ellipse 22% 60% at 20% 55%, rgba(229, 125, 35, .20), transparent 70%),
+        radial-gradient(ellipse 30% 70% at 52% 45%, rgba(214, 110, 50, .18), transparent 72%),
+        radial-gradient(ellipse 18% 55% at 80% 60%, rgba(250, 167, 25, .15), transparent 70%);
+      filter: blur(8px);
+      animation: marsDust 38s ease-in-out infinite alternate;
+    }
+
+    @keyframes marsDust {
+      from { transform: translate3d(-6%, 0, 0); opacity: .7; }
+      50% { opacity: 1; }
+      to { transform: translate3d(6%, -6%, 0); opacity: .75; }
+    }
+
+    /* About's film grain (.story-grain), from an SVG noise tile. */
+    body[data-page="portfolio"] .folio-grain {
+      position: absolute;
+      inset: -60%;
+      z-index: 4;
+      pointer-events: none;
+      opacity: .075;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") repeat;
+      mix-blend-mode: overlay;
+      animation: folioGrain .7s steps(7) infinite;
+    }
+
+    @keyframes folioGrain {
+      0%   { transform: translate(0, 0); }
+      14%  { transform: translate(-7%, 4%); }
+      28%  { transform: translate(5%, -9%); }
+      42%  { transform: translate(-11%, -3%); }
+      57%  { transform: translate(9%, 7%); }
+      71%  { transform: translate(-4%, 11%); }
+      85%  { transform: translate(12%, -6%); }
+      100% { transform: translate(0, 0); }
+    }
+
+    @media (max-width: 900px) {
+      body[data-page="portfolio"] .folio-hero-media {
+        --terrain-pos: 56% 54%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body[data-page="portfolio"] .folio-hero-media {
+        --terrain-pos: 60% 54%;
+      }
+
+      body[data-page="portfolio"] .mars-photo {
+        opacity: .86 !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body[data-page="portfolio"] .folio-camera,
+      body[data-page="portfolio"] .mars-terrain-fx__dust,
+      body[data-page="portfolio"] .folio-grain {
+        animation: none;
+      }
+    }
+  </style>
+
 </head>
 
 <body data-page="portfolio">
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <header class="site-header">
-    <div class="container nav-bar">
-      <a class="brand" href="../index.html"><img class="brand-mark" src="../static/assets/mark.png" alt="" width="40"
-          height="40"><span class="brand-text">WORX<small>&lt;like/magic&gt;</small></span></a>
-      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-      <nav class="nav-links" aria-label="Main navigation">
+  <!--WORX:HEADER-->
+<header class="site-header">
+    <div class="nav-bar">
+      <a class="brand" href="../index.html"><img class="brand-mark" src="../static/assets/mark.png" alt="" width="40" height="40"><span class="brand-text">WORX<small>&lt;like/magic&gt;</small></span></a>
+      <nav class="nav-links" id="site-nav" aria-label="Main navigation">
         <a href="../index.html" data-nav="home">Home</a>
-        <a href="../services/index.html" data-nav="services">Services</a>
-        <a href="../portfolio/index.html" data-nav="portfolio">Portfolio</a>
         <a href="../about/index.html" data-nav="about">About</a>
+        <!--WORX:GEN mega-->
+        <div class="nav-item nav-item--mega">
+          <a href="../services/index.html" data-nav="services" class="nav-mega-trigger" aria-haspopup="true" aria-expanded="false">Services<svg class="nav-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
+          <button class="nav-sub-toggle" type="button" aria-label="Show all services" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div class="mega" role="region" aria-label="All services">
+            <div class="mega-panel">
+              <div class="mega-cols">
+            <div class="mega-col">
+              <div class="mega-group">
+                <p class="mega-group-title"><span>01</span>Development</p>
+                <ul>
+                <li><a href="../services/web-development.html" data-mega-item data-division="Development" data-short="Fast, secure, search-friendly websites on the right stack." data-subs="Sitecore|Ibexa DXP|SharePoint|WordPress|Drupal|Joomla|ASP.NET|AngularJS|Ruby on Rails" data-more="8"><i aria-hidden="true"></i><span>Web Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/ecommerce-development.html" data-mega-item data-division="Development" data-short="Storefronts that sell, from boutique brands to marketplaces." data-subs="Shopify|Shopify Plus|WooCommerce|Magento|BigCommerce|Mirakl marketplaces|Headless commerce" data-more="0"><i aria-hidden="true"></i><span>E-commerce Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/custom-platforms.html" data-mega-item data-division="Development" data-short="Portals, dashboards and tools built around your workflow." data-subs="Web portals|Dashboards &amp; tooling|Integrations|Smart automation|Interactive configurators|Security &amp; compliance" data-more="0"><i aria-hidden="true"></i><span>Custom Platforms</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                </ul>
+              </div>
+              <div class="mega-group">
+                <p class="mega-group-title"><span>05</span>IT &amp; Enterprise</p>
+                <ul>
+                <li><a href="../services/erp-crm.html" data-mega-item data-division="IT &amp; Enterprise" data-short="One connected system for finance, people, supply and sales." data-subs="NetSuite|SAP|Microsoft Dynamics 365|Oracle Cloud|Odoo|CRM development" data-more="0"><i aria-hidden="true"></i><span>ERP &amp; CRM</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/it-outsourcing.html" data-mega-item data-division="IT &amp; Enterprise" data-short="Vetted specialists who join your team in days." data-subs="Hire scrum masters|Hire project managers|Hire SQA engineers|Hire ReactJS developers|Hire NodeJS developers|Hire .NET developers|Hire React Native developers|Hire mobile app developers|Hire SharePoint developers" data-more="3"><i aria-hidden="true"></i><span>IT Resource Outsourcing</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/cloud-transformation.html" data-mega-item data-division="IT &amp; Enterprise" data-short="Move to the cloud and keep it secure, fast and affordable." data-subs="Digital cloud transformation|Cloud migration|AWS|Microsoft Azure|Security &amp; compliance" data-more="0"><i aria-hidden="true"></i><span>Cloud Transformation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="mega-col">
+              <div class="mega-group">
+                <p class="mega-group-title"><span>02</span>Mobile</p>
+                <ul>
+                <li><a href="../services/mobile-apps.html" data-mega-item data-division="Mobile" data-short="Native and cross-platform apps, maintained for years." data-subs="iOS apps|Android apps|Flutter|React Native|Hybrid apps|Progressive web apps|Event &amp; kiosk apps|Unity &amp; 3D apps|Backend &amp; APIs" data-more="1"><i aria-hidden="true"></i><span>Mobile App Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                </ul>
+              </div>
+              <div class="mega-group">
+                <p class="mega-group-title"><span>04</span>Emerging Tech</p>
+                <ul>
+                <li><a href="../services/artificial-intelligence.html" data-mega-item data-division="Emerging Tech" data-short="Chatbots, automation and search that work while you sleep." data-subs="AI chatbots|Robotic process automation|AI enterprise search|Metaverse development" data-more="0"><i aria-hidden="true"></i><span>Artificial Intelligence</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/ar-vr.html" data-mega-item data-division="Emerging Tech" data-short="Immersive activations engineered to stop crowds." data-subs="Augmented reality|Virtual reality|Mixed reality|Interactive activations|3D &amp; Unity|Event support" data-more="0"><i aria-hidden="true"></i><span>AR / VR &amp; Mixed Reality</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="mega-col">
+              <div class="mega-group">
+                <p class="mega-group-title"><span>03</span>Design &amp; Creative</p>
+                <ul>
+                <li><a href="../services/ui-ux-design.html" data-mega-item data-division="Design &amp; Creative" data-short="Research-driven interfaces that make the right action obvious." data-subs="UX design|UX audit|UX workshops|Landing page design|Responsive web design|Design systems|Prototyping|PSD to HTML|Graphic design" data-more="1"><i aria-hidden="true"></i><span>UI/UX Design</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/digital-branding.html" data-mega-item data-division="Design &amp; Creative" data-short="Identities with a point of view, from logo to packaging." data-subs="Logo design|Corporate identity|Brand guidelines|Packaging design|Brochure design|Business card design" data-more="0"><i aria-hidden="true"></i><span>Digital Branding &amp; Creatives</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/video-animation.html" data-mega-item data-division="Design &amp; Creative" data-short="Explainers, product videos and walkthroughs that move people." data-subs="Explainer videos|Character animation|Whiteboard animation|Product demo videos|Video game trailers|Medical animation|3D architectural walkthroughs" data-more="0"><i aria-hidden="true"></i><span>2D/3D Video Animation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/copywriting.html" data-mega-item data-division="Design &amp; Creative" data-short="Words that sound like you and sell like a pro." data-subs="Website copy|Ad &amp; campaign copy|Brand voice|Content writing|Arabic &amp; English translation" data-more="0"><i aria-hidden="true"></i><span>Copywriting</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                </ul>
+              </div>
+            </div>
+              </div>
+              <aside class="mega-side" aria-live="polite">
+                <div class="mega-default">
+                  <p class="mega-side-title">Trusted by brands<br>across the world</p>
+                  <ul class="mega-clients"><li class="mega-client mega-client--chaumet has-logo"><span class="mega-logo" role="img" aria-label="Chaumet" style="-webkit-mask-image: url('../static/assets/clients/chaumet.svg'); mask-image: url('../static/assets/clients/chaumet.svg')"></span></li><li class="mega-client mega-client--hyundai has-logo"><span class="mega-logo" role="img" aria-label="Hyundai" style="-webkit-mask-image: url('../static/assets/clients/hyundai.svg'); mask-image: url('../static/assets/clients/hyundai.svg')"></span></li><li class="mega-client mega-client--modon has-logo"><span class="mega-logo" role="img" aria-label="Modon" style="-webkit-mask-image: url('../static/assets/clients/modon.svg'); mask-image: url('../static/assets/clients/modon.svg')"></span></li><li class="mega-client mega-client--genesis has-logo"><span class="mega-logo" role="img" aria-label="Genesis" style="-webkit-mask-image: url('../static/assets/clients/genesis.png'); mask-image: url('../static/assets/clients/genesis.png')"></span></li><li class="mega-client mega-client--kia has-logo"><span class="mega-logo" role="img" aria-label="Kia" style="-webkit-mask-image: url('../static/assets/clients/kia.svg'); mask-image: url('../static/assets/clients/kia.svg')"></span></li><li class="mega-client mega-client--uae-pavilion has-logo"><span class="mega-logo" role="img" aria-label="UAE Pavilion" style="-webkit-mask-image: url('../static/assets/clients/uae-pavilion.png'); mask-image: url('../static/assets/clients/uae-pavilion.png')"></span></li><li class="mega-client mega-client--hudayriyat has-logo"><span class="mega-logo" role="img" aria-label="Hudayriyat" style="-webkit-mask-image: url('../static/assets/clients/hudayriyat.svg'); mask-image: url('../static/assets/clients/hudayriyat.svg')"></span></li><li class="mega-client mega-client--wealthface has-logo"><span class="mega-logo" role="img" aria-label="Wealthface" style="-webkit-mask-image: url('../static/assets/clients/wealthface.png'); mask-image: url('../static/assets/clients/wealthface.png')"></span></li><li class="mega-client mega-client--hisense has-logo"><span class="mega-logo" role="img" aria-label="Hisense" style="-webkit-mask-image: url('../static/assets/clients/hisense.svg'); mask-image: url('../static/assets/clients/hisense.svg')"></span></li><li class="mega-client mega-client--unicef has-logo"><span class="mega-logo" role="img" aria-label="UNICEF" style="-webkit-mask-image: url('../static/assets/clients/unicef.svg'); mask-image: url('../static/assets/clients/unicef.svg')"></span></li><li class="mega-client mega-client--universal-pictures has-logo"><span class="mega-logo" role="img" aria-label="Universal Pictures" style="-webkit-mask-image: url('../static/assets/clients/universal-pictures.svg'); mask-image: url('../static/assets/clients/universal-pictures.svg')"></span></li><li class="mega-client mega-client--roxy-cinemas has-logo"><span class="mega-logo" role="img" aria-label="Roxy Cinemas" style="-webkit-mask-image: url('../static/assets/clients/roxy-cinemas.png'); mask-image: url('../static/assets/clients/roxy-cinemas.png')"></span></li><li class="mega-client mega-client--lg has-logo"><span class="mega-logo" role="img" aria-label="LG" style="-webkit-mask-image: url('../static/assets/clients/lg.svg'); mask-image: url('../static/assets/clients/lg.svg')"></span></li><li class="mega-client mega-client--tiara-dream has-logo"><span class="mega-logo" role="img" aria-label="Tiara Dream" style="-webkit-mask-image: url('../static/assets/clients/tiara-dream.svg'); mask-image: url('../static/assets/clients/tiara-dream.svg')"></span></li><li class="mega-client mega-client--duni has-logo"><span class="mega-logo" role="img" aria-label="Duni" style="-webkit-mask-image: url('../static/assets/clients/duni.png'); mask-image: url('../static/assets/clients/duni.png')"></span></li><li class="mega-client mega-client--glimpse has-logo"><span class="mega-logo" role="img" aria-label="Glimpse" style="-webkit-mask-image: url('../static/assets/clients/glimpse.svg'); mask-image: url('../static/assets/clients/glimpse.svg')"></span></li></ul>
+                </div>
+                <div class="mega-preview" hidden>
+                  <p class="mega-preview-div"></p>
+                  <p class="mega-preview-name"></p>
+                  <p class="mega-preview-short"></p>
+                  <ul class="mega-preview-subs"></ul>
+                  <span class="mega-preview-cta">Explore <span aria-hidden="true">→</span></span>
+                </div>
+              </aside>
+            </div>
+            <div class="mega-foot">
+              <span><b>13</b> services · <b>100+</b> capabilities · one crew</span>
+              <a href="../services/index.html" class="mega-all">View all services <span aria-hidden="true">→</span></a>
+              <a href="../contact/index.html" class="btn btn-primary mega-cta">Quick Enquiry</a>
+            </div>
+          </div>
+        </div>
+        <!--/WORX:GEN mega-->
+        <a href="../portfolio/index.html" data-nav="portfolio">Portfolio</a>
         <a href="../blogs/index.html" data-nav="blogs">Blog</a>
-        <a href="../contact/index.html" class="btn btn-primary" data-nav="contact">Let's Talk</a>
+        <a href="../contact/index.html" data-nav="contact" class="nav-link--panel">Make Contact</a>
+        <!-- in the mobile menu panel only: language + direct contact -->
+        <div class="nav-panel-foot">
+          <div class="lang-switch" role="group" aria-label="Language">
+            <span class="lang-thumb" aria-hidden="true"></span>
+            <button type="button" class="lang-opt is-active" data-lang="en" lang="en" aria-pressed="true">EN</button>
+            <button type="button" class="lang-opt" data-lang="ar" lang="ar" aria-pressed="false">AR</button>
+          </div>
+          <a class="nav-circle" href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a>
+          <a class="nav-circle" href="tel:+971555669847" aria-label="Call +971 55 566 9847"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
+        </div>
       </nav>
+      <div class="nav-actions">
+        <div class="lang-switch" role="group" aria-label="Language">
+          <span class="lang-thumb" aria-hidden="true"></span>
+          <button type="button" class="lang-opt is-active" data-lang="en" lang="en" aria-pressed="true">EN</button>
+          <button type="button" class="lang-opt" data-lang="ar" lang="ar" aria-pressed="false">AR</button>
+        </div>
+        <a class="btn-spark" href="../contact/index.html" data-nav="contact"><span class="btn-spark-bg" aria-hidden="true"></span><span class="btn-spark-txt"><span class="btn-spark-long">Make Contact</span><span class="btn-spark-short">Make Contact</span></span></a>
+        <a class="nav-circle nav-circle--bar" href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a>
+        <a class="nav-circle nav-circle--bar" href="tel:+971555669847" aria-label="Call +971 55 566 9847"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
+      </div>
+      <span class="nav-progress" aria-hidden="true"></span>
     </div>
   </header>
+  <!--/WORX:HEADER-->
 
   <main id="main">
+    <!-- the About sky carried on behind the archive: stars, Earth · Moon
+         and Jupiter, the storm cell, GLIMPSE and HOPE passing
+         (portfolio.js, deep sky); it fades in with the archive -->
+    <canvas class="pf-deep-sky" aria-hidden="true"></canvas>
+    <!-- the home page's comms tracker: it slides in at the left edge
+         once the archive is on screen -->
+    <aside class="pf-comms" aria-label="Worx on social media">
+      <span class="pf-comms-tag" aria-hidden="true">COMMS</span>
+      <span class="pf-comms-signal" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="pf-comms-line" aria-hidden="true"></span>
+      <ul class="pf-comms-list">
+        <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.06c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-4z"/></svg><span class="pf-comms-tip">CH-01 · LinkedIn</span></a></li>
+        <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.2 12 2.2zm0 4.66a5.14 5.14 0 1 0 0 10.28 5.14 5.14 0 0 0 0-10.28zm0 8.48a3.34 3.34 0 1 1 0-6.68 3.34 3.34 0 0 1 0 6.68zm5.34-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg><span class="pf-comms-tip">CH-02 · Instagram</span></a></li>
+        <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-7.6h2.56l.38-2.97H13.5V8.53c0-.86.24-1.45 1.47-1.45h1.57V4.43a21 21 0 0 0-2.29-.12c-2.27 0-3.82 1.39-3.82 3.93v2.19H7.87v2.97h2.56V21z"/></svg><span class="pf-comms-tip">CH-03 · Facebook</span></a></li>
+        <li><a href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg><span class="pf-comms-tip">CH-04 · Email</span></a></li>
+      </ul>
+      <span class="pf-comms-line" aria-hidden="true"></span>
+      <span class="pf-comms-freq" aria-hidden="true">FREQ <b data-freq>97.10</b></span>
+      <span class="pf-comms-status" aria-hidden="true"><i></i>OPEN CHANNEL</span>
+    </aside>
 
     <!-- ====== Portfolio hero (Mars) ====== -->
     <section class="folio-hero">
       <div class="folio-hero-media" aria-hidden="true">
-        <!-- Worx Mars landscape hero asset -->
+       <div class="folio-camera">
+        <!-- About-page night sky (sky-fx.js stars + Earth/Saturn,
+             ambient-storm.js cell, glimpse-orbiter.js pass) behind the
+             terrain plate (see the MARS HERO style block). -->
+        <div class="folio-sky"></div>
+        <canvas class="folio-sky-canvas"></canvas>
+        <div class="mars-terrain-base"></div>
+        <!-- Worx Mars landscape: ridge + About boulder field, one plate -->
         <div class="mars-photo"></div>
         <div class="mars-photo-grade"></div>
-        <!-- Mars ridge astronaut — 10 FINAL walk frames + kneel + planted flag -->
-        <div class="mars-astronaut" aria-hidden="true">
-          <div class="mars-astronaut__gravity">
-            <div class="mars-astronaut__walking">
-              <img class="mars-astronaut__frame mars-astronaut__frame--01"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 001.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--02"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 002.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--03"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 003.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--04"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 004.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--05"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 005.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--06"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 006.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--07"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 007.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--08"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 008.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--09"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 009.png" alt="">
-              <img class="mars-astronaut__frame mars-astronaut__frame--10"
-                src="../static/assets/portfolio/astronaut/Astronaut - Final - 010.png" alt="">
-            </div>
-            <img class="mars-astronaut__kneel" src="../static/assets/portfolio/astronaut/ASTRONAUT_KNEEL.png" alt="">
-          </div>
+        <div class="mars-terrain-fx">
+          <div class="mars-terrain-fx__storm"></div>
+          <div class="mars-terrain-fx__dust"></div>
         </div>
-
-        <svg class="mars-worx-flag" viewBox="0 0 337 360" role="img" aria-hidden="true" focusable="false">
-          <defs>
-            <!-- fabric shading -- the exact orange sampled from logo-dark.png's
-                 badge background (#e77d11), with subtle fold shading so it
-                 still reads as cloth instead of a flat digital rectangle.
-                 Static: no wave/turbulence filter is applied anywhere below. -->
-            <linearGradient id="worxClothShade" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#e77d11" />
-              <stop offset="18%" stop-color="#cf6d0d" />
-              <stop offset="40%" stop-color="#f08d29" />
-              <stop offset="65%" stop-color="#d0700e" />
-              <stop offset="100%" stop-color="#e77d11" />
-            </linearGradient>
-
-            <!-- flag-eye-solid.png is a mask here too (alpha, not luminance --
-                 the shape is painted solid black, which a default luminance mask
-                 would treat as fully-hidden): clips the crescent so it can slide
-                 left/right without ever spilling outside the eye's own outline. -->
-            <mask id="worxEyeClip" maskUnits="userSpaceOnUse" x="153.65" y="86" width="86.7" height="42"
-              style="mask-type:alpha">
-              <image x="153.65" y="86" width="86.7" height="42"
-                href="../static/assets/portfolio/astronaut/flag-eye-solid.png" />
-            </mask>
-          </defs>
-
-          <!-- flagpole: cropped straight from the original artwork -->
-          <image x="-2" y="48" width="88" height="298"
-            href="../static/assets/portfolio/astronaut/worx-flag-pole.png" />
-
-          <!-- cloth: a single static rect, no filter/animation -- the fabric
-               itself no longer moves. -->
-          <rect x="78" y="42" width="238" height="132" fill="url(#worxClothShade)" />
-
-          <!-- branding -->
-          <image x="173.71" y="50" width="46.58" height="30"
-            href="../static/assets/portfolio/astronaut/flag-swoosh.png" />
-
-          <!-- Worx eye: solid black almond (authentic logo-dark.png shape, no
-               synthetic white sclera) + the real orange crescent as a living
-               pupil that slides within it and blinks by squashing the whole
-               eye vertically -- the natural lens silhouette tapers to a line
-               at full closure, so there's no separate mask edge to seam. This
-               is the ONLY moving part of the flag. -->
-          <g class="worx-eye">
-            <image x="153.65" y="86" width="86.7" height="42"
-              href="../static/assets/portfolio/astronaut/flag-eye-solid.png" />
-            <g mask="url(#worxEyeClip)">
-              <g class="worx-eye-crescent">
-                <image x="153.65" y="86" width="86.7" height="42"
-                  href="../static/assets/portfolio/astronaut/flag-crescent.png" />
-              </g>
-            </g>
-          </g>
-
-          <text x="197" y="144" text-anchor="middle" font-family="Jost, sans-serif" font-weight="700"
-            font-size="16" letter-spacing="2" fill="#150905">WORX</text>
-          <text x="197" y="158" text-anchor="middle" font-family="Jost, sans-serif" font-weight="500"
-            font-size="8.5" letter-spacing="2.4" fill="#150905">&lt;like/magic&gt;</text>
-        </svg>
-        <canvas id="mars3d" class="mars-3d-canvas" aria-hidden="true"></canvas>
+        <!-- Summit scene (static/js/rover-scene.js): the flag behind, then
+             dust + rover + astronaut, then the lamps and beams -->
+        <canvas class="rover-scene rover-scene__flag" aria-hidden="true"></canvas>
+        <canvas class="rover-scene rover-scene__main" aria-hidden="true"></canvas>
+        <canvas class="rover-scene rover-scene__glow" aria-hidden="true"></canvas>
+        <!-- the camera tracking the story: a bracket locked on the rover
+             (portfolio-hero.js reads rover-scene.js's feed) -->
+        <div class="pf-track" aria-hidden="true"><i class="pf-track-box"><i></i></i><i class="pf-track-rec"></i></div>
+        <!-- his transmission: rings off the helmet while the EVA is live -->
+        <div class="pf-tx" aria-hidden="true"><i></i><i></i><i></i></div>
         <div class="mars-ember-glow"></div>
         <canvas class="folio-hero-particles"></canvas>
+        <div class="folio-grain"></div>
+       </div>
       </div>
-      <div class="container folio-hero-inner">
-        <p class="eyebrow">Our Work</p>
-        <h1>Ideas, built to make an <span class="gradient-text">impact</span>.</h1>
-        <p class="folio-hero-lead" data-reveal>
-          Platforms, apps and campaigns for brands people already know
-          designed, built, and kept sharp long after launch.
-        </p>
+      <!-- the shot ends in the page ink, whatever the caption is doing -->
+      <span class="pf-hero-fade" aria-hidden="true"></span>
+      <!-- Title card: the letterbox opens on the shot, the headline rises
+           word by word over the empty foreground (the rover has the
+           ridge above), a stroke draws under "impact", and the archive
+           log reads out as a telemetry strip that counts up
+           (static/css/portfolio.css, HERO TITLE CARD) -->
+      <span class="pf-letterbox" aria-hidden="true"><i></i><i></i></span>
+      <!-- the camera's viewfinder brackets on the frame's corners -->
+      <!-- the feed: the Services field-footage treatment on the whole
+           shot (scanlines, grade, a roll bar; a tear when the camera
+           switches), and its REC readout on the frame's edge -->
+      <div class="pf-feed" aria-hidden="true"><i class="pf-feed-roll"></i><i class="pf-feed-tear"></i></div>
+      <div class="pf-rechud" aria-hidden="true">
+        <span class="pf-rechud-rec"><i></i>REC · CAM 01 · <b data-feed-name>SURFACE</b></span>
+        <span class="pf-rechud-tx"><span class="pf-bars"><i></i><i></i><i></i><i></i></span>TX · LIVE TO EARTH</span>
+      </div>
+      <span class="pf-rechud-tc" aria-hidden="true" data-feed-tc>00:00:00:00</span>
+      <div class="pf-vfx" aria-hidden="true"><i class="pf-vfx-c pf-vfx-c--tl"></i><i class="pf-vfx-c pf-vfx-c--tr"></i><i class="pf-vfx-c pf-vfx-c--bl"></i><i class="pf-vfx-c pf-vfx-c--br"></i></div>
+      <!-- One mission panel, the About page's recipe (.hud-story): the
+           summit log up top, driven by the rover's own story, and the
+           caption below it on the same glass, at the same angle
+           (portfolio-hero.js: typing, the live log; portfolio.css: HERO
+           MISSION PANEL) -->
+      <div class="folio-hero-caption">
+        <div class="folio-hud-card pf-hud" data-pf-hud>
+          <div class="pf-hud-head" aria-hidden="true" data-type-in="2.1"><span class="pf-rec"></span><span class="pf-hud-call">WX-01 · SUMMIT LOG</span><span class="pf-hud-clock" data-pf-clock data-live>T+00:00.0</span></div>
+          <ol class="pf-stages" aria-hidden="true">
+            <li data-ph="in">Rover inbound</li>
+            <li data-ph="hold">Summit hold</li>
+            <li data-ph="eva">EVA · crew out</li>
+            <li data-ph="flag">WORX flag planted</li>
+            <li data-ph="back">Return to rover</li>
+            <li data-ph="go">Ignition · depart</li>
+          </ol>
+          <dl class="pf-hud-tele" aria-hidden="true">
+            <div><dt>SPD</dt><dd><b data-log-spd>0.0</b> KM/H</dd></div>
+            <div><dt>EVA</dt><dd><b data-log-eva>00:00</b></dd></div>
+            <div><dt>FLAGS</dt><dd><b data-log-flags>0</b></dd></div>
+          </dl>
+          <div class="pf-hud-cap">
+            <p class="folio-hud-status" data-type-in="3.2"><span>Our work · Mission archive</span></p>
+            <h1 class="folio-hud-title"><span class="pf-tmask"><span class="pf-tin">Ideas, built to make an <span class="gradient-text">impact</span>.</span></span></h1>
+            <p class="folio-hud-subtitle" data-words-in="3.7">Platforms, apps and campaigns for brands people already know, designed, built, and kept sharp long after launch.</p>
+            <ul class="pf-hud-stats" data-type-in="4.1">
+              <li><b>300</b> projects</li>
+              <li><b>12+</b> long-term clients</li>
+              <li>GCC · Europe · USA</li>
+            </ul>
+            <a class="pf-hud-go" href="#work">Open the archive <i aria-hidden="true">&darr;</i></a>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="section container folio-showcase-section">
-      <ul class="folio-grid folio-editorial-grid">
-        <li class="folio-card folio-card--tablet" data-scroll data-reveal data-live-url="https://hyundai-uae.com/">
-          <div class="folio-scene">
-            <img class="folio-card-bg" src="../static/assets/portfolio/live/hyundai.png" alt="" loading="lazy">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-device folio-device--tablet">
-              <div class="folio-device__screen">
-                <div class="folio-browserbar" aria-hidden="true"><span
-                    class="folio-browserdots"><i></i><i></i><i></i></span><span
-                    class="folio-browserurl">hyundai-uae.com</span></div>
-                <div class="folio-viewport">
-                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
-                      src="../static/assets/portfolio/live/hyundai.png" alt="" loading="lazy"></div>
-                </div>
+    <!-- the hero's open waits for the fonts (at most 1.2s), then rolls -->
+    <script>
+      (function (root) {
+        root.classList.add("pf-wait");
+        var go = function () { requestAnimationFrame(function () { root.classList.remove("pf-wait"); }); };
+        var fonts = document.fonts && document.fonts.ready;
+        if (!fonts) return go();
+        Promise.race([fonts, new Promise(function (r) { setTimeout(r, 1200); })]).then(go, go);
+      })(document.documentElement);
+    </script>
+
+    <div class="pf-limb" aria-hidden="true"><svg viewBox="0 0 1600 240" preserveAspectRatio="none"><defs><linearGradient id="pf-limb-g" x1="0" x2="1"><stop offset="0" stop-color="#c04527" stop-opacity="0"/><stop offset=".5" stop-color="#faa719"/><stop offset="1" stop-color="#c04527" stop-opacity="0"/></linearGradient></defs><path class="pf-limb-glow" d="M-40 240 Q800 -20 1640 240" stroke="url(#pf-limb-g)"/><path class="pf-limb-line" d="M-40 240 Q800 -20 1640 240" stroke="url(#pf-limb-g)" pathLength="100"/></svg><span class="pf-limb-tag">ENTERING · MISSION ARCHIVE</span></div>
+
+    <section class="folio-showcase-section pf-archive" id="work" aria-labelledby="folio-work-title">
+      <!-- the mission archive: every project is a screen in the habitat,
+           angled like the About page's HUD panels (left ones face right,
+           right ones face left) and turning to face you as they reach the
+           middle of the view; the film plays through a Mars grade that
+           lifts when you point at it (portfolio.js, "mission archive") -->
+      <div class="pf-reel-head container">
+        <p class="pf-kicker"><i aria-hidden="true"></i>Mission archive <span aria-hidden="true">WX-ARC · 18 FILES</span></p>
+        <h2 class="pf-reel-title" id="folio-work-title">Every mission, <span class="gradient-text">on the record</span></h2>
+        <p class="pf-reel-lede">Sixteen live transmissions and two in final countdown. Point at a screen to see it in its true colours; open it to visit it live.</p>
+        <!-- THE SECTOR TUNER: the archive, charted by industry, tuned like a
+             radio. The sectors are stations on a frequency band; the one
+             under the needle is the one playing. Click a station and the
+             band glides it under the needle; on touch screens the band
+             itself is swiped, and whichever station settles under the needle
+             is tuned in. The display above decodes the sector's name as it
+             locks. Past the title the side rail takes over (portfolio.js,
+             "sector scanner"). Counts are filled from the files themselves. -->
+        <div class="pf-scan-slot" data-scan-slot>
+          <div class="pf-scan pf-tuner" role="group" aria-label="Filter projects by industry" data-scan>
+            <div class="pf-tuner-top">
+              <p class="pf-scan-read"><span class="pf-scan-tag"><i aria-hidden="true"></i>Sector tuner</span><span class="pf-tuner-freq" aria-hidden="true"><b data-scan-freq>88.0</b> MHz</span></p>
+              <p class="pf-tuner-display" aria-live="polite"><strong class="pf-tuner-name" data-scan-name>All sectors</strong><span class="pf-scan-out"><b data-scan-n>18</b> signals</span></p>
+            </div>
+            <div class="pf-tuner-dial">
+              <canvas class="pf-tuner-wave" aria-hidden="true"></canvas>
+              <div class="pf-tuner-band" data-scan-band>
+                <button type="button" class="pf-station is-on" data-industry="all" data-freq="88.0" aria-pressed="true"><span class="pf-station-name">All sectors</span> <b>18</b><small aria-hidden="true">88.0</small></button>
+                <button type="button" class="pf-station" data-industry="automotive" data-freq="91.4" aria-pressed="false"><span class="pf-station-name">Automotive</span> <b>02</b><small aria-hidden="true">91.4</small></button>
+                <button type="button" class="pf-station" data-industry="luxury" data-freq="94.7" aria-pressed="false"><span class="pf-station-name">Luxury</span> <b>04</b><small aria-hidden="true">94.7</small></button>
+                <button type="button" class="pf-station" data-industry="technology" data-freq="97.9" aria-pressed="false"><span class="pf-station-name">Technology</span> <b>05</b><small aria-hidden="true">97.9</small></button>
+                <button type="button" class="pf-station" data-industry="realestate" data-freq="101.2" aria-pressed="false"><span class="pf-station-name">Real Estate</span> <b>03</b><small aria-hidden="true">101.2</small></button>
+                <button type="button" class="pf-station" data-industry="agency" data-freq="103.6" aria-pressed="false"><span class="pf-station-name">Agency &amp; Culture</span> <b>02</b><small aria-hidden="true">103.6</small></button>
+                <button type="button" class="pf-station" data-industry="lifestyle" data-freq="105.8" aria-pressed="false"><span class="pf-station-name">Lifestyle &amp; Travel</span> <b>02</b><small aria-hidden="true">105.8</small></button>
+                <button type="button" class="pf-station" data-industry="campaigns" data-freq="107.5" aria-pressed="false"><span class="pf-station-name">Campaigns</span> <b>03</b><small aria-hidden="true">107.5</small></button>
               </div>
+              <span class="pf-tuner-needle" aria-hidden="true"><i></i></span>
             </div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Hyundai.mp4" type="video/mp4">
-              </video>
-            </div>
+            <span class="pf-scan-sweep" aria-hidden="true"></span>
           </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://hyundai-uae.com/" target="_blank"
-                rel="noopener">Hyundai<span class="visually-hidden">, see
-                  case study</span></a></h3>
-            <p class="folio-desc">A rapidly built iPad app for Hyundai Motors Group, presented at Expo 2020’s Korean
-              pavilion.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
-        </li>
-
-        <li class="folio-card folio-card--monitor" data-scroll data-reveal
-          data-live-url="https://www.theglimpseproject.com/">
-          <div class="folio-scene">
-            <img class="folio-card-bg" src="../static/assets/portfolio/live/the-glimpse-project.png" alt=""
-              loading="lazy">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-device folio-device--monitor">
-              <div class="folio-device__screen">
-                <div class="folio-browserbar" aria-hidden="true"><span
-                    class="folio-browserdots"><i></i><i></i><i></i></span><span
-                    class="folio-browserurl">www.theglimpseproject.com</span></div>
-                <div class="folio-viewport">
-                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
-                      src="../static/assets/portfolio/live/the-glimpse-project.png" alt="" loading="lazy"></div>
-                </div>
+        </div>
+      </div>
+      <ol class="pf-reel container" data-reel>
+        <li class="pf-file" data-industry="automotive" data-name="Hyundai">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 01 · HYUNDAI</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/hyundai.webp" alt="Hyundai website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Hyundai.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
               </div>
-              <div class="folio-device__base"></div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Automotive</dd></div>
+                <div><dt>Build</dt><dd>iPad app</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
             </div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Glimpse.mp4" type="video/mp4">
-              </video>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://hyundai-uae.com/" target="_blank" rel="noopener">Hyundai<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">A rapidly built iPad app for Hyundai Motors Group, presented at Expo 2020’s Korean pavilion.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.theglimpseproject.com/" target="_blank"
-                rel="noopener">The Glimpse Project<span class="visually-hidden">, see case study</span></a></h3>
-            <p class="folio-desc">Our own studio site, designed in-house, built by Worx, and tuned to rank among the
-              best on Google’s Lighthouse.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
+          </article>
         </li>
-
-        <li class="folio-card folio-card--laptop" data-scroll data-reveal
-          data-live-url="https://www.genesis.com/ae/en/main.html">
-          <div class="folio-scene">
-            <img class="folio-card-bg" src="../static/assets/portfolio/live/genesis.png" alt="" loading="lazy">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-device folio-device--laptop">
-              <div class="folio-device__screen">
-                <div class="folio-browserbar" aria-hidden="true"><span
-                    class="folio-browserdots"><i></i><i></i><i></i></span><span
-                    class="folio-browserurl">www.genesis.com/ae/en/main.html</span></div>
-                <div class="folio-viewport">
-                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
-                      src="../static/assets/portfolio/live/genesis.png" alt="" loading="lazy"></div>
-                </div>
+        <li class="pf-file" data-industry="agency" data-name="The Glimpse Project">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 02 · THE GLIMPSE PROJECT</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/glimpse.webp" alt="The Glimpse Project website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Glimpse.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
               </div>
-              <div class="folio-device__base"></div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Creative studio</dd></div>
+                <div><dt>Build</dt><dd>Website</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
             </div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Genesis.mp4" type="video/mp4">
-              </video>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.theglimpseproject.com/" target="_blank" rel="noopener">The Glimpse Project<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Our own studio site, designed in-house, built by Worx, and tuned to rank among the best on Google’s Lighthouse.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.genesis.com/ae/en/main.html" target="_blank"
-                rel="noopener">Genesis<span class="visually-hidden">, see
-                  case study</span></a></h3>
-            <p class="folio-desc">Web development and upkeep for the Genesis MEA pages, supporting the marque’s regional
-              luxury launch.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
+          </article>
         </li>
-
-        <li class="folio-card folio-card--tablet" data-scroll data-reveal
-          data-live-url="https://www.lg.com/ae">
-          <div class="folio-scene">
-            <img class="folio-card-bg" src="../static/assets/portfolio/live/lg-kitchen-planner.png" alt=""
-              loading="lazy">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-device folio-device--tablet">
-              <div class="folio-device__screen">
-                <div class="folio-browserbar" aria-hidden="true"><span
-                    class="folio-browserdots"><i></i><i></i><i></i></span><span
-                    class="folio-browserurl">www.lg.com/ae</span></div>
-                <div class="folio-viewport">
-                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
-                      src="../static/assets/portfolio/live/lg-kitchen-planner.png" alt="" loading="lazy"></div>
-                </div>
+        <li class="pf-file" data-industry="automotive" data-name="Genesis">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 03 · GENESIS</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/genesis.webp" alt="Genesis website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Genesis.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
               </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Automotive</dd></div>
+                <div><dt>Build</dt><dd>Web pages</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
             </div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/LG.mp4" type="video/mp4">
-              </video>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.genesis.com/ae/en/main.html" target="_blank" rel="noopener">Genesis<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Web development and upkeep for the Genesis MEA pages, supporting the marque’s regional luxury launch.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.lg.com/ae"
-                target="_blank" rel="noopener">LG &amp; LG Kitchen Planner<span class="visually-hidden">, see case
-                  study</span></a></h3>
-            <p class="folio-desc">Interactive planning tools that let customers visualise and configure LG’s kitchen
-              range before they buy.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
+          </article>
         </li>
-
-        <li class="folio-card folio-card--duo" data-reveal data-live-url="https://www.hisenseme.com/">
-          <div class="folio-scene">
-            <img class="folio-card-bg" src="../static/assets/portfolio/live/hisense.png" alt="" loading="lazy">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-device folio-device--laptop">
-              <div class="folio-device__screen">
-                <div class="folio-browserbar" aria-hidden="true"><span
-                    class="folio-browserdots"><i></i><i></i><i></i></span><span
-                    class="folio-browserurl">www.hisenseme.com</span></div>
-                <div class="folio-viewport">
-                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
-                      src="../static/assets/portfolio/live/hisense.png" alt="" loading="lazy"></div>
-                </div>
+        <li class="pf-file" data-industry="technology" data-name="LG &amp; LG Kitchen Planner">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 04 · LG &amp; LG KITCHEN PLANNER</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/lg.webp" alt="LG &amp; LG Kitchen Planner website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/LG.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
               </div>
-              <div class="folio-device__base"></div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Electronics</dd></div>
+                <div><dt>Build</dt><dd>Web tools</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
             </div>
-            <div class="folio-device folio-device--phone">
-              <div class="folio-device__screen">
-                <div class="folio-browserbar" aria-hidden="true"><span
-                    class="folio-browserdots"><i></i><i></i><i></i></span><span
-                    class="folio-browserurl">www.hisenseme.com</span></div>
-                <div class="folio-viewport">
-                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
-                      src="../static/assets/portfolio/live/hisense.png" alt="" loading="lazy"></div>
-                </div>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.lg.com/ae" target="_blank" rel="noopener">LG &amp; LG Kitchen Planner<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Interactive planning tools that let customers visualise and configure LG’s kitchen range before they buy.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
+            </div>
+          </article>
+        </li>
+        <li class="pf-file" data-industry="technology campaigns" data-name="Hisense">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 05 · HISENSE</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/hisense.webp" alt="Hisense website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Hisense.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
               </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Electronics</dd></div>
+                <div><dt>Build</dt><dd>Campaign sites</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
             </div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Hisense.mp4" type="video/mp4">
-              </video>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.hisenseme.com/" target="_blank" rel="noopener">Hisense<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Regional campaign web builds and content rollouts for one of the world’s fastest-growing appliance brands.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.hisenseme.com/" target="_blank"
-                rel="noopener">Hisense<span class="visually-hidden">, see
-                  case study</span></a></h3>
-            <p class="folio-desc">Regional campaign web builds and content rollouts for one of the world’s
-              fastest-growing appliance brands.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
+          </article>
         </li>
-
-        <li class="folio-card folio-card--full" data-reveal data-pending-asset="true">
-          <div class="folio-scene">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-fill"></div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><span class="folio-link">Casio & Casio Music<span class="visually-hidden">, case study coming soon</span></span></h3>
-            <p class="folio-desc">Website design and development for Casio and Casio Music, supporting the brand’s regional electronics lineup.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
-        </li>
-
-        <li class="folio-card folio-card--laptop" data-scroll data-reveal
-          data-live-url="https://www.chaumet.com/ae_en/gb_en-homepage?redir-fix=1">
-          <div class="folio-scene">
-            <img class="folio-card-bg" src="../static/assets/portfolio/live/chaumet.png" alt="" loading="lazy">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-device folio-device--laptop">
-              <div class="folio-device__screen">
-                <div class="folio-browserbar" aria-hidden="true"><span
-                    class="folio-browserdots"><i></i><i></i><i></i></span><span
-                    class="folio-browserurl">www.chaumet.com/ae_en</span></div>
-                <div class="folio-viewport">
-                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
-                      src="../static/assets/portfolio/live/chaumet.png" alt="" loading="lazy"></div>
-                </div>
+        <li class="pf-file pf-file--soon" data-industry="technology" data-name="Casio &amp; Casio Music">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 06 · CASIO &amp; CASIO MUSIC</span><span class="pf-tc">T&minus; --:--</span></div>
+              <div class="pf-frame">
+                <span class="pf-static" aria-hidden="true"><img src="../static/assets/mark.png" alt="" width="56" height="56" loading="lazy"><b>SIGNAL INCOMING</b></span>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
               </div>
-              <div class="folio-device__base"></div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Retail</dd></div>
+                <div><dt>Build</dt><dd>Website</dd></div>
+                <div><dt>Status</dt><dd class="is-soon">Countdown</dd></div>
+              </dl>
             </div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/chaumet.mp4" type="video/mp4">
-              </video>
+            <div class="pf-copy">
+              <h3 class="pf-name">Casio &amp; Casio Music</h3>
+              <p class="pf-desc">Website design and development for Casio and Casio Music, supporting the brand’s regional electronics lineup.</p>
+              <span class="pf-cta pf-cta--soon" aria-hidden="true">Coming soon</span>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.chaumet.com/ae_en/gb_en-homepage?redir-fix=1" target="_blank"
-                rel="noopener">Chaumet<span class="visually-hidden">, see
-                  case study</span></a></h3>
-            <p class="folio-desc">Tailor-made online flagship for the 240-year-old jewellery Maison, built for luxury
-              shoppers across the MENA region.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
+          </article>
         </li>
-
-        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.modon.com/">
-          <div class="folio-scene">
-            <img class="folio-card-bg" src="../static/assets/portfolio/live/modon.png" alt="" loading="lazy">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-fill"><img class="folio-live-full" src="../static/assets/portfolio/live/modon.png" alt=""
-                loading="lazy"></div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Modon.mp4" type="video/mp4">
-              </video>
-            </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.modon.com/" target="_blank"
-                rel="noopener">Modon<span class="visually-hidden">, see case
-                  study</span></a></h3>
-            <p class="folio-desc">Ongoing care of the corporate site for one of the UAE’s leading sustainable developers
-              , Drupal, on-page SEO and press releases.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
-        </li>
-
-        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.dunimiddleeast.com/">
-          <div class="folio-scene">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-fill"></div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Duni.mp4" type="video/mp4">
-              </video>
-            </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.dunimiddleeast.com/" target="_blank" rel="noopener">Duni Middle East<span class="visually-hidden">, see case study</span></a></h3>
-            <p class="folio-desc">Website design and development for Duni Middle East, presenting the brand’s premium napkins and table covering collections.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
-        </li>
-
-        <li class="folio-card folio-card--full" data-reveal
-          data-live-url="https://calatrava.com/projects/uae-pavilion-at-expo-dubai-united-arab-emirates.html">
-          <div class="folio-scene">
-            <img class="folio-card-bg" src="../static/assets/portfolio/live/uae-pavilion.png" alt="" loading="lazy">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-fill"><img class="folio-live-full" src="../static/assets/portfolio/live/uae-pavilion.png"
-                alt="" loading="lazy"></div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/UAE-Pavilion.mp4" type="video/mp4">
-              </video>
-            </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link"
-                href="https://calatrava.com/projects/uae-pavilion-at-expo-dubai-united-arab-emirates.html"
-                target="_blank" rel="noopener">UAE Pavilion<span class="visually-hidden">
-                  , see case study</span></a></h3>
-            <p class="folio-desc">Creative direction across photos, films and bilingual content under the theme “Land of
-              Dreamers Who Do”.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
-        </li>
-
-        <li class="folio-card folio-card--phone" data-scroll data-reveal
-          data-live-url="https://www.hudayriyatisland.ae/en/">
-          <div class="folio-scene">
-            <img class="folio-card-bg" src="../static/assets/portfolio/live/hudayriyat-mar-vista.png" alt=""
-              loading="lazy">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-device folio-device--phone">
-              <div class="folio-device__screen">
-                <div class="folio-browserbar" aria-hidden="true"><span
-                    class="folio-browserdots"><i></i><i></i><i></i></span><span
-                    class="folio-browserurl">www.hudayriyatisland.ae/en/</span></div>
-                <div class="folio-viewport">
-                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
-                      src="../static/assets/portfolio/live/hudayriyat-mar-vista.png" alt="" loading="lazy"></div>
-                </div>
+        <li class="pf-file" data-industry="luxury" data-name="Chaumet">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 07 · CHAUMET</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/chaumet.webp" alt="Chaumet website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/chaumet.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
               </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Luxury</dd></div>
+                <div><dt>Build</dt><dd>E-commerce</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
             </div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Hudayriyat.mp4" type="video/mp4">
-              </video>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.chaumet.com/ae_en/gb_en-homepage?redir-fix=1" target="_blank" rel="noopener">Chaumet<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Tailor-made online flagship for the 240-year-old jewellery Maison, built for luxury shoppers across the MENA region.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.hudayriyatisland.ae/en/" target="_blank"
-                rel="noopener">Hudayriyat Mar Vista<span class="visually-hidden">, see case study</span></a></h3>
-            <p class="folio-desc">iOS and Android app upkeep plus the Marsana Events subpage for Abu Dhabi’s leisure and
-              recreation estate.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
+          </article>
         </li>
-
-        <li class="folio-card folio-card--phone" data-scroll data-reveal data-live-url="https://wealthface.com/">
-          <div class="folio-scene">
-            <img class="folio-card-bg" src="../static/assets/portfolio/live/wealthface.png" alt="" loading="lazy">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-device folio-device--phone">
-              <div class="folio-device__screen">
-                <div class="folio-browserbar" aria-hidden="true"><span
-                    class="folio-browserdots"><i></i><i></i><i></i></span><span
-                    class="folio-browserurl">wealthface.com</span></div>
-                <div class="folio-viewport">
-                  <div class="folio-shot" data-folio-shot><img class="folio-live-shot"
-                      src="../static/assets/portfolio/live/wealthface.png" alt="" loading="lazy"></div>
-                </div>
+        <li class="pf-file" data-industry="realestate" data-name="Modon">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 08 · MODON</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/modon.webp" alt="Modon website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Modon.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
               </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Real estate</dd></div>
+                <div><dt>Build</dt><dd>Website</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
             </div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Wealthface.mp4" type="video/mp4">
-              </video>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.modon.com/" target="_blank" rel="noopener">Modon<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Ongoing care of the corporate site for one of the UAE’s leading sustainable developers , Drupal, on-page SEO and press releases.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://wealthface.com/" target="_blank"
-                rel="noopener">Wealthface<span class="visually-hidden">
-                  see case study</span></a></h3>
-            <p class="folio-desc">An ongoing development partnership on an investment platform where security and clean
-              UX are non-negotiable.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
+          </article>
         </li>
-
-        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.watchtradeco.com/">
-          <div class="folio-scene">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-fill"></div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Watch Trade .mp4" type="video/mp4">
-              </video>
+        <li class="pf-file" data-industry="lifestyle" data-name="Duni Middle East">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 09 · DUNI MIDDLE EAST</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/duni.webp" alt="Duni Middle East website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Duni.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
+              </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Hospitality</dd></div>
+                <div><dt>Build</dt><dd>Website</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.watchtradeco.com/" target="_blank" rel="noopener">Watch Trade Co.<span class="visually-hidden">, see case study</span></a></h3>
-            <p class="folio-desc">Website design and development for Watch Trade Co., supporting the brand’s luxury watch trading platform.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
-        </li>
-
-        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.watchlocater.com/">
-          <div class="folio-scene">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-fill"></div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Watch Locater.mp4" type="video/mp4">
-              </video>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.dunimiddleeast.com/" target="_blank" rel="noopener">Duni Middle East<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Website design and development for Duni Middle East, presenting the brand’s premium napkins and table covering collections.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.watchlocater.com/" target="_blank" rel="noopener">Watch Locater<span class="visually-hidden">, see case study</span></a></h3>
-            <p class="folio-desc">Website design and development for Watch Locater, helping collectors discover and source luxury timepieces.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
+          </article>
         </li>
-
-        <li class="folio-card folio-card--full" data-reveal data-pending-asset="true">
-          <div class="folio-scene">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-fill"></div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><span class="folio-link">SEPHORiA<span class="visually-hidden">, case study coming soon</span></span></h3>
-            <p class="folio-desc">Website design and development for SEPHORiA, supporting the brand’s regional electronics retail presence.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
-        </li>
-
-        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.sailnaxos.com/">
-          <div class="folio-scene">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-fill"></div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Sail Naxos.mp4" type="video/mp4">
-              </video>
+        <li class="pf-file" data-industry="agency campaigns" data-name="UAE Pavilion">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 10 · UAE PAVILION</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/uae-pavilion.webp" alt="UAE Pavilion website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/UAE-Pavilion.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
+              </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Government · Expo</dd></div>
+                <div><dt>Build</dt><dd>Digital experience</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.sailnaxos.com/" target="_blank" rel="noopener">Sail Naxos<span class="visually-hidden">, see case study</span></a></h3>
-            <p class="folio-desc">Website design and development for Sail Naxos, supporting the operator’s sailing tours and island excursions.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
-        </li>
-
-        <li class="folio-card folio-card--full" data-reveal data-live-url="https://www.tailorandtweak.com/">
-          <div class="folio-scene">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-fill"></div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Tailor and Tweak.mp4" type="video/mp4">
-              </video>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://calatrava.com/projects/uae-pavilion-at-expo-dubai-united-arab-emirates.html" target="_blank" rel="noopener">UAE Pavilion<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Creative direction across photos, videos and bilingual content under the theme “Land of Dreamers Who Do”.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://www.tailorandtweak.com/" target="_blank" rel="noopener">Tailor &amp; Tweak<span class="visually-hidden">, see case study</span></a></h3>
-            <p class="folio-desc">Website design and development for Tailor & Tweak, presenting the brand’s made-to-measure tailoring services.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
+          </article>
         </li>
-
-        <li class="folio-card folio-card--full" data-reveal data-live-url="https://tiara.ae/">
-          <div class="folio-scene">
-            <img class="folio-card-bg" src="../static/assets/portfolio/live/tiara-dream.png" alt="" loading="lazy">
-            <span class="folio-floor" aria-hidden="true"></span>
-            <div class="folio-fill"><img class="folio-live-full" src="../static/assets/portfolio/live/tiara-dream.png"
-                alt="" loading="lazy"></div>
-
-            <div class="folio-live-preview folio-video-preview" aria-hidden="true">
-              <video class="folio-card-video" muted loop playsinline preload="metadata">
-                <source src="../static/assets/portfolio/videos/Tiara.mp4" type="video/mp4">
-              </video>
+        <li class="pf-file" data-industry="realestate" data-name="Hudayriyat Mar Vista">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 11 · HUDAYRIYAT MAR VISTA</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/hudayriyat.webp" alt="Hudayriyat Mar Vista website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Hudayriyat.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
+              </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Real estate</dd></div>
+                <div><dt>Build</dt><dd>Website</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
             </div>
-          </div>
-          <div class="folio-body">
-            <h3 class="folio-name"><a class="folio-link" href="https://tiara.ae/" target="_blank" rel="noopener">Tiara
-                Dream<span class="visually-hidden">
-                  see case study</span></a></h3>
-            <p class="folio-desc">High-value campaign engineering, targeting, budgets and creative formats tuned until
-              daily enquiries became the norm.</p>
-            <span class="folio-cta" aria-hidden="true">
-              <span class="folio-cta-label">View Case Study</span>
-              <span class="folio-cta-arrow">&rarr;</span>
-            </span>
-          </div>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.hudayriyatisland.ae/en/" target="_blank" rel="noopener">Hudayriyat Mar Vista<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">iOS and Android app upkeep plus the Marsana Events subpage for Abu Dhabi’s leisure and recreation estate.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
+            </div>
+          </article>
         </li>
-      
-</ul>
+        <li class="pf-file" data-industry="technology" data-name="Wealthface">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 12 · WEALTHFACE</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/wealthface.webp" alt="Wealthface website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Wealthface.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
+              </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Fintech</dd></div>
+                <div><dt>Build</dt><dd>App + web</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
+            </div>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://wealthface.com/" target="_blank" rel="noopener">Wealthface<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">An ongoing development partnership on an investment platform where security and clean UX are non-negotiable.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
+            </div>
+          </article>
+        </li>
+        <li class="pf-file" data-industry="luxury" data-name="Watch Trade Co.">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 13 · WATCH TRADE CO.</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/watch-trade.webp" alt="Watch Trade Co. website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Watch Trade .mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
+              </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Luxury</dd></div>
+                <div><dt>Build</dt><dd>Trading platform</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
+            </div>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.watchtradeco.com/" target="_blank" rel="noopener">Watch Trade Co.<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Website design and development for Watch Trade Co., supporting the brand’s luxury watch trading platform.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
+            </div>
+          </article>
+        </li>
+        <li class="pf-file" data-industry="luxury" data-name="Watch Locater">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 14 · WATCH LOCATER</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/watch-locater.webp" alt="Watch Locater website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Watch Locater.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
+              </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Luxury</dd></div>
+                <div><dt>Build</dt><dd>Website</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
+            </div>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.watchlocater.com/" target="_blank" rel="noopener">Watch Locater<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Website design and development for Watch Locater, helping collectors discover and source luxury timepieces.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
+            </div>
+          </article>
+        </li>
+        <li class="pf-file pf-file--soon" data-industry="technology" data-name="SEPHORiA">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 15 · SEPHORIA</span><span class="pf-tc">T&minus; --:--</span></div>
+              <div class="pf-frame">
+                <span class="pf-static" aria-hidden="true"><img src="../static/assets/mark.png" alt="" width="56" height="56" loading="lazy"><b>SIGNAL INCOMING</b></span>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
+              </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Retail</dd></div>
+                <div><dt>Build</dt><dd>Website</dd></div>
+                <div><dt>Status</dt><dd class="is-soon">Countdown</dd></div>
+              </dl>
+            </div>
+            <div class="pf-copy">
+              <h3 class="pf-name">SEPHORiA</h3>
+              <p class="pf-desc">Website design and development for SEPHORiA, supporting the brand’s regional electronics retail presence.</p>
+              <span class="pf-cta pf-cta--soon" aria-hidden="true">Coming soon</span>
+            </div>
+          </article>
+        </li>
+        <li class="pf-file" data-industry="lifestyle" data-name="Sail Naxos">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 16 · SAIL NAXOS</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/sail-naxos.webp" alt="Sail Naxos website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Sail Naxos.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
+              </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Travel</dd></div>
+                <div><dt>Build</dt><dd>Website</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
+            </div>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.sailnaxos.com/" target="_blank" rel="noopener">Sail Naxos<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Website design and development for Sail Naxos, supporting the operator’s sailing tours and island excursions.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
+            </div>
+          </article>
+        </li>
+        <li class="pf-file" data-industry="luxury" data-name="Tailor &amp; Tweak">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 17 · TAILOR &amp; TWEAK</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/tailor-and-tweak.webp" alt="Tailor &amp; Tweak website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Tailor and Tweak.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
+              </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Fashion</dd></div>
+                <div><dt>Build</dt><dd>Website</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
+            </div>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://www.tailorandtweak.com/" target="_blank" rel="noopener">Tailor &amp; Tweak<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">Website design and development for Tailor &amp; Tweak, presenting the brand’s made-to-measure tailoring services.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
+            </div>
+          </article>
+        </li>
+        <li class="pf-file" data-industry="realestate campaigns" data-name="Tiara Dream">
+          <article class="pf-card">
+            <div class="pf-screen">
+              <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 18 · TIARA DREAM</span><span class="pf-tc">00:00:00:00</span></div>
+              <div class="pf-frame">
+                <img class="pf-poster" src="../static/assets/portfolio/posters/tiara.webp" alt="Tiara Dream website preview" width="960" height="458" loading="lazy" decoding="async">
+                <video class="pf-video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" aria-hidden="true" data-src="../static/assets/portfolio/videos/Tiara.mp4"></video>
+                <span class="pf-grade" aria-hidden="true"></span>
+                <span class="pf-vf" aria-hidden="true"></span>
+              </div>
+              <dl class="pf-read">
+                <div><dt>Sector</dt><dd>Real estate</dd></div>
+                <div><dt>Build</dt><dd>Campaigns</dd></div>
+                <div><dt>Status</dt><dd class="is-live">Live</dd></div>
+              </dl>
+            </div>
+            <div class="pf-copy">
+              <h3 class="pf-name"><a href="https://tiara.ae/" target="_blank" rel="noopener">Tiara Dream<span class="visually-hidden"> (opens the live site)</span></a></h3>
+              <p class="pf-desc">High-value campaign engineering, targeting, budgets and creative formats tuned until daily enquiries became the norm.</p>
+              <span class="pf-cta" aria-hidden="true">Visit the live site <i>&rarr;</i></span>
+            </div>
+          </article>
+        </li>
+      </ol>
     </section>
 
     <section class="section container">
       <div class="cta-band" data-reveal>
         <h2>Your project, <span class="gradient-text">next</span></h2>
         <p>Helping new brands start up and established ones start over.</p>
-        <a href="../contact/index.html" class="btn btn-primary">Start a project</a>
+        <a class="ig-btn" href="../contact/index.html"><span class="ig-core"><span class="ig-state" aria-hidden="true">IGNITION</span><span class="ig-label">Start a project</span></span></a>
       </div>
     </section>
 
   </main>
 
-  <footer class="site-footer">
+  <!--WORX:FOOTER-->
+<footer class="site-footer">
     <div class="container">
-      <div class="footer-grid">
-        <div class="footer-about">
-          <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png"
-              alt="Worx by Glimpse" width="132" height="181"></a>
-          <p>Your one-stop destination for innovative website and software development, bringing digital aspirations to
-            life, one line of code at a time.</p>
-        </div>
-        <div>
-          <h4>Explore</h4>
+      <div class="footer-brand">
+        <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png" alt="Worx" width="132" height="181"></a>
+        <p class="footer-tagline">Your one-stop destination for innovative website and software development, bringing digital aspirations to life, one line of code at a time.</p>
+      </div>
+
+      <div class="footer-social-row">
+        <span class="footer-rule" aria-hidden="true"></span>
+        <ul class="footer-social" aria-label="Worx on social media">
+          <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.06c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-4z"/></svg></a></li>
+          <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.2 12 2.2zm0 4.66a5.14 5.14 0 1 0 0 10.28 5.14 5.14 0 0 0 0-10.28zm0 8.48a3.34 3.34 0 1 1 0-6.68 3.34 3.34 0 0 1 0 6.68zm5.34-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg></a></li>
+          <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-7.6h2.56l.38-2.97H13.5V8.53c0-.86.24-1.45 1.47-1.45h1.57V4.43a21 21 0 0 0-2.29-.12c-2.27 0-3.82 1.39-3.82 3.93v2.19H7.87v2.97h2.56V21z"/></svg></a></li>
+          <li><a href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a></li>
+        </ul>
+        <span class="footer-rule" aria-hidden="true"></span>
+      </div>
+
+      <nav class="footer-cols" aria-label="Footer">
+        <div class="footer-col footer-col--contact">
+          <h4>Contact Us</h4>
           <ul>
+            <li>Publishing Pavilion Bldg - Unit 709 - Me'aisem First - Dubai Production City - Dubai</li>
+            <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
+            <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
+            <li class="footer-cta-item"><a class="footer-cta" href="../contact/index.html">Quick Enquiry <span aria-hidden="true">→</span></a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Overview</h4>
+          <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../about/index.html">About us</a></li>
             <li><a href="../services/index.html">Services</a></li>
             <li><a href="../portfolio/index.html">Portfolio</a></li>
-            <li><a href="../about/index.html">About us</a></li>
             <li><a href="../blogs/index.html">Blog</a></li>
             <li><a href="../contact/index.html">Contact</a></li>
           </ul>
         </div>
-        <div>
-          <h4>Social</h4>
+        <div class="footer-col">
+          <h4>Development</h4>
           <ul>
-            <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener">LinkedIn</a>
-            </li>
-            <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener">Instagram</a></li>
-            <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener">Facebook</a></li>
-            <li><a href="https://www.theglimpseproject.com" target="_blank" rel="noopener">Glimpse</a></li>
+            <li><a href="../services/web-development.html">Web Development</a></li>
+            <li><a href="../services/ecommerce-development.html">E-commerce Development</a></li>
+            <li><a href="../services/custom-platforms.html">Custom Platforms</a></li>
+            <li><a href="../services/mobile-apps.html">Mobile App Development</a></li>
+            <li><a href="../services/seo-sem.html">SEO &amp; SEM</a></li>
           </ul>
         </div>
-        <div>
-          <h4>Contact</h4>
+        <div class="footer-col">
+          <h4>Design &amp; Creative</h4>
           <ul>
-            <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
-            <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
-            <li>Unit 404 Makateb 2,<br>Dubai Production City,<br>PO Box 503417, Dubai, UAE</li>
+            <li><a href="../services/ui-ux-design.html">UI / UX Design</a></li>
+            <li><a href="../services/digital-branding.html">Digital Branding &amp; Creatives</a></li>
+            <li><a href="../services/video-animation.html">2D / 3D Video Animation</a></li>
+            <li><a href="../services/copywriting.html">Copywriting</a></li>
           </ul>
         </div>
-      </div>
+        <div class="footer-col">
+          <h4>Emerging &amp; Enterprise</h4>
+          <ul>
+            <li><a href="../services/artificial-intelligence.html">Artificial Intelligence</a></li>
+            <li><a href="../services/ar-vr.html">AR / VR &amp; Mixed Reality</a></li>
+            <li><a href="../services/erp-crm.html">ERP &amp; CRM</a></li>
+            <li><a href="../services/cloud-transformation.html">Cloud Transformation</a></li>
+            <li><a href="../services/it-outsourcing.html">IT Resource Outsourcing</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <!-- The WORX wordmark, drawn in outline across the full width and
+         sunk into the bottom edge, lit from below. A slow light runs
+         along its stroke; on hover the letters fill in under the
+         pointer (main.js). Decorative: the logo above carries the name. -->
+    <div class="footer-mark" aria-hidden="true">
+      <svg class="footer-mark-svg" viewBox="0 0 1000 232" preserveAspectRatio="xMidYMax meet">
+        <defs>
+          <linearGradient id="footer-mark-stroke" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#c04527"/>
+            <stop offset="0.55" stop-color="#e57d23"/>
+            <stop offset="1" stop-color="#faa719"/>
+          </linearGradient>
+          <linearGradient id="footer-mark-shine" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+            <stop offset="0" stop-color="#feeecf" stop-opacity="0"/>
+            <stop offset="0.5" stop-color="#feeecf" stop-opacity="0.9"/>
+            <stop offset="1" stop-color="#feeecf" stop-opacity="0"/>
+            <animateTransform class="footer-mark-anim" attributeName="gradientTransform" type="translate" values="-1 0; 1.2 0" dur="9s" repeatCount="indefinite"/>
+          </linearGradient>
+        </defs>
+        <text class="footer-mark-base" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+        <text class="footer-mark-shine" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+        <text class="footer-mark-knock" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+      </svg>
+      <svg class="footer-mark-svg footer-mark-fill" viewBox="0 0 1000 232" preserveAspectRatio="xMidYMax meet">
+        <text x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+      </svg>
+    </div>
+
+    <div class="container">
       <div class="footer-bottom">
-        <span>© <span id="footer-year">2026</span> Worx by Glimpse. All rights reserved.</span>
-        <span>Built for businesses, by creatives.</span>
+        <span>© <span id="footer-year">2026</span> Worx. All rights reserved.</span>
+        <span class="footer-where">Dubai, UAE <span aria-hidden="true">·</span> <time class="footer-clock" data-tz="Asia/Dubai">--:--</time> GST</span>
+        <a class="footer-top" href="#main">Back to top <span aria-hidden="true">↑</span></a>
       </div>
     </div>
   </footer>
+  <!--/WORX:FOOTER-->
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="../static/js/nav.js"></script>
+  <script src="../static/js/logo-eye.js"></script>
   <script src="../static/js/animations.js"></script>
   <script src="../static/js/main.js"></script>
+  <script src="../static/js/reticle.js"></script>
   <script src="../static/js/contact-widget.js"></script>
-  <script type="module" src="../static/js/portfolio-3d.js"></script>
+  <script src="../static/js/sky-fx.js"></script>
+  <script src="../static/js/glimpse-orbiter.js"></script>
+  <script src="../static/js/ambient-storm.js"></script>
   <script src="../static/js/portfolio.js"></script>
+  <script src="../static/js/rover-scene.js"></script>
+  <script src="../static/js/portfolio-hero.js"></script>
+  <script src="../static/js/ignite.js"></script>
 </body>
 
 </html>

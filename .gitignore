@@ -1,2 +1,8 @@
 .DS_Store
 .claude/settings.local.json
+
+# Rover scene: full-size source frames (built into static/assets/portfolio/rover-scene by tools/rover-scene)
+static/assets/portfolio/WORX_animation_assets/
+tools/rover-scene/node_modules/
+tools/blog-covers/node_modules/
+tools/blog-covers/out/

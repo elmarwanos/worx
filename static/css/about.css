@@ -1,34 +1,38 @@
 /* ============================================================
-   Worx by Glimpse — about.css
+   Worx | about.css
    About page only: a one-viewport, wheel/swipe-paged storybook.
-   Each gesture turns exactly one page (about-story.js) — this file
+   Each gesture turns exactly one page (about-story.js), this file
    only owns the persistent environment and the per-chapter look.
 
-   Layering (all siblings inside #story, so z-index compares flatly —
+   Layering (all siblings inside #story, so z-index compares flatly,
    see about-story.js for why): atmosphere (0) < scene stack (1) <
-   landing back layer — contact shadow + back dust (2) < landing ship
-   canvas (3) < landing front layer — engine exhaust + front dust (4)
+   landing back layer, contact shadow + back dust (2) < landing ship
+   canvas (3) < landing front layer, engine exhaust + front dust (4)
    < ember glow (4, later in the DOM) < turn shadow (5) < stars (6) < text stack (7). There is no
    top-right HUD; the only narrative/status readout is the bottom-left
    .story-status inside the text stack (about-story.js). Persistent
    layers (atmosphere, the three landing canvases, stars) never move
    during a page turn; only the per-chapter scene/text pair being
    turned does. The landing canvases are persistent in that same
-   sense — they only fade in/out together when scene 0 (the landing
+   sense, they only fade in/out together when scene 0 (the landing
    chapter) is entered/left (about-story.js).
 
    --story-ground-y (below, on the landing canvases) is the single
    calibrated value both the ship's placement and every ground-level
    effect (shadow, dust origin) read to agree on where the terrain
-   photo actually becomes solid, visible ground — see landing-fx.js's
+   photo actually becomes solid, visible ground, see landing-fx.js's
    file header for how it's used.
 
    Each .story-scene's terrain is set via an inline background-image
-   (about/index.html) so a future chapter image is a one-line swap —
+   (about/index.html) so a future chapter image is a one-line swap,
    nothing here or in about-story.js changes.
    ============================================================ */
 
 #story {
+  /* One knob for the HUD panels and caption type: 1 on laptops, raised
+     on big screens and lowered on short landscape phones (see the
+     Responsive section). The HUD's inner type is in em off .story-texts. */
+  --hud-scale: 1;
   position: relative;
   width: 100%;
   height: 100vh;
@@ -38,9 +42,43 @@
   background: var(--ink);
 }
 
+/* While the story owns input (about-story.js navMode "story", scrollY
+   0), the page must not pan, bounce or pull-to-refresh under a page
+   turn: one gesture is one chapter. Pinch-zoom stays available where
+   the browser supports touch-action: pinch-zoom (the second value is
+   dropped elsewhere, leaving none). Released the moment the visitor
+   carries on into the page below. */
+html.story-locked,
+html.story-locked body {
+  overscroll-behavior: none;
+}
+
+html.story-locked #story {
+  touch-action: none;
+  touch-action: pinch-zoom;
+}
+
+/* The plain melts into the page colour at its bottom edge, so the story
+   flows straight on into the footer below it, no seam, no gap. */
+#story::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 7;
+  height: 14%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(21, 9, 5, 0), rgba(21, 9, 5, 0.55) 60%, var(--ink) 100%);
+}
+
+body[data-page="about"] .site-footer {
+  margin-top: 0;
+}
+
 /* GSAP/ScrollTrigger failed to load: fall back to a plain stacked
    scroll so every chapter and the footer stay reachable. No pin,
-   no turn — just visible, ordered content. */
+   no turn, just visible, ordered content. */
 #story.story--fallback {
   height: auto;
   overflow: visible;
@@ -62,6 +100,23 @@
   transform: none !important;
 }
 
+#story.story--fallback .hud-summary-rows li {
+  opacity: 1;
+  transform: none;
+}
+
+#story.story--fallback .hud-summary-rows li b {
+  color: var(--text);
+}
+
+#story.story--fallback .hud-summary-rows li b::after {
+  display: none;
+}
+
+#story.story--fallback .hud-story .hud-summary-status {
+  opacity: 1;
+}
+
 #story.story--fallback .story-atmosphere,
 #story.story--fallback .story-landing-back,
 #story.story--fallback .story-landing,
@@ -74,7 +129,7 @@
 
 /* ---- Persistent atmosphere (never turns) ----------------------- */
 /* Dark-to-ember vertical gradient standing in for the source photo's
-   sky, plus a screened warm glow near the horizon — same recipe as
+   sky, plus a screened warm glow near the horizon, same recipe as
    the Portfolio Mars hero's .mars-ember-glow (radial + screen). */
 
 .story-atmosphere {
@@ -121,9 +176,19 @@
   will-change: transform, opacity;
 }
 
+/* Off-screen shots hold their CSS loops still (about-story.js parks
+   every scene but the one on screen, and the whole story once the
+   visitor is down in the footer): no dust, beacon or drone keyframes
+   ticking behind an invisible layer. They resume exactly where they
+   stopped, so a shot never "jumps" when it turns back in. */
+.story-scene.is-parked *,
+#story.is-offscreen * {
+  animation-play-state: paused !important;
+}
+
 /* Distant hills + near landing ground. The photo is scaled to the
    box's width (background-size: 100% auto, 2:1 source, so the image
-   is 0.5 × --terrain-w tall) and shifted up by 0.12 × --terrain-w —
+   is 0.5 × --terrain-w tall) and shifted up by 0.12 × --terrain-w,
    i.e. the box's top edge is always 24% down the source image,
    whatever the viewport's aspect ratio. The hill ridge (≈28–36% down
    the source) therefore sits just under the box's top, and the photo's
@@ -139,7 +204,7 @@
    GROUND-LINE MATH (read by --story-ground-y below): the ship's legs
    rest at 82% of #story's height. On every tested aspect (16:9,
    16:10, 21:9, tablet and phone portrait) that line falls at 60–85%
-   down the source image — the close-in, fully-opaque rocky
+   down the source image, the close-in, fully-opaque rocky
    foreground, well below the hills. */
 .story-terrain {
   --terrain-w: 110vw;
@@ -158,7 +223,1013 @@
   mask-image: linear-gradient(180deg, transparent 0%, black 22%);
 }
 
-/* Burnt-orange atmospheric veil — the Portfolio Mars hero's
+/* Traverse page: the landed ship far behind the crew. Same box as
+   .story-terrain (without its mask/filter) so the ship stays planted on
+   the same patch of the ground photo at every aspect; .story-grade above
+   tints it with the rest of the scene. */
+.story-far-ship {
+  --terrain-w: 110vw;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: var(--terrain-w);
+  height: min(70%, calc(var(--terrain-w) * 0.4));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.story-far-ship-body {
+  position: absolute;
+  left: 78%;
+  top: 33%;
+  width: 8%;
+  transform: translate(-50%, -100%) perspective(700px) rotateY(28deg);
+  transform-origin: 50% 100%;
+}
+
+.story-far-ship-body img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* distance: flatter, dustier, a touch soft */
+  filter: brightness(0.78) saturate(0.7) contrast(0.88) sepia(0.18) blur(0.3px);
+}
+
+/* Deployment page: same ship, far left and nearer, turned to face in
+   toward the build site (and the HUD on the right). */
+.story-far-ship--left .story-far-ship-body {
+  left: 15%;
+  top: 41%;
+  width: 12.5%;
+  transform: translate(-50%, -100%) perspective(900px) rotateY(-24deg);
+}
+
+.story-far-ship--left .story-far-ship-body img {
+  filter: brightness(0.84) saturate(0.78) contrast(0.92) sepia(0.12);
+}
+
+/* far off now, so its strobe runs larger to stay readable */
+.story-far-ship--left .beacon { width: max(3px, 2.4%); }
+.story-far-ship--left .beacon::before { width: 1300%; }
+
+/* contact shadow under the pads */
+.story-far-ship-body::after {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: -3%;
+  height: 9%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(26, 12, 7, 0.55), rgba(26, 12, 7, 0));
+  z-index: -1;
+}
+
+/* Traverse page: the crew's rover, left of centre and closer than the
+   ship. Same terrain-locked box. The body gently bobs on its suspension;
+   each tyre throws puffs of dust that swell, drift back (the rover heads
+   right) and thin out, and a low haze band over the tyre bottoms melts
+   the wheels into the ground so nothing reads as pasted on. */
+.story-rover {
+  --terrain-w: 110vw;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: var(--terrain-w);
+  height: min(70%, calc(var(--terrain-w) * 0.4));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.story-rover-body {
+  position: absolute;
+  left: 43%;
+  top: 60%;
+  width: 26%;
+  aspect-ratio: 1100 / 622;
+  transform: translate(-50%, -97%);
+  /* about-story.js drives --drive: the rover pulls in from the left as
+     the page arrives, pulls away right as it leaves (1 = its own width) */
+  translate: calc(var(--drive, 0) * 100%) 0;
+}
+
+/* the camera pans with the rover: far ship and terrain slide the other
+   way, less the farther off they are (about-story.js --pan) */
+.story-scene--traverse .story-far-ship {
+  translate: calc(var(--pan, 0) * 2.4%) 0;
+}
+
+.story-scene--traverse .story-terrain {
+  translate: calc(var(--pan, 0) * 0.9%) 0;
+}
+
+.rover-img {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: brightness(0.86) saturate(0.8) contrast(0.94) sepia(0.08);
+  animation: rover-bob 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes rover-bob {
+  from { transform: translateY(0) rotate(0deg); }
+  to   { transform: translateY(-0.6%) rotate(-0.25deg); }
+}
+
+.rover-shadow {
+  position: absolute;
+  z-index: 1;
+  left: -2%;
+  right: -4%;
+  bottom: -4%;
+  height: 14%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(24, 10, 5, 0.6), rgba(24, 10, 5, 0));
+}
+
+.rover-dust {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.rover-dust--back { z-index: 1; }
+.rover-dust--front { z-index: 3; }
+
+.rover-puff {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  top: 97%;
+  width: 28%;
+  aspect-ratio: 1.7;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(236, 184, 140, 0.78),
+    rgba(214, 150, 106, 0.4) 50%,
+    rgba(190, 124, 82, 0) 100%);
+  filter: blur(4px);
+  opacity: 0;
+  transform: translate(-50%, -70%) scale(0.3);
+  animation: rover-puff 2.1s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+  animation-delay: var(--d);
+}
+.rover-dust--front .rover-puff { width: 22%; }
+
+@keyframes rover-puff {
+  0%   { opacity: 0;    transform: translate(-50%, -70%) scale(calc(0.3 * var(--s))); }
+  12%  { opacity: 1; }
+  100% { opacity: 0;    transform: translate(-140%, -115%) scale(calc(2.2 * var(--s))); }
+}
+
+/* the long, settling wake the rover leaves behind it */
+.rover-trail {
+  position: absolute;
+  z-index: 1;
+  right: 55%;
+  bottom: -6%;
+  width: 95%;
+  height: 34%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse 50% 50% at 70% 60%,
+    rgba(226, 170, 126, 0.55),
+    rgba(200, 138, 96, 0.24) 55%,
+    rgba(160, 92, 54, 0) 100%);
+  filter: blur(8px);
+  animation: rover-trail 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes rover-trail {
+  from { opacity: 0.75; transform: scaleX(0.95); }
+  to   { opacity: 1;    transform: scaleX(1.05) translateY(-4%); }
+}
+
+.rover-haze {
+  position: absolute;
+  z-index: 4;
+  left: -10%;
+  right: -8%;
+  bottom: -5%;
+  height: 16%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(212, 152, 108, 0.5),
+    rgba(186, 122, 80, 0.22) 60%,
+    rgba(150, 84, 48, 0) 100%);
+  filter: blur(4px);
+}
+
+/* Traverse page beacons: the same anti-collision double blink the
+   landed ship's spire strobe uses in Sections 1-2 (landing-fx.js: two
+   70ms flashes 230ms apart, every 1.8s), red on the ship's spire and
+   the rover's antenna, amber on the rover's two masts (the second one
+   half a cycle late, so the rover always has a light going). */
+.rover-beacons {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  animation: rover-bob 0.9s ease-in-out infinite alternate;   /* rides with the body */
+}
+
+.beacon {
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--bx) * 100%);
+  top: calc(var(--by) * 100%);
+  width: max(2px, 1.1%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff4ec;
+  opacity: 0;
+  animation: beacon-strobe 1.8s linear infinite;
+}
+
+.beacon::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 900%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, var(--glow), transparent);
+}
+
+.beacon::after {                                  /* thin anamorphic streak */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2400%;
+  height: 60%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(90deg, transparent, var(--glow) 50%, transparent);
+  opacity: 0.6;
+}
+
+.beacon--red   { --glow: rgba(255, 60, 40, 0.75); }
+.beacon--amber { --glow: rgba(255, 170, 40, 0.75); background: #fff6e0; }
+.beacon--late  { animation-delay: -0.9s; }
+.story-far-ship-body .beacon { width: max(2px, 2%); }
+
+@keyframes beacon-strobe {
+  0%     { opacity: 1; }
+  3.9%   { opacity: 0.7; }
+  4%     { opacity: 0; }
+  12.7%  { opacity: 0; }
+  12.8%  { opacity: 1; }
+  16.6%  { opacity: 0.7; }
+  16.7%, 100% { opacity: 0; }
+}
+
+/* Deployment page: the build site (frame 036), mid-distance between
+   the landed ship (left) and the HUD (right). Same terrain-locked box as
+   the rover/ship, and it turns in with the page like every other
+   chapter; the site keeps working on loop. The source image is cut at its
+   left (rover's front tyre), right and bottom: those edges feather out
+   under the rover's dust bank and the ground haze. Motion uses the
+   individual `translate`/`scale` properties so it composes with each
+   element's positioning `transform`. */
+.story-site {
+  --terrain-w: 110vw;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: var(--terrain-w);
+  height: min(70%, calc(var(--terrain-w) * 0.4));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.story-site-body {
+  position: absolute;
+  left: 49%;
+  top: 66%;
+  width: 37%;
+  aspect-ratio: 1670 / 941;
+  transform: translate(-50%, -100%);
+  transform-origin: 50% 100%;
+}
+
+/* SOL 04 powers up in stages (about-story.js): the site settles into
+   place (--rise), then .is-power switches the floodlights and beacons
+   on, then .is-work starts the sparks, the drone and the crew. */
+.story-scene--build .story-site-body {
+  translate: 0 calc(var(--rise, 0) * 5%);
+  scale: calc(1 - var(--rise, 0) * 0.035);
+}
+
+.story-scene--build .site-img {
+  transition: filter 1.4s ease;
+}
+
+.story-scene--build:not(.is-power) .site-img {
+  filter: brightness(0.64) saturate(0.7) contrast(0.93) sepia(0.12) blur(0.2px);
+}
+
+.story-scene--build:not(.is-power) .site-glow,
+.story-scene--build:not(.is-power) .site-drift .beacon,
+.story-scene--build:not(.is-work) .site-spark,
+.story-scene--build:not(.is-work) .site-step,
+.story-scene--build:not(.is-work) .site-mote {
+  animation: none;
+  opacity: 0;
+}
+
+.story-scene--build:not(.is-work) .site-drone {
+  opacity: 0;
+}
+
+.site-drone {
+  transition: opacity 0.8s ease;
+}
+
+/* slow "hand-held" camera breathing once the shot has landed */
+.site-drift {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  transform-origin: 40% 100%;
+  animation: site-breathe 16s ease-in-out infinite alternate;
+}
+
+@keyframes site-breathe {
+  from { scale: 1;     translate: 0 0; }
+  to   { scale: 1.025; translate: -0.6% -0.3%; }
+}
+
+.site-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: brightness(0.9) saturate(0.78) contrast(0.93) sepia(0.12) blur(0.2px);
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, #000 8%, #000 90%, transparent 100%),
+    linear-gradient(180deg, #000 78%, transparent 98%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 8%, #000 90%, transparent 100%),
+    linear-gradient(180deg, #000 78%, transparent 98%);
+  mask-composite: intersect;
+}
+
+/* atmospheric perspective: the plain's dusty air laid over the site's own
+   pixels (masked by the PNG plus the same edge feather), heavier up high
+   where the crane and dome stand farther into the haze */
+.site-atmos {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(206, 128, 84, 0.32) 0%,
+    rgba(190, 112, 70, 0.18) 45%,
+    rgba(168, 96, 58, 0.08) 80%,
+    rgba(150, 84, 48, 0.16) 100%);
+  -webkit-mask:
+    url("../assets/about/glimpse_landing_frames_001-032/glimpse-rover-036.png") 0 0 / 100% 100% no-repeat,
+    linear-gradient(90deg, transparent 0%, #000 8%, #000 90%, transparent 100%),
+    linear-gradient(180deg, #000 78%, transparent 98%);
+  -webkit-mask-composite: source-in, source-in;
+  mask:
+    url("../assets/about/glimpse_landing_frames_001-032/glimpse-rover-036.png") 0 0 / 100% 100% no-repeat,
+    linear-gradient(90deg, transparent 0%, #000 8%, #000 90%, transparent 100%),
+    linear-gradient(180deg, #000 78%, transparent 98%);
+  mask-composite: intersect;
+}
+
+.site-shadow {
+  position: absolute;
+  z-index: 1;
+  left: 2%;
+  right: 4%;
+  bottom: 1%;
+  height: 16%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(24, 10, 5, 0.55), rgba(24, 10, 5, 0));
+}
+
+/* warm floodlight spill from the dome and the work lights, breathing */
+.site-glow {
+  position: absolute;
+  left: 44%;
+  top: 22%;
+  width: 56%;
+  height: 58%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(255, 178, 90, 0.34),
+    rgba(250, 140, 50, 0.12) 55%,
+    rgba(250, 140, 50, 0) 100%);
+  mix-blend-mode: screen;
+  animation: site-glow 5.5s ease-in-out infinite alternate;
+}
+
+@keyframes site-glow {
+  0%   { opacity: 0.55; }
+  46%  { opacity: 0.85; }
+  50%  { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* welding sparks on the dome scaffolding: an irregular arc flicker with
+   a hot core and a warm bloom */
+.site-spark {
+  position: absolute;
+  left: calc(var(--bx) * 100%);
+  top: calc(var(--by) * 100%);
+  width: max(3px, 0.6%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #fffaf0;
+  box-shadow: 0 0 4px 1px rgba(255, 236, 190, 0.9);
+  opacity: 0;
+  animation: site-spark 3.4s steps(1, end) infinite;
+  animation-delay: var(--d);
+}
+
+.site-spark::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2000%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(254, 238, 207, 0.6), rgba(250, 167, 25, 0.22) 45%, transparent);
+}
+
+/* falling sparks under the arc */
+.site-spark::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 60%;
+  height: 700%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(255, 210, 140, 0.9), rgba(255, 150, 60, 0));
+  filter: blur(0.4px);
+}
+
+@keyframes site-spark {
+  0%   { opacity: 1; }
+  3%   { opacity: 0.3; }
+  5%   { opacity: 1; }
+  9%   { opacity: 0.6; }
+  12%  { opacity: 1; }
+  16%  { opacity: 0; }
+  38%  { opacity: 0.9; }
+  41%  { opacity: 0; }
+  44%  { opacity: 1; }
+  47%  { opacity: 0.4; }
+  52%  { opacity: 1; }
+  57%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.site-drift .beacon { width: max(2px, 0.7%); }
+
+/* the rover just pulled in: its dust bank still rolls off the front tyre
+   (and hides where the image is cut), drifting slowly toward the ship */
+.site-dust {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.site-dust .rover-puff {
+  top: 88%;
+  width: 26%;
+  background: radial-gradient(closest-side,
+    rgba(226, 170, 124, 0.9),
+    rgba(206, 142, 98, 0.5) 50%,
+    rgba(186, 120, 80, 0) 100%);
+  filter: blur(6px);
+  animation-duration: 4.8s;
+  animation-timing-function: cubic-bezier(0.25, 0.5, 0.35, 1);
+}
+
+/* a settled bank of dust around the front tyre, where the image ends */
+.site-dustbank {
+  position: absolute;
+  left: -6%;
+  bottom: 2%;
+  width: 18%;
+  height: 34%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(214, 154, 110, 0.75),
+    rgba(196, 132, 90, 0.35) 60%,
+    rgba(170, 104, 64, 0) 100%);
+  filter: blur(6px);
+  animation: rover-trail 5s ease-in-out infinite alternate;
+}
+
+.site-haze {
+  position: absolute;
+  z-index: 4;
+  left: -8%;
+  right: -6%;
+  bottom: -4%;
+  height: 18%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(212, 152, 108, 0.55),
+    rgba(186, 122, 80, 0.24) 60%,
+    rgba(150, 84, 48, 0) 100%);
+  filter: blur(5px);
+  animation: rover-trail 6s ease-in-out infinite alternate;
+}
+
+/* lit dust motes drifting through the floodlight */
+.site-mote {
+  position: absolute;
+  z-index: 5;
+  left: calc(var(--mx) * 100%);
+  top: calc(var(--my) * 100%);
+  width: max(2px, 0.3%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255, 214, 160, 0.85);
+  box-shadow: 0 0 6px rgba(255, 190, 120, 0.8);
+  opacity: 0;
+  animation: site-mote 10s linear infinite;
+  animation-delay: var(--d);
+}
+
+@keyframes site-mote {
+  0%   { opacity: 0;   translate: 0 0; }
+  15%  { opacity: 0.9; }
+  85%  { opacity: 0.6; }
+  100% { opacity: 0;   translate: -900% -700%; }
+}
+
+/* footfall dust: a small kick at each step as the crew walk */
+.site-step {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  top: calc(var(--y) * 100%);
+  width: 6%;
+  aspect-ratio: 2.2;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(226, 168, 122, 0.75), rgba(206, 142, 98, 0));
+  filter: blur(2px);
+  opacity: 0;
+  transform: translate(-50%, -60%) scale(0.3);
+  animation: site-step 1.1s ease-out infinite;
+  animation-delay: var(--d);
+}
+
+@keyframes site-step {
+  0%   { opacity: 0;    transform: translate(-50%, -60%) scale(0.3); }
+  15%  { opacity: 0.9; }
+  100% { opacity: 0;    transform: translate(-75%, -110%) scale(1.5); }
+}
+
+/* survey drone: loops over the build, banking as it turns */
+.site-drone {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: max(4px, 0.9%);
+  aspect-ratio: 2.4;
+  border-radius: 40%;
+  background: #2a1a12;
+  box-shadow: 0 0 0 1px rgba(255, 220, 180, 0.25);
+  animation: site-drone 18s ease-in-out infinite;
+}
+
+.site-drone-light {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -30%);
+  background: #fff6e0;
+  box-shadow: 0 0 6px 2px rgba(250, 167, 25, 0.8);
+  animation: beacon-strobe 1.2s linear infinite;
+}
+
+@keyframes site-drone {
+  0%   { translate: 5200% 1400%;  rotate: 0deg; }
+  20%  { translate: 7600% 400%;   rotate: 6deg; }
+  40%  { translate: 10400% 900%;  rotate: -4deg; }
+  55%  { translate: 9800% 2000%;  rotate: -10deg; }
+  75%  { translate: 7200% 2600%;  rotate: 4deg; }
+  100% { translate: 5200% 1400%;  rotate: 0deg; }
+}
+
+/* the rolling dust gust, crossing the plain right to left */
+.site-gust {
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  bottom: 18%;
+  width: 70%;
+  height: 46%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 50% 40% at 40% 60%, rgba(214, 150, 104, 0.38), rgba(214, 150, 104, 0) 70%),
+    radial-gradient(ellipse 36% 30% at 70% 45%, rgba(226, 170, 124, 0.3), rgba(226, 170, 124, 0) 70%);
+  filter: blur(14px);
+  opacity: 0;
+  translate: 110% 0;
+  animation: site-gust 19s linear 3s infinite;
+}
+
+@keyframes site-gust {
+  0%   { opacity: 0;   translate: 110% 0; }
+  12%  { opacity: 1; }
+  45%  { opacity: 0.9; translate: 10% -4%; }
+  60%  { opacity: 0;   translate: -40% -6%; }
+  100% { opacity: 0;   translate: -40% -6%; }
+}
+
+/* Tribute page: close on the landed ship (frame 037), hatch open on the
+   office inside, the crew (frame 038) in the foreground with their backs
+   to camera, saluting it. Same terrain-locked box as the other pages, and
+   it turns in with the page like every chapter. The hatch is the key
+   light: a volumetric shaft and a pool on the ground pour out toward the
+   lens, the crew are rim-lit and cast long shadows at the viewer, the
+   screen inside flickers and the ramp lights chase. Ship and crew drift
+   in opposite directions on a slow loop for parallax depth. */
+.story-tribute {
+  --terrain-w: 110vw;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: var(--terrain-w);
+  height: min(70%, calc(var(--terrain-w) * 0.4));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Frame 037 is already a 3/4 render with its own perspective, hatch
+   toward the viewer and the crew's side: shown flat, at its native angle.
+   A CSS rotateY on top of it double-foreshortened the hull (squeezed,
+   keystoned) and smeared the office interior. Big enough to read as the
+   giant being saluted, spire clear of the nav. */
+.tribute-ship {
+  position: absolute;
+  left: 70%;
+  top: 76%;
+  width: 38%;
+  aspect-ratio: 1374 / 1145;
+  transform: translate(-50%, -100%);
+  transform-origin: 50% 100%;
+  scale: calc(1 + var(--push, 0) * 0.035);
+}
+
+/* SOL 05: the hatch light comes up (.is-lit, about-story.js) and falls
+   on the crew, who are in shadow until it does */
+.story-scene--tribute .tribute-crew-img {
+  transition: filter 1.6s ease;
+}
+
+.story-scene--tribute:not(.is-lit) .tribute-crew-img {
+  filter: brightness(0.58) saturate(0.7) contrast(0.93) sepia(0.2);
+}
+
+.story-scene--tribute .tribute-pool {
+  transition: opacity 1.2s ease;
+}
+
+.story-scene--tribute:not(.is-lit) .tribute-shaft,
+.story-scene--tribute:not(.is-lit) .tribute-pool,
+.story-scene--tribute:not(.is-lit) .tribute-interior,
+.story-scene--tribute:not(.is-lit) .tribute-screen,
+.story-scene--tribute:not(.is-lit) .tribute-ramp-light,
+.story-scene--tribute:not(.is-lit) .tribute-crew-glow,
+.story-scene--tribute:not(.is-lit) .tribute-lamp {
+  animation: none;
+  opacity: 0;
+}
+
+.tribute-drift {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  animation: tribute-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes tribute-drift {
+  from { scale: 1;     translate: 0 0; }
+  to   { scale: 1.03; translate: 0.8% -0.4%; }
+}
+
+.tribute-ship-img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  /* farther off: a touch of the plain's haze */
+  filter: brightness(0.96) saturate(0.92) contrast(1.02) sepia(0.04);
+}
+
+.tribute-ship-shadow {
+  position: absolute;
+  left: 2%;
+  right: 0;
+  bottom: 1%;
+  height: 14%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(24, 10, 5, 0.6), rgba(24, 10, 5, 0));
+}
+
+/* warm office light breathing inside the hatch */
+.tribute-interior {
+  position: absolute;
+  z-index: 2;
+  left: 44%;
+  top: 30%;
+  width: 44%;
+  height: 48%;
+  border-radius: 30%;
+  background: radial-gradient(closest-side, rgba(255, 190, 110, 0.1), rgba(255, 160, 70, 0.03) 60%, transparent);
+  mix-blend-mode: screen;
+  animation: tribute-interior 6s ease-in-out infinite alternate;
+}
+
+@keyframes tribute-interior {
+  0%   { opacity: 0.6; }
+  48%  { opacity: 0.9; }
+  51%  { opacity: 0.72; }
+  100% { opacity: 1; }
+}
+
+/* the wall screen's cool glow, flickering with its content */
+.tribute-screen {
+  position: absolute;
+  z-index: 2;
+  left: 57.7%;
+  top: 49.4%;
+  width: 26%;
+  aspect-ratio: 1.6;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(150, 110, 255, 0.14), rgba(220, 80, 200, 0.05) 55%, transparent);
+  mix-blend-mode: screen;
+  animation: tribute-screen 4.2s steps(1, end) infinite;
+}
+
+@keyframes tribute-screen {
+  0%   { opacity: 0.7; }
+  18%  { opacity: 0.95; }
+  22%  { opacity: 0.55; }
+  40%  { opacity: 0.85; }
+  63%  { opacity: 1; }
+  66%  { opacity: 0.6; }
+  80%  { opacity: 0.9; }
+}
+
+/* volumetric light shaft out of the hatch, widening toward the lens */
+.tribute-shaft {
+  position: absolute;
+  z-index: 3;
+  left: 22%;
+  top: 52%;
+  width: 90%;
+  height: 80%;
+  clip-path: polygon(28% 0, 71% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg,
+    rgba(255, 196, 120, 0) 0%,
+    rgba(255, 190, 110, 0.07) 30%,
+    rgba(250, 170, 90, 0.05) 65%,
+    rgba(250, 170, 90, 0) 100%);
+  filter: blur(10px);
+  mix-blend-mode: screen;
+  animation: tribute-shaft 7s ease-in-out infinite alternate;
+}
+
+@keyframes tribute-shaft {
+  from { opacity: 0.7; }
+  to   { opacity: 1; }
+}
+
+/* the pool of hatch light on the ground in front of the ramp */
+.tribute-pool {
+  position: absolute;
+  z-index: 0;
+  left: 30%;
+  top: 88%;
+  width: 78%;
+  height: 26%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 186, 110, 0.4), rgba(240, 150, 80, 0.14) 60%, transparent);
+  mix-blend-mode: screen;
+}
+
+/* dust hanging in the shaft, lit as it drifts up */
+.tribute-mote {
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--mx) * 100%);
+  top: calc(var(--my) * 100%);
+  width: max(2px, 0.35%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255, 222, 170, 0.9);
+  box-shadow: 0 0 6px rgba(255, 196, 120, 0.9);
+  opacity: 0;
+  animation: tribute-mote 13s linear infinite;
+  animation-delay: var(--d);
+}
+
+@keyframes tribute-mote {
+  0%   { opacity: 0;   translate: 0 0; }
+  20%  { opacity: 0.9; }
+  80%  { opacity: 0.5; }
+  100% { opacity: 0;   translate: 500% -1400%; }
+}
+
+/* ramp edge lights chasing down toward the crew */
+.tribute-ramp-light {
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--bx) * 100%);
+  top: calc(var(--by) * 100%);
+  width: 3%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 214, 150, 0.95), rgba(255, 160, 60, 0.35) 45%, transparent);
+  mix-blend-mode: screen;
+  opacity: 0.2;
+  animation: tribute-ramp 1.5s ease-out infinite;
+  animation-delay: var(--d);
+}
+
+@keyframes tribute-ramp {
+  0%   { opacity: 1; }
+  45%  { opacity: 0.2; }
+  100% { opacity: 0.2; }
+}
+
+.tribute-drift .beacon { width: max(3px, 1%); }
+
+.tribute-haze {
+  position: absolute;
+  z-index: 1;
+  left: 40%;
+  right: 2%;
+  top: 60%;
+  height: 16%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(212, 152, 108, 0.45),
+    rgba(186, 122, 80, 0.2) 60%,
+    rgba(150, 84, 48, 0) 100%);
+  filter: blur(6px);
+  animation: rover-trail 7s ease-in-out infinite alternate;
+}
+
+/* the crew: backs to camera, backlit by the hatch (darker fronts, warm
+   rim), feet on the ground in the foreground */
+.tribute-crew {
+  position: absolute;
+  z-index: 2;
+  left: 41%;
+  top: 97%;
+  width: 19%;
+  aspect-ratio: 954 / 1020;
+  transform: translate(-50%, -100%);
+  animation: tribute-parallax 18s ease-in-out infinite alternate;
+}
+
+@keyframes tribute-parallax {
+  from { translate: 0 0; }
+  to   { translate: -1.6% 0; }
+}
+
+.tribute-crew-img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  transform-origin: 50% 100%;
+  /* graded into the scene: dusty, warm, lower contrast, a faint rim only */
+  filter: brightness(0.8) saturate(0.75) contrast(0.93) sepia(0.2)
+    drop-shadow(0 0 1px rgba(255, 196, 130, 0.45));
+}
+
+/* the plain's ambient light on the white suits (multiply warms them to
+   the terrain) plus a veil of the same dusty air, both clipped to the
+   crew's silhouette */
+.tribute-crew-tint {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(196, 116, 72, 0.16), rgba(170, 96, 58, 0.1) 70%, rgba(150, 84, 48, 0.2)),
+    linear-gradient(180deg, rgba(240, 168, 118, 1), rgba(226, 150, 102, 1));
+  background-blend-mode: normal;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  -webkit-mask: url("../assets/about/glimpse-crew-salute-038.png") 0 0 / 100% 100% no-repeat;
+  mask: url("../assets/about/glimpse-crew-salute-038.png") 0 0 / 100% 100% no-repeat;
+}
+
+/* contact shadows where the boots meet the ground */
+.tribute-crew-contact {
+  position: absolute;
+  z-index: 0;
+  bottom: -1.5%;
+  height: 6%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(28, 11, 5, 0.7), rgba(28, 11, 5, 0));
+  filter: blur(2px);
+}
+.tribute-crew-contact--a { left: 2%;  width: 40%; }
+.tribute-crew-contact--b { left: 50%; width: 44%; }
+
+/* backlight bloom: the sky and hatch light wrapping round the crew */
+.tribute-crew-glow {
+  position: absolute;
+  z-index: 0;
+  left: -15%;
+  right: -15%;
+  top: -8%;
+  height: 80%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 176, 96, 0.12), rgba(255, 140, 60, 0.04) 55%, transparent);
+  mix-blend-mode: screen;
+  animation: tribute-shaft 7s ease-in-out infinite alternate;
+}
+
+/* helmet comm lamps: a soft steady glow that breathes */
+.tribute-lamp {
+  position: absolute;
+  z-index: 2;
+  left: calc(var(--bx) * 100%);
+  top: calc(var(--by) * 100%);
+  width: 5%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 230, 180, 0.7), rgba(255, 180, 80, 0.25) 40%, transparent);
+  mix-blend-mode: screen;
+  animation: tribute-lamp 2.4s ease-in-out infinite alternate;
+  animation-delay: var(--d);
+}
+
+@keyframes tribute-lamp {
+  from { opacity: 0.45; }
+  to   { opacity: 1; }
+}
+
+.tribute-crew .beacon { width: max(3px, 1.2%); }
+
+/* dust streaming past the boots, right to left */
+.tribute-wind {
+  position: absolute;
+  z-index: 3;
+  left: -40%;
+  width: 180%;
+  bottom: -3%;
+  height: 14%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 30% 45% at 30% 60%, rgba(220, 160, 114, 0.45), transparent 70%),
+    radial-gradient(ellipse 24% 40% at 62% 50%, rgba(230, 172, 126, 0.35), transparent 70%),
+    radial-gradient(ellipse 20% 35% at 85% 65%, rgba(210, 148, 104, 0.3), transparent 70%);
+  filter: blur(5px);
+  opacity: 0;
+  animation: tribute-wind 8s linear infinite;
+}
+.tribute-wind--late { animation-delay: -4s; bottom: 2%; height: 10%; }
+
+@keyframes tribute-wind {
+  0%   { opacity: 0;   translate: 18% 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 0.8; }
+  100% { opacity: 0;   translate: -18% -10%; }
+}
+
+/* long shadows thrown toward the lens by the hatch light behind them */
+.tribute-crew-shadow {
+  position: absolute;
+  z-index: 0;
+  top: 96%;
+  height: 22%;
+  border-radius: 50% 50% 40% 40%;
+  background: linear-gradient(180deg, rgba(22, 9, 4, 0.6), rgba(22, 9, 4, 0));
+  filter: blur(3px);
+  transform: skewX(-18deg);
+  transform-origin: 50% 0;
+}
+.tribute-crew-shadow--a { left: 8%;  width: 38%; }
+.tribute-crew-shadow--b { left: 54%; width: 40%; }
+
+/* Burnt-orange atmospheric veil, the Portfolio Mars hero's
    .mars-photo-grade recipe (portfolio/index.html, "MARS DISTANCE
    TREATMENT"), on every chapter so the whole storybook shares the
    hero's orange light. The 90deg layer keeps the copy side dark. */
@@ -179,7 +1250,7 @@
       rgba(125, 39, 8, 0.10) 100%);
 }
 
-/* Persistent ember glow (never turns) — the Portfolio hero's
+/* Persistent ember glow (never turns), the Portfolio hero's
    .mars-ember-glow at the same .72 strength. Sits above the landing
    canvases so the ship catches the same warm light as the terrain. */
 .story-ember {
@@ -244,7 +1315,7 @@
 }
 
 /* Engine exhaust + the dust allowed to occlude the lower landing gear
-   — drawn last so it always paints on top of the ship art. */
+   drawn last so it always paints on top of the ship art. */
 .story-landing-front {
   position: absolute;
   inset: 0;
@@ -288,7 +1359,7 @@
   pointer-events: none;
 }
 
-/* Touchdown / separation flash — opacity driven per tick by landing-fx.js. */
+/* Touchdown / separation flash, opacity driven per tick by landing-fx.js. */
 .story-flash {
   opacity: 0;
   background: radial-gradient(ellipse 70% 60% at 50% 72%,
@@ -311,7 +1382,7 @@
 }
 
 /* Film grain: one noise tile (generated by landing-fx.js) jittered
-   by a stepped animation — no per-frame JS. */
+   by a stepped animation, no per-frame JS. */
 .story-grain {
   inset: -60%;
   opacity: 0.075;
@@ -342,11 +1413,9 @@
   transition: none;
 }
 
-/* the old drifting star particles belong to the text-only pages; the two
-   sky pages use the real sky (sky-fx.js) behind the atmosphere */
-#story.has-sky .story-stars {
-  opacity: 0;
-}
+/* the drifting star particles run over every page, the two sky pages
+   included (about-story.js skips its storm cell + orbiter there, since
+   landing-fx.js already draws those on that shot) */
 
 /* ---- Text stack (crossfades independently of the scene turn) --- */
 
@@ -354,6 +1423,7 @@
   position: absolute;
   inset: 0;
   z-index: 8;
+  font-size: calc(1rem * var(--hud-scale));
 }
 
 .story-text {
@@ -381,7 +1451,7 @@
   padding-bottom: 2px;
   overflow: hidden;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.78em;
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -448,8 +1518,19 @@
   color: var(--muted);
 }
 
+/* The chapter's supporting story line: quieter than the subtitle, still
+   comfortably readable. */
+.story-support {
+  max-width: 40ch;
+  margin-top: 10px;
+  font-family: var(--font-body);
+  font-size: calc(clamp(0.8rem, 0.95vw, 0.92rem) * var(--hud-scale));
+  line-height: 1.55;
+  color: rgba(254, 238, 207, 0.72);
+}
+
 /* ---- Landing (page 1 of 8) --------------------------------------- */
-/* A compact cinematic caption, not a hero headline — the Mars landing
+/* A compact cinematic caption, not a hero headline, the Mars landing
    itself is the hero. Sized larger than .story-status but well short
    of the other story pages' display type, and narrow enough to stay
    clear of the centered ship (see landing-fx.js). No scroll
@@ -459,7 +1540,7 @@
 
 .story-text--landing .story-title {
   max-width: 24ch;
-  font-size: clamp(1.5rem, 2.2vw, 2.1rem);
+  font-size: calc(clamp(1.5rem, 2.2vw, 2.1rem) * var(--hud-scale));
   line-height: 1.15;
   text-transform: none;
 }
@@ -467,7 +1548,7 @@
 .story-text--landing .story-subtitle {
   max-width: 34ch;
   margin-top: 10px;
-  font-size: clamp(0.88rem, 1.1vw, 1rem);
+  font-size: calc(clamp(0.88rem, 1.1vw, 1rem) * var(--hud-scale));
 }
 
 /* ---- Landing HUD ------------------------------------------------- */
@@ -493,7 +1574,7 @@
 /* Borderless: a smoked-glass field that dissolves into the shot at its
    edges, so the panels read as projected into the scene rather than
    boxed on top of it. The glass (and its fade mask) lives on ::before,
-   behind the content, so only the glass dissolves — text stays crisp. */
+   behind the content, so only the glass dissolves, text stays crisp. */
 .hud-panel {
   position: relative;
   isolation: isolate;
@@ -517,8 +1598,8 @@
   position: absolute;
   left: clamp(20px, 5vw, 72px);
   top: clamp(96px, 17vh, 170px);
-  width: clamp(250px, 22vw, 330px);
-  padding: 14px 18px 14px 16px;
+  width: calc(clamp(250px, 22vw, 330px) * var(--hud-scale));
+  padding: 0.875em 1.125em 0.875em 1em;
   font-family: var(--font-mono);
   color: var(--text);
   transform: perspective(900px) rotateY(20deg) rotateX(2deg);
@@ -537,7 +1618,7 @@
   margin-bottom: 10px;
   border-bottom: 1px solid transparent;
   border-image: linear-gradient(90deg, rgba(254, 238, 207, 0.3), transparent) 1;
-  font-size: 0.62rem;
+  font-size: 0.62em;
   letter-spacing: 0.16em;
   color: rgba(254, 238, 207, 0.7);
 }
@@ -566,8 +1647,8 @@
 
 .hud-stages li {
   position: relative;
-  padding: 3px 0 3px 16px;
-  font-size: 0.8rem;
+  padding: 0.19em 0 0.19em 1.25em;
+  font-size: 0.8em;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -611,14 +1692,14 @@
 }
 
 .hud-tele dt {
-  font-size: 0.56rem;
+  font-size: 0.56em;
   letter-spacing: 0.2em;
   color: rgba(254, 238, 207, 0.5);
 }
 
 .hud-tele dd {
   margin: 2px 0 0;
-  font-size: 0.78rem;
+  font-size: 0.78em;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--text);
@@ -684,7 +1765,7 @@
   top: -22px;
   font-family: var(--font-mono);
   font-style: normal;
-  font-size: 0.6rem;
+  font-size: 0.6em;
   letter-spacing: 0.18em;
   white-space: nowrap;
   color: rgba(254, 238, 207, 0.8);
@@ -713,7 +1794,7 @@
 /* Mission Control summary rows: label left, value right, booting in one
    after another when the page goes live. */
 .hud-summary {
-  width: clamp(270px, 24vw, 360px);
+  width: calc(clamp(270px, 24vw, 360px) * var(--hud-scale));
 }
 
 .hud-summary-rows {
@@ -726,8 +1807,8 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 4px 0;
-  font-size: 0.72rem;
+  padding: 0.35em 0;
+  font-size: 0.72em;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(254, 238, 207, 0.62);
@@ -740,22 +1821,198 @@
   white-space: nowrap;
 }
 
-.story-text.is-live .hud-summary-rows li {
-  animation: hud-row-in 0.45s ease both;
+/* The story loop (about-story.js runChapter()): each row slides in
+   (.is-in), scans for a beat, then its value resolves (.is-set) with a
+   short warm flash. The pending scan is drawn over the value's own box,
+   so nothing reflows while it resolves. */
+.hud-summary-rows li {
+  opacity: 0;
+  transform: translateX(10px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
-.hud-summary-rows li:nth-child(1) { animation-delay: 0.35s; }
-.hud-summary-rows li:nth-child(2) { animation-delay: 0.45s; }
-.hud-summary-rows li:nth-child(3) { animation-delay: 0.55s; }
-.hud-summary-rows li:nth-child(4) { animation-delay: 0.65s; }
-.hud-summary-rows li:nth-child(5) { animation-delay: 0.75s; }
-.hud-summary-rows li:nth-child(6) { animation-delay: 0.85s; }
-.hud-summary-rows li:nth-child(7) { animation-delay: 0.95s; }
-.hud-summary-rows li:nth-child(8) { animation-delay: 1.05s; }
+.hud-summary-rows li.is-in {
+  opacity: 1;
+  transform: none;
+}
 
-@keyframes hud-row-in {
-  from { opacity: 0; transform: translateX(10px); }
-  to   { opacity: 1; transform: none; }
+.hud-summary-rows li b {
+  position: relative;
+}
+
+.hud-summary-rows li:not(.is-set) b {
+  color: transparent;
+}
+
+.hud-summary-rows li:not(.is-set) b::after {
+  content: "· · ·";
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: rgba(254, 238, 207, 0.42);
+  animation: hud-blink 0.8s steps(2, jump-none) infinite;
+}
+
+.hud-summary-rows li.is-set b {
+  animation: hud-value-set 0.7s ease-out;
+}
+
+@keyframes hud-value-set {
+  0%   { color: var(--accent-2); text-shadow: 0 0 10px rgba(250, 167, 25, 0.7); }
+  100% { color: var(--text); text-shadow: none; }
+}
+
+/* The row a chapter builds up to (li[data-key], SOL 01's MISSION): it
+   scans longer ("ACQUIRING"), its label warms while it does, and it lands
+   with a stronger flash that stays lit, with a light sweep across it. */
+.hud-summary-rows li[data-key] {
+  position: relative;
+}
+
+.hud-summary-rows li[data-key].is-in:not(.is-set) span {
+  color: var(--accent-2);
+  transition: color 0.3s ease;
+}
+
+.hud-summary-rows li[data-key]:not(.is-set) b::after {
+  content: "ACQUIRING";
+  letter-spacing: 0.14em;
+  color: rgba(250, 167, 25, 0.75);
+  animation: hud-blink 0.5s steps(2, jump-none) infinite;
+}
+
+.hud-summary-rows li[data-key].is-set b {
+  color: var(--accent-2);
+  text-shadow: 0 0 12px rgba(250, 167, 25, 0.55);
+  animation: hud-key-set 1.1s ease-out;
+}
+
+.hud-summary-rows li[data-key].is-set::before {
+  content: "";
+  position: absolute;
+  inset: 0 -8px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(250, 167, 25, 0.22), transparent);
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  animation: hud-key-sweep 1s ease-out both;
+}
+
+@keyframes hud-key-set {
+  0%   { color: #fff6e0; text-shadow: 0 0 22px rgba(255, 200, 90, 1); letter-spacing: 0.3em; }
+  100% { color: var(--accent-2); text-shadow: 0 0 12px rgba(250, 167, 25, 0.55); letter-spacing: normal; }
+}
+
+@keyframes hud-key-sweep {
+  from { background-position: -60% 0; opacity: 1; }
+  to   { background-position: 160% 0; opacity: 0.35; }
+}
+
+/* A story log's footer is its conclusion: it lands once every row has
+   resolved (.is-complete, about-story.js). */
+.hud-story .hud-summary-status {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.story-text.is-complete .hud-story .hud-summary-status {
+  opacity: 1;
+}
+
+/* Collapsible middle of a story log: rows (and the landing's descent
+   read-out). Docking (.is-docked) folds it away, leaving a one-line chip
+   of header + footer, so the log never sits over the caption card. */
+.hud-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
+}
+
+.hud-body-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.story-text.is-docked .hud-story .hud-body {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+.story-text.is-docked .hud-story .hud-head {
+  padding-bottom: 6px;
+  margin-bottom: 0;
+}
+
+.story-text.is-docked .hud-story .hud-summary-status {
+  margin-top: 6px;
+  padding-top: 6px;
+}
+
+.story-text.is-docked .hud-story .hud-est {
+  display: none;
+}
+
+/* Stacked layouts only: the docked chip is a toggle (about-story.js
+   toggleChip()). A small chevron says so; opened, the full log returns
+   and the card steps aside until it's closed again. */
+.story-text.is-docked .hud-story {
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.story-text.is-docked .hud-story .hud-head::after {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin: -3px 2px 0 4px;
+  border-right: 1.5px solid var(--accent-2);
+  border-bottom: 1.5px solid var(--accent-2);
+  transform: rotate(45deg);
+  transition: transform 0.35s ease, margin 0.35s ease;
+}
+
+.story-text.is-docked.is-hud-open .hud-story .hud-head::after {
+  margin-top: 3px;
+  transform: rotate(-135deg);
+}
+
+.story-text.is-docked.is-hud-open .hud-story .hud-body {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.story-text.is-docked.is-hud-open .hud-story .hud-head {
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+/* SOL 02's founding year, under the log's header */
+.hud-est {
+  margin: -2px 0 8px;
+  font-size: 0.62em;
+  letter-spacing: 0.22em;
+  color: var(--accent-2);
+}
+
+/* SOL 01: the log runs the descent (stages + telemetry) while the ship
+   comes in, then turns into the GLIMPSE origin log (.is-origin). */
+.story-text--landing .hud-summary-rows,
+.story-text--landing .hud-summary-status {
+  display: none;
+}
+
+.story-text--landing.is-origin .hud-descent {
+  display: none;
+}
+
+.story-text--landing.is-origin .hud-summary-rows {
+  display: block;
+}
+
+.story-text--landing.is-origin .hud-summary-status {
+  display: flex;
 }
 
 .hud-summary-status {
@@ -766,7 +2023,7 @@
   padding-top: 10px;
   border-top: 1px solid transparent;
   border-image: linear-gradient(90deg, rgba(254, 238, 207, 0.3), transparent) 1;
-  font-size: 0.72rem;
+  font-size: 0.72em;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -774,6 +2031,7 @@
 }
 
 .hud-summary-dot {
+  flex: none;
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -782,84 +2040,97 @@
   animation: hud-blink 1.4s steps(2, jump-none) infinite;
 }
 
-/* Caption card: a page's text on a tilted holographic HUD panel. Left
-   column by default (the landing, revealed after the dust clears);
-   .story-text--hud-right mirrors it to the right side, tilted to face
-   the scene. .is-revealed (about-story.js) boots it in. */
-.story-text .hud-card {
-  position: absolute;
-  left: clamp(20px, 5vw, 72px);   /* same column as the mission log */
-  bottom: clamp(40px, 8vh, 96px);
-  max-width: min(460px, calc(100% - 40px));
-  padding: 18px 26px 22px 22px;
-  opacity: 0;
-  transform: perspective(1000px) rotateY(14deg) translateX(-12px);
-  transform-origin: left center;
-  transition: opacity 0.5s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+/* One mission panel per chapter (.hud-story): the log, and below it on
+   the same panel, at the same angle, the chapter's story (.hud-caption:
+   status, title, subtitle, supporting line). The story section opens
+   when the chapter reveals it (.is-revealed); on tablets and phones the
+   rows fold away as it opens (.is-docked) and trade places with it when
+   the header is tapped (.is-hud-open). Folding uses the 0fr/1fr grid
+   trick, so the panel resizes smoothly with no fixed heights. */
+.hud-story {
+  width: calc(clamp(300px, 25vw, 400px) * var(--hud-scale));
 }
 
-.story-text.is-revealed .hud-card {
-  opacity: 1;
-  transform: perspective(1000px) rotateY(14deg);
-  animation: hud-boot 0.7s steps(1, end) both;
+/* a taller panel than the old log: fade the glass at its edges on both
+   axes instead of from a centre point, so the top and bottom rows keep
+   the same dark field behind them as the middle */
+.hud-story::before {
+  inset: -30px -48px;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.55) 10%, #000 24%, #000 70%, rgba(0, 0, 0, 0.5) 86%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 6%, #000 14%, #000 86%, rgba(0, 0, 0, 0.6) 94%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.55) 10%, #000 24%, #000 70%, rgba(0, 0, 0, 0.5) 86%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 6%, #000 14%, #000 86%, rgba(0, 0, 0, 0.6) 94%, transparent 100%);
+  mask-composite: intersect;
 }
 
-.story-text--hud-right .hud-card {
-  left: auto;
-  right: clamp(20px, 5vw, 72px);
-  max-width: min(460px, calc(100% - 40px));
-  padding: 18px 22px 22px 26px;
-  border-left: 0;
-  transform: perspective(1000px) rotateY(-14deg) translateX(12px);
-  transform-origin: right center;
+/* right-hand panels fade toward their outer (right) edge the same way */
+.hud-log--right.hud-story::before {
+  -webkit-mask-image:
+    linear-gradient(270deg, transparent 0%, rgba(0, 0, 0, 0.55) 10%, #000 24%, #000 70%, rgba(0, 0, 0, 0.5) 86%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 6%, #000 14%, #000 86%, rgba(0, 0, 0, 0.6) 94%, transparent 100%);
+  mask-image:
+    linear-gradient(270deg, transparent 0%, rgba(0, 0, 0, 0.55) 10%, #000 24%, #000 70%, rgba(0, 0, 0, 0.5) 86%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 6%, #000 14%, #000 86%, rgba(0, 0, 0, 0.6) 94%, transparent 100%);
 }
 
-.story-text--hud-right.is-revealed .hud-card {
-  transform: perspective(1000px) rotateY(-14deg);
+.hud-caption {
+  display: grid;
+  grid-template-rows: 0fr;
+  /* a soft ink halo under the copy: the story stays legible wherever the
+     glass thins out over a bright patch of the plain */
+  text-shadow: 0 1px 14px rgba(21, 9, 5, 0.65), 0 0 2px rgba(21, 9, 5, 0.5);
+  transition: grid-template-rows 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* mirrored smoked-glass field: densest toward the card's inner edge */
-.story-text--hud-right .hud-panel::before {
-  background:
-    repeating-linear-gradient(0deg, rgba(254, 238, 207, 0.03) 0 1px, transparent 1px 3px),
-    radial-gradient(ellipse 120% 110% at 80% 40%, rgba(20, 9, 5, 0.66), rgba(20, 9, 5, 0.32) 60%, rgba(20, 9, 5, 0) 100%);
-  -webkit-mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
-  mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
+.hud-caption-inner {
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* same text format as the landing caption (compact, sentence case) */
-.story-text--hud-right .story-status {
-  margin-bottom: 10px;
+/* the rule between the log and the story */
+.hud-caption-inner::before {
+  content: "";
+  display: block;
+  height: 1px;
+  margin-top: 14px;
+  background: linear-gradient(90deg, rgba(254, 238, 207, 0.3), transparent);
 }
 
-.story-text--hud-right .story-title {
-  max-width: 24ch;
-  font-size: clamp(1.5rem, 2.2vw, 2.1rem);
+.hud-log--right .hud-caption-inner::before {
+  background: linear-gradient(90deg, rgba(254, 238, 207, 0.3), rgba(254, 238, 207, 0.08));
+}
+
+.story-text.is-revealed .hud-story .hud-caption {
+  grid-template-rows: 1fr;
+}
+
+.story-text.is-docked.is-hud-open .hud-story .hud-caption {
+  grid-template-rows: 0fr;
+}
+
+.hud-caption .story-status {
+  margin: 14px 0 8px;
+}
+
+.hud-caption .story-title {
+  max-width: none;
+  font-size: calc(clamp(1.4rem, 1.9vw, 1.95rem) * var(--hud-scale));
   line-height: 1.15;
   text-transform: none;
 }
 
-.story-text--hud-right .story-subtitle {
-  max-width: 34ch;
-  margin-top: 10px;
-  font-size: clamp(0.88rem, 1.1vw, 1rem);
+.hud-caption .story-subtitle {
+  max-width: none;
+  margin-top: 8px;
+  font-size: calc(clamp(0.86rem, 1vw, 0.98rem) * var(--hud-scale));
+  line-height: 1.5;
 }
 
-/* Cards hold more text than the log: start the glass fade earlier so
-   no edge of the panel box can read. */
-.story-text .hud-card::before {
-  inset: -26px -40px;
-  -webkit-mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
-  mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
-}
-
-.story-text--hud-right .hud-card::before {
-  -webkit-mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
-  mask-image: radial-gradient(closest-side at 50% 50%, #000 34%, transparent 100%);
-}
-
-.story-text--landing .story-status {
-  margin-bottom: 10px;
+.hud-caption .story-support {
+  max-width: none;
 }
 
 @keyframes hud-boot {
@@ -880,41 +2151,130 @@
   100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
 }
 
-/* ---- Final page --------------------------------------------------- */
+/* Ascent page: the WORX surface log sits bottom-right, leaving the sky
+   (and the orbiter up there) clear. */
+.worx-log {
+  top: auto;
+  bottom: clamp(56px, 11vh, 130px);
+}
 
-.story-text--final .story-title {
-  max-width: 18ch;
-  font-size: clamp(2.4rem, 5.6vw, 4.2rem);
+/* Ascent page: the habitat's target ring appears once it's out of the
+   launch dust (about-story.js sets its opacity). */
+.hud-target--hab {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.hud-target--hab .hud-target-label {
+  left: auto;
+  right: 24px;
+}
+
+/* ---- Final page --------------------------------------------------- */
+/* One word and one action, dead centre, over the same sky, storm,
+   orbiter, stars and plain as every other page. */
+.story-text--final {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 16px;
+}
+
+.story-text--final .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.story-text--final .story-title--worx {
+  max-width: none;
+  font-size: calc(clamp(3rem, min(17vw, 30vh), 13.5rem) * var(--hud-scale));
+  line-height: 0.92;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.story-text--final .story-cta {
+  margin-top: clamp(22px, 4vh, 40px);
+}
+
+/* the final chapter's ignition (ignite.css), under WORX: the home
+   page's size exactly, whatever the story's scale does to the type */
+.story-text--final .story-ignite {
+  --ig-size: clamp(200px, 20vw, 250px);
+  flex: none;
+  margin-top: clamp(26px, 4.5vh, 48px);
+}
+
+.story-text--final .story-ignite .ig-label { font-size: clamp(1rem, 1.3vw, 1.15rem); }
+
+@media (max-height: 760px) {
+  .story-text--final .story-ignite { --ig-size: clamp(180px, 26vh, 220px); margin-top: 18px; }
 }
 
 .story-subtitle--close {
   margin-top: 6px;
 }
 
+/* Same language as the header's "Quick Enquiry" and the CTA band
+   (components.css): the brand gradient pill, calm; on hover/focus it
+   goes dark and keeps only its gradient edge. Never under 48px tall,
+   whatever --hud-scale does to the type. */
 .story-cta {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
+  min-height: 48px;
   margin-top: 30px;
-  padding: 15px 32px;
+  padding: 1em 2.1em;
   border-radius: 999px;
   background: var(--gradient);
   color: var(--on-accent);
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--hud-scale));
   font-weight: 600;
   letter-spacing: 0.02em;
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+  box-shadow: 0 12px 30px -14px rgba(229, 125, 35, 0.8);
+  transition: color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.story-cta:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 40px -14px rgba(229, 125, 35, 0.55);
+.story-cta::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--ink);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.story-cta:hover,
+.story-cta:focus-visible {
+  color: var(--text);
+  box-shadow: 0 12px 30px -14px rgba(229, 125, 35, 0.5);
+}
+
+.story-cta:hover::before,
+.story-cta:focus-visible::before {
+  opacity: 1;
+}
+
+.story-cta:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 4px;
 }
 
 /* ---- Responsive ------------------------------------------------- */
+/* The portrait rules below key on shape, not width alone: an 844px
+   landscape phone must not pick up the tablet-portrait terrain/ship
+   scale (it gets the short-landscape block further down instead),
+   while a 1024px iPad Pro held upright should. */
 
-@media (max-width: 900px) {
+@media (max-width: 900px) and (max-aspect-ratio: 5/4), (max-aspect-ratio: 4/5) {
   .story-text {
     padding-top: clamp(120px, 22vw, 180px);
   }
@@ -923,30 +2283,67 @@
     --terrain-w: 170vw;
   }
 
+  .story-far-ship,
+  .story-rover,
+  .story-site,
+  .story-tribute {
+    --terrain-w: 170vw;
+  }
+
+  .tribute-ship { left: 60%; top: 56%; width: 29%; }
+  .tribute-crew { left: 39%; top: 62%; width: 15%; }
+
+  .story-site-body {
+    left: 56%;
+    width: 42%;
+  }
+
+  .story-rover-body {
+    left: 44%;
+    width: 34%;
+  }
+
+  .story-far-ship-body {
+    left: 70%;
+    width: 9%;
+  }
+
+  .story-far-ship--left .story-far-ship-body {
+    left: 27%;
+    top: 37%;
+    width: 11%;
+  }
+
   /* Portrait: contain-fit makes the 16:9 frame screen-width, so the
-     ship would be tiny — scale up and let the dust run off-screen. */
+     ship would be tiny, scale up and let the dust run off-screen. */
   .story-landing-back {
     --landing-scale: 1.25;
     --story-horizon-y: 0.52;
   }
 
-  /* No room for a leader line across the frame: the log sits flat at
-     the top and the target marker alone tracks the ship. */
-  .hud-leader { display: none; }
+  /* Stacked layout. No room for a leader line across the frame: the
+     mission panel sits flat at the top, over the open sky, and tells the
+     log first; then the rows fold away and the chapter's story opens on
+     the same panel (about-story.js), so the ship, rover, site and crew
+     below stay clear. The ascent's flight log is technical detail: on a
+     phone-sized frame the operations panel alone tells the chapter. */
+  .hud-leader,
+  .ascent-log { display: none; }
 
-  .hud-log {
-    transform: none;
+  .hud-log,
+  .hud-log--right,
+  .worx-log {
+    left: 20px;
+    right: auto;
     top: 88px;
-    width: min(320px, calc(100% - 40px));
-  }
-
-  .hud-log--right {
-    left: auto;
-    right: 20px;
+    bottom: auto;
+    width: min(460px, calc(100% - 40px));
+    transform: none;
+    transform-origin: left top;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 600px) and (orientation: portrait) {
   .story-text {
     padding-top: 112px;
     padding-bottom: 48px;
@@ -964,54 +2361,198 @@
     --terrain-w: 230vw;
   }
 
+  .story-far-ship,
+  .story-rover,
+  .story-site,
+  .story-tribute {
+    --terrain-w: 230vw;
+  }
+
+  .tribute-ship { left: 57%; top: 40%; width: 24%; }
+  .tribute-crew { left: 41%; top: 45%; width: 12%; }
+
+  .story-site-body {
+    left: 57%;
+    top: 50%;
+    width: 34%;
+  }
+
+  .story-rover-body {
+    left: 47%;
+    width: 32%;
+  }
+
+  .story-far-ship--left .story-far-ship-body {
+    left: 33%;
+    top: 27%;
+    width: 10%;
+  }
+
+  .story-far-ship-body {
+    left: 62%;
+  }
+
   .story-landing-back {
     --landing-scale: 1.5;
     --story-horizon-y: 0.6;
   }
 
-  .hud-log {
+  .hud-log,
+  .hud-log--right,
+  .worx-log {
     left: 16px;
     top: 80px;
+    width: calc(100% - 32px);
     padding: 10px 12px;
-  }
-
-  .hud-log--right {
-    left: auto;
-    right: 16px;
   }
 
   .hud-stages li:not(.is-active) { display: none; }
 
   .hud-target-label { display: none; }
 
-  .story-text .hud-card {
+  .hud-caption .story-title { font-size: 1.45rem; }
+}
+
+/* Short portrait phones (iPhone SE, small Androids): tighter type so
+   the panel still ends well above the scene art. */
+@media (orientation: portrait) and (max-height: 700px) {
+  /* a slightly smaller ship standing a touch lower on the plain, so its
+     spires stay under the open story panel (SOL 01, 02 and 06) */
+  .story-landing-back { --landing-scale: 1.16; --story-ground-y: 0.85; }
+  /* SOL 05: ship and crew step down the same way, clear of the copy */
+  .tribute-ship { top: 53%; }
+  .tribute-crew { top: 58%; }
+  .hud-caption .story-title { font-size: 1.28rem; }
+  .hud-caption .story-subtitle { font-size: 0.85rem; }
+  .hud-caption .story-support { font-size: 0.77rem; line-height: 1.45; }
+  .hud-summary-rows li { padding: 0.26em 0; }
+}
+
+/* Laptops with short windows (1366×768 and 1280×720 minus browser
+   chrome, 1024×600 netbooks): the open panel (log + story) must fit
+   between the header and the bottom of the frame, so the panel scales
+   down a step and its rows tighten. */
+@media (min-aspect-ratio: 5/4) and (max-height: 820px) and (min-height: 541px) {
+  #story { --hud-scale: 0.9; }
+  .hud-summary-rows li { padding: 0.28em 0; }
+  .hud-log { top: clamp(84px, 13vh, 130px); }
+  .worx-log { top: auto; bottom: clamp(24px, 5vh, 60px); }
+}
+
+@media (min-aspect-ratio: 5/4) and (max-height: 700px) and (min-height: 541px) {
+  #story { --hud-scale: 0.8; }
+  .hud-summary-rows li { padding: 0.2em 0; }
+  .hud-log { top: 80px; }
+  .hud-caption .story-support { line-height: 1.42; }
+}
+
+/* Landscape phones: a ~390px-tall frame. The scene keeps its desktop
+   framing (the shape is wide, like a laptop), but the HUD shrinks,
+   lies flat and shows only the essentials so the log and the caption
+   card fit above and below the art. */
+@media (orientation: landscape) and (max-height: 540px) {
+  #story { --hud-scale: 0.8; }
+
+  /* The open story panel takes a third of this short, wide frame: each
+     shot's hero steps toward the other side so the copy never sits on
+     it (SOL 03 rover and SOL 05 crew right of the left-hand panel,
+     SOL 04 site left of the right-hand one). */
+  .story-rover-body { left: 55%; }
+  .tribute-crew { left: 47%; }
+  .tribute-ship { left: 73%; }
+  .story-site-body { left: 45%; }
+
+  .hud-leader,
+  .ascent-log,
+  .hud-target-label { display: none; }
+
+  .hud-log,
+  .worx-log {
     left: 16px;
+    right: auto;
+    top: 64px;
+    bottom: auto;
+    width: 280px;
+    padding: 0.6em 0.8em;
     transform: none;
-    padding: 14px 16px 16px;
   }
 
-  .story-text--hud-right .hud-card {
+  .hud-log--right,
+  .story-text--hud-right .hud-log {
     left: auto;
     right: 16px;
   }
 
-  .story-text.is-revealed .hud-card { transform: none; }
+  .hud-head {
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+  }
+
+  .hud-stages li:not(.is-active) { display: none; }
+
+  .hud-summary-rows li { padding: 0.2em 0; }
+
+  .hud-tele,
+  .hud-summary-status {
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+
+  .hud-caption .story-title { font-size: 1.15rem; }
+  .hud-caption .story-subtitle { font-size: 0.78rem; }
+  .story-text .story-support { font-size: 0.7rem; line-height: 1.42; }
+  .hud-caption-inner::before { margin-top: 8px; }
+  .hud-caption .story-status { margin-top: 8px; }
+
+  .story-text .story-status { margin-bottom: 6px; }
+  .story-text .story-subtitle { margin-top: 6px; }
+
+  .story-text--final .story-cta { margin-top: 14px; }
+}
+
+/* Big screens: scale the HUD and captions up with the frame so they
+   don't shrink to specks on 1080p+, 1440p/ultrawide and 4K displays
+   (height matters too, a 3440×1440 ultrawide is scaled like 1440p). */
+@media (min-width: 1800px) and (min-height: 950px) {
+  #story { --hud-scale: 1.15; }
+
+  .hud-log { left: calc(72px * var(--hud-scale)); }
+  .hud-log--right { left: auto; right: calc(72px * var(--hud-scale)); }
+
+  .hud-ring--outer { width: calc(34px * var(--hud-scale)); height: calc(34px * var(--hud-scale)); }
+  .hud-ring--inner { width: calc(12px * var(--hud-scale)); height: calc(12px * var(--hud-scale)); }
+}
+
+@media (min-width: 2300px) and (min-height: 1250px) {
+  #story { --hud-scale: 1.4; }
+}
+
+@media (min-width: 3200px) and (min-height: 1800px) {
+  #story { --hud-scale: 1.85; }
 }
 
 /* ---- Reduced motion ---------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  .story-text.is-live .hud-summary-rows li,
+  .hud-summary-rows li,
+  .hud-body,
+  .story-scene--build .site-img,
+  .story-scene--tribute .tribute-crew-img { transition: none; }
+
+  .hud-summary-rows li.is-set b,
+  .hud-summary-rows li:not(.is-set) b::after,
+  .rover-img,
+  .rover-trail,
   .hud-summary-dot,
   .story-grain,
   .hud-rec,
   .hud-ring--outer,
   .story-text.is-live .hud-log,
-  .story-text.is-revealed .hud-card { animation: none; }
+  .hud-caption { transition: none; }
 }
 
 /* about-story.js swaps the page-turn tween properties down to a
    plain opacity crossfade (no rotateX/scale/shadow) when this query
-   matches; the mission-text stagger is skipped the same way — this
+   matches; the mission-text stagger is skipped the same way, this
    block only has to mop up the CSS-only bit: no status scan-line
    sweep. */
 
@@ -1024,4 +2565,99 @@
   .story-status::after {
     display: none;
   }
+}
+
+
+/* Reduced motion: the rover's dust holds as a still, settled cloud. */
+@media (prefers-reduced-motion: reduce) {
+  .rover-beacons { animation: none; }
+  .beacon { animation: none; opacity: 0.8; }
+
+  .rover-puff {
+    animation: none;
+    opacity: 0.45;
+    transform: translate(-110%, -95%) scale(calc(1.3 * var(--s)));
+  }
+}
+
+/* Reduced motion: the build site simply appears, lit and still. */
+@media (prefers-reduced-motion: reduce) {
+  .site-drift,
+  .site-glow,
+  .site-haze { animation: none; }
+
+  .site-mote { animation: none; opacity: 0; }
+
+  .site-spark { animation: none; opacity: 0.7; }
+
+  .site-step,
+  .site-gust { animation: none; opacity: 0; }
+
+  .site-drone { animation: none; translate: 7600% 400%; }
+
+  .tribute-drift,
+  .tribute-interior,
+  .tribute-screen,
+  .tribute-shaft,
+  .tribute-ramp-light,
+  .tribute-haze,
+  .tribute-crew { animation: none; }
+
+  .tribute-mote { animation: none; opacity: 0; }
+
+  .tribute-crew-glow,
+  .tribute-lamp { animation: none; }
+
+  .tribute-wind { animation: none; opacity: 0; }
+}
+
+/* ================================================================
+   Director's layer (about-cinema.js): the air, the gust
+   that carries each cut, the handheld breath, and the
+   light across WORX. Over the world, under the story's text.
+   ================================================================ */
+.story-air,
+.story-gust {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* the air sits under the star layer: the stars always read through it */
+.story-air { z-index: 5; }
+.story-gust { z-index: 7; }
+
+/* handheld: the shot breathes (the world only, never the text) */
+.story-scenes,
+.story-landing-back,
+.story-landing,
+.story-landing-front {
+  animation: story-handheld 17s ease-in-out infinite;
+}
+
+@keyframes story-handheld {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  25% { translate: 2px -1.5px; rotate: 0.04deg; }
+  50% { translate: -1.5px 1px; rotate: -0.03deg; }
+  75% { translate: 1px 2px; rotate: 0.02deg; }
+}
+
+/* the finale: a slow light crosses WORX */
+.story-text--final .story-title--worx .gradient-text {
+  background-image: linear-gradient(100deg, #c04527 0%, #e57d23 30%, #faa719 44%, #fff1d6 50%, #faa719 56%, #e57d23 70%, #c04527 100%);
+  background-size: 260% 100%;
+  animation: story-worx-sweep 7s ease-in-out infinite;
+}
+
+@keyframes story-worx-sweep {
+  0%, 20% { background-position: 100% 50%; }
+  70%, 100% { background-position: 0% 50%; }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .story-scenes, .story-landing-back, .story-landing, .story-landing-front,
+  .story-text--final .story-title--worx .gradient-text { animation: none !important; }
 }

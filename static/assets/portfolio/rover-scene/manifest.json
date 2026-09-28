@@ -1,0 +1,10 @@
+{
+  "assetScale": 0.25,
+  "poses": {
+    "kneel_down": 0,
+    "stand_up": 0,
+    "get_in": 0,
+    "get_out": 0,
+    "driving_seated": 0
+  }
+}
