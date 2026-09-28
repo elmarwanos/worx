@@ -632,7 +632,7 @@
 }
 
 /* Primary actions inside the CTA band and the contact planner speak
-   the same language as the header's "Talk to Mission Control": the brand
+   the same language as the header's "Get a Quote": the brand
    gradient, calm, and on hover it goes dark keeping only the edge. */
 .cta-band .btn-primary,
 .cw .btn-primary {

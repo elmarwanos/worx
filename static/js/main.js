@@ -49,6 +49,45 @@
     setInterval(tick, 15000);
   }
 
+  // --- Footer wordmark: a type-design wireframe on every letter --------
+  // The R shows faint construction lines of its own (its overlapping
+  // shapes, just traced through the knock-out, layout.css). Every letter
+  // gets the same draughtsman's frame, placed from the glyphs themselves:
+  // its box from baseline to cap height, the centre lines, a cross to the
+  // corners and ticks at the corners. Re-drawn once the font has loaded.
+  var markSvg = document.querySelector(".footer-mark-svg");
+  var markBase = markSvg && markSvg.querySelector(".footer-mark-base");
+  if (markBase && markBase.getExtentOfChar) {
+    var NS = "http://www.w3.org/2000/svg";
+    var wire = document.createElementNS(NS, "g");
+    wire.setAttribute("class", "footer-mark-wire");
+    markSvg.appendChild(wire);
+    var line = function (x1, y1, x2, y2, cls) {
+      return '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"' + (cls ? ' class="' + cls + '"' : "") + "/>";
+    };
+    var drawWire = function () {
+      var n = (markBase.textContent || "").length, out = "";
+      var size = parseFloat(getComputedStyle(markBase).fontSize) || 330;
+      var baseY = parseFloat(markBase.getAttribute("y")) || 262;
+      var top = baseY - size * 0.7;   // Jost's cap height, ~0.7em
+      for (var i = 0; i < n; i++) {
+        var e;
+        try { e = markBase.getExtentOfChar(i); } catch (err) { return; }
+        var inset = e.width * 0.06;
+        var x0 = e.x + inset, x1 = e.x + e.width - inset, w = x1 - x0, h = baseY - top;
+        var cx = x0 + w / 2, my = top + h / 2, t = Math.min(w, h) * 0.08;
+        out += '<rect x="' + x0.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '"/>';
+        out += line(x0, my, x1, my) + line(cx, top, cx, baseY);
+        out += line(x0, top, x1, baseY, "d") + line(x1, top, x0, baseY, "d");
+        // corner ticks, just outside the box
+        out += line(x0 - t, top, x0, top, "k") + line(x0, top - t, x0, top, "k") + line(x1, top, x1 + t, top, "k") + line(x1, top - t, x1, top, "k");
+      }
+      wire.innerHTML = out;
+    };
+    drawWire();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawWire);
+  }
+
   // --- Footer wordmark: the outline letters fill in under the pointer --
   var mark = document.querySelector(".footer-mark");
   if (mark && window.matchMedia("(hover: hover)").matches) {

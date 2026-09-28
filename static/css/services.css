@@ -388,6 +388,18 @@
   }
 }
 
+/* tablets: the icons sit in the bottom-left corner, so the corner's
+   coordinates readout steps up above them */
+@media (min-width: 721px) and (max-width: 900px) {
+  .cx-hud .cx-hud-corner--bl { bottom: 50px; }
+}
+
+/* phones on their side: the hero fills the screen edge to edge and the
+   icons would sit on its copy (the footer carries the same links) */
+@media (max-width: 900px) and (max-height: 500px) {
+  .cx-comms { display: none; }
+}
+
 /* ---- 00 Launch (hero) ---------------------------------------- */
 
 .cx-hero {
@@ -2339,7 +2351,7 @@
   border: 1px solid var(--line-strong);
   border-radius: 14px;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--surface-2), var(--ink));
+  background: var(--ink);
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.5s ease;
 }
@@ -2351,12 +2363,17 @@
   z-index: 2;
 }
 
+/* The film overfills its card by 2px all round (clipped by the card):
+   the card's height lands on a fraction of a pixel at most widths and
+   the video layer snaps to whole pixels, and a capture's own last rows
+   can be light, either of which left a bright hairline along the
+   bottom. The card behind is dark for the same reason. */
 .cx-tile video {
   position: absolute;
-  inset: 0;
+  inset: -2px;
   display: block;
-  width: 100%;
-  height: 100%;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
   object-fit: cover;
   object-position: center;
   transform: scale(var(--cx-zoom, 1));
@@ -3563,20 +3580,6 @@
     linear-gradient(90deg, rgba(254, 238, 207, 0.05) 1px, transparent 1px) 0 0 / 60px 60px;
 }
 
-/* Radar sweep */
-.cx-map-sweep {
-  position: absolute;
-  z-index: -1;
-  left: 50%;
-  top: 50%;
-  width: 160%;
-  aspect-ratio: 1;
-  margin: -80% 0 0 -80%;
-  background: conic-gradient(from 0deg, rgba(250, 167, 25, 0.12), transparent 14%);
-  border-radius: 50%;
-  animation: cx-spin 9s linear infinite;
-}
-
 /* Desktop: stars fill the left, the inspector card owns the right */
 .cx-map-stars {
   position: absolute;
@@ -3630,6 +3633,25 @@
 .cx-const-label b {
   color: var(--accent-2);
   font-weight: 500;
+}
+
+/* the constellation, its division: a faint dot between */
+.cx-const-label i {
+  font-style: normal;
+  opacity: 0.5;
+}
+
+/* desktop: the top star of a four-star line carries its name above it,
+   clear of the star it rises over (tools/services/build.js marks it) */
+@media (min-width: 1100px) {
+  .cx-star.cx-star--up span { top: auto; bottom: calc(100% + 8px); }
+}
+
+/* the narrowest phones: a column is too slim for both names, so the
+   division is charted on its own */
+@media (max-width: 389px) {
+  .cx-const-label b,
+  .cx-const-label i { display: none; }
 }
 
 .cx-star {
@@ -3780,8 +3802,6 @@
   flex-wrap: wrap;
   gap: 5px;
   margin-top: 12px;
-  max-height: 118px;
-  overflow: auto;
 }
 
 .cx-map-card-subs li {
@@ -3789,6 +3809,12 @@
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   font-size: 0.7rem;
+}
+
+/* the rest of the capabilities, counted (the service page lists them) */
+.cx-map-card-subs li.is-more {
+  border-style: dashed;
+  color: var(--accent-2);
 }
 
 .cx-map-card-link[hidden] {
@@ -3815,7 +3841,9 @@
   color: var(--hud-dim);
 }
 
-@media (max-width: 900px) {
+/* the star map charts its stacked layout up to 1099px: between tablet
+   and laptop the side-by-side chart is too narrow for its names */
+@media (max-width: 1099px) {
   .cx-map {
     aspect-ratio: auto;
     height: 170vw;
@@ -4102,10 +4130,14 @@
   }
 
   .cx-const-label { font-size: 0.56rem; letter-spacing: 0.12em; }
+
+  /* the lowest star's label hangs below the frame: room before the card */
+  .cx-map .cx-map-card { margin-top: 26px; }
 }
 
-/* Phone star map: stars get the full frame, the inspector sits below */
-@media (max-width: 900px) {
+/* Phone and tablet star map (to 1099px, as above): stars get the full
+   frame, the inspector sits below */
+@media (max-width: 1099px) {
   .cx-map {
     height: auto;
     max-height: none;

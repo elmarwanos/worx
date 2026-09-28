@@ -222,11 +222,15 @@
 
   gsap.matchMedia().add("(max-width: 900px)", function () {
     var comms = $(".cx-comms");
+    // the rail rides the hero only; it also has to know where the page
+    // opened (an anchor, a refresh or the back button can land mid-page)
+    var away = function (self) { comms.classList.toggle("is-away", !self.isActive); };
     ScrollTrigger.create({
       trigger: ".cx-hero",
-      start: "top top",
+      start: "top bottom",
       end: "bottom 40%",
-      onToggle: function (self) { comms.classList.toggle("is-away", !self.isActive); }
+      onToggle: away,
+      onRefresh: away
     });
     return function () { comms.classList.remove("is-away"); };
   });
@@ -1130,6 +1134,9 @@
   function setupStarMap() {
     var map = $(".cx-map");
     if (!map || !catalogue.length) return;
+    // each division's constellation, in division order (the labels on
+    // the map come from tools/services/build.js, which names them too)
+    var CONSTELLATIONS = ["Fornax", "Pyxis", "Pictor", "Nova", "Norma"];
     var starBtns = $$(".cx-star", map);
     var card = $(".cx-map-card", map);
     var cDiv = $(".cx-map-card-div", card);
@@ -1148,10 +1155,18 @@
       active = btn;
       btn.classList.add("is-active");
       map.setAttribute("data-division", s.divIndex);
-      cDiv.textContent = pad(s.divIndex + 1) + " · " + s.division;
+      cDiv.textContent = (CONSTELLATIONS[s.divIndex] ? CONSTELLATIONS[s.divIndex] + " · " : "") + s.division;
       cName.textContent = s.name;
       cShort.textContent = s.short;
-      cSubs.innerHTML = s.subs.map(function (x) { return "<li>" + x + "</li>"; }).join("");
+      // the board shows the first capabilities and a count of the rest (the
+      // service page has them all): it never scrolls
+      // (a budget of text rather than a count, so long names show fewer)
+      var BUDGET = 96, used = 0, shown = 0;
+      while (shown < s.subs.length && used + s.subs[shown].length <= BUDGET) used += s.subs[shown++].length;
+      if (s.subs.length - shown === 1) shown++;   // never "+1 more": just show it
+      var more = s.subs.length - shown;
+      cSubs.innerHTML = s.subs.slice(0, shown).map(function (x) { return "<li>" + x + "</li>"; }).join("") +
+        (more > 0 ? '<li class="is-more">+' + more + " more</li>" : "");
       cLink.href = s.href;
       cLink.hidden = false;
       card.classList.remove("is-flash");

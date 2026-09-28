@@ -213,8 +213,11 @@
     var headEl = q("[data-hx-head]", hx);
     var ticks = [];
     var COLLAPSE = 1.6;    // seconds: the universe falls into the point of light
-    // the title card between collapse and Big Bang (seconds)
-    var CARD = { point: 0.35, born: 0.35, hold: 1.55, gone: 1.95, erupt: 2.3 };
+    // the closing title card, after the collapse (seconds): the point of
+    // light holds a beat, then dies out completely; a breath of pure
+    // black; WORX appears out of the dark, then the headline and actions
+    // return under it. The film plays once; the card is where it rests.
+    var CARD = { hold: 0.25, out: 0.85, born: 1.35, final: 2.55 };
     var filmOn = false;
 
     // ---- cinematic layers --------------------------------------------
@@ -322,7 +325,7 @@
       var startCard = function () {
         video.pause();
         hx.classList.add("is-card");
-        hx.classList.remove("is-born", "is-gone");
+        hx.classList.remove("is-born", "is-final");
         video.style.setProperty("--k", "0");
         video.style.setProperty("--pk", "0");
         video.style.setProperty("--vo", "1");
@@ -340,8 +343,8 @@
         hx.classList.add("has-film");
         setTimeout(function () { if (film) film.pause(); }, 1500);   // the generated film rests
       });
-      // the opening is the title card itself: the point, WORX, the Bang
-      var begin = function () { if (state === "wait") { hx.classList.add("has-film"); if (film) film.pause(); startCard(); } };
+      // the opening is the film itself, from its Big Bang
+      var begin = function () { if (state === "wait") { hx.classList.add("has-film"); if (film) film.pause(); playFilm(); } };
       video.addEventListener("canplaythrough", begin);
       setTimeout(function () { if (video.readyState >= 3) begin(); }, 2500);
       video.addEventListener("ended", function () { if (state === "film") startCard(); });
@@ -362,20 +365,14 @@
         if (state === "card" && inView) {
           var ct = (now - stateT0) / 1000;
           restRecorder();
-          // the pen-point: a pulse in the dark, held behind the word
+          // the pen-point flickers a moment, then fades to nothing
           var pulse = 0.8 + 0.2 * Math.sin(now * 0.02) * Math.sin(now * 0.007);
-          // the pen-point breathes behind the word, then swells to erupt
-          var sv = ct < CARD.point ? 0.14 + 0.1 * (1 - ct / CARD.point) : ct < CARD.gone ? 0.07 * pulse : ct < CARD.erupt ? 0.07 + 1.25 * Math.pow((ct - CARD.gone) / (CARD.erupt - CARD.gone), 2.2) : 1.3;
+          var sv = ct < CARD.hold ? 0.12 * pulse : ct < CARD.out ? 0.12 * pulse * (1 - smooth((ct - CARD.hold) / (CARD.out - CARD.hold))) : 0;
           pointEl.style.setProperty("--s", sv.toFixed(4));
           if (ct >= CARD.born && !hx.classList.contains("is-born")) hx.classList.add("is-born");
-          if (ct >= CARD.gone && !hx.classList.contains("is-gone")) hx.classList.add("is-gone");
+          if (ct >= CARD.final && !hx.classList.contains("is-final")) hx.classList.add("is-final");
           flashEl.style.opacity = "0";
           flareEl.style.opacity = "0";
-          if (ct >= CARD.erupt) {
-            // the point erupts: the film begins at its Big Bang
-            hx.classList.remove("is-card", "is-born", "is-gone");
-            playFilm();
-          }
         } else if (state === "film" && !video.paused) {
           var t = video.currentTime, d = video.duration || 9.33;
           // THE COLLAPSE, into the point of light:
@@ -542,7 +539,7 @@
           clearTimeout(sayT); running = false;
           text = NATURAL; paint(text); typing(false);
         };
-        var shown = function () { return hx.classList.contains("is-ready") && !hx.classList.contains("is-card") && heroSeen && !document.hidden; };
+        var shown = function () { return hx.classList.contains("is-ready") && (!hx.classList.contains("is-card") || hx.classList.contains("is-final")) && heroSeen && !document.hidden; };
         var sync = function () {
           if (shown() && !running) { running = true; cycle(2200); }   // first read, while the reveal settles
           else if (!shown() && running) stop();
@@ -1724,57 +1721,7 @@
     }
   })();
 
-  // The targeting reticle: follows the pointer, locks onto what you aim at.
-  var ret = q(".hm-reticle");
-  var main = q(".hm");
-  if (ret && main && window.matchMedia("(hover: hover) and (pointer: fine)").matches && !reduced) {
-    var readEl = q(".hm-reticle-read", ret);
-    var px = -100, py = -100, rx = -100, ry = -100, rw = 38, rh = 38, target = null, inside = false;
-    var retDot = q("b", ret), lastT = 0, MOVE_MS = 26, SIZE_MS = 36;   // same feel as reticle.js
-    var LOCKS = "a, button, .hm-case, .hm-star, .hm-note, [role=tab]";
-    document.addEventListener("pointermove", function (e) {
-      px = e.clientX; py = e.clientY;
-      var over = e.target.closest ? e.target.closest(".hm") : null;
-      var inHeader = e.target.closest && e.target.closest(".site-header, .qc-dock");
-      inside = !!over && !inHeader;
-      main.classList.toggle("has-reticle", inside);
-      var t = inside && e.target.closest ? e.target.closest(LOCKS) : null;
-      if (t && t.closest(".hm-case, .hm-star, .hm-note") && t !== t.closest(".hm-case, .hm-star, .hm-note")) t = t.closest(".hm-case, .hm-star, .hm-note");
-      if (t !== target) {
-        target = t;
-        ret.classList.toggle("is-lock", !!t);
-        if (t) {
-          var label = (t.getAttribute("aria-label") || t.textContent || "").replace(/\s+/g, " ").trim().slice(0, 22).toUpperCase();
-          scramble(readEl, "LOCK · " + label, 260);
-        }
-      }
-    }, { passive: true });
-    document.addEventListener("pointerleave", function () { main.classList.remove("has-reticle"); });
-    (function aim(now) {
-      requestAnimationFrame(aim);
-      var dt = lastT && now ? Math.min(now - lastT, 64) : 16.7;
-      lastT = now || 0;
-      if (!inside && !target) return;   // nothing to follow: no writes
-      var km = 1 - Math.exp(-dt / MOVE_MS), ks = 1 - Math.exp(-dt / SIZE_MS);
-      var tw = 38, th = 38, cx = px, cy = py;
-      if (target) {
-        var r = target.getBoundingClientRect();
-        var big = r.width > 260 || r.height > 200;
-        tw = big ? Math.min(r.width, 120) : r.width + 14;
-        th = big ? Math.min(r.height, 90) : r.height + 10;
-        if (!big) { cx = r.left + r.width / 2; cy = r.top + r.height / 2; }
-      } else if (inside) {
-        readEl.textContent = "X " + ("000" + Math.round(px)).slice(-4) + " · Y " + ("000" + Math.round(py)).slice(-4);
-      }
-      rx += (cx - rx) * km; ry += (cy - ry) * km;
-      rw += (tw - rw) * ks; rh += (th - rh) * ks;
-      ret.style.width = rw.toFixed(1) + "px";
-      ret.style.height = rh.toFixed(1) + "px";
-      ret.style.transform = "translate3d(" + (rx - rw / 2).toFixed(1) + "px," + (ry - rh / 2).toFixed(1) + "px,0)";
-      // the dot rides the true pointer, so aiming never lags
-      if (retDot) retDot.style.transform = "translate3d(" + (px - rx).toFixed(1) + "px," + (py - ry).toFixed(1) + "px,0)";
-    })();
-  }
+  // (the targeting reticle is reticle.js, shared with every page)
 
   // The hover ring (home.css ONE HOVER LANGUAGE) on the project films,
   // whose own pseudo-elements are already the grade and the scan.

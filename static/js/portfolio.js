@@ -540,18 +540,239 @@
       });
     }
 
-    // the filter
-    var btns = [].slice.call(document.querySelectorAll(".pf-filter [data-filter]"));
-    btns.forEach(function (b) {
-      b.addEventListener("click", function () {
-        var k = b.getAttribute("data-filter");
-        btns.forEach(function (o) {
-          var on = o === b;
+    // THE SECTOR SCANNER: the archive by industry. Each file carries its
+    // sectors (data-industry, space separated: a campaign is also its
+    // industry); the counts come from the files, so they stay honest.
+    //   - the console under the title: the way in
+    //   - the sector rail: once the reel is under way it slides in from the
+    //     right edge (the comms rail's twin), a tuner of ticks, the sector
+    //     lit and a beam filling as the sector plays; on touch screens and
+    //     tablets it is a tab on the edge that opens a drawer
+    //   - the hand-off: a picked sector ends on a transmission that offers
+    //     the next sector, so the reel never runs out into empty space
+    var scan = document.querySelector("[data-scan]");
+    if (scan) {
+      var slot = scan.closest("[data-scan-slot]");
+      var nEl = scan.querySelector("[data-scan-n]"), nameEl = scan.querySelector("[data-scan-name]");
+      var sectorsOf = function (f) { return (f.getAttribute("data-industry") || "").split(/\s+/); };
+      var inSector = function (f, k) { return k === "all" || sectorsOf(f).indexOf(k) >= 0; };
+      var countOf = function (k) { return files.filter(function (f) { return inSector(f, k); }).length; };
+      var SECTORS = [].slice.call(scan.querySelectorAll("[data-industry]")).map(function (c) {
+        var nmEl = c.querySelector(".pf-station-name") || c.firstChild;
+        return { k: c.getAttribute("data-industry"), name: nmEl ? nmEl.textContent.trim() : "", freq: c.getAttribute("data-freq") || "" };
+      });
+      SECTORS.forEach(function (s) { s.n = countOf(s.k); });
+      var nameOfKey = function (k) { for (var i = 0; i < SECTORS.length; i++) if (SECTORS[i].k === k) return SECTORS[i].name; return ""; };
+      var current = "all";
+
+      // ---- the rail --------------------------------------------------
+      var rail = document.createElement("nav");
+      rail.className = "pf-rail";
+      rail.setAttribute("aria-label", "Sectors");
+      rail.innerHTML =
+        '<button type="button" class="pf-rail-tab" aria-expanded="false" aria-controls="pf-rail-panel">' +
+          '<span class="pf-rail-tab-k">Sector</span><b data-rail-name>All sectors</b><span class="pf-rail-tab-n" data-rail-n>' + p2(files.length) + "</span>" +
+        "</button>" +
+        '<div class="pf-rail-panel" id="pf-rail-panel">' +
+          '<p class="pf-rail-head" aria-hidden="true"><i></i>Sector scan<b data-rail-count>' + p2(files.length) + "</b></p>" +
+          '<ol class="pf-rail-list">' +
+            SECTORS.map(function (s, i) {
+              return '<li style="--i:' + i + '"><button type="button" data-industry="' + s.k + '" aria-pressed="' + (s.k === "all") + '"' + (s.k === "all" ? ' class="is-on"' : "") + ">" +
+                '<span class="pf-rail-label">' + s.name + '</span><span class="pf-rail-n">' + p2(s.n) + '</span><i class="pf-rail-tick" aria-hidden="true"></i></button></li>';
+            }).join("") +
+          "</ol>" +
+          '<span class="pf-rail-track" aria-hidden="true"><i></i></span>' +
+          '<span class="pf-rail-now" aria-hidden="true"><b data-rail-now>All sectors</b><span data-rail-now-n>' + p2(files.length) + '</span></span>' +
+          '<span class="pf-rail-beam" aria-hidden="true"></span>' +
+        "</div>";
+      archive.appendChild(rail);
+      var tab = rail.querySelector(".pf-rail-tab");
+      var railName = rail.querySelector("[data-rail-name]"), railN = rail.querySelector("[data-rail-n]"), railCount = rail.querySelector("[data-rail-count]");
+      var railNow = rail.querySelector("[data-rail-now]"), railNowN = rail.querySelector("[data-rail-now-n]");
+      var chips = [].slice.call(document.querySelectorAll(".pf-scan [data-industry], .pf-rail [data-industry]"));
+      chips.forEach(function (c) {
+        var b = c.querySelector("b");
+        if (b) b.textContent = p2(countOf(c.getAttribute("data-industry")));
+      });
+      var drawer = window.matchMedia("(max-width: 1100px), (hover: none)");
+      var setOpen = function (on) {
+        rail.classList.toggle("is-open", on);
+        tab.setAttribute("aria-expanded", on ? "true" : "false");
+      };
+      tab.addEventListener("click", function () { setOpen(!rail.classList.contains("is-open")); });
+      document.addEventListener("pointerdown", function (e) { if (rail.classList.contains("is-open") && !rail.contains(e.target)) setOpen(false); });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && rail.classList.contains("is-open")) { setOpen(false); tab.focus(); } });
+
+      // ---- the hand-off at the end of a sector ------------------------
+      var next = document.createElement("li");
+      next.className = "pf-next";
+      next.hidden = true;
+      next.innerHTML =
+        '<div class="pf-next-card">' +
+          '<span class="pf-next-streaks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' +
+          '<p class="pf-next-k"><i aria-hidden="true"></i>Sector complete <span data-next-done></span></p>' +
+          '<p class="pf-next-title">Next sector: <span class="gradient-text" data-next-name></span></p>' +
+          '<p class="pf-next-sub" data-next-sub></p>' +
+          '<div class="pf-next-actions">' +
+            '<button type="button" class="pf-next-go" data-next-go><span data-next-go-txt></span> <i aria-hidden="true">&rarr;</i></button>' +
+            '<button type="button" class="pf-next-all" data-industry-all>All sectors</button>' +
+          "</div>" +
+        "</div>";
+      reel.appendChild(next);
+      var nextKey = function (k) {
+        var list = SECTORS.filter(function (s) { return s.k !== "all"; });
+        for (var i = 0; i < list.length; i++) if (list[i].k === k) return list[(i + 1) % list.length].k;
+        return list[0].k;
+      };
+      var showNext = function (k) {
+        if (k === "all") { next.hidden = true; reel.classList.remove("has-next"); return; }
+        var nk = nextKey(k), nn = countOf(nk);
+        next.querySelector("[data-next-done]").textContent = "· " + p2(countOf(k)) + " " + (countOf(k) === 1 ? "file" : "files") + " · " + nameOfKey(k);
+        next.querySelector("[data-next-name]").textContent = nameOfKey(nk);
+        next.querySelector("[data-next-sub]").textContent = p2(nn) + " more " + (nn === 1 ? "transmission" : "transmissions") + " waiting on the next frequency.";
+        next.querySelector("[data-next-go-txt]").textContent = "Scan " + nameOfKey(nk);
+        next.dataset.next = nk;
+        next.hidden = false;
+        reel.classList.add("has-next");
+        // after a lowered right-hand screen, the transmission clears it
+        var vis = files.filter(function (f) { return !f.hidden; });
+        var last = vis[vis.length - 1];
+        next.classList.toggle("is-after-right", !!last && last.classList.contains("is-right"));
+        next.classList.remove("is-in"); void next.offsetWidth;
+        if (reduceMotion || !("IntersectionObserver" in window)) next.classList.add("is-in");
+        else nio.observe(next);
+      };
+      var nio = "IntersectionObserver" in window ? new IntersectionObserver(function (en) {
+        en.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("is-in"); nio.unobserve(e.target); } });
+      }, { rootMargin: "0px 0px -12% 0px" }) : null;
+
+      // ---- the tuner ---------------------------------------------------
+      var band = scan.querySelector("[data-scan-band]");
+      var freqEl = scan.querySelector("[data-scan-freq]");
+      var freqOfKey = function (k) { for (var i = 0; i < SECTORS.length; i++) if (SECTORS[i].k === k) return SECTORS[i].freq; return ""; };
+      // the name decodes as it locks: noise, resolving left to right
+      var GLYPHS = "01<>/#%&*+=?ABCDEFXYZ";
+      var decode = function (el, text) {
+        clearTimeout(el.__dec);
+        if (reduceMotion) { el.textContent = text; return; }
+        var t0 = performance.now(), dur = 520;
+        (function run() {
+          var k = Math.min(1, (performance.now() - t0) / dur), out = "";
+          for (var i = 0; i < text.length; i++) {
+            var ch = text.charAt(i);
+            out += ch === " " || i / text.length < k ? ch : GLYPHS.charAt((Math.random() * GLYPHS.length) | 0);
+          }
+          el.textContent = out;
+          if (k < 1) el.__dec = setTimeout(run, 34);
+        })();
+      };
+      // centre a station under the needle (the band scrolls, never the page)
+      var autoUntil = 0;
+      var centre = function (k, smooth) {
+        if (!band) return;
+        var st = band.querySelector('[data-industry="' + k + '"]');
+        if (!st) return;
+        var to = st.offsetLeft + st.offsetWidth / 2 - band.clientWidth / 2;
+        autoUntil = performance.now() + (smooth && !reduceMotion ? 700 : 80);
+        band.scrollTo({ left: to, behavior: smooth && !reduceMotion ? "smooth" : "auto" });
+      };
+      // the station nearest the needle
+      var underNeedle = function () {
+        var mid = band.scrollLeft + band.clientWidth / 2, best = null, bd = 1e9;
+        [].forEach.call(band.querySelectorAll("[data-industry]"), function (st) {
+          var d = Math.abs(st.offsetLeft + st.offsetWidth / 2 - mid);
+          if (d < bd) { bd = d; best = st; }
+        });
+        return best;
+      };
+      // swiping the band tunes it: when it settles, the station under the
+      // needle plays (CSS scroll-snap lands it there)
+      var settleT = null;
+      if (band) {
+        band.addEventListener("scroll", function () {
+          var near = underNeedle();
+          [].forEach.call(band.querySelectorAll("[data-industry]"), function (st) { st.classList.toggle("is-near", st === near); });
+          if (performance.now() < autoUntil) return;
+          clearTimeout(settleT);
+          settleT = setTimeout(function () {
+            if (performance.now() < autoUntil) return;
+            var st = underNeedle();
+            if (st && st.getAttribute("data-industry") !== current) pick(st.getAttribute("data-industry"), "tune");
+          }, 160);
+        }, { passive: true });
+        // arrows tune station to station
+        band.addEventListener("keydown", function (e) {
+          var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+          if (!d) return;
+          e.preventDefault();
+          var i = -1;
+          for (var j = 0; j < SECTORS.length; j++) if (SECTORS[j].k === current) i = j;
+          var nk = SECTORS[(i + d + SECTORS.length) % SECTORS.length].k;
+          pick(nk, "chip");
+          var btn = band.querySelector('[data-industry="' + nk + '"]');
+          if (btn) btn.focus({ preventScroll: true });
+        });
+        var recentre = function () { centre(current, false); };
+        window.addEventListener("resize", recentre);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(recentre);
+        recentre();
+      }
+      // the signal: a live waveform behind the band, calm at rest, flaring
+      // as a station locks, resting while off screen
+      var wave = scan.querySelector(".pf-tuner-wave"), waveKick = function () {};
+      if (wave && wave.getContext && !reduceMotion) {
+        var wc = wave.getContext("2d"), wDpr = Math.min(window.devicePixelRatio || 1, 2), energy = 0, wOn = false, wRaf = 0, ph = 0;
+        var drawWave = function () {
+          wRaf = 0;
+          var w = wave.clientWidth, h = wave.clientHeight;
+          if (!w || !h) return;
+          if (wave.width !== Math.round(w * wDpr)) { wave.width = Math.round(w * wDpr); wave.height = Math.round(h * wDpr); }
+          wc.setTransform(wDpr, 0, 0, wDpr, 0, 0);
+          wc.clearRect(0, 0, w, h);
+          ph += 0.045 + energy * 0.12;
+          energy *= 0.96;
+          var fq = (parseFloat(freqEl && freqEl.textContent) || 88) / 88;
+          [[0.55, 1, 1.4], [0.25, 1.9, 1]].forEach(function (L, li) {
+            wc.beginPath();
+            for (var x = 0; x <= w; x += 4) {
+              var u = x / w, env = Math.sin(Math.PI * u);
+              var y = h / 2 + Math.sin(u * 22 * fq * L[1] + ph * (li ? -1.3 : 1)) * (h * 0.12 + energy * h * 0.26) * env * (li ? 0.6 : 1);
+              if (x) wc.lineTo(x, y); else wc.moveTo(x, y);
+            }
+            wc.strokeStyle = "rgba(250,167,25," + (L[0] * (0.5 + energy * 0.5)).toFixed(3) + ")";
+            wc.lineWidth = L[2];
+            wc.stroke();
+          });
+          if (wOn) wRaf = requestAnimationFrame(drawWave);
+        };
+        waveKick = function () { energy = 1; if (wOn && !wRaf) wRaf = requestAnimationFrame(drawWave); };
+        if ("IntersectionObserver" in window) new IntersectionObserver(function (en) {
+          wOn = en[0].isIntersecting && !document.hidden;
+          if (wOn && !wRaf) wRaf = requestAnimationFrame(drawWave);
+        }).observe(wave);
+      }
+
+      var scanFx = function (el) { el.classList.remove("is-scanning"); void el.offsetWidth; el.classList.add("is-scanning"); };
+      var pick = function (k, source) {
+        current = k;
+        chips.forEach(function (o) {
+          var on = o.getAttribute("data-industry") === k;
           o.classList.toggle("is-on", on);
           o.setAttribute("aria-pressed", on ? "true" : "false");
         });
+        var n = p2(countOf(k)), nm = nameOfKey(k);
+        if (nEl) nEl.textContent = n;
+        if (nameEl) decode(nameEl, nm);
+        if (freqEl) freqEl.textContent = freqOfKey(k);
+        waveKick();
+        railName.textContent = nm; railN.textContent = n; railCount.textContent = n;
+        railNow.textContent = nm; railNowN.textContent = n;
+        rail.setAttribute("data-sector", k);
+        scanFx(scan); scanFx(rail);
+        // the band glides the station under the needle
+        if (source !== "tune") centre(k, true);
         files.forEach(function (f) {
-          var show = k === "all" || f.getAttribute("data-type") === k;
+          var show = inSector(f, k);
           f.hidden = !show;
           if (show && !reduceMotion) {
             // re-run the entrance for the files that stay
@@ -561,8 +782,53 @@
           }
         });
         layout();
+        showNext(k);
+        // picked mid-reel (or from the rail / the hand-off): fly to the
+        // first file of the sector
+        var head = reel.getBoundingClientRect().top;
+        if (head < 0 || source === "next") window.scrollTo({ top: head + window.scrollY - 110, behavior: reduceMotion ? "auto" : "smooth" });
+        if (drawer.matches) setOpen(false);
+        requestRail();
+      };
+      chips.forEach(function (c) { c.addEventListener("click", function () { pick(c.getAttribute("data-industry"), "chip"); }); });
+      next.querySelector("[data-next-go]").addEventListener("click", function () { pick(next.dataset.next, "next"); });
+      next.querySelector("[data-industry-all]").addEventListener("click", function () { pick("all", "next"); });
+
+      // The rail comes in once the console under the title has gone behind
+      // the header, and leaves as the archive ends; the beam fills with
+      // how far through the sector's reel the view has come.
+      // magnetic ticks: they swell toward the pointer, like a dock
+      var railBtns = [].slice.call(rail.querySelectorAll(".pf-rail-list button"));
+      rail.addEventListener("pointermove", function (e) {
+        if (drawer.matches) return;
+        railBtns.forEach(function (b) {
+          var r = b.getBoundingClientRect(), d = Math.abs(e.clientY - (r.top + r.height / 2));
+          b.style.setProperty("--m", Math.max(0, 1 - d / 90).toFixed(3));
+        });
       });
-    });
+      rail.addEventListener("pointerleave", function () { railBtns.forEach(function (b) { b.style.setProperty("--m", 0); }); });
+
+      var railOn = false, railTick = false;
+      var setRail = function () {
+        railTick = false;
+        var vh = window.innerHeight;
+        var sr = slot.getBoundingClientRect(), ar = archive.getBoundingClientRect(), rr = reel.getBoundingClientRect();
+        var on = sr.bottom < 90 && ar.bottom > vh * 0.55;
+        if (on !== railOn) {
+          railOn = on;
+          rail.classList.toggle("is-on", on);
+          if (!on) setOpen(false);
+        }
+        if (on) {
+          var p = Math.min(1, Math.max(0, (vh * 0.5 - rr.top) / Math.max(1, rr.height)));
+          rail.style.setProperty("--p", p.toFixed(3));
+        }
+      };
+      var requestRail = function () { if (!railTick) { railTick = true; requestAnimationFrame(setRail); } };
+      window.addEventListener("scroll", requestRail, { passive: true });
+      window.addEventListener("resize", requestRail);
+      requestRail();
+    }
 
     // every frame the page moves: each screen turns to face you as it
     // nears the middle of the view; the comms tracker + deep sky come

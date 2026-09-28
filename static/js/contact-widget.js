@@ -6,7 +6,7 @@
    channel below comes from the CONTACT dictionary, edit the data,
    not the markup.
    The console opens from any [data-contact-open] trigger and from
-   every "Talk to Mission Control" CTA; without JS those CTAs keep
+   every "Get a Quote" CTA; without JS those CTAs keep
    their own link to the contact page.
    ============================================================ */
 
@@ -15,11 +15,11 @@
 
   // --- The dictionary --------------------------------------------
   var CONTACT = {
-    title: "Talk to Mission Control",
+    title: "Get a Quote",
     intro: "Pick a channel or leave a note, we usually reply within a day.",
     recipient: "Hello@worxbyglimpse.com",
     subjectPrefix: "Project enquiry from ",
-    ctaText: /talk to mission control/i,
+    ctaText: /get a quote|talk to mission control/i,
     whatsapp: {
       href: "https://wa.me/971555669847",
       greeting: "Hi Worx, I'd like to talk about a project.",
@@ -112,7 +112,7 @@
   var call = el("a", "qc-call");
   call.href = ROOT + "contact/index.html";
   call.innerHTML = '<span class="qc-call-beacon" aria-hidden="true"><i></i></span>' +
-    '<span class="qc-call-txt"><small aria-hidden="true"><span>Relay \u00B7 live</span><span>Plan your project</span></small><b>Open Channel</b></span>' +
+    '<span class="qc-call-txt"><small aria-hidden="true"><span>Relay \u00B7 live</span><span>Plan your project</span></small><b>Make Contact</b></span>' +
     '<span class="qc-call-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>';
   panel.appendChild(call);
 

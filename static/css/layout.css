@@ -385,7 +385,7 @@ body[data-page="about"] .nav-progress {
   }
 }
 
-/* "Talk to Mission Control": the site gradient, calm, no light effects; on
+/* "Get a Quote": the site gradient, calm, no light effects; on
    hover it goes dark and keeps only the gradient edge */
 .btn-spark {
   position: relative;
@@ -753,9 +753,10 @@ body.nav-open .qc-dock {
   .brand-text small { display: none; }
 }
 
-/* the narrowest phones (320-360): everything in the bar has to fit
-   beside the toggle without touching the edge */
-@media (max-width: 360px) {
+/* narrow phones (320-413, the 375 and 390 iPhones included):
+   everything in the bar has to fit beside the toggle without
+   touching the edge */
+@media (max-width: 413px) {
   .nav-bar,
   .site-header.is-scrolled .nav-bar {
     gap: 10px;
@@ -1094,6 +1095,23 @@ body.nav-open .qc-dock {
   fill: var(--ink);
   fill-opacity: 0.9;
 }
+
+/* the wireframe on every letter (main.js draws it from the glyphs):
+   as faint as the R's own traced construction lines, brighter when the
+   wordmark is lit */
+.footer-mark-wire {
+  fill: none;
+  stroke: url(#footer-mark-stroke);
+  stroke-width: 1;
+  opacity: 0.24;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.footer-mark-wire * { vector-effect: non-scaling-stroke; }
+.footer-mark-wire .d { stroke-dasharray: 3 6; stroke-opacity: 0.6; }
+.footer-mark-wire .k { stroke-width: 1.4; }
+.footer-mark.is-lit .footer-mark-wire { opacity: 0.45; }
 
 /* the fill that appears under the pointer */
 .footer-mark-fill {

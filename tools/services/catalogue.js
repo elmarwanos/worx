@@ -32,6 +32,7 @@ module.exports = [
       },
       {
         slug: "ecommerce",
+        page: "ecommerce-development.html",
         name: "E-commerce Development",
         short: "Storefronts that sell, from boutique brands to marketplaces.",
         subs: ["Shopify", "Shopify Plus", "WooCommerce", "Magento", "BigCommerce", "Mirakl marketplaces", "Headless commerce"]
@@ -75,18 +76,21 @@ module.exports = [
       },
       {
         slug: "branding",
+        page: "digital-branding.html",
         name: "Digital Branding & Creatives",
         short: "Identities with a point of view, from logo to packaging.",
         subs: ["Logo design", "Corporate identity", "Brand guidelines", "Packaging design", "Brochure design", "Business card design"]
       },
       {
         slug: "video-animation",
+        page: "video-animation.html",
         name: "2D/3D Video Animation",
         short: "Explainers, product videos and walkthroughs that move people.",
         subs: ["Explainer videos", "Character animation", "Whiteboard animation", "Product demo videos", "Video game trailers", "Medical animation", "3D architectural walkthroughs"]
       },
       {
         slug: "copywriting",
+        page: "copywriting.html",
         name: "Copywriting",
         short: "Words that sound like you and sell like a pro.",
         subs: ["Website copy", "Ad & campaign copy", "Brand voice", "Content writing", "Arabic & English translation"]
@@ -101,6 +105,7 @@ module.exports = [
     services: [
       {
         slug: "artificial-intelligence",
+        page: "artificial-intelligence.html",
         name: "Artificial Intelligence",
         short: "Chatbots, automation and search that work while you sleep.",
         subs: ["AI chatbots", "Robotic process automation", "AI enterprise search", "Metaverse development"]
@@ -122,18 +127,21 @@ module.exports = [
     services: [
       {
         slug: "erp-crm",
+        page: "erp-crm.html",
         name: "ERP & CRM",
         short: "One connected system for finance, people, supply and sales.",
         subs: ["NetSuite", "SAP", "Microsoft Dynamics 365", "Oracle Cloud", "Odoo", "CRM development"]
       },
       {
         slug: "it-outsourcing",
+        page: "it-outsourcing.html",
         name: "IT Resource Outsourcing",
         short: "Vetted specialists who join your team in days.",
         subs: ["Hire scrum masters", "Hire project managers", "Hire SQA engineers", "Hire ReactJS developers", "Hire NodeJS developers", "Hire .NET developers", "Hire React Native developers", "Hire mobile app developers", "Hire SharePoint developers", "Hire Dynamics 365 developers", "Hire AWS resources", "Hire Azure developers"]
       },
       {
         slug: "cloud",
+        page: "cloud-transformation.html",
         name: "Cloud Transformation",
         short: "Move to the cloud and keep it secure, fast and affordable.",
         subs: ["Digital cloud transformation", "Cloud migration", "AWS", "Microsoft Azure", "Security & compliance"]

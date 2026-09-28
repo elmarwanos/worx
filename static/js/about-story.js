@@ -99,6 +99,44 @@
   var hasGsap = typeof gsap !== "undefined";
   var html = document.documentElement;
 
+  // Where a leader line leaves a HUD panel: the panel is tilted in 3D
+  // (perspective + rotateY), so its bounding box is not where its edge
+  // is drawn: the far edge recedes and each row there is pulled toward
+  // the panel's middle. This projects the row's real end point on that
+  // edge (the near edge when fromRight) through the panel's transform,
+  // in story px.
+  function leaderStart(panel, row, fromRight) {
+    var base = story.getBoundingClientRect();
+    var cs = getComputedStyle(panel);
+    var parent = panel.offsetParent;
+    if (!parent || cs.transform === "none" || typeof DOMMatrix === "undefined") {
+      var lr = panel.getBoundingClientRect(), r = (row || panel).getBoundingClientRect();
+      return { x: (fromRight ? lr.left : lr.right) - base.left, y: r.top + r.height / 2 - base.top };
+    }
+    // the row's middle, in the panel's own (untransformed) box
+    var y = panel.offsetHeight / 2;
+    if (row && row !== panel) {
+      var top = 0, el = row;
+      while (el && el !== panel) { top += el.offsetTop; el = el.offsetParent; }
+      if (el === panel) y = top + row.offsetHeight / 2;
+    }
+    var x = fromRight ? 0 : panel.offsetWidth;
+    var o = cs.transformOrigin.split(" ").map(parseFloat);
+    var p = new DOMMatrix(cs.transform).transformPoint(new DOMPoint(x - o[0], y - o[1], 0, 1));
+    var pr = parent.getBoundingClientRect();
+    return {
+      x: pr.left + parent.clientLeft + panel.offsetLeft + p.x / p.w + o[0] - base.left,
+      y: pr.top + parent.clientTop + panel.offsetTop + p.y / p.w + o[1] - base.top,
+    };
+  }
+  // ...and where it meets its target: on the outer ring's edge (17px),
+  // along the line's own heading, so it touches the ring from any angle.
+  var RING_R = 17;
+  function leaderEnd(kx, ky, tx, ty) {
+    var dx = tx - kx, dy = ty - ky, d = Math.sqrt(dx * dx + dy * dy) || 1;
+    return { x: tx - dx / d * RING_R, y: ty - dy / d * RING_R };
+  }
+
   // Shared with the star layer below: text panels the sky labels dim under.
   var occluders = [];
   var skyFx = null;
@@ -494,12 +532,10 @@
       if (hud.target) hud.target.style.transform = "translate(" + tx.toFixed(1) + "px," + ty.toFixed(1) + "px)";
       var li = origin ? hud.head : hud.stages[hud.stage];
       if (li && hud.line && hud.accent && hud.log && !isStacked()) {
-        var base = story.getBoundingClientRect();
-        var lr = hud.log.getBoundingClientRect();
-        var r = li.getBoundingClientRect();
-        var ax = lr.right - base.left, ay = r.top + r.height / 2 - base.top;
+        var st0 = leaderStart(hud.log, li, false);
+        var ax = st0.x, ay = st0.y;
         var kx = ax + Math.min(60, Math.max(24, (tx - ax) * 0.18));
-        var ex = tx - 20 * (tx >= kx ? 1 : -1), ey = ty;
+        var en = leaderEnd(kx, ay, tx, ty), ex = en.x, ey = en.y;
         hud.accent.setAttribute("points", ax.toFixed(1) + "," + ay.toFixed(1) + " " + kx.toFixed(1) + "," + ay.toFixed(1));
         hud.line.setAttribute("points", kx.toFixed(1) + "," + ay.toFixed(1) + " " + ex.toFixed(1) + "," + ey.toFixed(1));
       }
@@ -838,13 +874,11 @@
 
       var leader = function (fromEl, fromRight, rowEl, tx, ty, line, accent) {
         if (!fromEl || !line || !accent) return;
-        var base = story.getBoundingClientRect();
-        var lr = fromEl.getBoundingClientRect();
-        var r = (rowEl || fromEl).getBoundingClientRect();
-        var ax = (fromRight ? lr.left : lr.right) - base.left, ay = r.top + r.height / 2 - base.top;
+        var st0 = leaderStart(fromEl, rowEl, fromRight);
+        var ax = st0.x, ay = st0.y;
         var dir = tx >= ax ? 1 : -1;
         var kx = ax + dir * Math.min(60, Math.max(24, Math.abs(tx - ax) * 0.18));
-        var ex = tx - 20 * dir, ey = ty;
+        var en = leaderEnd(kx, ay, tx, ty), ex = en.x, ey = en.y;
         accent.setAttribute("points", ax.toFixed(1) + "," + ay.toFixed(1) + " " + kx.toFixed(1) + "," + ay.toFixed(1));
         line.setAttribute("points", kx.toFixed(1) + "," + ay.toFixed(1) + " " + ex.toFixed(1) + "," + ey.toFixed(1));
       };

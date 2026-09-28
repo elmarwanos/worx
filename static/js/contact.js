@@ -374,16 +374,77 @@
     return group;
   }
 
+  // --- Question 1's cards: each is a mission module with a blueprint ---
+  // The blueprint draws itself in as the card arrives, comes alive under
+  // the pointer (each in its own way, contact.css) and glows once picked;
+  // the card tilts toward the pointer. Purely decorative: the radio and
+  // its label are unchanged.
+  var BUILD_ART = {
+    "website": '<rect x="6" y="6" width="108" height="60" rx="5"/><path d="M6 16h108"/><circle cx="13" cy="11" r="1.6"/><circle cx="19" cy="11" r="1.6"/><circle cx="25" cy="11" r="1.6"/><g class="ba-a"><path d="M16 28h44"/><path d="M16 36h32"/><path d="M16 44h38"/></g><rect class="ba-b" x="72" y="24" width="32" height="30" rx="3"/><path class="ba-b" d="M72 48l10-9 7 6 6-4 9 7"/>',
+    "web-app": '<rect x="6" y="6" width="108" height="60" rx="5"/><path d="M30 6v60"/><g class="ba-a"><path d="M12 18h12"/><path d="M12 26h12"/><path d="M12 34h12"/></g><g class="ba-b"><path d="M44 56V42"/><path d="M56 56V32"/><path d="M68 56V46"/><path d="M80 56V26"/><path d="M92 56V38"/></g><circle class="ba-c" cx="102" cy="16" r="4"/>',
+    "mobile-app": '<rect x="42" y="4" width="36" height="64" rx="7"/><path d="M54 9h12"/><g class="ba-a"><rect x="47" y="16" width="26" height="18" rx="2"/><path d="M47 42h26"/><path d="M47 49h18"/><path d="M47 56h22"/></g><g class="ba-c"><path d="M26 30l-8 6 8 6"/><path d="M94 30l8 6-8 6"/></g>',
+    "platform": '<circle cx="60" cy="36" r="8"/><circle cx="20" cy="16" r="5"/><circle cx="100" cy="16" r="5"/><circle cx="20" cy="56" r="5"/><circle cx="100" cy="56" r="5"/><g class="ba-l"><path d="M25 18l28 13"/><path d="M95 18l-28 13"/><path d="M25 54l28-13"/><path d="M95 54l-28-13"/></g><g class="ba-p"><path d="M25 18l28 13"/><path d="M95 54l-28-13"/></g>',
+    "unsure": '<g class="ba-o"><ellipse cx="60" cy="36" rx="40" ry="13"/></g><g class="ba-o2"><ellipse cx="60" cy="36" rx="20" ry="30"/></g><circle class="ba-s" cx="60" cy="36" r="4"/><circle class="ba-c" cx="100" cy="36" r="2.4"/><circle class="ba-c" cx="60" cy="6" r="1.8"/>'
+  };
+  var BUILD_CODE = { "website": "WEB", "web-app": "APP", "mobile-app": "MOB", "platform": "SYS", "unsure": "IDEA" };
+  var fineHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function dressBuildCards(group) {
+    var cards = group.querySelectorAll(".cw-option");
+    Array.prototype.forEach.call(cards, function (card, i) {
+      var input = card.querySelector("input");
+      var v = input ? input.value : "";
+      var art = document.createElement("span");
+      art.className = "cw-build-art";
+      art.setAttribute("aria-hidden", "true");
+      art.innerHTML = '<svg viewBox="0 0 120 72">' + (BUILD_ART[v] || "") + "</svg>" +
+        '<span class="cw-build-code">MODULE 0' + (i + 1) + " · " + (BUILD_CODE[v] || "") + "</span>";
+      // every stroke draws in (pathLength 1 makes one dash fit any shape)
+      Array.prototype.forEach.call(art.querySelectorAll("path, rect, circle, ellipse"), function (el, k) {
+        el.setAttribute("pathLength", "1");
+        el.style.setProperty("--k", k);
+      });
+      card.style.setProperty("--i", i);
+      card.insertBefore(art, card.querySelector(".cw-option-body"));
+      var vf = document.createElement("span");
+      vf.className = "cw-build-vf";
+      vf.setAttribute("aria-hidden", "true");
+      card.appendChild(vf);
+      if (!fineHover || reducedMotion) return;
+      // the card leans toward the pointer
+      card.addEventListener("pointermove", function (e) {
+        var r = card.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+        card.style.setProperty("--ry", ((x - 0.5) * 10).toFixed(2) + "deg");
+        card.style.setProperty("--rx", ((0.5 - y) * 8).toFixed(2) + "deg");
+        card.style.setProperty("--mx", (x * 100).toFixed(1) + "%");
+        card.style.setProperty("--my", (y * 100).toFixed(1) + "%");
+      });
+      card.addEventListener("pointerleave", function () {
+        card.style.setProperty("--ry", "0deg");
+        card.style.setProperty("--rx", "0deg");
+      });
+    });
+    // a pick locks on: the brackets snap in and a scan crosses the card
+    group.addEventListener("change", function (e) {
+      var card = e.target.closest(".cw-option");
+      if (!card) return;
+      card.classList.remove("is-locking"); void card.offsetWidth; card.classList.add("is-locking");
+    });
+  }
+
   // --- Question 1: what to build + their idea, in their own words ----
   function renderBuild() {
     var box = h("div", null);
-    box.appendChild(renderCards(BUILD_OPTIONS, "buildType", state.form.buildType,
+    var buildCards = renderCards(BUILD_OPTIONS, "buildType", state.form.buildType,
       "What do you want to build?", function (value) {
         state.form.buildType = value;
         clearError();
         renderProgress();
         saveState();
-      }, "cw-options--build"));
+      }, "cw-options--build");
+    dressBuildCards(buildCards);
+    box.appendChild(buildCards);
 
     var idea = h("div", { "class": "cw-followup" }, [
       h("p", { "class": "cw-followup-title" }, ["Tell us about your idea (optional)"]),

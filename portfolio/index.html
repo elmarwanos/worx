@@ -681,7 +681,8 @@
 <body data-page="portfolio">
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <header class="site-header">
+  <!--WORX:HEADER-->
+<header class="site-header">
     <div class="nav-bar">
       <a class="brand" href="../index.html"><img class="brand-mark" src="../static/assets/mark.png" alt="" width="40" height="40"><span class="brand-text">WORX<small>&lt;like/magic&gt;</small></span></a>
       <nav class="nav-links" id="site-nav" aria-label="Main navigation">
@@ -756,14 +757,14 @@
             <div class="mega-foot">
               <span><b>13</b> services · <b>100+</b> capabilities · one crew</span>
               <a href="../services/index.html" class="mega-all">View all services <span aria-hidden="true">→</span></a>
-              <a href="../contact/index.html" class="btn btn-primary mega-cta">Talk to Mission Control</a>
+              <a href="../contact/index.html" class="btn btn-primary mega-cta">Get a Quote</a>
             </div>
           </div>
         </div>
         <!--/WORX:GEN mega-->
         <a href="../portfolio/index.html" data-nav="portfolio">Portfolio</a>
         <a href="../blogs/index.html" data-nav="blogs">Blog</a>
-        <a href="../contact/index.html" data-nav="contact" class="nav-link--panel">Open channel</a>
+        <a href="../contact/index.html" data-nav="contact" class="nav-link--panel">Make Contact</a>
         <!-- in the mobile menu panel only: language + direct contact -->
         <div class="nav-panel-foot">
           <div class="lang-switch" role="group" aria-label="Language">
@@ -781,7 +782,7 @@
           <button type="button" class="lang-opt is-active" data-lang="en" lang="en" aria-pressed="true">EN</button>
           <button type="button" class="lang-opt" data-lang="ar" lang="ar" aria-pressed="false">AR</button>
         </div>
-        <a class="btn-spark" href="../contact/index.html" data-nav="contact"><span class="btn-spark-bg" aria-hidden="true"></span><span class="btn-spark-txt"><span class="btn-spark-long">Open Channel</span><span class="btn-spark-short">Open Channel</span></span></a>
+        <a class="btn-spark" href="../contact/index.html" data-nav="contact"><span class="btn-spark-bg" aria-hidden="true"></span><span class="btn-spark-txt"><span class="btn-spark-long">Make Contact</span><span class="btn-spark-short">Make Contact</span></span></a>
         <a class="nav-circle nav-circle--bar" href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a>
         <a class="nav-circle nav-circle--bar" href="tel:+971555669847" aria-label="Call +971 55 566 9847"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
         <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
@@ -789,6 +790,7 @@
       <span class="nav-progress" aria-hidden="true"></span>
     </div>
   </header>
+  <!--/WORX:HEADER-->
 
   <main id="main">
     <!-- the About sky carried on behind the archive: stars, Earth · Moon
@@ -922,16 +924,40 @@
         <p class="pf-kicker"><i aria-hidden="true"></i>Mission archive <span aria-hidden="true">WX-ARC · 18 FILES</span></p>
         <h2 class="pf-reel-title" id="folio-work-title">Every mission, <span class="gradient-text">on the record</span></h2>
         <p class="pf-reel-lede">Sixteen live transmissions and two in final countdown. Point at a screen to see it in its true colours; open it to visit it live.</p>
-        <div class="pf-filter" role="group" aria-label="Filter projects">
-          <button type="button" class="is-on" data-filter="all" aria-pressed="true">All <b>18</b></button>
-          <button type="button" data-filter="web" aria-pressed="false">Websites</button>
-          <button type="button" data-filter="commerce" aria-pressed="false">E-commerce</button>
-          <button type="button" data-filter="apps" aria-pressed="false">Apps</button>
-          <button type="button" data-filter="campaigns" aria-pressed="false">Campaigns</button>
+        <!-- THE SECTOR TUNER: the archive, charted by industry, tuned like a
+             radio. The sectors are stations on a frequency band; the one
+             under the needle is the one playing. Click a station and the
+             band glides it under the needle; on touch screens the band
+             itself is swiped, and whichever station settles under the needle
+             is tuned in. The display above decodes the sector's name as it
+             locks. Past the title the side rail takes over (portfolio.js,
+             "sector scanner"). Counts are filled from the files themselves. -->
+        <div class="pf-scan-slot" data-scan-slot>
+          <div class="pf-scan pf-tuner" role="group" aria-label="Filter projects by industry" data-scan>
+            <div class="pf-tuner-top">
+              <p class="pf-scan-read"><span class="pf-scan-tag"><i aria-hidden="true"></i>Sector tuner</span><span class="pf-tuner-freq" aria-hidden="true"><b data-scan-freq>88.0</b> MHz</span></p>
+              <p class="pf-tuner-display" aria-live="polite"><strong class="pf-tuner-name" data-scan-name>All sectors</strong><span class="pf-scan-out"><b data-scan-n>18</b> signals</span></p>
+            </div>
+            <div class="pf-tuner-dial">
+              <canvas class="pf-tuner-wave" aria-hidden="true"></canvas>
+              <div class="pf-tuner-band" data-scan-band>
+                <button type="button" class="pf-station is-on" data-industry="all" data-freq="88.0" aria-pressed="true"><span class="pf-station-name">All sectors</span> <b>18</b><small aria-hidden="true">88.0</small></button>
+                <button type="button" class="pf-station" data-industry="automotive" data-freq="91.4" aria-pressed="false"><span class="pf-station-name">Automotive</span> <b>02</b><small aria-hidden="true">91.4</small></button>
+                <button type="button" class="pf-station" data-industry="luxury" data-freq="94.7" aria-pressed="false"><span class="pf-station-name">Luxury</span> <b>04</b><small aria-hidden="true">94.7</small></button>
+                <button type="button" class="pf-station" data-industry="technology" data-freq="97.9" aria-pressed="false"><span class="pf-station-name">Technology</span> <b>05</b><small aria-hidden="true">97.9</small></button>
+                <button type="button" class="pf-station" data-industry="realestate" data-freq="101.2" aria-pressed="false"><span class="pf-station-name">Real Estate</span> <b>03</b><small aria-hidden="true">101.2</small></button>
+                <button type="button" class="pf-station" data-industry="agency" data-freq="103.6" aria-pressed="false"><span class="pf-station-name">Agency &amp; Culture</span> <b>02</b><small aria-hidden="true">103.6</small></button>
+                <button type="button" class="pf-station" data-industry="lifestyle" data-freq="105.8" aria-pressed="false"><span class="pf-station-name">Lifestyle &amp; Travel</span> <b>02</b><small aria-hidden="true">105.8</small></button>
+                <button type="button" class="pf-station" data-industry="campaigns" data-freq="107.5" aria-pressed="false"><span class="pf-station-name">Campaigns</span> <b>03</b><small aria-hidden="true">107.5</small></button>
+              </div>
+              <span class="pf-tuner-needle" aria-hidden="true"><i></i></span>
+            </div>
+            <span class="pf-scan-sweep" aria-hidden="true"></span>
+          </div>
         </div>
       </div>
       <ol class="pf-reel container" data-reel>
-        <li class="pf-file" data-type="apps" data-name="Hyundai">
+        <li class="pf-file" data-industry="automotive" data-name="Hyundai">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 01 · HYUNDAI</span><span class="pf-tc">00:00:00:00</span></div>
@@ -954,7 +980,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="web" data-name="The Glimpse Project">
+        <li class="pf-file" data-industry="agency" data-name="The Glimpse Project">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 02 · THE GLIMPSE PROJECT</span><span class="pf-tc">00:00:00:00</span></div>
@@ -977,7 +1003,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="web" data-name="Genesis">
+        <li class="pf-file" data-industry="automotive" data-name="Genesis">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 03 · GENESIS</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1000,7 +1026,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="web" data-name="LG &amp; LG Kitchen Planner">
+        <li class="pf-file" data-industry="technology" data-name="LG &amp; LG Kitchen Planner">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 04 · LG &amp; LG KITCHEN PLANNER</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1023,7 +1049,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="campaigns" data-name="Hisense">
+        <li class="pf-file" data-industry="technology campaigns" data-name="Hisense">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 05 · HISENSE</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1046,7 +1072,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file pf-file--soon" data-type="web" data-name="Casio &amp; Casio Music">
+        <li class="pf-file pf-file--soon" data-industry="technology" data-name="Casio &amp; Casio Music">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 06 · CASIO &amp; CASIO MUSIC</span><span class="pf-tc">T&minus; --:--</span></div>
@@ -1068,7 +1094,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="commerce" data-name="Chaumet">
+        <li class="pf-file" data-industry="luxury" data-name="Chaumet">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 07 · CHAUMET</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1091,7 +1117,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="web" data-name="Modon">
+        <li class="pf-file" data-industry="realestate" data-name="Modon">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 08 · MODON</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1114,7 +1140,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="web" data-name="Duni Middle East">
+        <li class="pf-file" data-industry="lifestyle" data-name="Duni Middle East">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 09 · DUNI MIDDLE EAST</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1137,7 +1163,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="web" data-name="UAE Pavilion">
+        <li class="pf-file" data-industry="agency campaigns" data-name="UAE Pavilion">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 10 · UAE PAVILION</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1160,7 +1186,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="web" data-name="Hudayriyat Mar Vista">
+        <li class="pf-file" data-industry="realestate" data-name="Hudayriyat Mar Vista">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 11 · HUDAYRIYAT MAR VISTA</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1183,7 +1209,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="apps" data-name="Wealthface">
+        <li class="pf-file" data-industry="technology" data-name="Wealthface">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 12 · WEALTHFACE</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1206,7 +1232,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="commerce" data-name="Watch Trade Co.">
+        <li class="pf-file" data-industry="luxury" data-name="Watch Trade Co.">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 13 · WATCH TRADE CO.</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1229,7 +1255,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="web" data-name="Watch Locater">
+        <li class="pf-file" data-industry="luxury" data-name="Watch Locater">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 14 · WATCH LOCATER</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1252,7 +1278,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file pf-file--soon" data-type="web" data-name="SEPHORiA">
+        <li class="pf-file pf-file--soon" data-industry="technology" data-name="SEPHORiA">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 15 · SEPHORIA</span><span class="pf-tc">T&minus; --:--</span></div>
@@ -1274,7 +1300,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="web" data-name="Sail Naxos">
+        <li class="pf-file" data-industry="lifestyle" data-name="Sail Naxos">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 16 · SAIL NAXOS</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1297,7 +1323,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="web" data-name="Tailor &amp; Tweak">
+        <li class="pf-file" data-industry="luxury" data-name="Tailor &amp; Tweak">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 17 · TAILOR &amp; TWEAK</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1320,7 +1346,7 @@
             </div>
           </article>
         </li>
-        <li class="pf-file" data-type="campaigns" data-name="Tiara Dream">
+        <li class="pf-file" data-industry="realestate campaigns" data-name="Tiara Dream">
           <article class="pf-card">
             <div class="pf-screen">
               <div class="pf-bar" aria-hidden="true"><span class="pf-rec"></span><span class="pf-call">FILE 18 · TIARA DREAM</span><span class="pf-tc">00:00:00:00</span></div>
@@ -1356,7 +1382,8 @@
 
   </main>
 
-  <footer class="site-footer">
+  <!--WORX:FOOTER-->
+<footer class="site-footer">
     <div class="container">
       <div class="footer-brand">
         <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png" alt="Worx" width="132" height="181"></a>
@@ -1381,7 +1408,7 @@
             <li>Publishing Pavilion Bldg - Unit 709 - Me'aisem First - Dubai Production City - Dubai</li>
             <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
             <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
-            <li class="footer-cta-item"><a class="footer-cta" href="../contact/index.html">Talk to Mission Control <span aria-hidden="true">→</span></a></li>
+            <li class="footer-cta-item"><a class="footer-cta" href="../contact/index.html">Get a Quote <span aria-hidden="true">→</span></a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -1463,6 +1490,7 @@
       </div>
     </div>
   </footer>
+  <!--/WORX:FOOTER-->
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>

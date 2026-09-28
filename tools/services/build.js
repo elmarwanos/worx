@@ -16,6 +16,7 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "../..");
 const catalogue = require("./catalogue.js");
 
+const nl0 = (s) => (s.includes("\r\n") ? "\r\n" : "\n");
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const pad = (n) => String(n).padStart(2, "0");
 
@@ -108,39 +109,21 @@ function megaMenu(prefix) {
             <div class="mega-foot">
               <span><b>${services.length}</b> services · <b>${capRounded}+</b> capabilities · one crew</span>
               <a href="${prefix}services/index.html" class="mega-all">View all services <span aria-hidden="true">→</span></a>
-              <a href="${prefix}contact/index.html" class="btn btn-primary mega-cta">Talk to Mission Control</a>
+              <a href="${prefix}contact/index.html" class="btn btn-primary mega-cta">Get a Quote</a>
             </div>
           </div>
         </div>`;
 }
 
-function walk(dir, out) {
-  for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (["node_modules", ".git", "tools", "static"].includes(f.name)) continue;
-    const p = path.join(dir, f.name);
-    if (f.isDirectory()) walk(p, out);
-    else if (f.name.endsWith(".html")) out.push(p);
-  }
-  return out;
-}
-
-let menuCount = 0;
-for (const file of walk(ROOT, [])) {
-  let html = fs.readFileSync(file, "utf8");
-  const depth = path.relative(ROOT, path.dirname(file)).split(path.sep).filter(Boolean).length;
-  const prefix = "../".repeat(depth);
-  const block = `<!--WORX:GEN mega-->${megaMenu(prefix)}\n        <!--/WORX:GEN mega-->`;
-
-  if (html.includes("<!--WORX:GEN mega-->")) {
-    html = html.replace(/<!--WORX:GEN mega-->[\s\S]*?<!--\/WORX:GEN mega-->/, block);
-  } else {
-    const link = /<a href="[^"]*services\/index\.html" data-nav="services">Services<\/a>/;
-    if (!link.test(html)) continue;
-    html = html.replace(link, block);
-  }
-  fs.writeFileSync(file, html);
-  menuCount++;
-}
+// The mega menu lives in the one site header (partials/header.html);
+// tools/site/build.js stamps that header into every page (run below).
+const headerFile = path.join(ROOT, "partials/header.html");
+let header = fs.readFileSync(headerFile, "utf8");
+if (!header.includes("<!--WORX:GEN mega-->")) throw new Error("partials/header.html has no <!--WORX:GEN mega--> block");
+const megaBlock = `<!--WORX:GEN mega-->${megaMenu("{{root}}")}\n        <!--/WORX:GEN mega-->`.replace(/\r?\n/g, nl0(header));
+header = header.replace(/<!--WORX:GEN mega-->[\s\S]*?<!--\/WORX:GEN mega-->/, () => megaBlock);
+fs.writeFileSync(headerFile, header);
+let menuCount = 1;
 
 /* ---- 2. Services page --------------------------------------- */
 
@@ -176,20 +159,29 @@ const SHAPES = {
   5: [[-0.9, 0.5], [-0.55, -0.45], [0.1, -0.8], [0.55, 0.05], [0.95, 0.75]]
 };
 
-function layout(cols, rows, spreadX, spreadY) {
+// On phones a column is half as wide, so labels on the same row run
+// together: there three stars step down from right to left, and four
+// sit on a diamond (left, top, right, bottom), each label clear of its
+// neighbours down to a 320px screen.
+const MOB_SHAPES = Object.assign({}, SHAPES, {
+  3: [[-0.72, 0.75], [0, -0.75], [0.9, 1.25]],
+  4: [[-0.9, 0.3], [0, -1.0], [1.05, 0.5], [0, 1.5]]
+});
+
+function layout(cols, rows, spreadX, spreadY, shapes = SHAPES) {
   return catalogue.map((d, i) => {
     // A short last row is centred instead of left-aligned
     const row = Math.floor(i / cols);
     const inRow = Math.min(cols, catalogue.length - row * cols);
     const cx = ((i % cols) + 0.5 + (cols - inRow) / 2) / cols * 100;
     const cy = (Math.floor(i / cols) + 0.5) / rows * 100;
-    const pts = SHAPES[d.services.length].map(([x, y]) => [cx + x * spreadX, cy + y * spreadY]);
+    const pts = shapes[d.services.length].map(([x, y]) => [cx + x * spreadX, cy + y * spreadY]);
     return { cx, cy, pts };
   });
 }
 
 const desk = layout(3, 2, 10, 15);
-const mob = layout(2, Math.ceil(catalogue.length / 2), 14, 8);
+const mob = layout(2, Math.ceil(catalogue.length / 2), 14, 8, MOB_SHAPES);
 
 function lines(lay) {
   return lay.map((g) => g.pts.slice(1).map((p, k) => {
@@ -198,14 +190,23 @@ function lines(lay) {
   }).join("")).join("");
 }
 
+// Each division is charted as a real constellation that suits its work
+// (the home page's star chart names its reasons the same way):
+// Fornax the furnace, Pyxis the compass you carry, Pictor the painter's
+// easel, Nova the new star, Norma the carpenter's square.
+const CONSTELLATIONS = { development: "Fornax", mobile: "Pyxis", creative: "Pictor", emerging: "Nova", it: "Norma" };
+
 let starIndex = 0;
 const stars = catalogue.map((d, i) => {
-  const label = `<span class="cx-const-label" style="--x:${desk[i].cx.toFixed(2)}%;--y:${(desk[i].cy - 21).toFixed(2)}%;--mx:${mob[i].cx.toFixed(2)}%;--my:${(mob[i].cy - 13).toFixed(2)}%"><b>${pad(i + 1)}</b>${esc(d.name)}</span>`;
+  const label = `<span class="cx-const-label" style="--x:${desk[i].cx.toFixed(2)}%;--y:${(desk[i].cy - 21).toFixed(2)}%;--mx:${mob[i].cx.toFixed(2)}%;--my:${(mob[i].cy - 13).toFixed(2)}%"><b>${CONSTELLATIONS[d.id] || ""}</b><i aria-hidden="true">·</i>${esc(d.name)}</span>`;
   const btns = d.services.map((s, k) => {
     const [x, y] = desk[i].pts[k];
     const [mx, my] = mob[i].pts[k];
     const size = (10 + Math.min(s.subs.length, 17) * 0.9).toFixed(1);
-    return `<button class="cx-star" type="button" data-star="${starIndex++}" style="--x:${x.toFixed(2)}%;--y:${y.toFixed(2)}%;--mx:${mx.toFixed(2)}%;--my:${my.toFixed(2)}%;--s:${size}px;--d:${(Math.random() * 3).toFixed(2)}s" aria-label="${esc(s.name)}, ${esc(d.name)}"><i></i><span>${esc(s.name)}</span></button>`;
+    // on desktop the four-star line's top star carries its label above it,
+    // clear of the star it rises over (services.css .cx-star--up)
+    const up = d.services.length === 4 && k === 1 ? " cx-star--up" : "";
+    return `<button class="cx-star${up}" type="button" data-star="${starIndex++}" style="--x:${x.toFixed(2)}%;--y:${y.toFixed(2)}%;--mx:${mx.toFixed(2)}%;--my:${my.toFixed(2)}%;--s:${size}px;--d:${(Math.random() * 3).toFixed(2)}s" aria-label="${esc(s.name)}, ${esc(d.name)}"><i></i><span>${esc(s.name)}</span></button>`;
   }).join("");
   return label + btns;
 }).join("");
@@ -244,5 +245,6 @@ page = replaceBlock(page, "catalogue-json", `\n  <script type="application/json"
 
 fs.writeFileSync(pageFile, page);
 
-console.log(`mega menu written to ${menuCount} pages`);
+console.log("mega menu written to partials/header.html");
+require("../site/build.js");
 console.log(`${catalogue.length} divisions, ${services.length} services, ${capCount} capabilities`);

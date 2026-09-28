@@ -398,10 +398,11 @@
 }
 
 /* ---- THE TITLE CARD -------------------------------------------- */
-/* Black. The pen-point. WORX born out of it (each letter streams out
-   from the centre, --o = its offset in letter widths), a light sweeps
-   it, then it is drawn back into the point, which erupts. home.js runs
-   the states: .is-card (black), .is-born, .is-gone. */
+/* Where the film comes to rest. The pen-point dies out, black, then
+   WORX appears out of the dark (each letter streams out from the
+   centre, --o = its offset in letter widths), a light sweeps it, and
+   it holds: the headline and the actions return under it. home.js runs
+   the states: .is-card (black), .is-born, .is-final. */
 .hx-card {
   position: absolute;
   inset: 0;
@@ -456,19 +457,10 @@
 .hx.is-born .hx-card-word span:nth-child(3) { animation-delay: 0.1s; }
 .hx.is-born .hx-card-word span:nth-child(4) { animation-delay: 0.15s; }
 
-.hx.is-gone .hx-card-word span {
-  animation: hx-gone 0.5s cubic-bezier(0.7, 0, 0.84, 0) both;
-}
-
 @keyframes hx-born {
   0%   { opacity: 0; transform: translateX(calc(var(--o) * 1em)) scale(0.06); filter: blur(24px) brightness(3); }
   35%  { opacity: 1; }
   100% { opacity: 1; transform: none; filter: blur(0) brightness(1) drop-shadow(0 0 34px rgba(229, 125, 35, 0.45)); }
-}
-
-@keyframes hx-gone {
-  0%   { opacity: 1; transform: none; filter: blur(0) brightness(1); }
-  100% { opacity: 0; transform: translateX(calc(var(--o) * 1em)) scale(0.04); filter: blur(18px) brightness(4); }
 }
 
 /* the light sweeping the word while it holds */
@@ -488,28 +480,8 @@
 
 @keyframes hx-sweep { to { transform: translateX(120%); } }
 
-.hx-card-tag {
-  font-family: var(--font-mono);
-  font-size: clamp(0.7rem, 1.1vw, 0.95rem);
-  letter-spacing: 0.5em;
-  color: var(--accent-2);
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.hx.is-born .hx-card-tag {
-  opacity: 0.85;
-  transform: none;
-  transition: opacity 0.7s ease 0.55s, transform 0.9s var(--hm-ease) 0.55s;
-}
-
-.hx.is-gone .hx-card-tag {
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
 /* the singularity the universe collapses into, and the flash it
-   erupts from as the film begins again */
+   erupts from as the film begins */
 .hx-point,
 .hx-flash {
   position: absolute;
@@ -862,9 +834,9 @@
 }
 
 .hx:not(.is-ready) .hx-say,
-.hx.is-card .hx-say,
+.hx.is-card:not(.is-final) .hx-say,
 .hx:not(.is-ready) .hx-cta,
-.hx.is-card .hx-cta {
+.hx.is-card:not(.is-final) .hx-cta {
   opacity: 0;
   transform: translateY(18px);
   pointer-events: none;
@@ -2229,9 +2201,9 @@
   position: relative;
   display: grid;
   place-items: center;
-  padding: clamp(18px, 2.2vw, 30px) clamp(14px, 2vw, 26px) 22px;
+  padding: clamp(14px, 1.76vw, 24px) clamp(11px, 1.6vw, 21px) 18px;
   border: 1px solid var(--hm-line);
-  border-radius: 26px;
+  border-radius: 21px;
   background:
     radial-gradient(circle at 50% 42%, rgba(229, 125, 35, 0.1), transparent 60%),
     rgba(10, 4, 3, 0.55);
@@ -2241,8 +2213,8 @@
 
 .hm-dial svg {
   grid-area: 1 / 1;
-  width: 100%;
-  max-width: 230px;
+  width: 80%;
+  max-width: 184px;
   height: auto;
   overflow: visible;
   transform: rotate(-90deg);
@@ -2324,13 +2296,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   text-align: center;
 }
 
 .hm-dial-read strong {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 3.6vw, 3.3rem);
+  font-size: clamp(1.6rem, 2.88vw, 2.64rem);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.04em;
@@ -2340,7 +2312,7 @@
 
 .hm-dial-read > span {
   max-width: 13ch;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   line-height: 1.35;
   color: var(--muted);
 }
@@ -2349,7 +2321,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 13px;
   font-family: var(--font-mono);
   font-size: 0.58rem;
   letter-spacing: 0.24em;
@@ -2396,6 +2368,12 @@
 
 @media (max-width: 1000px) {
   .hm-dials { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* the narrowest phones: the card is already as small as the ring can
+   go and still hold its reading, so the ring takes the card width */
+@media (max-width: 374px) {
+  .hm-dial svg { width: 100%; }
 }
 
 @media (max-width: 760px) {
@@ -3942,7 +3920,7 @@
   .hm-arc-trail, .hm-arc-craft { display: none; }
   .hm-fclock-ladder li.is-now, .hm-stage.is-live .hm-stage-st i, .hm-fclock.is-go .hm-fclock-row::after { animation: none; }
   .hx-star-rays { animation: none; }
-  .hx.is-born .hx-card-word span, .hx.is-gone .hx-card-word span { animation: none; opacity: 1; }
+  .hx.is-born .hx-card-word span { animation: none; opacity: 1; }
   .hx-line > span,
   .hm-split-line > span { transform: none !important; transition: none !important; }
   .hx:not(.is-ready) .hx-eyebrow,
@@ -4677,67 +4655,6 @@ html.hm-sheet-lock body { overflow: hidden; }
   .hm-dock-txt, .hm-dock-caret, .hm-dock-btn { transition: none; }
   .hm-dock.is-tick .hm-dock-btn::after { animation: none; }
 }
-
-/* ---- targeting reticle (fine pointers only) -------------------- */
-.hm-reticle {
-  --w: 38px;
-  --h: 38px;
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 200;
-  width: var(--w);
-  height: var(--h);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  will-change: transform;
-}
-
-.hm.has-reticle .hm-reticle { opacity: 1; }
-.hm.has-reticle,
-.hm.has-reticle a,
-.hm.has-reticle button { cursor: none; }
-
-.hm-reticle i {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border: 0 solid var(--accent-2);
-  transition: border-color 0.3s ease;
-}
-
-.hm-reticle i:nth-child(1) { left: 0; top: 0; border-width: 1.5px 0 0 1.5px; }
-.hm-reticle i:nth-child(2) { right: 0; top: 0; border-width: 1.5px 1.5px 0 0; }
-.hm-reticle i:nth-child(3) { left: 0; bottom: 0; border-width: 0 0 1.5px 1.5px; }
-.hm-reticle i:nth-child(4) { right: 0; bottom: 0; border-width: 0 1.5px 1.5px 0; }
-
-.hm-reticle b {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 4px;
-  height: 4px;
-  margin: -2px 0 0 -2px;
-  border-radius: 50%;
-  background: var(--text);
-  box-shadow: 0 0 8px rgba(250, 167, 25, 0.9);
-}
-
-.hm-reticle-read {
-  position: absolute;
-  left: calc(100% + 8px);
-  top: calc(100% + 4px);
-  font-family: var(--font-mono);
-  font-size: 0.56rem;
-  letter-spacing: 0.14em;
-  white-space: nowrap;
-  color: rgba(254, 238, 207, 0.6);
-}
-
-.hm-reticle.is-lock i { border-color: var(--text); }
-.hm-reticle.is-lock b { opacity: 0; }
-.hm-reticle.is-lock .hm-reticle-read { color: var(--accent-2); }
 
 /* ---- viewfinder frames on the films and worlds ------------------ */
 .hm-case-media,

@@ -1,12 +1,13 @@
 /* ============================================================
    Worx | reticle.js
-   The home page's targeting reticle, on every other page: four
+   The targeting reticle, on every page (home included): four
    corner brackets and a glowing dot follow the pointer, a mono
-   X/Y readout rides beside it, and over a link or button it locks
-   on (wraps the target, scrambles in "LOCK · LABEL"). Fine pointers
-   only, off for reduced motion; the header, the contact dock and
-   text fields keep the normal cursor. Home runs its own copy
-   (home.js), so this steps aside when .hm-reticle is on the page.
+   X/Y readout rides beside it, and over anything you can act on it
+   locks on: it frames the target and scrambles in "LOCK · LABEL".
+   What it frames: a small link or button, the whole of it; a wide
+   block link round a short line (a project title), the words; a
+   card, a film, a panel, the whole of it. Fine pointers only, off
+   for reduced motion; text fields keep the normal cursor.
 
    It never takes a click (pointer-events: none, components.css).
    The dot sits exactly on the pointer every frame, so aiming never
@@ -16,7 +17,6 @@
 (function () {
   "use strict";
 
-  if (document.querySelector(".hm-reticle")) return;
   if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
@@ -50,9 +50,32 @@
   // catch-up time constants (ms): the brackets land ~0.1s after the
   // pointer stops, the same on a 60Hz or a 144Hz screen
   var MOVE_MS = 26, SIZE_MS = 36;
-  var LOCKS = "a, button, [role=tab], summary, label, [data-reticle]";
+  var LOCKS = "a, button, [role=tab], [role=button], summary, label, [data-reticle], .hm-case, .hm-star, .hm-note, .is-docked .hud-story";
+  // whole units: aimed anywhere inside, the reticle frames all of it
+  var UNITS = ".hm-case, .hm-star, .hm-note";
   // over these the system cursor is the right one
-  var PLAIN = ".site-header, .qc-dock, input, textarea, select, [contenteditable], iframe";
+  var PLAIN = "input, textarea, select, [contenteditable], iframe";
+
+  // The frame for a target, in viewport px ({ l, t, w, h }), or null
+  // when it is too big to frame (a whole section): then the reticle
+  // stays its own size, riding the pointer.
+  function frameOf(t) {
+    var r = t.getBoundingClientRect();
+    if (!r.width || !r.height) return null;
+    if (r.width <= 260 && r.height <= 200) return { l: r.left - 7, t: r.top - 5, w: r.width + 14, h: r.height + 10 };
+    // a wide block link round a line of words (a project title, a
+    // footer link across its column): frame the words themselves
+    if (!t.querySelector("img, video, canvas, picture")) {
+      var rg = document.createRange();
+      rg.selectNodeContents(t);
+      var c = rg.getBoundingClientRect();
+      if (c.width && c.height && c.width <= 720 && c.height <= 220) return { l: c.left - 8, t: c.top - 6, w: c.width + 16, h: c.height + 12 };
+    }
+    // a card, a film, a panel: frame the whole of it (a whole section
+    // is too much to lock onto)
+    if (r.height > window.innerHeight * 0.9 || r.width > window.innerWidth * 0.95) return null;
+    return { l: r.left - 6, t: r.top - 6, w: r.width + 12, h: r.height + 12 };
+  }
 
   function show(on) {
     if (on === inside) return;
@@ -66,7 +89,7 @@
     target = t;
     ret.classList.toggle("is-lock", !!t);
     if (t) {
-      var label = (t.getAttribute("aria-label") || t.textContent || "").replace(/\s+/g, " ").trim().slice(0, 22).toUpperCase();
+      var label = (t.getAttribute("data-cursor") || t.getAttribute("aria-label") || t.textContent || "").replace(/\s+/g, " ").trim().slice(0, 22).toUpperCase();
       scramble(readEl, "LOCK · " + label, 260);
     } else {
       clearTimeout(readEl.__scr);
@@ -79,7 +102,7 @@
     if (!el || !el.closest) { show(false); return; }
     var ok = !el.closest(PLAIN);
     show(ok);
-    setTarget(ok ? el.closest(LOCKS) : null);
+    setTarget(ok ? el.closest(UNITS) || el.closest(LOCKS) : null);
     wake();
   }
 
@@ -124,11 +147,8 @@
     var km = 1 - Math.exp(-dt / MOVE_MS), ks = 1 - Math.exp(-dt / SIZE_MS);
     var tw = 38, th = 38, cx = px, cy = py;
     if (target && target.isConnected) {
-      var r = target.getBoundingClientRect();
-      var big = r.width > 260 || r.height > 200;
-      tw = big ? Math.min(r.width, 120) : r.width + 14;
-      th = big ? Math.min(r.height, 90) : r.height + 10;
-      if (!big) { cx = r.left + r.width / 2; cy = r.top + r.height / 2; }
+      var fr = frameOf(target);
+      if (fr) { tw = fr.w; th = fr.h; cx = fr.l + fr.w / 2; cy = fr.t + fr.h / 2; }
     } else if (inside) {
       var read = "X " + ("000" + Math.round(px)).slice(-4) + " · Y " + ("000" + Math.round(py)).slice(-4);
       if (read !== lastRead) { readEl.textContent = read; lastRead = read; }

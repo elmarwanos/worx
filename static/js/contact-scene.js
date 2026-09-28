@@ -130,8 +130,8 @@
     var lastSweep = 0, sweepAng = 0, lastT = 0;
     var t0 = now();
 
-    // brackets round a point, and a readout beside it
-    var lockBox = function (c, x, y, s, a, label, sub, wEdge) {
+    // brackets round a point
+    var brackets = function (c, x, y, s, a) {
       c.strokeStyle = "rgba(" + AMBER + "," + a.toFixed(3) + ")";
       c.lineWidth = 1.2;
       c.beginPath();
@@ -141,18 +141,32 @@
         c.lineTo(x + q[0] * s - q[0] * s * 0.5, y + q[1] * s);
       });
       c.stroke();
-      if (!label) return;
+    };
+    // where a contact's readout goes (whichever side has the room), as a
+    // box the labels can be kept apart by
+    var LABEL_GAP = 11;   // the brackets' settled size + a little air
+    var labelBox = function (c, x, y, label, sub, wEdge) {
       c.font = "500 10px 'JetBrains Mono', monospace";
-      // the readout on whichever side has the room
       var lw = Math.max(c.measureText(label).width, c.measureText(sub).width);
-      var left = wEdge && x + s + 8 + lw > wEdge - 12;
-      c.textAlign = left ? "right" : "left";
-      var lx = left ? x - s - 8 : x + s + 8;
+      var left = wEdge && x + LABEL_GAP + 8 + lw > wEdge - 12;
+      var lx = left ? x - LABEL_GAP - 8 : x + LABEL_GAP + 8;
+      return { left: left, lx: lx, y: y, l: left ? lx - lw : lx, r: left ? lx : lx + lw, t: y - 12, b: y + 14 };
+    };
+    var drawLabel = function (c, bx, a, label, sub) {
+      c.font = "500 10px 'JetBrains Mono', monospace";
+      c.textAlign = bx.left ? "right" : "left";
       c.fillStyle = "rgba(" + CREAM + "," + (0.95 * a).toFixed(3) + ")";
-      c.fillText(label, lx, y - 2);
+      c.fillText(label, bx.lx, bx.y - 2);
       c.fillStyle = "rgba(" + AMBER + "," + (0.8 * a).toFixed(3) + ")";
-      c.fillText(sub, lx, y + 11);
+      c.fillText(sub, bx.lx, bx.y + 11);
       c.textAlign = "left";
+    };
+    var clash = function (bx, placed) {
+      for (var i = 0; i < placed.length; i++) {
+        var p = placed[i];
+        if (bx.l < p.r + 10 && p.l < bx.r + 10 && bx.t < p.b + 4 && p.t < bx.b + 4) return true;
+      }
+      return false;
     };
 
     // where the title card sits, so the table takes the room it leaves:
@@ -274,18 +288,24 @@
       var prev = ((lastSweep % 6.283) + 6.283) % 6.283, cur = ((sa % 6.283) + 6.283) % 6.283;
       var order = contacts.slice().sort(function (x, y) { return Math.sin(x.a) * x.r - Math.sin(y.a) * y.r; });
       var near = null, nearD = 1e9;
+      // where each contact is, and how lit: worked out first, so the one
+      // the pointer holds is known before anything is drawn
       order.forEach(function (ct) {
         var aa = ((ct.a % 6.283) + 6.283) % 6.283;
         var crossed = prev <= cur ? (aa > prev && aa <= cur) : (aa > prev || aa <= cur);
         if (crossed) ct.hit = t;
-        var fix = P(ct.a, ct.r), top = [fix[0], fix[1] - ct.alt * R];
-        ct.sx = top[0]; ct.sy = top[1];
-        var d = Math.hypot(top[0] - mx0, top[1] - my0);
+        ct.fix = P(ct.a, ct.r);
+        ct.sx = ct.fix[0]; ct.sy = ct.fix[1] - ct.alt * R;
+        var d = Math.hypot(ct.sx - mx0, ct.sy - my0);
         if (d < nearD) { nearD = d; near = ct; }
         // (a still frame shows the few the sweep has just passed)
         var behind = ((sa - ct.a) % 6.283 + 6.283) % 6.283;
-        var age = reduced ? (behind < 1.6 ? 300 + behind * 3000 : 1e9) : t - ct.hit;
-        var life = Math.max(heat, Math.max(0, 1 - age / 5600));
+        ct.age = reduced ? (behind < 1.6 ? 300 + behind * 3000 : 1e9) : t - ct.hit;
+        ct.life = Math.max(heat, Math.max(0, 1 - ct.age / 5600));
+      });
+      var held = near && nearD < 90 && !mobile ? near : null;
+      order.forEach(function (ct) {
+        var fix = ct.fix, top = [ct.sx, ct.sy], age = ct.age, life = ct.life;
         var base = 0.16 + life * 0.84;
         // stem and its fix on the disc
         c.strokeStyle = "rgba(" + CREAM + "," + (0.12 + life * 0.3).toFixed(3) + ")";
@@ -302,19 +322,41 @@
         c.fillStyle = cgl; c.beginPath(); c.arc(top[0], top[1], 14, 0, 6.283); c.fill();
         c.fillStyle = "rgba(" + (life > 0.3 ? AMBER : CREAM) + "," + base.toFixed(3) + ")";
         c.beginPath(); c.arc(top[0], top[1], 2.4, 0, 6.283); c.fill();
-        // just acquired: brackets close in, its name and fix
-        if (life > 0.02 && !mobile) {
+        // just acquired: brackets close in (the held one gets its own)
+        if (life > 0.02 && !mobile && ct !== held) {
           var closeIn = reduced ? 1 : Math.min(1, age / 380);
-          var brg = Math.round(((ct.a * 180 / Math.PI) + 450) % 360);
-          lockBox(c, top[0], top[1], 16 - closeIn * 7, Math.min(1, life * 1.3), ct.name,
-            "BRG " + ("00" + brg).slice(-3) + "° · RNG " + (ct.r * 40).toFixed(1), w);
+          brackets(c, top[0], top[1], 16 - closeIn * 7, Math.min(1, life * 1.3));
         }
       });
       // the pointer locks the contact nearest it
-      if (near && nearD < 90 && !mobile) {
-        lockBox(c, near.sx, near.sy, 11 + Math.sin(t / 180) * 1.5, 1, near.name, near.id + " · LOCKED", w);
+      if (held) {
+        brackets(c, held.sx, held.sy, 11 + Math.sin(t / 180) * 1.5, 1);
         c.strokeStyle = "rgba(" + AMBER + ",0.35)"; c.lineWidth = 1;
-        c.beginPath(); c.moveTo(ox, oy); c.lineTo(near.sx, near.sy); c.stroke();
+        c.beginPath(); c.moveTo(ox, oy); c.lineTo(held.sx, held.sy); c.stroke();
+      }
+      // The readouts, one per contact, never on top of each other: the
+      // held contact first, then the freshest from the sweep. A readout
+      // that would land on one already placed eases out of the way (and
+      // back in when there's room), so a new contact taking over from a
+      // fading neighbour crossfades instead of printing over it.
+      if (!mobile) {
+        var placed = [];
+        var lit = contacts.filter(function (ct) { return ct === held || ct.life > 0.02 || ct.la > 0.01; });
+        lit.sort(function (x, y) { return (y === held) - (x === held) || y.life - x.life; });
+        lit.forEach(function (ct) {
+          var isHeld = ct === held;
+          var brg = Math.round(((ct.a * 180 / Math.PI) + 450) % 360);
+          var sub = isHeld ? ct.id + " · LOCKED" : "BRG " + ("00" + brg).slice(-3) + "° · RNG " + (ct.r * 40).toFixed(1);
+          var bx = labelBox(c, ct.sx, ct.sy, ct.name, sub, w);
+          var free = !clash(bx, placed);
+          var want = isHeld ? 1 : free ? Math.min(1, ct.life * 1.3) : 0;
+          var la = ct.la || 0;
+          // quick to clear the way, a touch slower to come back
+          la += (want - la) * (reduced ? 1 : want < la ? 0.35 : 0.2);
+          ct.la = la;
+          if (la > 0.01) drawLabel(c, bx, la, ct.name, sub);
+          if (free && want > 0.02) placed.push(bx);
+        });
       }
       lastSweep = sa;
 
@@ -420,7 +462,7 @@
       }, reduced ? 0 : 450);
       setTimeout(function () {
         done = false; v = 0; paint(); key.classList.remove("is-open", "is-holding");
-        if (say) say.textContent = "Hold to open the channel";
+        if (say) say.textContent = "Resume Journey";
         signal = ""; setSignal("idle");
       }, 2600);
     };
@@ -449,7 +491,7 @@
       holding = false;
       key.classList.remove("is-holding");
       if (!done) {
-        if (say) say.textContent = "Hold to open the channel";
+        if (say) say.textContent = "Resume Journey";
         statusEls.forEach(function (el) { el.textContent = LABELS[signal] || "STANDING BY"; });
         // a quick tap is a click: open straight away
         if (now() - pressT < 220) open();
