@@ -93,24 +93,6 @@
 .cx-letterbox span:first-child { top: 0; }
 .cx-letterbox span:last-child { bottom: 0; }
 
-.cx-countdown {
-  position: fixed;
-  inset: 0;
-  z-index: 151;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(6rem, 20vw, 16rem);
-  color: var(--brand-cream);
-}
-
-.cx-countdown span {
-  display: block;
-  line-height: 1;
-}
-
 /* ---- Left HUD: comms rail ----------------------------------- */
 
 .cx-comms {

@@ -1,7 +1,7 @@
 /* ============================================================
    Worx | services.js
    Drives the cinematic services page:
-   starfield, intro (letterbox + countdown), HUD clock and rails,
+   starfield, intro (letterbox + warp), HUD clock and rails,
    hero word slot, manifesto word scrub, horizontal fleet with
    six live scenes, star map, footage wall, velocity marquee,
    flight plan (the Worx sequence), mission builder.
@@ -162,32 +162,13 @@
   })();
 
   // =============================================================
-  // Intro: letterbox + countdown + warp, then the title rises.
-  // The countdown plays once per session; repeat visits get a
-  // quick warp only.
+  // Intro: letterbox + a quick warp, then the title rises.
   // =============================================================
-  var countdown = $("[data-countdown]");
   var intro = gsap.timeline({ defaults: { ease: "power3.out" } });
-  var seen = false;
-  try { seen = sessionStorage.getItem("cx-intro") === "1"; } catch (e) {}
-
-  if (!seen) {
-    ["3", "2", "1"].forEach(function (n, i) {
-      intro
-        .set(countdown, { textContent: n })
-        .fromTo(countdown, { scale: 1.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.28 })
-        .to(countdown, i < 2 ? { opacity: 0, scale: 0.7, duration: 0.2 } : { opacity: 0, scale: 3, duration: 0.35, ease: "power2.in" }, "+=0.08");
-    });
-    intro
-      .add(function () { stars.warpTo(40, 0.3); }, "<")
-      .add(function () { stars.warpTo(0, 2.2); }, "+=0.35");
-    try { sessionStorage.setItem("cx-intro", "1"); } catch (e) {}
-  } else {
-    intro.add(function () { stars.warpTo(18, 0.2); }).add(function () { stars.warpTo(0, 1.6); }, "+=0.3");
-  }
+  intro.add(function () { stars.warpTo(18, 0.2); }).add(function () { stars.warpTo(0, 1.6); }, "+=0.3");
 
   intro
-    .to(".cx-letterbox span:first-child", { yPercent: -100, duration: 1.1, ease: "power4.inOut" }, seen ? 0 : "-=0.5")
+    .to(".cx-letterbox span:first-child", { yPercent: -100, duration: 1.1, ease: "power4.inOut" }, 0)
     .to(".cx-letterbox span:last-child", { yPercent: 100, duration: 1.1, ease: "power4.inOut" }, "<")
     .to(".cx-title .cx-line > span", { yPercent: 0, y: 0, rotate: 0, duration: 1.2, stagger: 0.12 }, "-=0.6")
     .to(".cx-kicker", { opacity: 1, duration: 0.8 }, "-=0.9")
