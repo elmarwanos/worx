@@ -208,7 +208,7 @@ def main():
     print("encoding ...")
     x264 = ["-an", "-c:v", "libx264", "-preset", "slow", "-profile:v", "high", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-g", "60"]
     encode("hero-1440.mp4", ["-vf", GRADE + ",scale=2560:1440:flags=lanczos,unsharp=3:3:0.35"] + x264 + ["-crf", "22"])
-    encode("hero-1080.mp4", ["-vf", GRADE] + x264 + ["-crf", "21"])
+    encode("hero-1080-hq.mp4", ["-vf", GRADE] + x264 + ["-crf", "21"])
     encode("hero-720.mp4", ["-vf", GRADE + ",scale=1280:720:flags=lanczos"] + x264 + ["-crf", "23"])
     encode("hero-poster.jpg", ["-ss", "2.4", "-frames:v", "1", "-vf", GRADE + ",scale=1920:1080", "-q:v", "3"])
     print("done")
