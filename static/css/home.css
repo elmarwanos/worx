@@ -397,89 +397,6 @@
   75% { transform: translate(10%, -5%); } 87% { transform: translate(-7%, -9%); } 100% { transform: translate(0, 0); }
 }
 
-/* ---- THE TITLE CARD -------------------------------------------- */
-/* Where the film comes to rest. The pen-point dies out, black, then
-   WORX appears out of the dark (each letter streams out from the
-   centre, --o = its offset in letter widths), a light sweeps it, and
-   it holds: the headline and the actions return under it. home.js runs
-   the states: .is-card (black), .is-born, .is-final. */
-.hx-card {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2.2vmin;
-  background: #000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.35s ease;
-}
-
-.hx.is-card .hx-card { opacity: 1; }
-
-.hx-card-word {
-  position: relative;
-  display: flex;
-  font-family: var(--font-display);
-  font-size: clamp(4.5rem, 21vw, 22rem);
-  font-weight: 700;
-  line-height: 0.9;
-  letter-spacing: 0.08em;
-  padding-left: 0.08em;
-}
-
-.hx-card-word span {
-  display: inline-block;
-  /* the Worx gradient, laid across the whole word (each letter shows its
-     own slice of it, so the word reads as one ember -> amber sweep) */
-  background: linear-gradient(100deg, #c04527 0%, #e57d23 45%, #faa719 82%, #ffc86a 100%);
-  background-size: 400% 100%;
-  background-position: calc(var(--i, 0) * 33.333%) 0;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  opacity: 0;
-  filter: drop-shadow(0 0 34px rgba(229, 125, 35, 0.45));
-}
-
-.hx-card-word span:nth-child(2) { --i: 1; }
-.hx-card-word span:nth-child(3) { --i: 2; }
-.hx-card-word span:nth-child(4) { --i: 3; }
-
-.hx.is-born .hx-card-word span {
-  animation: hx-born 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.hx.is-born .hx-card-word span:nth-child(2) { animation-delay: 0.05s; }
-.hx.is-born .hx-card-word span:nth-child(3) { animation-delay: 0.1s; }
-.hx.is-born .hx-card-word span:nth-child(4) { animation-delay: 0.15s; }
-
-@keyframes hx-born {
-  0%   { opacity: 0; transform: translateX(calc(var(--o) * 1em)) scale(0.06); filter: blur(24px) brightness(3); }
-  35%  { opacity: 1; }
-  100% { opacity: 1; transform: none; filter: blur(0) brightness(1) drop-shadow(0 0 34px rgba(229, 125, 35, 0.45)); }
-}
-
-/* the light sweeping the word while it holds */
-.hx-card-word::after {
-  content: "";
-  position: absolute;
-  inset: -10% -20%;
-  background: linear-gradient(100deg, transparent 38%, rgba(255, 250, 240, 0.55) 50%, transparent 62%);
-  mix-blend-mode: overlay;
-  transform: translateX(-120%);
-  pointer-events: none;
-}
-
-.hx.is-born .hx-card-word::after {
-  animation: hx-sweep 1.4s var(--hm-ease) 0.55s both;
-}
-
-@keyframes hx-sweep { to { transform: translateX(120%); } }
-
 /* the singularity the universe collapses into, and the flash it
    erupts from as the film begins */
 .hx-point,
@@ -834,9 +751,7 @@
 }
 
 .hx:not(.is-ready) .hx-say,
-.hx.is-card:not(.is-final) .hx-say,
-.hx:not(.is-ready) .hx-cta,
-.hx.is-card:not(.is-final) .hx-cta {
+.hx:not(.is-ready) .hx-cta {
   opacity: 0;
   transform: translateY(18px);
   pointer-events: none;
@@ -3920,7 +3835,6 @@
   .hm-arc-trail, .hm-arc-craft { display: none; }
   .hm-fclock-ladder li.is-now, .hm-stage.is-live .hm-stage-st i, .hm-fclock.is-go .hm-fclock-row::after { animation: none; }
   .hx-star-rays { animation: none; }
-  .hx.is-born .hx-card-word span { animation: none; opacity: 1; }
   .hx-line > span,
   .hm-split-line > span { transform: none !important; transition: none !important; }
   .hx:not(.is-ready) .hx-eyebrow,
