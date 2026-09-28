@@ -2216,7 +2216,7 @@ body[data-page="about"] .site-footer {
   margin-top: 6px;
 }
 
-/* Same language as the header's "Speak to an expert" and the CTA band
+/* Same language as the header's "Talk to Mission Control" and the CTA band
    (components.css): the brand gradient pill, calm; on hover/focus it
    goes dark and keeps only its gradient edge. Never under 48px tall,
    whatever --hud-scale does to the type. */

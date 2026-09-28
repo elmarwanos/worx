@@ -1,10 +1,13 @@
 /* ============================================================
    Worx | contact-widget.js
-   A floating "quick contact" dock that follows the viewport on
-   every page. Every string and channel below comes from the
-   CONTACT dictionary, edit the data, not the markup.
-   Opened by its own button or by any [data-contact-open] trigger
-   (e.g. the hero button on the home page).
+   A floating dock that follows the viewport on every page: the
+   WhatsApp beacon (straight to the studio's chat) and the Mission
+   Control console, a quick transmission form. Every string and
+   channel below comes from the CONTACT dictionary, edit the data,
+   not the markup.
+   The console opens from any [data-contact-open] trigger and from
+   every "Talk to Mission Control" CTA; without JS those CTAs keep
+   their own link to the contact page.
    ============================================================ */
 
 (function () {
@@ -12,11 +15,19 @@
 
   // --- The dictionary --------------------------------------------
   var CONTACT = {
-    title: "Let's talk",
+    title: "Talk to Mission Control",
     intro: "Pick a channel or leave a note, we usually reply within a day.",
     recipient: "Hello@worxbyglimpse.com",
     subjectPrefix: "Project enquiry from ",
-    fabLabel: "Contact",
+    ctaText: /talk to mission control/i,
+    whatsapp: {
+      href: "https://wa.me/971555669847",
+      greeting: "Hi Worx, I'd like to talk about a project.",
+      label: "WhatsApp",
+      ariaLabel: "Chat with Worx on WhatsApp (opens in a new tab)",
+      sender: "Worx \u00B7 Mission Control",
+      bubble: "We're online. Tap to chat on WhatsApp."
+    },
     channels: {
       email: {
         icon: "✉️",
@@ -46,9 +57,6 @@
       }
     }
   };
-
-  // The dedicated /contact page already has the full form.
-  if (document.body.dataset.page === "contact") return;
 
   var prefersReducedMotion =
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -168,32 +176,59 @@
   form.appendChild(note);
   panel.appendChild(form);
 
-  // Floating button -----------------------------------------
-  var fab = el("button", "qc-fab");
-  fab.type = "button";
-  fab.setAttribute("aria-haspopup", "dialog");
-  fab.setAttribute("aria-expanded", "false");
-  fab.setAttribute("aria-controls", "qc-panel");
-  // the beacon: a live radar in a dark well, the label, its status
+  // The WhatsApp beacon ------------------------------------
+  // a green core on a dark glass puck, a signal halo sweeping round
+  // it, a satellite on its orbit, pings going out; under the pointer
+  // it opens into a pill with the crew's status and Dubai's clock.
+  var WA = CONTACT.whatsapp;
+  var waHref = WA.href + "?text=" + encodeURIComponent(WA.greeting);
+  var WA_GLYPH = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
+
+  var waWrap = el("div", "qc-wa-wrap");
+
+  // the incoming message: typing, then a line from the crew
+  var bubble = el("a", "qc-wa-bubble");
+  bubble.href = waHref;
+  bubble.target = "_blank";
+  bubble.rel = "noopener";
+  bubble.tabIndex = -1;
+  bubble.setAttribute("aria-hidden", "true");
+  bubble.innerHTML =
+    '<span class="qc-wa-bubble-face"><span class="qc-wa-bubble-tile"><img src="' + ROOT + 'static/assets/logo-dark.png" alt="" width="40" height="55" decoding="async"></span><i></i></span>' +
+    '<span class="qc-wa-bubble-body"><small></small><span class="qc-wa-typing"><i></i><i></i><i></i></span><span class="qc-wa-bubble-msg"></span></span>';
+  bubble.querySelector("small").textContent = WA.sender;
+  bubble.querySelector(".qc-wa-bubble-msg").textContent = WA.bubble;
+  waWrap.appendChild(bubble);
+
+  var fab = el("a", "qc-wa");
+  fab.href = waHref;
+  fab.target = "_blank";
+  fab.rel = "noopener";
+  fab.setAttribute("aria-label", WA.ariaLabel);
+  // the glass pill (clipped to a puck until hovered), then the orb
   fab.innerHTML =
-    '<span class="qc-radar" aria-hidden="true"><i class="qc-radar-sweep"></i><i class="qc-radar-blip"></i><i class="qc-radar-ping"></i></span>' +
-    '<span class="qc-fab-vf" aria-hidden="true"></span>';
-  var fabTxt = el("span", "qc-fab-txt");
-  fabTxt.appendChild(el("span", "qc-fab-label", CONTACT.fabLabel));
-  var fabSub = el("small", "qc-fab-sub", "Relay \u00B7 live");
-  fabSub.setAttribute("aria-hidden", "true");
-  fabTxt.appendChild(fabSub);
-  fab.appendChild(fabTxt);
+    '<span class="qc-wa-shell" aria-hidden="true"><span class="qc-wa-txt"><b></b><small><i></i>Crew online \u00B7 <time data-qc-clock>--:--</time> GST</small></span></span>' +
+    '<span class="qc-wa-orb" aria-hidden="true">' +
+      '<i class="qc-wa-ping"></i><i class="qc-wa-ping"></i>' +
+      '<i class="qc-wa-orbit"><b></b></i>' +
+      '<i class="qc-wa-halo"></i>' +
+      '<span class="qc-wa-core">' + WA_GLYPH + '</span>' +
+    '</span>';
+  fab.querySelector(".qc-wa-txt b").textContent = WA.label;
+  waWrap.appendChild(fab);
 
   dock.appendChild(panel);
-  dock.appendChild(fab);
+  dock.appendChild(waWrap);
   document.body.appendChild(dock);
 
   // Dubai's time on the console's bar
-  var clock = panel.querySelector("[data-qc-clock]");
+  var clocks = dock.querySelectorAll("[data-qc-clock]");
   try {
     var fmt = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dubai", hour: "2-digit", minute: "2-digit", hour12: false });
-    var tickClock = function () { clock.textContent = fmt.format(new Date()); };
+    var tickClock = function () {
+      var t = fmt.format(new Date());
+      Array.prototype.forEach.call(clocks, function (c) { c.textContent = t; });
+    };
     tickClock();
     setInterval(tickClock, 15000);
   } catch (e) {}
@@ -218,7 +253,7 @@
     shown = true;
     fab.tabIndex = 0;
     fab.removeAttribute("aria-hidden");
-    fab.setAttribute("aria-expanded", "true");
+    hideBubble();
     if (narrow.matches) document.body.style.overflow = "hidden";
     closeBtn.focus();
     document.addEventListener("keydown", onKeydown);
@@ -229,7 +264,6 @@
     if (!isOpen) return;
     isOpen = false;
     dock.classList.remove("is-open");
-    fab.setAttribute("aria-expanded", "false");
     document.body.style.overflow = "";
     document.removeEventListener("keydown", onKeydown);
     document.removeEventListener("click", onOutsideClick, true);
@@ -265,18 +299,113 @@
     if (!dock.contains(event.target)) close(false);
   }
 
-  fab.addEventListener("click", function () {
-    isOpen ? close() : open();
-  });
+  // once they've opened the chat, the crew's message stays quiet
+  var SEEN_KEY = "worx-wa-seen";
+  function seen() {
+    try { return !!window.sessionStorage.getItem(SEEN_KEY); } catch (e) { return false; }
+  }
+  function markSeen() {
+    hideBubble();
+    try { window.sessionStorage.setItem(SEEN_KEY, "1"); } catch (e) {}
+  }
+  fab.addEventListener("click", markSeen);
+  bubble.addEventListener("click", markSeen);
+
+  // the incoming message, once a visit: a moment after the beacon
+  // first docks, the crew types, then speaks, then leaves it be
+  var bubbleTimers = [];
+  var bubbleDone = seen();
+  function clearBubbleTimers() {
+    bubbleTimers.forEach(window.clearTimeout);
+    bubbleTimers = [];
+  }
+  function hideBubble() {
+    bubbleDone = true;
+    clearBubbleTimers();
+    waWrap.classList.remove("is-typing", "is-talking");
+  }
+
+  // ...and every time the pointer rests on the beacon: the Worx tile
+  // flips in, a beat of typing, then the line. Moving onto the bubble
+  // keeps it up; leaving both lets it go.
+  var canHover = window.matchMedia("(hover: hover)");
+  var leaveTimer = 0;
+  function hoverIn(event) {
+    if (event.pointerType === "touch" || !canHover.matches || isOpen) return;
+    window.clearTimeout(leaveTimer);
+    bubbleDone = true;
+    if (waWrap.classList.contains("is-talking") || waWrap.classList.contains("is-typing")) return;
+    clearBubbleTimers();
+    waWrap.classList.add("is-typing");
+    bubbleTimers.push(window.setTimeout(function () {
+      waWrap.classList.remove("is-typing");
+      waWrap.classList.add("is-talking");
+    }, prefersReducedMotion ? 0 : 700));
+  }
+  function hoverOut(event) {
+    if (event.pointerType === "touch") return;
+    window.clearTimeout(leaveTimer);
+    leaveTimer = window.setTimeout(function () {
+      clearBubbleTimers();
+      waWrap.classList.remove("is-typing", "is-talking");
+    }, 260);
+  }
+  fab.addEventListener("pointerenter", hoverIn);
+  fab.addEventListener("pointerleave", hoverOut);
+  bubble.addEventListener("pointerenter", hoverIn);
+  bubble.addEventListener("pointerleave", hoverOut);
+  fab.addEventListener("focus", function () { hoverIn({ pointerType: "" }); });
+  fab.addEventListener("blur", function () { hoverOut({ pointerType: "" }); });
+  function cueBubble() {
+    if (bubbleDone) return;
+    bubbleDone = true;
+    var later = function (fn, ms) { bubbleTimers.push(window.setTimeout(fn, ms)); };
+    later(function () { if (shown && !isOpen) waWrap.classList.add("is-typing"); }, 2600);
+    later(function () {
+      waWrap.classList.remove("is-typing");
+      if (shown && !isOpen) waWrap.classList.add("is-talking");
+    }, 4400);
+    later(function () { waWrap.classList.remove("is-talking"); }, 12400);
+  }
   closeBtn.addEventListener("click", function () {
     close();
   });
 
-  // External triggers, e.g. the hero button --------------------
-  document.querySelectorAll("[data-contact-open]").forEach(function (trigger) {
+  // Triggers: [data-contact-open] and every "Talk to Mission
+  // Control" CTA. A service page's CTA carries its service in the
+  // link (?services=...), which becomes the note's opening line.
+  function prefill(trigger) {
+    var href = trigger.getAttribute("href") || "";
+    var m = href.match(/[?&]services=([^&#]+)/);
+    if (!m || form.message.value.trim()) return;
+    try {
+      form.message.value = "I'm interested in " + decodeURIComponent(m[1].replace(/\+/g, " ")) + ". ";
+    } catch (e) {}
+  }
+
+  Array.prototype.filter.call(
+    document.querySelectorAll("a, button"),
+    function (node) {
+      return !dock.contains(node) &&
+        (node.hasAttribute("data-contact-open") || CONTACT.ctaText.test(node.textContent));
+    }
+  ).forEach(function (trigger) {
+    trigger.setAttribute("aria-haspopup", "dialog");
+    trigger.setAttribute("aria-controls", "qc-panel");
     trigger.addEventListener("click", function (event) {
+      // a modified click still opens the contact page in a new tab
+      if (event.metaKey || event.ctrlKey || event.shiftKey) return;
       event.preventDefault();
-      open();
+      event.stopPropagation();
+      prefill(trigger);
+      // from inside the mobile menu: let the menu slide away first
+      var toggle = document.querySelector(".nav-toggle");
+      if (document.body.classList.contains("nav-open") && toggle) {
+        toggle.click();
+        window.setTimeout(open, prefersReducedMotion ? 0 : 320);
+      } else {
+        open();
+      }
     });
   });
 
@@ -325,6 +454,8 @@
     if (show === shown) return;
     shown = show;
     dock.classList.toggle("is-ready", show);
+    if (show) cueBubble();
+    else waWrap.classList.remove("is-typing", "is-talking");
     // while it's faded out, keep the button out of the Tab order and
     // away from screen readers too
     fab.tabIndex = show ? 0 : -1;

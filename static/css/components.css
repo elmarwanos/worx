@@ -632,7 +632,7 @@
 }
 
 /* Primary actions inside the CTA band and the contact planner speak
-   the same language as the header's "Speak to an expert": the brand
+   the same language as the header's "Talk to Mission Control": the brand
    gradient, calm, and on hover it goes dark keeping only the edge. */
 .cta-band .btn-primary,
 .cw .btn-primary {
@@ -792,11 +792,9 @@
 }
 
 /* ---- Quick contact dock ---------------------------------------
-   A floating comms beacon that travels with the viewport on every page,
-   and the console it opens (static/js/contact-widget.js builds both
-   from one data object). The beacon: a live radar in a dark well, the
-   label and its status, a ping going out every few seconds, viewfinder
-   brackets opening under the pointer. The console: the site's HUD
+   A floating WhatsApp beacon that travels with the viewport on every
+   page, and the Mission Control console the site's CTAs open
+   (static/js/contact-widget.js builds both from one data object). The console: the site's HUD
    glass with the relay's bar and Dubai clock, a status line, Marwan's
    call (WhatsApp), the channels as numbered log rows, and a quick
    transmission form. */
@@ -818,168 +816,459 @@
   gap: 16px;
 }
 
-/* ---- the beacon ------------------------------------------------ */
-.qc-fab {
-  --qc-hov: 0;
+/* ---- the WhatsApp beacon -------------------------------------- */
+/* A dark glass puck holding a core in the brand gradient. Round it:
+   a signal halo sweeping, a satellite on a tilted orbit, pings going
+   out. It docks in with a flare when it first appears, buzzes now and
+   then like an incoming call, and under the pointer a pill slides out
+   to its left with the crew's status and Dubai's clock.
+   The link itself never changes size: the pill is a clipped layer
+   that opens leftwards, so the orb stays exactly under the pointer
+   and hover never flickers. Every hover change is a plain transition
+   on transform, opacity or clip-path; no running animation is
+   retimed mid-spin. */
+.qc-wa-wrap {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.qc-wa {
+  --wa-h: 70px;
+  --wa-orb: 56px;
+  --wa-ease: cubic-bezier(0.2, 0.9, 0.2, 1);
   position: relative;
   isolation: isolate;
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  height: 60px;
-  padding: 0 22px 0 7px;
-  border-radius: 999px;
-  background: var(--gradient);
-  color: var(--on-accent);
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 0.98rem;
-  box-shadow:
-    0 16px 36px -14px rgba(229, 125, 35, 0.8),
-    0 0 0 1px rgba(250, 167, 25, 0.35),
-    inset 0 1px 0 rgba(254, 238, 207, 0.45),
-    inset 0 -10px 22px -12px rgba(66, 29, 15, 0.55);
-  transform: translateY(14px);
+  display: block;
+  width: var(--wa-h);
+  height: var(--wa-h);
+  border-radius: 50%;
+  color: var(--brand-cream);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transform: translateY(26px) scale(0.6);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease, --qc-hov 0.5s cubic-bezier(0.135, 0.9, 0.15, 1);
+  transition: transform 0.45s var(--wa-ease), opacity 0.3s ease;
 }
 
-/* the light pass across the key, now and then */
-.qc-fab::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background:
-    linear-gradient(105deg, transparent 38%, rgba(254, 238, 207, 0.55) 50%, transparent 62%) -160% 0 / 60% 100% no-repeat,
-    repeating-linear-gradient(0deg, rgba(66, 29, 15, 0.1) 0 1px, transparent 1px 3px);
-  animation: qc-pass 6s ease-in-out 3s infinite;
-}
-
-@keyframes qc-pass {
-  0% { background-position: -160% 0, 0 0; }
-  20%, 100% { background-position: 260% 0, 0 0; }
-}
-
-.qc-dock.is-ready .qc-fab {
-  transform: translateY(0);
+.qc-dock.is-ready .qc-wa {
+  transform: none;
   opacity: 1;
   pointer-events: auto;
+  animation: qc-wa-dock 1.1s var(--wa-ease) both;
 }
 
-.qc-fab:hover,
-.qc-fab:focus-visible,
-.qc-dock.is-open .qc-fab {
-  --qc-hov: 1;
-  box-shadow:
-    0 22px 48px -16px rgba(229, 125, 35, 0.95),
-    0 0 0 1px rgba(250, 167, 25, 0.6),
-    0 0 36px -6px rgba(250, 167, 25, 0.45),
-    inset 0 1px 0 rgba(254, 238, 207, 0.55),
-    inset 0 -10px 22px -12px rgba(66, 29, 15, 0.55);
+.qc-wa:focus-visible { outline: none; }
+
+/* arriving: falls in from the dark, overshoots, settles, the flare
+   blooms behind it */
+@keyframes qc-wa-dock {
+  0% { transform: translateY(60px) scale(0.3) rotate(-35deg); opacity: 0; filter: blur(8px) brightness(2); }
+  55% { transform: translateY(-8px) scale(1.08) rotate(6deg); opacity: 1; filter: blur(0) brightness(1.4); }
+  75% { transform: translateY(2px) scale(0.97) rotate(-2deg); filter: none; }
+  100% { transform: none; opacity: 1; filter: none; }
 }
 
-.qc-fab:focus-visible { outline: none; }
-
-/* the radar in its well */
-.qc-radar {
-  position: relative;
-  flex: none;
-  width: 46px;
-  height: 46px;
+/* the glow behind the orb: the arrival flare, and a steady bloom
+   while hovered */
+.qc-wa::after {
+  content: "";
+  position: absolute;
+  right: calc(var(--wa-h) / 2 - 80px);
+  top: 50%;
+  z-index: -1;
+  width: 160px;
+  height: 160px;
+  margin-top: -80px;
   border-radius: 50%;
-  background:
-    radial-gradient(circle, transparent 0 32%, rgba(250, 167, 25, 0.18) 33% 34%, transparent 35% 64%, rgba(250, 167, 25, 0.22) 65% 66%, transparent 67%),
-    linear-gradient(rgba(250, 167, 25, 0.16), rgba(250, 167, 25, 0.16)) center / 1px 100% no-repeat,
-    linear-gradient(rgba(250, 167, 25, 0.16), rgba(250, 167, 25, 0.16)) center / 100% 1px no-repeat,
-    #140804;
-  box-shadow: inset 0 0 0 1px rgba(250, 167, 25, 0.4), 0 0 0 2px rgba(21, 9, 5, 0.6);
-  overflow: visible;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(250, 167, 25, 0.5), rgba(229, 125, 35, 0.14) 35%, transparent 65%);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.5s ease, transform 0.6s var(--wa-ease);
 }
 
-.qc-radar-sweep {
+.qc-dock.is-ready .qc-wa::after { animation: qc-wa-flare 1.3s ease-out 0.35s; }
+
+@keyframes qc-wa-flare {
+  0% { opacity: 0; transform: scale(0.2); }
+  30% { opacity: 1; transform: scale(1.3); }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+
+/* the glass: a puck at rest, a pill when opened */
+.qc-wa-shell {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 calc(var(--wa-h) + 2px) 0 24px;
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse 60% 140% at 100% 50%, rgba(229, 125, 35, 0.22), transparent 70%),
+    repeating-linear-gradient(0deg, rgba(254, 238, 207, 0.025) 0 1px, transparent 1px 3px),
+    rgba(14, 6, 3, 0.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(250, 167, 25, 0.28),
+    inset 0 1px 0 rgba(254, 238, 207, 0.08);
+  clip-path: inset(0 0 0 calc(100% - var(--wa-h)) round calc(var(--wa-h) / 2));
+  transition: clip-path 0.55s var(--wa-ease);
+  will-change: clip-path;
+}
+
+.qc-wa-txt {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  line-height: 1;
+  white-space: nowrap;
+  text-align: left;
+  opacity: 0;
+  transform: translateX(14px);
+  transition: opacity 0.2s ease, transform 0.45s var(--wa-ease);
+}
+
+.qc-wa-txt b {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.qc-wa-txt small {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(254, 238, 207, 0.72);
+  font-variant-numeric: tabular-nums;
+}
+
+.qc-wa-txt small i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px 1px rgba(229, 125, 35, 0.9);
+  animation: qc-live 1.4s ease-in-out infinite;
+}
+
+/* the orb: core, halo, orbit, pings; pinned to the puck's centre */
+.qc-wa-orb {
+  position: absolute;
+  top: calc((var(--wa-h) - var(--wa-orb)) / 2);
+  right: calc((var(--wa-h) - var(--wa-orb)) / 2);
+  width: var(--wa-orb);
+  height: var(--wa-orb);
+  transition: transform 0.5s var(--wa-ease);
+}
+
+.qc-wa-core {
   position: absolute;
   inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, rgba(250, 167, 25, 0.75), rgba(250, 167, 25, 0) 70deg, transparent 360deg);
-  -webkit-mask: radial-gradient(circle, #000 69%, transparent 70%);
-  mask: radial-gradient(circle, #000 69%, transparent 70%);
-  animation: qc-sweep 3.2s linear infinite;
-  animation-duration: calc(3.2s - var(--qc-hov) * 1.8s);
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.5), transparent 32%),
+    var(--gradient);
+  box-shadow:
+    0 10px 26px -8px rgba(229, 125, 35, 0.9),
+    inset 0 -6px 14px -4px rgba(66, 29, 15, 0.7),
+    inset 0 2px 0 rgba(255, 255, 255, 0.35);
+  animation: qc-wa-ring 7s ease-in-out 3.5s infinite;
+}
+
+.qc-wa-core svg {
+  width: 29px;
+  height: 29px;
+  fill: #fff;
+  filter: drop-shadow(0 2px 3px rgba(66, 29, 15, 0.55));
+  transition: transform 0.5s var(--wa-ease);
+}
+
+/* an incoming call: a short buzz, then quiet */
+@keyframes qc-wa-ring {
+  0%, 84%, 100% { transform: none; }
+  86% { transform: rotate(-14deg) scale(1.06); }
+  88% { transform: rotate(12deg) scale(1.06); }
+  90% { transform: rotate(-10deg) scale(1.06); }
+  92% { transform: rotate(8deg) scale(1.03); }
+  94% { transform: rotate(-4deg); }
+}
+
+/* the halo: a signal arc sweeping round the core, one steady speed */
+.qc-wa-halo {
+  position: absolute;
+  inset: -4px;
+  z-index: 2;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 55%, rgba(250, 167, 25, 0.15) 70%, rgba(254, 238, 207, 0.95) 88%, transparent 90%);
+  -webkit-mask: radial-gradient(circle, transparent calc(50% - 3px), #000 calc(50% - 2px));
+  mask: radial-gradient(circle, transparent calc(50% - 3px), #000 calc(50% - 2px));
+  opacity: 0.75;
+  transition: opacity 0.4s ease;
+  animation: qc-sweep 2.8s linear infinite;
 }
 
 @keyframes qc-sweep { to { transform: rotate(360deg); } }
 
-.qc-radar-blip {
-  position: absolute;
-  left: 64%;
-  top: 30%;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #fff1d6;
-  box-shadow: 0 0 8px 2px rgba(250, 167, 25, 0.9);
-  animation: qc-blip 3.2s linear infinite;
-}
-
-@keyframes qc-blip {
-  0%, 8% { opacity: 1; }
-  60%, 100% { opacity: 0.15; }
-}
-
-/* the ping: a ring off the beacon every few seconds */
-.qc-radar-ping {
-  position: absolute;
-  inset: -2px;
-  border-radius: 50%;
-  border: 1px solid rgba(254, 238, 207, 0.75);
-  opacity: 0;
-  animation: qc-ping 3.6s ease-out 1s infinite;
-}
-
+/* a ring going out (the console's call beacon) */
 @keyframes qc-ping {
   0% { transform: scale(1); opacity: 0.9; }
   45%, 100% { transform: scale(1.7); opacity: 0; }
 }
 
-.qc-fab-txt {
+/* the orbit: a tilted ring with a satellite riding it */
+.qc-wa-orbit {
+  position: absolute;
+  inset: -11px;
+  z-index: 1;
+  border-radius: 50%;
+  border: 1px dashed rgba(250, 167, 25, 0.24);
+  transform: rotateX(64deg) rotateZ(0deg);
+  transition: border-color 0.4s ease;
+  animation: qc-wa-orbit 9s linear infinite;
+}
+
+.qc-wa-orbit b {
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--brand-cream);
+  box-shadow: 0 0 8px 2px rgba(250, 167, 25, 0.95), 0 0 18px 4px rgba(229, 125, 35, 0.5);
+}
+
+@keyframes qc-wa-orbit {
+  from { transform: rotateX(64deg) rotateZ(0deg); }
+  to { transform: rotateX(64deg) rotateZ(360deg); }
+}
+
+/* the pings: signal leaving the beacon */
+.qc-wa-ping {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(229, 125, 35, 0.7);
+  opacity: 0;
+  animation: qc-wa-ping 3.2s cubic-bezier(0.2, 0.6, 0.3, 1) 1.2s infinite;
+}
+
+.qc-wa-ping + .qc-wa-ping { animation-delay: 2.3s; }
+
+@keyframes qc-wa-ping {
+  0% { transform: scale(1); opacity: 0.85; }
+  60%, 100% { transform: scale(2.1); opacity: 0; border-width: 0.5px; }
+}
+
+/* opened: by the pointer (on devices that hover) or the keyboard */
+@media (hover: hover) {
+  .qc-wa:hover .qc-wa-shell { clip-path: inset(0 0 0 0 round calc(var(--wa-h) / 2)); }
+  .qc-wa:hover .qc-wa-txt { opacity: 1; transform: none; transition-delay: 0.1s, 0.06s; }
+  .qc-wa:hover .qc-wa-orb { transform: scale(1.06); }
+  .qc-wa:hover .qc-wa-core svg { transform: rotate(-12deg); }
+  .qc-wa:hover .qc-wa-halo { opacity: 1; }
+  .qc-wa:hover .qc-wa-orbit { border-color: rgba(250, 167, 25, 0.5); }
+  .qc-wa:hover::after { opacity: 0.55; transform: scale(1); }
+}
+
+.qc-wa:focus-visible .qc-wa-shell { clip-path: inset(0 0 0 0 round calc(var(--wa-h) / 2)); }
+.qc-wa:focus-visible .qc-wa-txt { opacity: 1; transform: none; }
+.qc-wa:focus-visible .qc-wa-orb { transform: scale(1.06); }
+.qc-wa:focus-visible .qc-wa-halo { opacity: 1; }
+.qc-wa:focus-visible::after { opacity: 0.55; transform: scale(1); }
+
+/* the incoming message: the crew types, then speaks */
+.qc-wa-bubble {
+  position: absolute;
+  right: 4px;
+  bottom: calc(100% + 16px);
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  width: max-content;
+  max-width: min(270px, calc(100vw - 40px));
+  padding: 12px 16px 12px 12px;
+  border: 1px solid rgba(250, 167, 25, 0.22);
+  border-radius: 18px 18px 5px 18px;
+  background:
+    radial-gradient(ellipse 80% 100% at 0% 0%, rgba(229, 125, 35, 0.16), transparent 70%),
+    rgba(14, 6, 3, 0.92);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.85), 0 0 30px -12px rgba(229, 125, 35, 0.5);
+  color: var(--brand-cream);
+  text-decoration: none;
+  transform-origin: bottom right;
+  transform: translateY(10px) scale(0.85);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.45s cubic-bezier(0.3, 1.4, 0.5, 1), opacity 0.25s ease;
+}
+
+.qc-wa-wrap.is-typing .qc-wa-bubble,
+.qc-wa-wrap.is-talking .qc-wa-bubble {
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* the sender: the Worx tile (logo-dark.png cropped to its orange
+   square), flipping in as the message arrives, a light pass across
+   it now and then, an amber signal running round its frame */
+@property --qc-ang {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.qc-wa-bubble-face {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  perspective: 240px;
+}
+
+/* the frame: an amber arc chasing round the tile */
+.qc-wa-bubble-face::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 13px;
+  padding: 1.5px;
+  background: conic-gradient(from var(--qc-ang), rgba(250, 167, 25, 0.12) 0 60%, rgba(254, 238, 207, 0.95) 80%, var(--brand-amber) 88%, rgba(250, 167, 25, 0.12) 96%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: qc-wa-frame 3s linear infinite;
+}
+
+@keyframes qc-wa-frame { to { --qc-ang: 360deg; } }
+
+.qc-wa-bubble-tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px -6px rgba(229, 125, 35, 0.75), inset 0 0 0 1px rgba(254, 238, 207, 0.12);
+  transform-style: preserve-3d;
+}
+
+/* the logo is taller than the tile: keep only the orange square */
+.qc-wa-bubble-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+/* the light pass */
+.qc-wa-bubble-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 246, 225, 0.7) 50%, transparent 65%) -150% 0 / 250% 100% no-repeat;
+  animation: qc-wa-sheen 4.5s ease-in-out 1.2s infinite;
+}
+
+@keyframes qc-wa-sheen {
+  0% { background-position: 150% 0; }
+  30%, 100% { background-position: -150% 0; }
+}
+
+.qc-wa-wrap.is-typing .qc-wa-bubble-tile { animation: qc-wa-tile-in 0.9s cubic-bezier(0.2, 0.9, 0.2, 1) both; }
+
+@keyframes qc-wa-tile-in {
+  0% { transform: rotateY(-110deg) scale(0.6); opacity: 0; }
+  60% { transform: rotateY(14deg) scale(1.06); opacity: 1; }
+  100% { transform: none; }
+}
+
+/* online */
+.qc-wa-bubble-face i {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  z-index: 1;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--brand-cream);
+  box-shadow: 0 0 0 2px rgba(14, 6, 3, 0.95), 0 0 10px 2px rgba(250, 167, 25, 0.85);
+  animation: qc-live 1.4s ease-in-out infinite;
+}
+
+.qc-wa-bubble-body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  line-height: 1;
-  text-align: left;
+  gap: 6px;
+  min-width: 0;
 }
 
-.qc-fab-label { white-space: nowrap; }
-
-.qc-fab-sub {
+.qc-wa-bubble-body small {
   font-family: var(--font-mono);
-  font-size: 0.54rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(26, 10, 4, 0.66);
+  color: var(--accent-2);
 }
 
-.qc-fab-vf {
-  --c: rgba(254, 238, 207, 0.7);
-  --o: calc(5px + var(--qc-hov) * 6px);
-  position: absolute;
-  inset: calc(var(--o) * -1);
-  pointer-events: none;
-  opacity: calc(0.25 + var(--qc-hov) * 0.75);
-  background:
-    linear-gradient(var(--c), var(--c)) 0 0 / 12px 1px no-repeat,
-    linear-gradient(var(--c), var(--c)) 0 0 / 1px 12px no-repeat,
-    linear-gradient(var(--c), var(--c)) 100% 0 / 12px 1px no-repeat,
-    linear-gradient(var(--c), var(--c)) 100% 0 / 1px 12px no-repeat,
-    linear-gradient(var(--c), var(--c)) 0 100% / 12px 1px no-repeat,
-    linear-gradient(var(--c), var(--c)) 0 100% / 1px 12px no-repeat,
-    linear-gradient(var(--c), var(--c)) 100% 100% / 12px 1px no-repeat,
-    linear-gradient(var(--c), var(--c)) 100% 100% / 1px 12px no-repeat;
+.qc-wa-typing {
+  display: none;
+  gap: 4px;
+  padding: 4px 0 2px;
 }
+
+.qc-wa-typing i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(254, 238, 207, 0.8);
+  animation: qc-wa-dot 1s ease-in-out infinite;
+}
+
+.qc-wa-typing i:nth-child(2) { animation-delay: 0.15s; }
+.qc-wa-typing i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes qc-wa-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+.qc-wa-bubble-msg {
+  display: none;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+.qc-wa-wrap.is-typing .qc-wa-typing { display: inline-flex; }
+.qc-wa-wrap.is-talking .qc-wa-bubble-msg { display: block; animation: qc-wa-say 0.5s ease-out both; }
+
+@keyframes qc-wa-say {
+  from { opacity: 0; transform: translateY(4px); filter: blur(3px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+/* while the console is open, the beacon sits back */
+.qc-dock.is-open .qc-wa-bubble { display: none; }
 
 /* ---- the console ----------------------------------------------- */
 .qc-panel {
@@ -1433,9 +1722,9 @@
 /* short screens (phones on their side): the beacon alone, smaller, so
    it never sits over half the content */
 @media (max-height: 500px) {
-  .qc-fab { height: 50px; padding: 0 5px; }
-  .qc-fab-txt, .qc-fab-vf { display: none; }
-  .qc-radar { width: 40px; height: 40px; }
+  .qc-wa { --wa-h: 56px; --wa-orb: 46px; }
+  .qc-wa-core svg { width: 24px; height: 24px; }
+  .qc-wa-bubble { display: none; }
   .qc-panel { max-height: calc(100vh - 90px); }
 }
 
@@ -1451,29 +1740,37 @@
     width: 100%;
   }
 
-  .qc-fab {
+  .qc-wa-wrap {
     align-self: flex-end;
-    padding: 0 7px;
   }
 
-  .qc-fab-txt {
-    display: none;
+  .qc-wa {
+    --wa-h: 64px;
+    --wa-orb: 52px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .qc-fab,
+  .qc-wa,
+  .qc-wa-bubble,
+  .qc-wa-shell,
+  .qc-wa-txt,
+  .qc-wa-orb,
   .qc-panel {
     transition: opacity 0.15s ease;
     transform: none;
   }
 
   .qc-dock.is-open .qc-panel,
-  .qc-dock.is-ready .qc-fab {
+  .qc-dock.is-ready .qc-wa,
+  .qc-wa-wrap.is-typing .qc-wa-bubble,
+  .qc-wa-wrap.is-talking .qc-wa-bubble {
     transform: none;
   }
 
-  .qc-fab::before, .qc-radar-sweep, .qc-radar-blip, .qc-radar-ping, .qc-rec, .qc-status::before,
+  .qc-dock.is-ready .qc-wa, .qc-dock.is-ready .qc-wa::after, .qc-wa-core, .qc-wa-halo, .qc-wa-orbit, .qc-wa-ping,
+  .qc-wa-typing i, .qc-wa-txt small i, .qc-wa-bubble-msg, .qc-wa-bubble-face::before, .qc-wa-bubble-face i,
+  .qc-wa-bubble-tile, .qc-wa-bubble-tile::after, .qc-rec, .qc-status::before,
   .qc-call-face i, .qc-call-beacon i, .qc-call-beacon::after, .qc-send-wave i, .qc-dock.is-open .qc-panel, .qc-dock.is-open .qc-panel::after { animation: none !important; }
 }
 

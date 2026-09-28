@@ -40,8 +40,8 @@ Worx/
     │   ├── nav.js            Header scroll state, mobile menu, active link
     │   ├── animations.js     GSAP: hero stagger, scroll reveals, counters, marquee
     │   ├── main.js           FAQ accordion, footer year
-    │   ├── contact-widget.js Floating "quick contact" dock, loaded on every
-    │   │                     page except /contact (which has the full planner)
+    │   ├── contact-widget.js Floating WhatsApp beacon + the Mission Control
+    │   │                     console every "Talk to Mission Control" CTA opens
     │   └── contact.js        The /contact project planner wizard
     └── assets/
         ├── Dark Logo.png / Light Logo.png   Source logos (full stacked lockup)
