@@ -26,7 +26,7 @@
       label: "WhatsApp",
       ariaLabel: "Chat with Worx on WhatsApp (opens in a new tab)",
       sender: "Worx \u00B7 Mission Control",
-      bubble: "We're online. Tap to chat on WhatsApp."
+      bubble: "Mission Control Online.\nTap to Open Comms."
     },
     channels: {
       email: {

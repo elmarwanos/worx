@@ -1256,7 +1256,7 @@
   display: none;
   font-size: 0.9rem;
   line-height: 1.4;
-  white-space: normal;
+  white-space: pre-line;
 }
 
 .qc-wa-wrap.is-typing .qc-wa-typing { display: inline-flex; }
