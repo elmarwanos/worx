@@ -2136,8 +2136,10 @@
   // Drawn straight in screen space, no camera transform, since at that
   // distance the terrain's push-in/shake would never actually move it.
   LandingFX.prototype._drawOrbiter = function (ctx) {
-    if (this.reduceMotion || typeof GlimpseOrbiter === "undefined") return;
-    GlimpseOrbiter.draw(ctx, this.frontCanvas.width, this.frontCanvas.height, { dpr: this.dpr });
+    if (this.reduceMotion) return;
+    var o = { dpr: this.dpr, occluders: this.occluders };
+    if (typeof HopeProbe !== "undefined") HopeProbe.draw(ctx, this.frontCanvas.width, this.frontCanvas.height, o);
+    if (typeof GlimpseOrbiter !== "undefined") GlimpseOrbiter.draw(ctx, this.frontCanvas.width, this.frontCanvas.height, o);
   };
 
   LandingFX.prototype._renderStill = function (e, dt) {
@@ -2367,16 +2369,20 @@
   LandingFX.preloadAscent = loadAscentArt;
 
   // Start the ascent shot. onFrame(info) is called every frame.
-  LandingFX.prototype.playAscent = function (onFrame) {
+  // startAt (ms, optional): join the shot part-way, e.g. returning to it
+  // from a later page lands straight on its settled end state instead of
+  // replaying the launch.
+  LandingFX.prototype.playAscent = function (onFrame, startAt) {
     loadAscentArt();
     this.reset();
     this._prepareFinal();
-    this.ascent = { onFrame: onFrame || null, trail: [], stormed: false, lastTrail: -1e9 };
+    startAt = Math.max(0, startAt || 0);
+    this.ascent = { onFrame: onFrame || null, trail: [], stormed: startAt > ASCENT.lift + 150, lastTrail: -1e9 };
     // Time the orbiter's pass so it crosses the descent's start point just
-    // as the ship gets there.
-    if (typeof GlimpseOrbiter !== "undefined") {
+    // as the ship gets there (not needed once the rendezvous is past).
+    if (typeof GlimpseOrbiter !== "undefined" && startAt < ASCENT.dock) {
       var m = this._descentStart();
-      GlimpseOrbiter.syncX(m.x / this.frontCanvas.width, this.reduceMotion ? 0 : ASCENT.dock, this.frontCanvas.width, this.frontCanvas.height);
+      GlimpseOrbiter.syncX(m.x / this.frontCanvas.width, this.reduceMotion ? 0 : ASCENT.dock - startAt, this.frontCanvas.width, this.frontCanvas.height);
     }
     var self = this;
     if (this.reduceMotion) { this._renderAscent(ASCENT.done + 4000, 0); return; }
@@ -2386,7 +2392,7 @@
       if (start === null) start = ts;
       var dt = last == null ? 16.6667 : Math.min(100, ts - last);
       last = ts;
-      self._renderAscent(ts - start, dt);
+      self._renderAscent(startAt + ts - start, dt);
       self._idleRAF = requestAnimationFrame(tick);
     }
     this._idleRAF = requestAnimationFrame(tick);
@@ -2720,7 +2726,9 @@
         var f0x = ox + cam.tx + s0 * (fx - ox), f0y = oy + cam.ty + s0 * (fy - oy);
         var S = s0 * lerp(1, BOOM_ZOOM, k) * (1 + 0.035 * creep);
         var arc = Math.sin(Math.PI * k);
-        var cx = lerp(f0x, W * (W > H ? 0.54 : 0.5), k), cy = lerp(f0y, H * (W > H ? 0.53 : 0.5), k) - H * 0.05 * arc;
+        // portrait frames settle the habitat lower: the story panel lives in
+        // the sky above it there (about.css, stacked layout)
+        var cx = lerp(f0x, W * (W > H ? 0.54 : 0.5), k), cy = lerp(f0y, H * (W > H ? 0.53 : 0.62), k) - H * 0.05 * arc;
         cam.scale = S;
         cam.tx = cx - ox - S * (fx - ox);
         cam.ty = cy - oy - S * (fy - oy);

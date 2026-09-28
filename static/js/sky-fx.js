@@ -1,17 +1,15 @@
 /* ============================================================
    Worx | sky-fx.js
    The Martian night sky above the landing site (Sections 1–2): a deep,
-   layered, procedural star field plus Earth + Moon and Saturn, placed
-   from the Martian celestial sphere for Sept 15, 2026 (reference graph):
+   layered, procedural star field plus Earth + Moon and Jupiter, placed
+   in the Martian sky (the Worx world is Mars: no ringed planets here):
 
-       azimuth  15°  Jupiter (in Cancer)       , behind the camera
        azimuth  45°  Gemini                    , behind the camera
-       azimuth 195°  Saturn (in Pisces)         , in view, subtle
+       azimuth 195°  Jupiter                    , in view, warm and subtle
        azimuth 240°  Earth & Moon (inner system), in view, bright
 
    The camera looks toward HEADING 218° with a ~110° horizontal field,
-   so Earth·Moon and Saturn sit in this sky; Jupiter and Gemini are off
-   behind us (the HUD heading line pins them at its edges).
+   so Earth·Moon and Jupiter sit in this sky; Gemini is off behind us.
 
    HOW IT'S BUILT (one canvas pass, no DOM stars)
    - Layer 1, distant: ~1–1.6k faint points, pre-rendered once per size
@@ -23,7 +21,7 @@
    - Distribution is not uniform: a faint galactic band, a few loose
      clusters and empty voids.
    - Planets: Earth = cool bluish-white point with restrained bloom and
-     the Moon as a dim companion a few pixels off; Saturn = smaller warm
+     the Moon as a dim companion a few pixels off; Jupiter = smaller warm
      point with very little glow.
    - Atmosphere IN FRONT: everything is composited through a vertical
      extinction ramp (clearer high up, fading to nothing just above the
@@ -32,6 +30,17 @@
    - Parallax: drawn through the inverse of the virtual camera with a
      2.5% residual, the world moves, the sky practically doesn't.
    - A single, rare, faint meteor now and then.
+   - Phobos and Deimos, Mars's own moons, labelled like Earth and
+     Jupiter. Unlike the planets their place in the sky changes by the
+     hour (Phobos crosses it twice a day, west to east), and the
+     reference graph fixes a date, not a time of night, so they can't
+     be placed exactly: they sit at plausible spots for that night,
+     clear of the planets, and Phobos creeps along very slowly. Phobos
+     is a small, half-lit grey disc (~0.2° across from the surface),
+     Deimos just a star-like point.
+   - Labels dim wherever the page's text panels sit over them
+     (fx.occluders, see about-story.js), so they never collide with
+     story copy.
    ============================================================ */
 
 (function (global) {
@@ -43,10 +52,15 @@
   var PARALLAX = 0.025;       // how much of the camera's motion the sky follows
 
   var BODIES = {
-    jupiter: { az: 15, label: "Jupiter" },
     gemini: { az: 45, label: "Gemini" },
-    saturn: { az: 195, alt: 37, label: "Saturn" },
-    earth: { az: 240, alt: 27, label: "Earth · Moon" }
+    jupiter: { az: 195, alt: 37, label: "Jupiter" },
+    earth: { az: 240, alt: 27, label: "Earth · Moon" },
+    // Not ephemeris positions (see the header): plausible placements.
+    // Phobos sits low enough (alt 42) to stay clear of the site header on
+    // every screen, and between Jupiter and the frame centre so its label
+    // never meets EARTH · MOON on narrow phones.
+    phobos: { az: 212, alt: 42, label: "Phobos" },
+    deimos: { az: 203, alt: 17, label: "Deimos" }
   };
 
   function wrap180(d) { d = ((d + 180) % 360 + 360) % 360 - 180; return d; }
@@ -64,6 +78,8 @@
     this._mid = []; this._hero = [];
     this._comp = document.createElement("canvas");
     this._halo = null;
+    this._points = {};      // last drawn screen point of each body (device px)
+    this._labelA = {};      // eased label alpha, per label
   }
 
   MartianSky.HEADING = HEADING;
@@ -162,6 +178,29 @@
     ctx.beginPath(); ctx.arc(x, y, core, 0, 6.283); ctx.fill();
   };
 
+  // Phobos: a tiny, dusky, irregular disc, lit from one side.
+  MartianSky.prototype._drawPhobos = function (ctx, x, y, dpr) {
+    var r = 2.3 * dpr;
+    ctx.globalAlpha = 0.16;
+    ctx.drawImage(this._halo, x - r * 3, y - r * 3, r * 6, r * 6);
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(-0.5);
+    ctx.scale(1, 0.84);
+    ctx.globalAlpha = 0.9;
+    var g = ctx.createLinearGradient(-r, 0, r, 0);
+    g.addColorStop(0, "rgba(60,50,44,0.5)");
+    g.addColorStop(0.45, "rgba(150,132,116,0.85)");
+    g.addColorStop(1, "rgba(214,198,178,1)");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, 6.283); ctx.fill();
+    ctx.restore();
+  };
+
+  // Last drawn screen point of a body (device px of the sky canvas), for
+  // things that point at it (the habitat's Earth link, landing-fx.js).
+  MartianSky.prototype.bodyPoint = function (name) { return this._points[name] || null; };
+
   // Draw the sky into ctx (the back canvas, BEFORE the storm).
   MartianSky.prototype.draw = function (ctx, fx) {
     var cw = ctx.canvas.width, ch = ctx.canvas.height, dpr = fx.dpr;
@@ -204,9 +243,25 @@
     var ey = hzS * (1 - BODIES.earth.alt / ALT_TOP), ex = azToX(BODIES.earth.az) * cw;
     this._drawBody(x, ex, ey, 1.9 * dpr, 11 * dpr, "225,236,255", 1, 0.42);
     this._drawBody(x, ex + 6 * dpr, ey + 2.5 * dpr, 0.75 * dpr, 2.5 * dpr, "235,232,226", 0.55, 0.18); // the Moon
-    var sy = hzS * (1 - BODIES.saturn.alt / ALT_TOP), sx = azToX(BODIES.saturn.az) * cw;
-    this._labels = [{ x: ex, y: ey, text: "EARTH · MOON", color: "216,230,255" }, { x: sx, y: sy, text: "SATURN", color: "242,207,150" }];
+    var sy = hzS * (1 - BODIES.jupiter.alt / ALT_TOP), sx = azToX(BODIES.jupiter.az) * cw;
     this._drawBody(x, sx, sy, 1.35 * dpr, 6 * dpr, "255,228,176", 0.85, 0.22);
+
+    // Mars's moons. Phobos drifts west-to-east very slowly (a few
+    // degrees over a long visit), Deimos effectively holds still.
+    var drift = this.reduceMotion ? 0 : ((t / 60000) % 6) * 0.35;
+    var pAz = BODIES.phobos.az + drift;
+    var py = hzS * (1 - BODIES.phobos.alt / ALT_TOP), px = azToX(pAz) * cw;
+    this._drawPhobos(x, px, py, dpr);
+    var dy = hzS * (1 - BODIES.deimos.alt / ALT_TOP), dx = azToX(BODIES.deimos.az) * cw;
+    this._drawBody(x, dx, dy, 0.8 * dpr, 3.2 * dpr, "236,226,214", 0.8, 0.16);
+
+    this._points = { earth: { x: ex, y: ey }, jupiter: { x: sx, y: sy }, phobos: { x: px, y: py }, deimos: { x: dx, y: dy } };
+    this._labels = [
+      { x: ex, y: ey, text: "EARTH · MOON", color: "216,230,255" },
+      { x: sx, y: sy, text: "JUPITER", color: "242,207,150" },
+      { x: px, y: py - 1.5 * dpr, text: "PHOBOS", color: "228,214,196" },
+      { x: dx, y: dy, text: "DEIMOS", color: "228,214,196" }
+    ];
 
     // A rare, faint meteor (one every ~47s, 700ms, high in the sky).
     if (!this.reduceMotion) {
@@ -252,7 +307,7 @@
     this._lastCam = cam; this._lastO = [ox, oy];
   };
 
-  // Names written in the sky just above Earth·Moon and Saturn (front
+  // Names written in the sky just above Earth·Moon and Jupiter (front
   // layer, so the storm never hides them), through the same camera-
   // cancelling transform as the sky so they stay on their points.
   MartianSky.prototype.drawLabels = function (ctx, fx) {
@@ -270,16 +325,38 @@
     if ("letterSpacing" in ctx) ctx.letterSpacing = (2 * dpr).toFixed(1) + "px";
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
+    var occ = fx.occluders || null;
     for (var i = 0; i < this._labels.length; i++) {
       var l = this._labels[i];
+      // dim a label wherever a text panel sits over it (eased, so a
+      // panel booting in or docking never pops it)
+      var target = occluded(occ, l.x / dpr, (l.y - 19 * dpr) / dpr, l.text.length * 7 + 10) ? 0 : 1;
+      var la = this._labelA[l.text];
+      la = la == null ? target : la + (target - la) * (this.reduceMotion ? 1 : 0.12);
+      this._labelA[l.text] = la;
+      if (la < 0.02) continue;
+      ctx.globalAlpha = la;
       ctx.strokeStyle = "rgba(" + l.color + ",0.35)";
       ctx.lineWidth = Math.max(1, dpr * 0.8);
       ctx.beginPath(); ctx.moveTo(l.x, l.y - 7 * dpr); ctx.lineTo(l.x, l.y - 15 * dpr); ctx.stroke();
       ctx.fillStyle = "rgba(" + l.color + ",0.78)";
       ctx.fillText(l.text, l.x, l.y - 19 * dpr);
     }
+    ctx.globalAlpha = 1;
     ctx.restore();
   };
+
+  // Is the point (x, y) (CSS px, label centre-bottom) with a label of
+  // width w under any of the occluder rects [{l, t, r, b}] (CSS px)?
+  function occluded(list, x, y, w) {
+    if (!list) return false;
+    for (var i = 0; i < list.length; i++) {
+      var o = list[i];
+      if (x + w / 2 > o.l && x - w / 2 < o.r && y + 22 > o.t && y - 14 < o.b) return true;
+    }
+    return false;
+  }
+  MartianSky.occluded = occluded;
 
   global.MartianSky = MartianSky;
 })(window);

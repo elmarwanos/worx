@@ -193,6 +193,7 @@
 
   var hero = document.querySelector(".folio-hero");
   var camera = document.querySelector(".folio-camera");
+  var FEED = window.worxRoverFeed = { phase: null };
   var media = document.querySelector(".folio-hero-media");
   var flagCanvas = document.querySelector(".rover-scene__flag");
   var mainCanvas = document.querySelector(".rover-scene__main");
@@ -429,6 +430,9 @@
     var h = camera.clientHeight;
     if (!w || !h) return false;
     var dpr = Math.min(window.devicePixelRatio || 1, lowPower ? 1.5 : 2);
+    // three full-hero canvases: keep each under ~4.5MP on big
+    // retina/ultra-wide screens (never below 1x)
+    dpr = Math.max(1, Math.min(dpr, Math.sqrt(4.5e6 / (w * h))));
     [flagCanvas, mainCanvas, glowCanvas].forEach(function (c) {
       c.width = Math.round(w * dpr);
       c.height = Math.round(h * dpr);
@@ -1047,6 +1051,25 @@
     var cruiseSrc = RV.cruise * CONFIG.pxPerMeter;
     var speedK = clamp(R.vel / cruiseSrc, 0, 1.3);
     var braking = n === "driveIn" && ph.u > 1 - RV.arriveBrake;
+
+    // ---- feed: where the rover is and what it's doing, for the hero's
+    // mission log and tracking brackets (portfolio-hero.js reads it) ----
+    FEED.phase = n; FEED.loop = loop; FEED.t = t;
+    FEED.x = p ? p.x : null; FEED.y = p ? p.y : null;
+    FEED.w = L.w; FEED.s = L.S;
+    FEED.peakX = L.peakX; FEED.peakY = groundY(L.peakX);
+    FEED.vel = R.vel / CONFIG.pxPerMeter;
+    FEED.evaStart = START.getOut; FEED.evaEnd = START.getIn + DUR.getIn;
+    FEED.plantAt = START.plant + CONFIG.flag.plant.groundFrame / CONFIG.flag.plant.fps;
+    FEED.stamp = sceneTime;
+    // the astronaut, while he's out of the rover (the EVA the hero films)
+    var ax = null;
+    if (n === "walkOut") ax = lerp(L.exitX, L.kneelX, trap(ph.u, AST.easeFrac, AST.easeFrac));
+    else if (n === "walkBack") ax = lerp(L.kneelX, L.exitX, trap(ph.u, AST.easeFrac, AST.easeFrac));
+    else if (n === "kneelDown" || n === "plant" || n === "standUp" || n === "beat") ax = L.kneelX;
+    else if (n === "getOut" || n === "getIn") ax = L.exitX;
+    FEED.ax = ax; FEED.ay = ax == null ? null : groundY(ax); FEED.ah = H * L.S;
+    FEED.exitX = L.exitX; FEED.kneelX = L.kneelX; FEED.h = L.h;
     var wheelFrame = Math.floor(R.dist / RV.wheelPxPerFrame) % 24;
 
     // ---- events ----

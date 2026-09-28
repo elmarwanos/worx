@@ -123,7 +123,7 @@
       ctx.translate(o.x, o.y);
       ctx.rotate(n.a * Math.PI / 180);
       // Engine thrust: a short orange tongue, a hot yellow sheath and a
-      // blue-white Mach cone right at the nozzle, all flickering together
+      // white-hot Mach cone right at the nozzle, all flickering together
       var tongue = len * 1.9;
       var g0 = ctx.createLinearGradient(0, 0, tongue, 0);
       g0.addColorStop(0, "rgba(255,150,50,0.75)");
@@ -149,9 +149,9 @@
       ctx.fill();
       var cone = len * 0.42;
       var g2 = ctx.createLinearGradient(0, 0, cone, 0);
-      g2.addColorStop(0, "rgba(235,245,255,1)");
-      g2.addColorStop(0.6, "rgba(170,205,255,0.6)");
-      g2.addColorStop(1, "rgba(150,190,255,0)");
+      g2.addColorStop(0, "rgba(255,252,240,1)");
+      g2.addColorStop(0.6, "rgba(255,226,170,0.6)");
+      g2.addColorStop(1, "rgba(255,200,120,0)");
       ctx.fillStyle = g2;
       ctx.beginPath();
       ctx.moveTo(0, -wid * 0.55);

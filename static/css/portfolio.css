@@ -1636,21 +1636,6 @@
   display: none !important;
 }
 
-/* Keep header floating over the Mars image instead of visually cutting it */
-body[data-page="portfolio"] .site-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  background: linear-gradient(180deg,
-      rgba(21, 9, 5, .72) 0%,
-      rgba(21, 9, 5, .24) 68%,
-      transparent 100%);
-  border-bottom: 0;
-  box-shadow: none;
-}
-
 /* Add breathing room because header now overlays the hero */
 .folio-hero-inner {
   padding-top: clamp(155px, 18vh, 220px);
@@ -1695,29 +1680,9 @@ body[data-page="portfolio"] .site-header {
    Make the Mars photograph cover behind the navigation
    ============================================================ */
 
-/* The shared header styles were creating the angled dark area.
-   Make the header transparent and keep it above the hero. */
-body[data-page="portfolio"] .site-header {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-  z-index: 100 !important;
-  background: transparent !important;
-  background-image: none !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Remove any header pseudo-element that could cover the photograph */
-body[data-page="portfolio"] .site-header::before,
-body[data-page="portfolio"] .site-header::after {
-  content: none !important;
-  display: none !important;
-}
+/* The shared header (layout.css) is transparent over every hero now
+   and floats as a glass pill once scrolled, so the portfolio no longer
+   needs its own header overrides here. */
 
 /* Hero starts at the absolute top of the page */
 body[data-page="portfolio"] main {
@@ -1799,8 +1764,11 @@ body[data-page="portfolio"] .nav-bar {
   z-index: 101;
 }
 
+/* on the links themselves, not their container: a filter on
+   .nav-links would become the mega menu's positioning box */
 body[data-page="portfolio"] .site-header .brand,
-body[data-page="portfolio"] .site-header .nav-links {
+body[data-page="portfolio"] .site-header .nav-links > a,
+body[data-page="portfolio"] .site-header .nav-mega-trigger {
   filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .28));
 }
 
@@ -2830,3 +2798,1765 @@ body[data-page="portfolio"] .folio-video-preview .folio-live-frame {
   animation: none !important;
 }
 
+
+
+/* ============================================================
+   PREMIUM POLISH PASS
+   Final layer over everything above: calm, cinematic reveals, one
+   hover language (the site's gradient hairline), honest
+   placeholders, and a hero that dissolves into the work grid.
+   ============================================================ */
+
+/* ---- Hero: fade the shot into the page ink, no hard edge ---- */
+body[data-page="portfolio"] .folio-hero-caption {
+  will-change: transform, opacity;
+}
+
+body[data-page="portfolio"] .folio-hero-caption::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: clamp(90px, 16vh, 200px);
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(21, 9, 5, 0) 0%,
+    rgba(21, 9, 5, .55) 58%,
+    #150905 100%);
+}
+
+/* Short landscape screens (phones on their side): keep the caption
+   on the first screen instead of below a 650px minimum. */
+@media (orientation: landscape) and (max-height: 540px) {
+  html body[data-page="portfolio"] .folio-hero {
+    min-height: 100svh !important;
+  }
+}
+
+/* ---- Grid rhythm -------------------------------------------- */
+.folio-showcase-section.container {
+  padding-top: clamp(56px, 8vw, 120px);
+  padding-left: clamp(20px, 4.2vw, 60px);
+  padding-right: clamp(20px, 4.2vw, 60px);
+}
+
+.folio-editorial-grid {
+  gap: clamp(52px, 5.4vw, 76px) clamp(20px, 2.1vw, 30px);
+}
+
+/* Ultra-wide: a fourth column instead of ever-larger cards */
+@media (min-width: 2200px) {
+  .folio-editorial-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Every card is a column: the CTA sits on one line across a row,
+   without the old fixed min-height gap under short descriptions. */
+.folio-editorial-grid .folio-card,
+.folio-editorial-grid .folio-card:nth-child(n) {
+  display: flex;
+  flex-direction: column;
+}
+
+.folio-editorial-grid .folio-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.folio-editorial-grid .folio-desc {
+  min-height: 0;
+  margin-bottom: 20px;
+}
+
+.folio-editorial-grid .folio-cta {
+  margin-top: auto;
+  min-height: 40px;
+  transform: none;
+}
+
+/* ---- Media fit ---------------------------------------------- */
+body[data-page="portfolio"] .folio-editorial-grid .folio-scene {
+  margin-bottom: clamp(16px, 1.6vw, 22px);
+  border-radius: clamp(16px, 1.5vw, 22px);
+  transform: translateZ(0);
+  transition: box-shadow .5s ease;
+}
+
+/* Videos fade up from the ink once they have a frame, never a pop
+   from black or a half-decoded first frame. */
+body[data-page="portfolio"] .folio-card-video {
+  opacity: 0;
+  transition: opacity .8s ease;
+}
+
+body[data-page="portfolio"] .folio-card-video.is-ready {
+  opacity: 1;
+}
+
+/* ---- One hover language: the gradient hairline ------------- */
+/* .folio-scene::after was the (now hidden) grain; it becomes the
+   masked gradient ring, above the video. */
+.folio-editorial-grid .folio-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--gradient);
+  background-size: auto;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mix-blend-mode: normal;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .45s ease;
+}
+
+.folio-editorial-grid .folio-card:hover .folio-scene,
+.folio-editorial-grid .folio-card:focus-within .folio-scene {
+  border-color: transparent;
+  box-shadow: 0 30px 70px -40px rgba(0, 0, 0, .75);
+}
+
+.folio-editorial-grid .folio-card:hover .folio-scene::after,
+.folio-editorial-grid .folio-card:focus-within .folio-scene::after {
+  opacity: 1;
+}
+
+/* CTA: stays dark on hover and keeps only the gradient edge */
+.folio-editorial-grid .folio-cta {
+  position: relative;
+  border-color: rgba(254, 238, 207, .16);
+  background: rgba(21, 9, 5, .35);
+  color: var(--brand-cream);
+}
+
+.folio-editorial-grid .folio-cta::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--gradient);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease;
+}
+
+.folio-editorial-grid .folio-card:hover .folio-cta,
+.folio-editorial-grid .folio-card:focus-within .folio-cta {
+  color: var(--brand-cream);
+  border-color: transparent;
+  background: rgba(21, 9, 5, .6);
+  transform: none;
+}
+
+.folio-editorial-grid .folio-card:hover .folio-cta::before,
+.folio-editorial-grid .folio-card:focus-within .folio-cta::before {
+  opacity: 1;
+}
+
+.folio-editorial-grid .folio-cta-arrow {
+  color: var(--accent-2);
+  transition: transform .35s ease;
+}
+
+.folio-editorial-grid .folio-card:hover .folio-cta-arrow,
+.folio-editorial-grid .folio-card:focus-within .folio-cta-arrow {
+  transform: translateX(4px);
+}
+
+/* Keyboard: the whole card is the link (.folio-link::after), so the
+   focus ring is the scene's gradient ring above plus a clear outline
+   around the card. */
+.folio-editorial-grid .folio-link:focus-visible {
+  outline: none;
+}
+
+.folio-editorial-grid .folio-link:focus-visible::after {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 6px;
+  border-radius: clamp(16px, 1.5vw, 22px);
+}
+
+/* ---- "Coming soon" cards: a calm branded plate, no fake CTA -- */
+.folio-editorial-grid .folio-fill--pending {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(60% 80% at 50% 110%, rgba(229, 125, 35, .16), transparent 70%),
+    radial-gradient(50% 60% at 85% 0%, rgba(250, 167, 25, .07), transparent 70%),
+    linear-gradient(160deg, #211009 0%, #150905 70%);
+}
+
+.folio-editorial-grid .folio-fill--pending::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(160deg, rgba(254, 238, 207, .12), rgba(254, 238, 207, .03));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+
+.folio-editorial-grid .folio-fill--pending .folio-pending-mark {
+  width: clamp(40px, 3.4vw, 56px);
+  height: auto;
+  min-height: 0;
+  border-radius: 12px;
+  object-fit: contain;
+  opacity: .78;
+  transform: none;
+  animation: none !important;
+  filter: saturate(.9);
+  transition: opacity .45s ease;
+}
+
+.folio-editorial-grid .folio-card:hover .folio-pending-mark {
+  opacity: .95;
+}
+
+.folio-editorial-grid .folio-card[data-pending-asset] .folio-cta {
+  color: var(--muted);
+  border-style: dashed;
+  border-color: rgba(254, 238, 207, .2);
+}
+
+.folio-editorial-grid .folio-card[data-pending-asset] .folio-cta-arrow {
+  display: none;
+}
+
+/* ---- Entrance choreography (portfolio.js initReveal) --------
+   Each card rises and its media unveils from a soft inset as it
+   enters; cards in one row follow each other by --i. Only active
+   once the script has armed the grid, so no-JS stays visible. */
+.folio-reveal-armed .folio-card[data-folio-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 34px, 0);
+  transition:
+    opacity .9s cubic-bezier(.2, .7, .2, 1),
+    transform 1.1s cubic-bezier(.2, .7, .2, 1);
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+
+.folio-reveal-armed .folio-card[data-folio-reveal] .folio-scene {
+  clip-path: inset(6% 4% 6% 4% round clamp(16px, 1.5vw, 22px));
+  transition:
+    clip-path 1.2s cubic-bezier(.2, .7, .2, 1),
+    box-shadow .5s ease;
+  transition-delay: calc(var(--i, 0) * 110ms), 0s;
+}
+
+.folio-reveal-armed .folio-card[data-folio-reveal] .folio-body > * {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition: opacity .7s ease, transform .9s cubic-bezier(.2, .7, .2, 1);
+}
+
+.folio-reveal-armed .folio-card[data-folio-reveal] .folio-name { transition-delay: calc(var(--i, 0) * 110ms + 220ms); }
+.folio-reveal-armed .folio-card[data-folio-reveal] .folio-desc { transition-delay: calc(var(--i, 0) * 110ms + 300ms); }
+.folio-reveal-armed .folio-card[data-folio-reveal] .folio-cta  { transition-delay: calc(var(--i, 0) * 110ms + 380ms); }
+
+.folio-reveal-armed .folio-card[data-folio-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.folio-reveal-armed .folio-card[data-folio-reveal].is-in .folio-scene {
+  clip-path: inset(0 0 0 0 round clamp(16px, 1.5vw, 22px));
+}
+
+.folio-reveal-armed .folio-card[data-folio-reveal].is-in .folio-body > * {
+  opacity: 1;
+  transform: none;
+}
+
+/* once in, hovers respond immediately (no inherited delays) */
+.folio-reveal-armed .folio-card.is-settled .folio-body > *,
+.folio-reveal-armed .folio-card.is-settled .folio-scene {
+  transition-delay: 0s;
+}
+
+/* ---- Small phones ------------------------------------------- */
+@media (max-width: 380px) {
+  .folio-editorial-grid .folio-name {
+    font-size: 1.3rem;
+  }
+
+  .folio-editorial-grid .folio-desc {
+    font-size: .9rem;
+  }
+}
+
+/* ---- Reduced motion ----------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .folio-reveal-armed .folio-card[data-folio-reveal],
+  .folio-reveal-armed .folio-card[data-folio-reveal] .folio-scene,
+  .folio-reveal-armed .folio-card[data-folio-reveal] .folio-body > * {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+    transition: none;
+  }
+
+  body[data-page="portfolio"] .folio-card-video {
+    transition: none;
+  }
+
+  body[data-page="portfolio"] .folio-hero-caption {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+
+/* ============================================================
+   MISSION ARCHIVE
+   The page's second act. The About sky carries on behind the work
+   (a fixed deep-sky canvas that fades in with it), the home page's
+   comms tracker slides in at its left edge, a limb of atmosphere announces it, and every project is a
+   screen in the habitat: angled like the About page's HUD panels
+   (left screens face right, right ones face left), turning to face
+   you as they reach the middle of the view, their films running
+   through a Mars grade that lifts to true colour when you point at
+   one. portfolio.js ("mission archive") drives --turn, the sides,
+   the films, the timecodes, the filter and the trackers.
+   ============================================================ */
+
+/* the pointer-driven "look at me" amount, animatable */
+@property --hov {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* ---- the hero's HUD panel, the About log recipe --------------- */
+/* on the right, clear of the rover's track across the left of the
+   frame, turned toward the middle like the About page's right logs */
+body[data-page="portfolio"] .pf-hud {
+  left: auto;
+  right: clamp(20px, 5vw, 72px);
+  transform: perspective(900px) rotateY(-20deg) rotateX(2deg);
+  transform-origin: right center;
+  animation: pf-hud-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both, folio-hud-boot 0.7s steps(1, end) 0.2s both;
+}
+
+@keyframes pf-hud-in {
+  from { transform: perspective(900px) rotateY(-20deg) rotateX(2deg) translateX(14px); }
+  to { transform: perspective(900px) rotateY(-20deg) rotateX(2deg); }
+}
+
+
+.pf-hud-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, rgba(254, 238, 207, 0.3), transparent) 1;
+  font-family: var(--font-mono);
+  font-size: 0.62em;
+  letter-spacing: 0.16em;
+  color: rgba(254, 238, 207, 0.7);
+}
+
+.pf-hud-call { flex: 1; }
+.pf-hud-clock { font-variant-numeric: tabular-nums; color: var(--accent-2); }
+
+.pf-rec {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff4a32;
+  box-shadow: 0 0 8px rgba(255, 74, 50, 0.8);
+  animation: pf-blink 1.2s steps(2, jump-none) infinite;
+}
+
+@keyframes pf-blink { 50% { opacity: 0.15; } }
+
+/* the archive log boots one line at a time */
+.pf-hud-log {
+  display: grid;
+  gap: 5px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 0.66em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pf-hud-log li {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  color: rgba(254, 238, 207, 0.55);
+  opacity: 0;
+  animation: pf-line 0.35s steps(1, end) both;
+}
+
+.pf-hud-log li:nth-child(1) { animation-delay: 0.8s; }
+.pf-hud-log li:nth-child(2) { animation-delay: 1.05s; }
+.pf-hud-log li:nth-child(3) { animation-delay: 1.3s; }
+.pf-hud-log li:nth-child(4) { animation-delay: 1.55s; }
+.pf-hud-log li:nth-child(5) { animation-delay: 1.85s; }
+
+.pf-hud-log b { font-weight: 500; color: var(--text); }
+.pf-hud-log li[data-key] b { color: var(--accent-2); }
+
+@keyframes pf-line { from { opacity: 0; } to { opacity: 1; } }
+
+.pf-hud-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.66em;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.pf-hud-go i {
+  font-style: normal;
+  animation: pf-nudge 1.8s ease-in-out infinite;
+}
+
+@keyframes pf-nudge { 50% { transform: translateY(4px); } }
+
+/* ---- the limb of atmosphere into the archive ------------------ */
+.pf-limb {
+  position: relative;
+  z-index: 1;
+  height: clamp(90px, 14vw, 220px);
+  margin: clamp(10px, 3vw, 40px) 0 calc(clamp(20px, 4vw, 60px) * -1);
+  pointer-events: none;
+}
+
+.pf-limb svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+.pf-limb path { fill: none; vector-effect: non-scaling-stroke; }
+
+.pf-limb-line {
+  stroke-width: 1.2;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 2.4s var(--nav-ease);
+}
+
+.pf-limb-glow {
+  stroke-width: 26;
+  opacity: 0;
+  filter: blur(18px);
+  transition: opacity 2.4s ease 0.6s;
+}
+
+.pf-limb.is-in .pf-limb-line { stroke-dashoffset: 0; }
+.pf-limb.is-in .pf-limb-glow { opacity: 0.22; }
+
+.pf-limb-tag {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.34em;
+  white-space: nowrap;
+  color: rgba(254, 238, 207, 0.45);
+  opacity: 0;
+  transition: opacity 1s ease 1.4s;
+}
+
+.pf-limb.is-in .pf-limb-tag { opacity: 1; }
+
+/* ---- the deep sky behind the archive -------------------------- */
+/* It is fixed to the screen, so it can't simply end where the archive
+   ends: a mask that rides with the page (portfolio.js writes where the
+   limb and the archive's end are on screen) fades the stars in below
+   the limb and out before the closing band. Nothing switches on or off,
+   so there is never a strip or an edge mid-scroll. */
+.pf-deep-sky {
+  --a: 100vh;
+  --b: 160vh;
+  --c: 200vh;
+  --d: 240vh;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent var(--a), #000 var(--b), #000 var(--c), transparent var(--d));
+  mask-image: linear-gradient(180deg, transparent var(--a), #000 var(--b), #000 var(--c), transparent var(--d));
+}
+
+body[data-page="portfolio"] .pf-archive,
+body[data-page="portfolio"] main > .section:last-child {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- the archive's head --------------------------------------- */
+.pf-archive { padding: clamp(40px, 6vw, 90px) 0 clamp(60px, 8vw, 120px); }
+
+.pf-reel-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: clamp(40px, 6vw, 88px);
+}
+
+.pf-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 0 0 18px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.pf-kicker i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 0 4px rgba(250, 167, 25, 0.14), 0 0 10px rgba(250, 167, 25, 0.8);
+}
+
+.pf-kicker span { color: rgba(254, 238, 207, 0.4); letter-spacing: 0.18em; }
+
+.pf-reel-title {
+  max-width: 16ch;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.3rem, 5.4vw, 4.6rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.pf-reel-lede {
+  max-width: 52ch;
+  margin: 22px 0 0;
+  font-size: clamp(1rem, 1.2vw, 1.1rem);
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* the filter: one pill per kind of work */
+.pf-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.pf-filter button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(254, 238, 207, 0.18);
+  border-radius: 999px;
+  background: rgba(12, 5, 3, 0.45);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(254, 238, 207, 0.7);
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+
+.pf-filter button b { font-weight: 500; color: var(--accent-2); }
+
+.pf-filter button::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--gradient);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.pf-filter button.is-on { color: var(--text); border-color: transparent; background: rgba(229, 125, 35, 0.1); }
+.pf-filter button.is-on::after { opacity: 1; }
+
+@media (hover: hover) {
+  .pf-filter button:hover { color: var(--text); border-color: transparent; }
+  .pf-filter button:hover::after { opacity: 1; }
+}
+
+.pf-filter button:focus-visible { outline: none; }
+.pf-filter button:focus-visible::after { opacity: 1; }
+
+/* ---- the reel -------------------------------------------------- */
+body[data-page="portfolio"] .pf-reel.container { width: min(1380px, 100% - 40px); }
+
+/* room at the edges for the trackers wherever they show */
+@media (min-width: 1101px) and (hover: hover) {
+  body[data-page="portfolio"] .pf-reel.container,
+  body[data-page="portfolio"] .pf-reel-head.container { width: min(1320px, 100% - 220px); }
+}
+
+.pf-reel {
+  --drop: clamp(60px, 9vw, 170px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(64px, 8vw, 132px) clamp(36px, 6vw, 110px);
+  margin: 0 auto;
+  padding: 0 0 var(--drop);
+  list-style: none;
+}
+
+.pf-file {
+  --side: 1;
+  --turn: 1;
+  --ox: 0%;
+  position: relative;
+  perspective: 1500px;
+  opacity: 0;
+  translate: 0 60px;
+  transition: opacity 0.9s ease, translate 1.2s var(--nav-ease);
+}
+
+/* the right-hand screens sit lower, a staggered bank of displays */
+.pf-file.is-right { --ox: 100%; }
+.pf-file.is-in { opacity: 1; translate: 0 0; }
+.pf-file.is-right.is-in { translate: 0 var(--drop); }
+.pf-file.is-right:not(.is-in) { translate: 0 calc(var(--drop) + 60px); }
+.pf-file[hidden] { display: none; }
+
+.pf-card {
+  --hov: 0;
+  position: relative;
+  transform-style: preserve-3d;
+  transform-origin: var(--ox) 50%;
+  transform:
+    rotateY(calc(var(--side) * var(--turn) * (1 - var(--hov)) * 14deg))
+    rotateX(calc(var(--turn) * (1 - var(--hov)) * 2.5deg))
+    translateZ(calc(var(--hov) * 30px));
+  transition: --hov 0.7s var(--nav-ease);
+}
+
+@media (hover: hover) {
+  .pf-file:hover .pf-card,
+  .pf-file:focus-within .pf-card { --hov: 1; }
+}
+
+.pf-file:focus-within .pf-card { --hov: 1; }
+
+/* the screen throws its light down onto the floor below it */
+.pf-card::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 58%;
+  height: 40%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(229, 125, 35, 0.26), transparent);
+  filter: blur(26px);
+  opacity: calc(0.55 + var(--hov) * 0.45);
+  pointer-events: none;
+}
+
+.pf-screen {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(254, 238, 207, 0.12);
+  border-radius: 18px;
+  background: rgba(12, 5, 3, 0.82);
+  box-shadow:
+    0 50px 90px -46px rgba(0, 0, 0, 0.95),
+    inset 0 1px 0 rgba(254, 238, 207, 0.06);
+  transition: border-color 0.5s ease;
+}
+
+.pf-file:hover .pf-screen,
+.pf-file:focus-within .pf-screen { border-color: rgba(250, 167, 25, 0.4); }
+
+.pf-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(254, 238, 207, 0.08);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  color: rgba(254, 238, 207, 0.55);
+}
+
+.pf-bar .pf-rec { opacity: 0.35; animation: none; box-shadow: none; }
+.pf-screen.is-live .pf-bar .pf-rec { opacity: 1; animation: pf-blink 1.2s steps(2, jump-none) infinite; box-shadow: 0 0 8px rgba(255, 74, 50, 0.8); }
+
+.pf-call {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.pf-tc { font-variant-numeric: tabular-nums; color: var(--accent-2); }
+
+/* the film, at its own frame (the recordings are ~2.1 : 1) */
+.pf-frame {
+  position: relative;
+  aspect-ratio: 1904 / 906;
+  overflow: hidden;
+  background: #0b0503;
+}
+
+.pf-poster,
+.pf-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(calc(0.7 + var(--hov) * 0.3)) sepia(calc(0.22 - var(--hov) * 0.22)) contrast(1.04);
+  transform: scale(calc(1.035 - var(--hov) * 0.035));
+  transition: transform 1.2s var(--nav-ease);
+}
+
+.pf-video { opacity: 0; transition: opacity 0.9s ease, transform 1.2s var(--nav-ease); }
+.pf-video.is-playing { opacity: 1; }
+
+/* the Mars grade: warm light and a vignette, lifted on hover */
+.pf-grade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 85% 75% at 50% 45%, transparent 55%, rgba(10, 4, 2, 0.62) 100%),
+    linear-gradient(180deg, rgba(229, 125, 35, 0.2), rgba(192, 69, 39, 0.28));
+  mix-blend-mode: multiply;
+  opacity: calc(1 - var(--hov) * 0.85);
+}
+
+/* scanlines and a breath of grain over the glass */
+.pf-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(254, 238, 207, 0.035) 0 1px, transparent 1px 3px);
+  opacity: calc(1 - var(--hov) * 0.7);
+}
+
+/* viewfinder corners: they close in on the film you point at */
+.pf-vf {
+  --c: rgba(254, 238, 207, 0.6);
+  position: absolute;
+  inset: calc(14px + var(--hov) * 8px);
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--c), var(--c)) 0 0 / 16px 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 0 / 1px 16px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 16px 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 1px 16px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 100% / 16px 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 100% / 1px 16px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 16px 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 1px 16px no-repeat;
+}
+
+/* files still in countdown: a screen waiting for its signal */
+.pf-static {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background:
+    radial-gradient(ellipse 60% 60% at 50% 50%, rgba(229, 125, 35, 0.14), transparent 70%),
+    repeating-linear-gradient(90deg, rgba(254, 238, 207, 0.025) 0 2px, transparent 2px 5px),
+    #100604;
+}
+
+.pf-static::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background-image: radial-gradient(rgba(254, 238, 207, 0.12) 0.6px, transparent 0.8px);
+  background-size: 3px 3px;
+  animation: pf-snow 0.9s steps(6) infinite;
+  opacity: 0.6;
+}
+
+@keyframes pf-snow { to { transform: translate(-6px, 4px); } }
+
+.pf-static img { position: relative; width: 56px; height: 56px; border-radius: 12px; opacity: 0.85; }
+
+.pf-static b {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  color: var(--accent-2);
+  animation: pf-blink 1.6s ease-in-out infinite;
+}
+
+/* readouts under the film */
+.pf-read {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid rgba(254, 238, 207, 0.08);
+}
+
+.pf-read div {
+  min-width: 0;
+  padding: 11px 16px 12px;
+  border-left: 1px solid rgba(254, 238, 207, 0.06);
+}
+
+.pf-read div:first-child { border-left: 0; }
+
+.pf-read dt {
+  margin-bottom: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(254, 238, 207, 0.38);
+}
+
+.pf-read dd {
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+
+.pf-read dd.is-live,
+.pf-read dd.is-soon { display: flex; align-items: center; gap: 7px; text-transform: uppercase; letter-spacing: 0.18em; }
+.pf-read dd.is-live { color: var(--accent-2); }
+.pf-read dd.is-soon { color: var(--brand-orange); }
+
+.pf-read dd.is-live::before,
+.pf-read dd.is-soon::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* the copy under each screen */
+.pf-copy { padding: 24px 6px 0; }
+
+.pf-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.pf-name a { color: inherit; }
+
+/* the whole card (screen and copy) is the link */
+.pf-name a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+
+.pf-desc {
+  max-width: 48ch;
+  margin: 10px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.pf-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.pf-cta i { font-style: normal; transition: transform 0.5s var(--nav-ease); }
+.pf-file:hover .pf-cta i,
+.pf-file:focus-within .pf-cta i { transform: translateX(6px); }
+.pf-cta--soon { color: rgba(254, 238, 207, 0.4); }
+
+.pf-name a:focus-visible { outline: none; }
+.pf-file:focus-within .pf-screen { box-shadow: 0 0 0 2px rgba(250, 167, 25, 0.6), 0 50px 90px -46px rgba(0, 0, 0, 0.95); }
+
+/* ---- the comms tracker (the home page's) ----------------------- */
+.pf-comms {
+  position: fixed;
+  left: clamp(12px, 1.6vw, 26px);
+  top: 50%;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: rgba(254, 238, 207, 0.55);
+  transform: translate(calc(-100% - 40px), -50%);
+  transition: transform 0.9s var(--nav-ease);
+}
+
+body.pf-in-archive .pf-comms { transform: translate(0, -50%); }
+
+.pf-comms-tag,
+.pf-comms-freq { writing-mode: vertical-rl; transform: rotate(180deg); }
+.pf-comms-tag { color: var(--accent-2); }
+.pf-comms-freq b { font-weight: 500; color: var(--text); }
+
+.pf-comms-signal { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+.pf-comms-signal i { width: 3px; background: var(--accent-2); animation: pf-signal 1.6s ease-in-out infinite; }
+.pf-comms-signal i:nth-child(1) { height: 30%; }
+.pf-comms-signal i:nth-child(2) { height: 50%; animation-delay: 0.15s; }
+.pf-comms-signal i:nth-child(3) { height: 70%; animation-delay: 0.3s; }
+.pf-comms-signal i:nth-child(4) { height: 85%; animation-delay: 0.45s; }
+.pf-comms-signal i:nth-child(5) { height: 100%; animation-delay: 0.6s; }
+
+@keyframes pf-signal { 50% { opacity: 0.25; } }
+
+.pf-comms-line {
+  position: relative;
+  width: 1px;
+  height: clamp(40px, 8vh, 80px);
+  overflow: hidden;
+  background: rgba(254, 238, 207, 0.2);
+}
+
+.pf-comms-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -30%;
+  width: 1px;
+  height: 30%;
+  background: linear-gradient(transparent, var(--accent-2));
+  animation: pf-packet 2.4s linear infinite;
+}
+
+.pf-comms-line:last-of-type::after { animation-delay: 1.2s; }
+
+@keyframes pf-packet { to { top: 100%; } }
+
+.pf-comms-list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+
+.pf-comms-list a {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(254, 238, 207, 0.2);
+  border-radius: 10px;
+  background: rgba(21, 9, 5, 0.6);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.pf-comms-list a:hover,
+.pf-comms-list a:focus-visible {
+  border-color: var(--accent-2);
+  background: rgba(250, 167, 25, 0.12);
+  color: var(--accent-2);
+  transform: translateX(3px);
+}
+
+.pf-comms-list svg { width: 16px; height: 16px; fill: currentColor; }
+
+.pf-comms-tip {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  white-space: nowrap;
+  padding: 5px 10px;
+  border: 1px solid rgba(250, 167, 25, 0.4);
+  border-radius: 6px;
+  background: rgba(21, 9, 5, 0.9);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--text);
+  opacity: 0;
+  transform: translate(-6px, -50%);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.3s var(--nav-ease);
+}
+
+.pf-comms-list a:hover .pf-comms-tip,
+.pf-comms-list a:focus-visible .pf-comms-tip { opacity: 1; transform: translate(0, -50%); }
+
+.pf-comms-status { display: flex; flex-direction: column; align-items: center; gap: 8px; writing-mode: vertical-rl; transform: rotate(180deg); }
+.pf-comms-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 8px rgba(250, 167, 25, 0.8); animation: pf-blink 1.4s ease-in-out infinite; }
+
+@media (max-width: 1100px), (hover: none) {
+  .pf-comms { display: none; }
+}
+
+/* ---- sizes ----------------------------------------------------- */
+@media (max-width: 1100px) {
+  .pf-card {
+    transform:
+      rotateY(calc(var(--side) * var(--turn) * (1 - var(--hov)) * 9deg))
+      rotateX(calc(var(--turn) * (1 - var(--hov)) * 2deg));
+  }
+}
+
+/* one column: the screens lean back as they come and stand up to face
+   you in the middle of the view */
+@media (max-width: 767px) {
+  .pf-reel { grid-template-columns: minmax(0, 1fr); gap: 64px; padding-bottom: 20px; }
+  .pf-file.is-right.is-in,
+  .pf-file.is-in { translate: 0 0; }
+  .pf-card {
+    transform-origin: 50% 100%;
+    transform: rotateX(calc(var(--turn) * (1 - var(--hov)) * 10deg));
+  }
+  .pf-read div { padding: 10px 12px 11px; }
+  .pf-bar { padding: 0 12px; }
+  body[data-page="portfolio"] .pf-hud { left: clamp(20px, 5vw, 72px); right: auto; transform: none; animation: folio-hud-boot 0.7s steps(1, end) 0.2s both; }
+  .pf-hud-log { display: none; }
+}
+
+
+/* ---- reduced motion -------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .pf-file { opacity: 1; translate: 0 0; transition: none; }
+  .pf-file.is-right { translate: 0 var(--drop); }
+  .pf-card { transition: none; }
+  .pf-hud-log li { opacity: 1; animation: none; }
+  .pf-rec, .pf-static::before, .pf-static b, .pf-comms-signal i, .pf-comms-line::after, .pf-hud-go i, .pf-comms-status i { animation: none; }
+  .pf-limb-line { stroke-dashoffset: 0; transition: none; }
+  body[data-page="portfolio"] .pf-hud { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
+  .pf-file.is-right { translate: 0 0; }
+}
+
+/* the hero's camera layers overscan the frame (drift, dust, grain):
+   keep them inside it so phones never scroll sideways */
+body[data-page="portfolio"] .folio-hero,
+body[data-page="portfolio"] .folio-hero-media { overflow: hidden; }
+body[data-page="portfolio"] { overflow-x: clip; }
+
+/* very wide screens: a bigger bank of screens */
+@media (min-width: 2000px) and (hover: hover) {
+  body[data-page="portfolio"] .pf-reel.container,
+  body[data-page="portfolio"] .pf-reel-head.container { width: min(1720px, 100% - 260px); }
+}
+
+/* the hero always lands in the page ink: this fade belongs to the hero
+   (the caption, which fades away on scroll, used to carry it) */
+.pf-hero-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  z-index: 4;
+  height: clamp(180px, 34vh, 360px);
+  background: linear-gradient(180deg, rgba(21, 9, 5, 0) 0%, rgba(21, 9, 5, 0.55) 45%, rgba(21, 9, 5, 0.9) 78%, #150905 100%);
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   HERO MISSION PANEL, directed as one shot
+   The About page's recipe (.hud-story on a right-hand log): one
+   smoked-glass panel hung in the scene at the same angle, the summit
+   log up top and the caption below it on the same glass. The log is
+   driven by the rover's own story (portfolio-hero.js reads
+   rover-scene.js's feed), with a bracket tracking the rover.
+     Open (on load): black, the letterbox parts, the camera pulls
+       focus, the panel boots, its lines type in, the title rises out
+       of its mask, the subtitle resolves word by word.
+     Lift-off (on scroll): portfolio.js writes --lift (0 to 1); the
+       ground drops away under the camera and the panel drifts off.
+   The open waits for the fonts (html.pf-wait, set and cleared by the
+   inline script after the hero); without JS nothing waits.
+   ============================================================ */
+
+html.pf-wait .pf-letterbox i,
+html.pf-wait body[data-page="portfolio"] .folio-hero-media,
+html.pf-wait .folio-hero-caption,
+html.pf-wait .folio-hero-caption * {
+  animation-play-state: paused !important;
+}
+
+body[data-page="portfolio"] .folio-hero {
+  --lift: 0;
+}
+
+/* ---- the open: from black, through the letterbox ------------ */
+.pf-letterbox {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.pf-letterbox i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: #070302;
+  animation: pf-open 2.8s cubic-bezier(0.7, 0, 0.2, 1) both;
+}
+
+.pf-letterbox i:first-child { top: 0; }
+.pf-letterbox i:last-child { bottom: 0; }
+
+@keyframes pf-open {
+  0%, 22% { height: 50.5%; }
+  58%     { height: 11%; }
+  78%     { height: 11%; }
+  100%    { height: 0; }
+}
+
+/* focus pull on the whole shot */
+body[data-page="portfolio"] .folio-hero-media {
+  animation: pf-focus 3.4s cubic-bezier(0.2, 0.7, 0.2, 1) 0.4s both;
+}
+
+@keyframes pf-focus {
+  from { scale: 1.14; filter: blur(12px) brightness(0.35) saturate(0.6); }
+  60%  { filter: blur(1.5px) brightness(0.9) saturate(0.95); }
+  to   { scale: 1; filter: none; }
+}
+
+/* ---- lift-off: the ground falls away under the camera ------- */
+body[data-page="portfolio"] .mars-terrain-base,
+body[data-page="portfolio"] .mars-photo,
+body[data-page="portfolio"] .mars-photo-grade,
+body[data-page="portfolio"] .mars-terrain-fx,
+body[data-page="portfolio"] .rover-scene,
+body[data-page="portfolio"] .mars-ember-glow,
+.pf-track {
+  translate: 0 calc(var(--lift) * 26vh);
+}
+
+body[data-page="portfolio"] .folio-sky,
+body[data-page="portfolio"] .folio-sky-canvas {
+  translate: 0 calc(var(--lift) * 5vh);
+}
+
+/* the panel drifts up and away, a touch faster than the shot */
+body[data-page="portfolio"] .folio-hero-caption {
+  transform: translate3d(0, calc(var(--lift) * -7vh), 0) !important;
+  opacity: calc(1 - var(--lift) * 1.3) !important;
+  filter: blur(calc(var(--lift) * 4px));
+}
+
+/* ---- the panel: About's right-hand log, same angle, same place --- */
+body[data-page="portfolio"] .pf-hud {
+  top: clamp(96px, 17vh, 170px);
+  bottom: auto;
+  left: auto;
+  right: clamp(20px, 5vw, 72px);
+  width: calc(clamp(300px, 25vw, 400px) * var(--hud-scale));
+  max-width: calc(100% - 40px);
+  padding: 0.875em 1.125em 0.875em 1em;
+  font-size: calc(1rem * var(--hud-scale));
+  text-shadow: 0 1px 14px rgba(21, 9, 5, 0.65), 0 0 2px rgba(21, 9, 5, 0.5);
+  transform: perspective(900px) rotateY(-20deg) rotateX(2deg);
+  transform-origin: right center;
+  animation: pf-hud-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) 1.9s both, folio-hud-boot 0.9s steps(1, end) 1.9s both;
+}
+
+/* About's taller-panel glass: fades at its edges on both axes, toward
+   the outer (right) edge on a right-hand panel */
+body[data-page="portfolio"] .pf-hud::before {
+  inset: -30px -48px;
+  -webkit-mask-image:
+    linear-gradient(270deg, transparent 0%, rgba(0, 0, 0, 0.55) 10%, #000 24%, #000 70%, rgba(0, 0, 0, 0.5) 86%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 6%, #000 14%, #000 86%, rgba(0, 0, 0, 0.6) 94%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(270deg, transparent 0%, rgba(0, 0, 0, 0.55) 10%, #000 24%, #000 70%, rgba(0, 0, 0, 0.5) 86%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 6%, #000 14%, #000 86%, rgba(0, 0, 0, 0.6) 94%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* the stages: About's .hud-stages, a dash per line; done lines lift,
+   the live one burns orange with a longer, glowing dash */
+.pf-stages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+}
+
+.pf-stages li {
+  position: relative;
+  padding: 0.19em 0 0.19em 1.25em;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(254, 238, 207, 0.26);
+  transition: color 0.35s ease, text-shadow 0.35s ease;
+  animation: pf-flick 0.32s linear both;
+}
+
+.pf-stages li:nth-child(1) { animation-delay: 2.5s; }
+.pf-stages li:nth-child(2) { animation-delay: 2.6s; }
+.pf-stages li:nth-child(3) { animation-delay: 2.7s; }
+.pf-stages li:nth-child(4) { animation-delay: 2.8s; }
+.pf-stages li:nth-child(5) { animation-delay: 2.9s; }
+.pf-stages li:nth-child(6) { animation-delay: 3s; }
+
+@keyframes pf-flick {
+  0% { opacity: 0; }
+  35% { opacity: 1; }
+  55% { opacity: 0.25; }
+  100% { opacity: 1; }
+}
+
+.pf-stages li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 7px;
+  height: 1px;
+  background: currentColor;
+}
+
+.pf-stages li.is-done {
+  color: rgba(254, 238, 207, 0.78);
+}
+
+.pf-stages li.is-now {
+  color: var(--accent);
+  text-shadow: 0 0 12px rgba(229, 125, 35, 0.55);
+}
+
+.pf-stages li.is-now::before {
+  width: 10px;
+  height: 2px;
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* telemetry: About's .hud-tele */
+.pf-hud-tele {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, rgba(254, 238, 207, 0.3), transparent) 1;
+  font-family: var(--font-mono);
+  animation: pf-flick 0.4s linear 3.1s both;
+}
+
+.pf-hud-tele dt {
+  font-size: 0.56em;
+  letter-spacing: 0.2em;
+  color: rgba(254, 238, 207, 0.5);
+}
+
+.pf-hud-tele dd {
+  margin: 2px 0 0;
+  font-size: 0.62em;
+  letter-spacing: 0.1em;
+  color: rgba(254, 238, 207, 0.6);
+}
+
+.pf-hud-tele b {
+  font-size: 1.25em;
+  font-weight: 500;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* the caption, on the same glass below a quiet rule (.hud-caption) */
+.pf-hud-cap::before {
+  content: "";
+  display: block;
+  height: 1px;
+  margin-top: 14px;
+  background: linear-gradient(90deg, rgba(254, 238, 207, 0.3), rgba(254, 238, 207, 0.08));
+}
+
+body[data-page="portfolio"] .pf-hud .folio-hud-status {
+  margin: 14px 0 8px;
+  font-size: 0.72em;
+}
+
+body[data-page="portfolio"] .pf-hud .folio-hud-title {
+  max-width: none;
+  font-size: calc(clamp(1.4rem, 1.9vw, 1.95rem) * var(--hud-scale));
+  line-height: 1.15;
+}
+
+/* a shadow would paint over gradient-clipped text: glow it instead */
+body[data-page="portfolio"] .pf-hud .gradient-text {
+  text-shadow: none;
+  filter: drop-shadow(0 1px 10px rgba(21, 9, 5, 0.55));
+}
+
+/* the title rises out of its mask, like About's chapter titles */
+.pf-tmask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+
+.pf-tin {
+  display: block;
+  animation: pf-rise 1.1s cubic-bezier(0.16, 1, 0.3, 1) 3.4s both;
+}
+
+@keyframes pf-rise {
+  from { transform: translateY(105%); letter-spacing: 0.04em; }
+  to { transform: none; letter-spacing: normal; }
+}
+
+body[data-page="portfolio"] .pf-hud .folio-hud-subtitle {
+  max-width: none;
+  margin-top: 8px;
+  font-size: calc(clamp(0.86rem, 1vw, 0.98rem) * var(--hud-scale));
+  line-height: 1.5;
+}
+
+.pf-hud-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 0.62em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(254, 238, 207, 0.55);
+}
+
+.pf-hud-stats b {
+  font-weight: 500;
+  color: var(--accent-2);
+}
+
+body[data-page="portfolio"] .pf-hud .pf-hud-go {
+  margin-top: 6px;
+  animation: pf-flick 0.5s linear 4.3s both;
+}
+
+/* ---- the words, live (portfolio-hero.js) ---------------------- */
+.is-held { visibility: hidden; }
+.is-typing [data-live] { visibility: hidden; }
+
+.pf-word {
+  display: inline-block;
+  animation: pf-word 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes pf-word {
+  from { opacity: 0; transform: translateY(0.5em); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+/* ---- tracking: a bracket locked on the rover ------------------- */
+.pf-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  will-change: transform;
+}
+
+.pf-track.is-on { opacity: 1; }
+
+.pf-track-box {
+  position: relative;
+  display: block;
+  width: var(--w, 120px);
+  height: var(--h, 80px);
+  --c: rgba(250, 167, 25, 0.7);
+  background:
+    linear-gradient(var(--c), var(--c)) 0 0 / 10px 1px,
+    linear-gradient(var(--c), var(--c)) 0 0 / 1px 10px,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 10px 1px,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 1px 10px,
+    linear-gradient(var(--c), var(--c)) 0 100% / 10px 1px,
+    linear-gradient(var(--c), var(--c)) 0 100% / 1px 10px,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 10px 1px,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 1px 10px;
+  background-repeat: no-repeat;
+}
+
+.pf-track-box i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border: 1px solid rgba(250, 167, 25, 0.7);
+  border-radius: 50%;
+}
+
+/* ---- the viewfinder: brackets on the frame's corners ------------ */
+.pf-vfx {
+  position: absolute;
+  inset: clamp(88px, 12vh, 104px) clamp(14px, 2.4vw, 36px) clamp(14px, 2.4vh, 26px);
+  z-index: 6;
+  pointer-events: none;
+  opacity: calc(1 - var(--lift) * 1.1);
+}
+
+.pf-vfx-c {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 0 solid rgba(250, 167, 25, 0.75);
+  animation: pf-lock 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) 1.5s both;
+}
+
+.pf-vfx-c--tl { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; --dx: -18px; --dy: -18px; }
+.pf-vfx-c--tr { top: 0; right: 0; border-top-width: 1px; border-right-width: 1px; --dx: 18px; --dy: -18px; }
+.pf-vfx-c--bl { bottom: 0; left: 0; border-bottom-width: 1px; border-left-width: 1px; --dx: -18px; --dy: 18px; }
+.pf-vfx-c--br { bottom: 0; right: 0; border-bottom-width: 1px; border-right-width: 1px; --dx: 18px; --dy: 18px; }
+
+/* the brackets close in and lock, like autofocus finding its mark */
+@keyframes pf-lock {
+  0%   { opacity: 0; transform: translate(var(--dx), var(--dy)); }
+  60%  { opacity: 1; transform: translate(calc(var(--dx) * -0.12), calc(var(--dy) * -0.12)); }
+  75%  { opacity: 0.4; }
+  85%  { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+
+html.pf-wait .pf-vfx-c { animation-play-state: paused !important; }
+
+/* ---- the feed: the Services field-footage look on the whole shot ---- */
+/* scanlines, a soft lens vignette and a slow roll bar, like the REC
+   tiles on the Services page; a tear across the picture when the
+   camera cuts between the wide shot and the EVA */
+.pf-feed {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.14) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 120% 90% at 50% 45%, transparent 55%, rgba(8, 3, 1, 0.5) 100%);
+  opacity: calc(1 - var(--lift) * 0.8);
+}
+
+.pf-feed-roll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -30%;
+  height: 22%;
+  background: linear-gradient(to bottom, transparent, rgba(254, 238, 207, 0.035) 45%, rgba(254, 238, 207, 0.05) 50%, transparent);
+  animation: pf-roll 9s linear infinite;
+}
+
+@keyframes pf-roll {
+  to { transform: translateY(620%); }
+}
+
+.pf-feed-tear {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 40%;
+  height: 7%;
+  opacity: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(254, 238, 207, 0.1) 0 2px, transparent 2px 7px),
+    linear-gradient(to bottom, transparent, rgba(250, 167, 25, 0.12), transparent);
+  mix-blend-mode: screen;
+}
+
+.pf-feed.is-switch .pf-feed-tear {
+  animation: pf-tear 0.5s steps(6, end);
+}
+
+@keyframes pf-tear {
+  0%   { opacity: 1; transform: translate(-3%, -120%) scaleY(0.6); }
+  30%  { opacity: 1; transform: translate(2%, 90%) scaleY(1.4); }
+  60%  { opacity: 0.8; transform: translate(-1%, 260%) scaleY(0.8); }
+  100% { opacity: 0; transform: translate(0, 420%); }
+}
+
+/* the picture jumps a frame as the camera cuts */
+.pf-feed.is-switch { animation: pf-jolt 0.5s steps(4, end); }
+
+@keyframes pf-jolt {
+  0%, 100% { transform: none; }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(3px) skewX(-0.6deg); }
+  75% { transform: translateX(-1px); }
+}
+
+/* the camera eases in on the spacewalk (origin set by portfolio-hero.js) */
+body[data-page="portfolio"] .folio-camera {
+  scale: 1;
+  transition: scale 2.6s cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+body[data-page="portfolio"] .folio-hero.is-eva .folio-camera { scale: 1.12; }
+
+/* the REC readout on the frame's edge, inside the corner brackets */
+.pf-rechud {
+  position: absolute;
+  z-index: 6;
+  top: calc(clamp(88px, 12vh, 104px) + 14px);
+  left: calc(clamp(14px, 2.4vw, 36px) + 34px);
+  display: grid;
+  gap: 6px;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: rgba(254, 238, 207, 0.78);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  opacity: calc(1 - var(--lift) * 1.1);
+  animation: pf-flick 0.5s linear 2.2s both;
+}
+
+.pf-rechud-rec {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pf-rechud-rec i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--brand-ember);
+  box-shadow: 0 0 8px rgba(192, 69, 39, 0.8);
+  animation: pf-blink 1.2s steps(2, jump-none) infinite;
+}
+
+.pf-rechud b {
+  font-weight: 500;
+  color: var(--accent-2);
+}
+
+/* the transmit line only runs while the EVA is live */
+.pf-rechud-tx {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-2);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.folio-hero.is-eva .pf-rechud-tx { opacity: 1; transform: none; }
+
+.pf-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 9px;
+}
+
+.pf-bars i {
+  width: 2px;
+  background: var(--accent-2);
+  animation: pf-bar-sig 1.1s ease-in-out infinite;
+}
+
+.pf-bars i:nth-child(1) { height: 3px; animation-delay: 0s; }
+.pf-bars i:nth-child(2) { height: 5px; animation-delay: 0.15s; }
+.pf-bars i:nth-child(3) { height: 7px; animation-delay: 0.3s; }
+.pf-bars i:nth-child(4) { height: 9px; animation-delay: 0.45s; }
+
+@keyframes pf-bar-sig { 50% { opacity: 0.25; } }
+
+.pf-rechud-tc {
+  position: absolute;
+  z-index: 6;
+  bottom: calc(clamp(14px, 2.4vh, 26px) + 14px);
+  right: calc(clamp(14px, 2.4vw, 36px) + 34px);
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: rgba(254, 238, 207, 0.6);
+  font-variant-numeric: tabular-nums;
+  opacity: calc(1 - var(--lift) * 1.1);
+  animation: pf-flick 0.5s linear 2.3s both;
+}
+
+html.pf-wait .pf-rechud,
+html.pf-wait .pf-rechud-tc { animation-play-state: paused !important; }
+
+/* the bracket snaps between marks when the camera cuts */
+.pf-track.is-snap {
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pf-track.is-snap .pf-track-box {
+  transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* on the astronaut, the bracket is the recording camera's: a red REC dot */
+.pf-track-rec {
+  position: absolute;
+  top: -12px;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--brand-ember);
+  box-shadow: 0 0 8px rgba(192, 69, 39, 0.9);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.folio-hero.is-eva .pf-track-rec {
+  opacity: 1;
+  animation: pf-blink 1.2s steps(2, jump-none) infinite;
+}
+
+/* his transmission: rings off the helmet, calm, in the brand amber */
+.pf-tx {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  translate: 0 calc(var(--lift) * 26vh);
+}
+
+.pf-tx.is-on { opacity: 1; }
+
+.pf-tx i {
+  position: absolute;
+  left: -9px;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(250, 167, 25, 0.7);
+  /* the upper half only: the signal goes up, to Earth */
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 60%);
+  mask-image: linear-gradient(to bottom, #000 45%, transparent 60%);
+  animation: pf-ring 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+
+.pf-tx i:nth-child(2) { animation-delay: 0.8s; }
+.pf-tx i:nth-child(3) { animation-delay: 1.6s; }
+
+@keyframes pf-ring {
+  from { transform: scale(1); opacity: 0.9; }
+  to   { transform: scale(4.2); opacity: 0; }
+}
+
+/* ---- smaller screens: About's docked panel, caption first ------- */
+@media (max-width: 767px) {
+  body[data-page="portfolio"] .pf-hud {
+    top: auto;
+    bottom: clamp(28px, 6vh, 56px);
+    left: clamp(16px, 5vw, 32px);
+    right: auto;
+    width: auto;
+    max-width: calc(100% - 32px);
+    transform: none;
+    animation: folio-hud-boot 0.9s steps(1, end) 1.9s both;
+  }
+
+  .pf-stages,
+  .pf-hud-tele { display: none; }
+
+  .pf-hud-cap::before { display: none; }
+  .pf-rechud-tc { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-letterbox { display: none; }
+  body[data-page="portfolio"] .folio-hero.is-eva .folio-camera { scale: 1; }
+  .pf-feed-roll,
+  .pf-feed.is-switch,
+  .pf-feed.is-switch .pf-feed-tear,
+  .pf-tx i,
+  .pf-bars i,
+  .pf-rechud,
+  .pf-rechud-tc,
+  .pf-vfx-c,
+  body[data-page="portfolio"] .folio-hero-media,
+  body[data-page="portfolio"] .pf-hud,
+  .pf-stages li,
+  .pf-hud-tele,
+  .pf-tin,
+  body[data-page="portfolio"] .pf-hud .pf-hud-go {
+    animation: none;
+  }
+}

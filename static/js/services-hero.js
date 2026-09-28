@@ -142,9 +142,16 @@
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var scale = Math.min(window.devicePixelRatio || 1, 1.5) * (window.innerWidth < 720 ? 0.8 : 0.7);
 
+  // Pixel budget: large and retina screens render the shader at a
+  // capped resolution (the planet is soft by nature, so it upscales well)
+  var BUDGET = 2.2e6;
+
   function resize() {
-    var w = Math.max(1, Math.round(hero.clientWidth * scale));
-    var h = Math.max(1, Math.round(hero.clientHeight * scale));
+    var k = scale;
+    var px = hero.clientWidth * hero.clientHeight * k * k;
+    if (px > BUDGET) k *= Math.sqrt(BUDGET / px);
+    var w = Math.max(1, Math.round(hero.clientWidth * k));
+    var h = Math.max(1, Math.round(hero.clientHeight * k));
     if (canvas.width === w && canvas.height === h) return;
     canvas.width = w;
     canvas.height = h;

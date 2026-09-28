@@ -4,7 +4,7 @@
    starfield, intro (letterbox + countdown), HUD clock and rails,
    hero word slot, manifesto word scrub, horizontal fleet with
    six live scenes, star map, footage wall, velocity marquee,
-   flight plan (the Worx sequence), mission builder, cursor.
+   flight plan (the Worx sequence), mission builder.
    Service data comes from the #cx-catalogue JSON, which
    tools/services/build.js generates from catalogue.js.
    Needs gsap + ScrollTrigger; Lenis is optional.
@@ -36,6 +36,10 @@
   if (!hasGsap || reduced) {
     lazyVideos(false);
     staticStars();
+    // The flight plan still charts its full trajectory, just without the ride
+    setupFlight(false);
+    // SVG (SMIL) loops in the scenes hold still for reduced motion
+    if (reduced) $$("svg").forEach(function (s) { if (s.pauseAnimations) s.pauseAnimations(); });
     return;
   }
 
@@ -82,7 +86,7 @@
     var mouseX = 0, mouseY = 0, driftX = 0, driftY = 0;
 
     function resize() {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       w = canvas.clientWidth;
       h = canvas.clientHeight;
       canvas.width = w * dpr;
@@ -274,49 +278,98 @@
   gsap.timeline({
     scrollTrigger: { trigger: ".cx-hero", start: "top top", end: "bottom top", scrub: true }
   })
-    .to(".cx-hero-copy", { scale: 1.35, opacity: 0, yPercent: -12, filter: "blur(6px)", ease: "none" }, 0)
+    .to(".cx-hero-copy", { scale: 1.25, opacity: 0, yPercent: -16, xPercent: -6, ease: "power1.in" }, 0)
     .to(".cx-eclipse", { y: "-18vh", ease: "none" }, 0)
     .to(".cx-hero-glow", { opacity: 0, ease: "none" }, 0)
     .to(".cx-hud", { opacity: 0, ease: "none" }, 0)
     .to(".cx-hero-sky", { opacity: 0, ease: "none" }, 0);
 
+  // The hand-over: the sun's light washes the screen as the hero leaves,
+  // peaks as the manifesto arrives, and is gone before its words light.
+  // Fixed, so it bridges the two sections instead of scrolling with one.
+  var transit = document.createElement("div");
+  transit.className = "cx-transit";
+  transit.setAttribute("aria-hidden", "true");
+  document.body.appendChild(transit);
+  ScrollTrigger.create({
+    trigger: ".cx-hero", start: "top top", end: "bottom top",
+    onUpdate: function (self) {
+      var k = Math.max(0, Math.min(1, (self.progress - 0.4) / 0.6));
+      var o = Math.sin(k * Math.PI) * 0.7;
+      transit.style.opacity = o.toFixed(3);
+      transit.style.visibility = o > 0.002 ? "visible" : "hidden";
+    },
+    onLeave: function () { transit.style.opacity = 0; transit.style.visibility = "hidden"; }
+  });
+
   // =============================================================
   // Manifesto: words light up as you scroll (pinned)
   // =============================================================
   var manifesto = $("[data-scrub-words]");
+  var teles = $$(".cx-tele");
+  var counted = false;
+
+  // The record rolls in once, as the last words light: each figure on
+  // mechanical reels (a strip of digits per column behind a mask; the
+  // ones column rolls farthest, so a figure settles left to right), its
+  // trace drawing along the line, then one scan over the whole line.
+  // The real figure stays in the markup for screen readers and no-JS.
+  teles.forEach(function (tele, i) {
+    var num = $("[data-count]", tele);
+    if (!num) return;
+    var digits = num.getAttribute("data-count").split("");
+    var reels = document.createElement("span");
+    reels.className = "cx-reels";
+    reels.setAttribute("aria-hidden", "true");
+    digits.forEach(function (d, j) {
+      var laps = digits.length - 1 - j + 1;   // ones column: most laps
+      var reel = document.createElement("span");
+      reel.className = "cx-reel";
+      var strip = document.createElement("span");
+      var html = "";
+      for (var k = 0; k <= laps * 10 + (+d); k++) html += "<i>" + (k % 10) + "</i>";
+      strip.innerHTML = html;
+      strip.style.setProperty("--to", laps * 10 + (+d));
+      strip.style.setProperty("--d", (1.5 + laps * 0.35).toFixed(2) + "s");
+      strip.style.setProperty("--dl", (i * 0.14 + j * 0.06).toFixed(2) + "s");
+      reel.appendChild(strip);
+      reels.appendChild(reel);
+    });
+    num.classList.add("cx-sr");
+    num.parentNode.insertBefore(reels, num);
+  });
+  function countUp() {
+    if (counted) return;
+    counted = true;
+    teles.forEach(function (tele) { tele.classList.add("is-on"); });
+    var line = $(".cx-telemetry");
+    if (line) setTimeout(function () { line.classList.add("is-done"); }, 1900);
+  }
+
   if (manifesto) {
     splitWords(manifesto);
-    gsap.to($$(".cx-w", manifesto), {
-      opacity: 1,
-      stagger: 0.1,
-      ease: "none",
+    var words = $$(".cx-w", manifesto);
+    var span = words.length * 0.1;
+    gsap.timeline({
       scrollTrigger: {
         trigger: ".cx-manifesto",
         start: "top top",
-        end: "+=120%",
+        end: "+=130%",
         pin: ".cx-manifesto-pin",
-        scrub: true
+        scrub: true,
+        onUpdate: function (self) { if (self.progress > 0.8) countUp(); },
+        onLeave: countUp
       }
+    })
+      .to(words, { opacity: 1, stagger: 0.1, duration: 0.4, ease: "none" }, 0)
+      // Telemetry rises in as the sentence completes, then a short hold
+      .fromTo(teles, { opacity: 0, y: 40 }, { opacity: 1, y: 0, stagger: span * 0.04, duration: span * 0.18, ease: "power2.out" }, span * 0.74)
+      .to({}, { duration: span * 0.12 });
+  } else {
+    teles.forEach(function (tele) {
+      ScrollTrigger.create({ trigger: tele, start: "top 90%", once: true, onEnter: countUp });
     });
   }
-
-  $$(".cx-tele").forEach(function (tele, i) {
-    var num = $("[data-count]", tele);
-    ScrollTrigger.create({
-      trigger: tele,
-      start: "top 90%",
-      once: true,
-      onEnter: function () {
-        tele.classList.add("is-on");
-        var end = parseInt(num.getAttribute("data-count"), 10);
-        var o = { v: 0 };
-        gsap.to(o, {
-          v: end, duration: 2, delay: i * 0.12, ease: "power3.out",
-          onUpdate: function () { num.textContent = Math.round(o.v); }
-        });
-      }
-    });
-  });
 
   // =============================================================
   // Fleet: horizontal ride on desktop, stacked on small screens
@@ -332,18 +385,36 @@
   var scenes = setupScenes();
   var ride = null;
 
+  // Off-screen scenes hold still: CSS loops pause on panels that are not
+  // live (services.css) and the SVG motion paths pause with them
+  function smil(panel, on) {
+    $$("svg", panel).forEach(function (s) {
+      if (s.pauseAnimations) s[on ? "unpauseAnimations" : "pauseAnimations"]();
+    });
+  }
+  panels.forEach(function (p) { smil(p, false); });
+
   function setLive(panel, on) {
     if (panel.classList.contains("is-live") === on) return;
     panel.classList.toggle("is-live", on);
+    smil(panel, on);
     var key = panel.getAttribute("data-scene");
     if (key && scenes[key]) scenes[key][on ? "start" : "stop"]();
+  }
+
+  // Ride length from the panels themselves: the drifting outline numbers
+  // overhang the track, and scrollWidth would count them, leaving the
+  // last division parked short of its mark
+  function fleetDistance() {
+    var last = panels[panels.length - 1];
+    return Math.max(1, last.offsetLeft + last.offsetWidth - window.innerWidth);
   }
 
   var mm = gsap.matchMedia();
 
   mm.add("(min-width: 901px)", function () {
     fleet.classList.add("cx-h");
-    var distance = function () { return track.scrollWidth - window.innerWidth; };
+    var distance = fleetDistance;
 
     ride = gsap.to(track, {
       x: function () { return -distance(); },
@@ -395,7 +466,24 @@
       }
     });
 
+    // Tabbing into a division off to the side: the browser would scroll
+    // the clipped pin sideways; instead ride the page to that panel
+    var pin = $(".cx-fleet-pin");
+    function onFocus(e) {
+      var panel = e.target.closest(".cx-panel");
+      pin.scrollLeft = 0;
+      if (!panel || !ride) return;
+      var st = ride.scrollTrigger;
+      var maxX = distance();
+      var y = st.start + Math.min(maxX, panel.offsetLeft) / maxX * (st.end - st.start);
+      if (Math.abs(window.scrollY - y) < 4) return;
+      if (lenis) lenis.scrollTo(y, { immediate: true });
+      else window.scrollTo(0, y);
+    }
+    track.addEventListener("focusin", onFocus);
+
     return function () {
+      track.removeEventListener("focusin", onFocus);
       ride = null;
       fleet.classList.remove("cx-h");
       gsap.set(track, { clearProps: "transform" });
@@ -413,6 +501,12 @@
     });
   });
 
+  // The fleet's opening title card rises in as the section arrives
+  gsap.from($$(".cx-panel--intro > :not(.cx-panel-bignum)"), {
+    y: 50, opacity: 0, stagger: 0.1, duration: 1, ease: "power3.out",
+    scrollTrigger: { trigger: fleet, start: "top 72%" }
+  });
+
   // Anchor links (menu, star map, rails). A #sys-* panel sits inside the
   // horizontal track, so its scroll position is worked out from the ride.
   function targetY(hash) {
@@ -420,7 +514,7 @@
     if (!el) return null;
     if (ride && el.classList.contains("cx-panel")) {
       var st = ride.scrollTrigger;
-      var maxX = track.scrollWidth - window.innerWidth;
+      var maxX = fleetDistance();
       return st.start + Math.min(maxX, el.offsetLeft) / maxX * (st.end - st.start);
     }
     return el.getBoundingClientRect().top + window.scrollY;
@@ -461,12 +555,16 @@
   // =============================================================
   // Field footage: the tilted wall flattens as it arrives
   // =============================================================
-  gsap.fromTo(".cx-wall-grid",
-    { rotateX: 38, rotateZ: -6, scale: 0.82, yPercent: 6 },
-    {
-      rotateX: 0, rotateZ: 0, scale: 1, yPercent: 0, ease: "none",
-      scrollTrigger: { trigger: ".cx-wall", start: "top bottom", end: "top 20%", scrub: true }
-    });
+  mm.add({ wide: "(min-width: 821px)", narrow: "(max-width: 820px)" }, function (ctx) {
+    // A tall stacked wall on phones only needs a hint of the tilt
+    var wide = ctx.conditions.wide;
+    gsap.fromTo(".cx-wall-grid",
+      wide ? { rotateX: 38, rotateZ: -6, scale: 0.82, yPercent: 6 } : { rotateX: 14, rotateZ: -2, scale: 0.94, yPercent: 2 },
+      {
+        rotateX: 0, rotateZ: 0, scale: 1, yPercent: 0, ease: "none",
+        scrollTrigger: { trigger: ".cx-wall", start: "top bottom", end: wide ? "top 20%" : "top 45%", scrub: true }
+      });
+  });
 
   gsap.from(".cx-field-head > *", {
     y: 40, opacity: 0, stagger: 0.1, duration: 0.9, ease: "power3.out",
@@ -474,6 +572,14 @@
   });
 
   lazyVideos(true);
+
+  // Chapters off screen pause their CSS loops (sweep, twinkle, pings...)
+  if ("IntersectionObserver" in window) {
+    var offscreen = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { en.target.classList.toggle("is-offscreen", !en.isIntersecting); });
+    }, { rootMargin: "120px 0px" });
+    $$(".cx-hero, .cx-starmap, .cx-field, .cx-flight, .cx-ignite").forEach(function (el) { offscreen.observe(el); });
+  }
 
   // =============================================================
   // Marquee: endless, speeds up and skews with scroll velocity
@@ -485,18 +591,33 @@
     var items = $$(".cx-marquee-inner", row);
     var loop = gsap.fromTo(items,
       { xPercent: dir > 0 ? 0 : -100 },
-      { xPercent: dir > 0 ? -100 : 0, duration: 40, ease: "none", repeat: -1 });
+      { xPercent: dir > 0 ? -100 : 0, duration: 40, ease: "none", repeat: -1, paused: true });
+    var onScreen = false;
+    var skew = 0;
+
+    // Only run while the band is on screen
+    ScrollTrigger.create({
+      trigger: row,
+      start: "top bottom",
+      end: "bottom top",
+      onToggle: function (self) {
+        onScreen = self.isActive;
+        if (onScreen) loop.play(); else loop.pause();
+      }
+    });
 
     gsap.ticker.add(function () {
+      if (!onScreen) return;
       loop.timeScale(1 + Math.min(Math.abs(velocity), 40) * 0.25);
-      gsap.set(items, { skewX: -Math.max(-12, Math.min(12, velocity * 0.4)) * dir });
+      var k = -Math.max(-12, Math.min(12, velocity * 0.4)) * dir;
+      if (Math.abs(k - skew) > 0.05) { skew = k; gsap.set(items, { skewX: k }); }
     });
   });
 
   // =============================================================
   // Flight plan: the ship flies the trajectory; stages ignite
   // =============================================================
-  setupFlight();
+  setupFlight(true);
 
   // =============================================================
   // Ignition
@@ -518,7 +639,7 @@
   });
 
   // =============================================================
-  // Magnetic buttons, tilt scenes, custom cursor
+  // Magnetic buttons, tilt scenes, star-map parallax
   // =============================================================
   if (finePointer) {
     $$("[data-magnetic]").forEach(function (el) {
@@ -526,8 +647,8 @@
       var yTo = gsap.quickTo(el, "y", { duration: 0.5, ease: "power3.out" });
       el.addEventListener("pointermove", function (e) {
         var r = el.getBoundingClientRect();
-        xTo((e.clientX - r.left - r.width / 2) * 0.35);
-        yTo((e.clientY - r.top - r.height / 2) * 0.35);
+        xTo((e.clientX - r.left - r.width / 2) * 0.25);
+        yTo((e.clientY - r.top - r.height / 2) * 0.25);
       });
       el.addEventListener("pointerleave", function () { xTo(0); yTo(0); });
     });
@@ -560,7 +681,6 @@
       });
     }
 
-    setupCursor();
   }
 
   // =============================================================
@@ -625,45 +745,13 @@
     window.addEventListener("resize", draw);
   }
 
-  function setupCursor() {
-    var cursor = $(".cx-cursor");
-    var dot = $(".cx-cursor-dot");
-    var ring = $(".cx-cursor-ring");
-    var label = $("[data-cursor-label]");
-    if (!cursor) return;
-    root.classList.add("cx-cursor-on");
-
-    var dx = gsap.quickTo(dot, "x", { duration: 0.08 });
-    var dy = gsap.quickTo(dot, "y", { duration: 0.08 });
-    var rx = gsap.quickTo(ring, "x", { duration: 0.45, ease: "power3.out" });
-    var ry = gsap.quickTo(ring, "y", { duration: 0.45, ease: "power3.out" });
-
-    window.addEventListener("pointermove", function (e) {
-      cursor.classList.add("is-moving");
-      dx(e.clientX); dy(e.clientY); rx(e.clientX); ry(e.clientY);
-    }, { passive: true });
-
-    document.addEventListener("pointerover", function (e) {
-      var t = e.target.closest("[data-cursor]");
-      if (t) {
-        label.textContent = t.getAttribute("data-cursor");
-        cursor.classList.add("is-hover");
-      } else if (e.target.closest("a, button")) {
-        label.textContent = "";
-        cursor.classList.add("is-hover");
-      } else {
-        cursor.classList.remove("is-hover");
-      }
-    });
-
-    document.documentElement.addEventListener("pointerleave", function () { gsap.set([dot, ring], { opacity: 0 }); });
-    document.documentElement.addEventListener("pointerenter", function () { gsap.set([dot, ring], { opacity: 1 }); });
-  }
-
   // ---- The six fleet scenes: start when live, stop when not ----
   function setupScenes() {
     var list = {};
     var noop = { start: function () {}, stop: function () {} };
+    // the fleet's worlds are canvases now (fleet-worlds.js), each running
+    // itself while on screen; the old DOM scenes below only if they're back
+    if (!$("[data-code]")) return list;
 
     // DEVELOPMENT: code types itself, URL types, Lighthouse ring counts up
     list.web = (function () {
@@ -779,7 +867,7 @@
   }
 
   // ---- Flight plan -------------------------------------------
-  function setupFlight() {
+  function setupFlight(motion) {
     var section = $(".cx-flight");
     if (!section) return;
     var map = $(".cx-flight-map", section);
@@ -818,12 +906,26 @@
         ["cloud", "it-outsourcing", "web-development", "mobile-apps"]]
     ];
 
+    // The flight: the path gives him a target, not a position. He flies
+    // to it on a damped spring (so he carries momentum, overshoots a
+    // touch and settles), leans into turns, stretches at speed, and the
+    // marks are beats: a boost and a shockwave at each (the biggest at
+    // Deliver), a smoke billow off the pad at liftoff.
+    // flight-fx.js is the air behind him (contrail, streaks, beats).
+    var fx = motion && typeof FlightFX !== "undefined" ? FlightFX.create(map) : null;
+    var F = { x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0, ta: 0, h: 0, lean: 0,
+      roll: -1, seeded: false, onPad: true,
+      // which way he's flying along the path (1 up it, -1 back down), the
+      // way he's shown facing, and the turnaround between the two
+      dir: 1, lastP: -1, acc: 0, ddir: 1, mir: false, turn: -1, turned: false };
+    var heading = function (a) { return Math.atan2(Math.sin(a), Math.cos(a)); };
+
     var len = 0;
     var wps = [];
     var wpLen = [];
     var fractions = [0.004, 0.18, 0.33, 0.49, 0.64, 0.8, 0.97];
     var current = -1;
-    var lastProgress = 0;
+    var lastProgress = motion ? 0 : 1;
 
     function buildPath() {
       var w = map.clientWidth;
@@ -876,12 +978,22 @@
       trail.style.strokeDashoffset = len - at;
       var pt = trail.getPointAtLength(at);
       var ahead = trail.getPointAtLength(Math.min(len, at + 2));
-      var angle = Math.atan2(ahead.y - pt.y, ahead.x - pt.x) * 180 / Math.PI;
-      // Heading leftwards: mirror the rocket man instead of flying upside down
-      var flip = Math.abs(angle) > 90;
-      if (flip) angle = angle > 0 ? angle - 180 : angle + 180;
-      ship.classList.toggle("is-flipped", flip);
-      ship.style.transform = "translate(" + pt.x + "px," + pt.y + "px) rotate(" + angle + "deg)";
+      F.tx = pt.x; F.ty = pt.y;
+      F.ta = Math.atan2(ahead.y - pt.y, ahead.x - pt.x);
+      // going back down the path: he turns round once to face it (only
+      // after a clear change of direction, so a jitter never spins him)
+      if (F.lastP >= 0 && p !== F.lastP) {
+        var dp = p - F.lastP;
+        F.acc = (dp > 0) === (F.acc > 0) ? F.acc + dp : dp;
+        if (Math.abs(F.acc) > 0.006 && p > 0.002 && p < 0.998) F.dir = dp > 0 ? 1 : -1;
+      }
+      F.lastP = p;
+      if (!F.seeded || !motion) { F.x = pt.x; F.y = pt.y; F.vx = F.vy = 0; F.h = F.ta; F.seeded = true; }
+      if (!motion) place(0);
+      else wakeFlight();
+      // liftoff: leaving the pad (again) puts it in a billow
+      if (fx && F.onPad && p > 0.012) { F.onPad = false; fx.liftoff(wps[0] ? parseFloat(wps[0].style.left) : pt.x, wps[0] ? parseFloat(wps[0].style.top) : pt.y); }
+      if (p < 0.004) F.onPad = true;
       // Scrolling harder opens the throttle; the plumes ease back when you stop
       var thrust = Math.min(1, Math.abs(p - lastThrustP) * 40);
       lastThrustP = p;
@@ -903,11 +1015,87 @@
           wp.classList.remove("is-arriving");
           void wp.offsetWidth;
           wp.classList.add("is-arriving");
+          if (fx && i > 0) {
+            fx.beat(parseFloat(wp.style.left), parseFloat(wp.style.top), i === wps.length - 1);
+            if (F.roll < 0) F.roll = 0;
+            if (jet) { jet.style.setProperty("--thrust", 1); clearTimeout(thrustTimer); thrustTimer = setTimeout(function () { jet.style.setProperty("--thrust", 0); }, 420); }
+          }
         }
         wp.classList.toggle("is-done", reached);
         wp.classList.toggle("is-current", i === stage);
       });
       if (stage !== current) setStage(stage);
+    }
+
+    // his pose from the flight state (dt = 0: just draw where he is)
+    function place(dt) {
+      var sp = Math.sqrt(F.vx * F.vx + F.vy * F.vy);
+      var ox = 0, oy = 0, extra = 0, sx = 1;
+      // the path's tangent, smoothed
+      var dh = heading(F.ta - F.h);
+      F.h = heading(F.h + dh * Math.min(1, dt * 9 || 1));
+      // lean into the turn (the rate the path is turning at), eased
+      var lean = dt ? Math.max(-0.4, Math.min(0.4, dh * 2.2)) : 0;
+      F.lean += (lean - F.lean) * Math.min(1, dt * 6 || 1);
+      // the facing he should have: along the path, or back down it; the
+      // image is mirrored whenever that facing points left, so he's
+      // always upright
+      var face = function (d) { return F.h + (d < 0 ? Math.PI : 0); };
+      var wantMir = Math.cos(face(F.dir)) < 0;
+      // the turnaround: his profile narrows to a sliver and opens again
+      // facing the other way (the switch happens at its thinnest), once
+      if (F.turn < 0 && (F.dir !== F.ddir || wantMir !== F.mir)) { F.turn = 0; F.turned = false; }
+      if (F.turn >= 0) {
+        F.turn += (dt || 1) / 0.42;
+        if (!F.turned && F.turn >= 0.5) { F.ddir = F.dir; F.mir = Math.cos(face(F.ddir)) < 0; F.turned = true; }
+        sx = Math.max(0.06, Math.abs(Math.cos(Math.min(1, F.turn) * Math.PI)));
+        if (F.turn >= 1) F.turn = -1;
+      }
+      var fh = face(F.ddir);
+      // the boost at a mark: a surge the way he faces, a wobble that settles
+      if (F.roll >= 0) {
+        F.roll += dt / 0.8;
+        var r = F.roll >= 1 ? 1 : F.roll;
+        var surge = Math.sin(r * Math.PI) * Math.max(10, (jet ? jet.clientWidth : 100) * 0.16);
+        ox += Math.cos(fh) * surge; oy += Math.sin(fh) * surge;
+        extra += Math.sin(r * Math.PI * 3) * (1 - r) * 0.14;
+        if (F.roll >= 1) F.roll = -1;
+      }
+      var deg = (fh + extra + F.lean * (F.mir ? -1 : 1) * 0.35) * 180 / Math.PI - (F.mir ? 180 : 0);
+      ship.classList.toggle("is-flipped", F.mir);
+      var stretch = 1 + Math.min(0.08, sp / 9000);
+      ship.style.transform = "translate(" + (F.x + ox).toFixed(1) + "px," + (F.y + oy).toFixed(1) + "px) rotate(" + deg.toFixed(2) + "deg) scale(" + (stretch * sx).toFixed(3) + "," + (1 / stretch).toFixed(3) + ")";
+      if (fx && dt) fx.trail(F.x + ox, F.y + oy, fh + extra, sp, +(jet && jet.style.getPropertyValue("--thrust")) || 0, dt, jet ? jet.clientWidth : 100);
+    }
+
+    var flying = false, flightLast = 0, flightT = 0;
+    function wakeFlight() {
+      if (flying) return;
+      flying = true; flightLast = 0;
+      gsap.ticker.add(flightTick);
+    }
+    function flightTick() {
+      var now = performance.now();
+      var dt = flightLast ? Math.min(0.25, (now - flightLast) / 1000) : 1 / 60;
+      flightLast = now; flightT += dt;
+      // the spring: stiff enough to keep up with the scroll, a little
+      // loose; fixed sub-steps, so a stuttering frame never slows him
+      var k = 70, c = 2 * Math.sqrt(k) * 0.72;
+      for (var left = dt; left > 1e-4; left -= 1 / 120) {
+        var h = Math.min(1 / 120, left);
+        F.vx += ((F.tx - F.x) * k - F.vx * c) * h;
+        F.vy += ((F.ty - F.y) * k - F.vy * c) * h;
+        F.x += F.vx * h; F.y += F.vy * h;
+      }
+      dt = Math.min(dt, 0.05);
+      place(dt);
+      if (fx) fx.frame(dt, flightT);
+      var settled = Math.abs(F.tx - F.x) < 0.2 && Math.abs(F.ty - F.y) < 0.2 && Math.abs(F.vx) + Math.abs(F.vy) < 2;
+      // keep breathing smoke while he's on screen; sleep when he's gone
+      var inView = section.getBoundingClientRect().bottom > 0 && section.getBoundingClientRect().top < window.innerHeight;
+      if ((settled && F.roll < 0 && F.turn < 0 && !(fx && fx.alive()) && !inView) || (!inView && !(fx && fx.alive()))) {
+        flying = false; gsap.ticker.remove(flightTick);
+      }
     }
 
     function setStage(i) {
@@ -937,6 +1125,9 @@
 
     requestAnimationFrame(buildPath);
     window.addEventListener("resize", function () { requestAnimationFrame(buildPath); });
+
+    // Reduced motion / no GSAP: the whole trajectory, flown and parked
+    if (!motion) return;
 
     ScrollTrigger.create({
       trigger: section,

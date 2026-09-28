@@ -1,67 +1,81 @@
 /* ============================================================
    Worx | about-story.js
-   About page only. Four independent pieces:
+   About page only: the Mars mission that tells the GLIMPSE →
+   WORX BY GLIMPSE → WORX story, one chapter (SOL) per page.
 
-   1. Scene animation lifecycle, each .story-scene can own an
-      animation that plays while that scene is active. Right now
-      only scene 0 (the GLIMPSE landing) has one: a 32-frame
-      autoplay sequence, drawn onto .story-landing via
-      LandingSequence (landing-sequence.js). It is driven by a
-      requestAnimationFrame clock (time-based, not scroll-based),
-      so it plays on its own the moment the scene becomes active,
-      and it is cancelled the instant the scene stops being active.
-      sceneAnimations[] below is the reusable hook table, future
-      chapters (rover deployment, base construction, etc.) plug in
-      the same way: { onEnter, onLeave }. onEnter also serves as
-      "onReEnter", re-entering a scene just calls onEnter again,
-      which is why the landing resets to frame 0 and replays every
-      time the visitor scrolls back up to it.
+     idx  SOL  shot                                  identity
+      0   01   the landing (landing-fx.js)           GLIMPSE
+      1   02   same shot, hatch open, crew out       WORX BY GLIMPSE
+      2   03   the rover traverse                    WORX
+      3   04   the build site                        WORX
+      4   05   the crew's salute                     WORX
+      5   06   the ascent, habitat online            WORX
+      6   -    WORX + "Start your project"           (closing page)
 
-   2. Page-turn navigation, scrolling no longer scrubs anything.
-      One wheel/trackpad gesture (or touch swipe) advances or
-      retreats exactly one story page; goToPage() plays a fixed-
-      duration GSAP tween (not a scrub) between the outgoing and
-      incoming scene+text pair. Every other chapter sits at
-      opacity 0 (autoAlpha, so it's also out of the tab order) the
-      whole time, see about.css's flat z-index layering for why
-      nothing "shows through" underneath.
+   1. Scenes. Each .story-scene has an animation hook table,
+      sceneAnimations[idx] = { onEnter(fromIndex, dir), onLeave(toIndex,
+      dir) }. Pages 1 and 5 play on scene 0's terrain + the three landing
+      canvases (visibleScene()), so between 0↔1 only the text changes:
+      one continuous shot. Every hook knows where it came from, so going
+      BACK to a page lands on its settled state instead of replaying its
+      entrance (no second landing when you step back to SOL 01, no second
+      launch when you step back to SOL 06). SOL 06 turns to the closing
+      page on its own once its story is told (forward visits only).
 
-   3. Scroll capture, while the story is showing (window is at
-      the very top of the page), wheel/touch input is intercepted
-      and converted into goToPage() calls instead of scrolling the
-      document. The one exception: scrolling forward from the last
-      page is allowed to fall through as a normal scroll, so the
-      visitor reaches the footer naturally. Scrolling back up from
-      the footer is likewise normal scroll until the page returns
-      to scrollY 0, at which point wheel input is captured again
-      (already sitting on the last story page, ready to step back).
-      A single isAnimating lock (transition duration + a short
-      buffer) makes one gesture equal one page, even under a fast
-      or "flung" trackpad gesture that fires many wheel events.
+   2. Chapters (runChapter()). Every SOL page tells its part of the
+      story on one mission panel (.hud-story), everything at the panel's
+      angle: the log (header, rows resolving one by one, footer) and,
+      below it on the same panel, the chapter's story (.hud-caption:
+      status, title, subtitle, supporting line). One GSAP timeline per
+      chapter runs it:
+        panel boots → rows resolve → story opens on the panel.
+      On laptops and desktops the rows stay open above the story. On
+      tablets and phones the rows fold away as the story opens (the panel
+      never grows over the scene), and tapping the panel's header swaps
+      them back in (the story folds while they're open), tap again to
+      swap back. It all runs by itself: one gesture is always one
+      chapter.
 
-   4. Star layer, same persistent canvas particle system as
-      before (adapted from Portfolio's initHero()), a child of
-      #story so it can sit between the scene stack and the text
-      stack in the same stacking context.
+   3. Navigation, one authoritative state:
+        currentIndex   the page on screen (the target, once a turn starts)
+        isAnimating    a page turn is in flight (input lock)
+        navMode        "story"     the story owns input (scrollY 0,
+                                   html.story-locked: touch-action and
+                                   overscroll locked, see about.css)
+                       "leaving"   programmatic scroll into the page below
+                       "page"      normal page scrolling (footer)
+                       "returning" programmatic scroll back up into the story
+      goToPage() locks, runs the turn, and unlocks from the timeline's
+      onComplete, with a wall-clock failsafe (hidden tabs stall the GSAP
+      ticker) and a token so a stale unlock can never release a newer
+      turn. Input is read as GESTURES, not events:
+        wheel  events are grouped into a gesture (a gap > WHEEL_GAP_MS
+               ends it); a gesture fires at most one step, once its
+               accumulated delta passes WHEEL_THRESHOLD; the rest of it
+               (trackpad momentum) is swallowed, even after the turn ends.
+               A fresh swipe during the momentum tail is recognised by its
+               sudden delta jump.
+        touch  a vertical swipe past a distance threshold (or a quick
+               flick) fires one step; small moves, taps and horizontal
+               moves are ignored; the finger then owns nothing until it
+               lifts. While the story owns input the page can't pan at
+               all (touch-action on #story + preventDefault elsewhere), so
+               the browser never scrolls under a turn.
+        keys   arrows / PageUp / PageDown / Space, one step per press.
+      Boundaries: back on SOL 01 does nothing but a small nudge. Forward
+      on the closing page hands over to the page (leaveStory(): a controlled scroll
+      to the footer). From there, scrolling up into the story (wheel,
+      key, or a touch scroll that settles part-way) returns cleanly to
+      the closing page (returnToStory()).
 
-   5. Landing composite, landing-fx.js (LandingFX) owns the landing
-      clock: it grounds the ship on the terrain's calibrated line,
-      cross-dissolves neighbouring frames for smooth motion, and adds
-      the contact shadow / engine light on the terrain (flames and the
-      main dust cloud are baked into the frames). This file just ticks
-      it and uses the returned frame number to drive the bottom-left
-      descent narration (DESCENT_NARRATION), the only HUD location on
-      this page; there is no separate top-right panel.
+   4. Star layer, the persistent canvas sky for the pages that don't play
+      on the landing canvases (sky-fx.js night sky, stars, storm cell,
+      the GLIMPSE orbiter and HOPE).
 
-   Reduced motion / no-GSAP fallback: reduced motion keeps page
-   navigation but swaps the turn down to a plain opacity crossfade
-   (no rotateX/scale/shadow); the landing sequence itself is
-   unaffected (it was already a plain frame-substitution, not a 3D
-   effect). If GSAP fails to load at all, #story drops the whole
-   interaction model and falls back to a plain stacked scroll
-   (about.css .story--fallback) so every chapter and the footer
-   stay reachable; the landing canvas is simply left blank in that
-   path (no frames are ever requested).
+   Reduced motion keeps navigation but turns scenes over with a plain
+   crossfade; the chapter timing is kept (it is timing, not motion) and
+   CSS drops the boot/scan/row animations. If GSAP fails to load, #story
+   falls back to a plain stacked scroll (about.css .story--fallback).
    ============================================================ */
 
 (function () {
@@ -70,34 +84,255 @@
   var story = document.getElementById("story");
   if (!story) return;
 
-  var reduceMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
-  var isCompact = window.matchMedia("(max-width: 640px)").matches;
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Same shapes as about.css's stacked HUD layouts.
+  var stackedMQ = window.matchMedia(
+    "(max-width: 900px) and (max-aspect-ratio: 5/4), (max-aspect-ratio: 4/5), (orientation: landscape) and (max-height: 540px)"
+  );
+  function isStacked() { return stackedMQ.matches; }
+  // Tablets and phones: stacked shapes, plus touch-first screens of any
+  // shape (a landscape tablet keeps the side-by-side layout, but its log
+  // still collapses to the tappable chip). Laptops/desktops never do.
+  var touchMQ = window.matchMedia("(hover: none) and (pointer: coarse)");
+  function canCollapse() { return stackedMQ.matches || touchMQ.matches; }
 
   var hasGsap = typeof gsap !== "undefined";
+  var html = document.documentElement;
+
+  // Shared with the star layer below: text panels the sky labels dim under.
+  var occluders = [];
+  var skyFx = null;
 
   if (hasGsap) {
     var scenes = gsap.utils.toArray(".story-scene");
     var texts = gsap.utils.toArray(".story-text");
     var shadow = document.querySelector(".story-turn-shadow");
     var sceneCount = scenes.length;
+    var LAST = sceneCount - 1;
+
+    var currentIndex = 0;
+    var isAnimating = false;
+    var navMode = "story";
+
+    var ASCENT_IDX = scenes.indexOf(document.querySelector(".story-scene--ascent"));
 
     /* ----------------------------------------------------------
-       1. Landing frame sequence (scene 0's animation)
+       Chapter engine (HUD story loop → dock → card)
+       ---------------------------------------------------------- */
+    var ROW_START = 0.3;   // s after the HUD boots: first row
+    var ROW_STEP = 0.13;   // s between rows
+    var ROW_SET = 0.28;    // s a row scans before its value resolves
+    var HOLD = 1.1;        // s the full log holds before it docks (stacked)
+
+    function makeChapter(el) {
+      var c = {
+        el: el,
+        hud: el.querySelector(".hud-story"),
+        card: el.querySelector(".hud-caption"),
+        rows: [],
+        tl: null,
+      };
+      if (c.hud) c.hud.querySelectorAll(".hud-summary-rows li").forEach(function (li) { c.rows.push(li); });
+      return c;
+    }
+    var chapters = texts.map(makeChapter);
+
+    function textParts(el) {
+      return {
+        status: el.querySelector(".story-status"),
+        titleInner: el.querySelector(".story-title-inner"),
+        subtitle: el.querySelector(".story-subtitle"),
+        support: el.querySelector(".story-support"),
+        extra: [],
+      };
+    }
+
+    function hideTextParts(parts) {
+      if (parts.status) gsap.set(parts.status, { autoAlpha: 0, y: -6 });
+      if (parts.titleInner) gsap.set(parts.titleInner, { yPercent: 100, autoAlpha: 0, letterSpacing: "0.05em" });
+      if (parts.subtitle) gsap.set(parts.subtitle, { autoAlpha: 0, y: 14 });
+      if (parts.support) gsap.set(parts.support, { autoAlpha: 0, y: 12 });
+      if (parts.extra.length) gsap.set(parts.extra, { autoAlpha: 0, y: 12 });
+    }
+
+    // at: when each part lands, in s from the start (a chapter can time
+    // its copy to its HUD, see SOL 01).
+    var TEXT_AT = { status: 0, title: 0.16, subtitle: 0.34, support: 0.5 };
+    function playTextReveal(el, delay, at) {
+      at = at || TEXT_AT;
+      var parts = textParts(el);
+      if (!parts.status) return;
+      var all = [parts.status, parts.titleInner, parts.subtitle, parts.support].concat(parts.extra).filter(Boolean);
+      gsap.killTweensOf(all);
+      if (reduceMotion) {
+        gsap.set(all, { autoAlpha: 1, y: 0 });
+        if (parts.titleInner) gsap.set(parts.titleInner, { yPercent: 0, letterSpacing: "-0.02em" });
+        return;
+      }
+      hideTextParts(parts);
+      var tl = gsap.timeline({ delay: delay || 0 });
+      tl.to(parts.status, { autoAlpha: 1, y: 0, duration: 0.3, ease: "power1.out" }, at.status);
+      tl.call(function () {
+        parts.status.classList.remove("is-scanned");
+        void parts.status.offsetWidth; // restart the CSS scan-line keyframe
+        parts.status.classList.add("is-scanned");
+      }, null, at.status);
+      if (parts.titleInner) tl.to(parts.titleInner, { yPercent: 0, autoAlpha: 1, letterSpacing: "-0.02em", duration: 0.65, ease: "power3.out" }, at.title);
+      if (parts.subtitle) tl.to(parts.subtitle, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power1.out" }, at.subtitle);
+      if (parts.support) tl.to(parts.support, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power1.out" }, at.support);
+    }
+
+    function resetChapter(c) {
+      if (c.tl) { c.tl.kill(); c.tl = null; }
+      c.el.classList.remove("is-live", "is-revealed", "is-docked", "is-origin", "is-complete", "is-hud-open");
+      syncChip(c);
+      c.rows.forEach(function (li) { li.classList.remove("is-in", "is-set"); });
+      hideTextParts(textParts(c.el));
+    }
+
+    // The docked chip is a toggle on stacked layouts: tap to open the full
+    // log (the card steps aside while it's open), tap again to close.
+    function syncChip(c) {
+      if (!c.hud) return;
+      var chip = c.el.classList.contains("is-docked") && canCollapse();
+      if (chip) {
+        c.hud.setAttribute("role", "button");
+        c.hud.setAttribute("tabindex", "0");
+        c.hud.setAttribute("aria-expanded", c.el.classList.contains("is-hud-open") ? "true" : "false");
+      } else {
+        c.hud.removeAttribute("tabindex");
+        c.hud.removeAttribute("aria-expanded");
+        c.hud.setAttribute("role", "group");
+      }
+    }
+    function toggleChip(c) {
+      if (!c.el.classList.contains("is-docked") || !canCollapse()) return;
+      c.el.classList.toggle("is-hud-open");
+      syncChip(c);
+      scheduleOccluders();
+    }
+    chapters.forEach(function (c) {
+      if (!c.hud) return;
+      c.hud.addEventListener("click", function () { toggleChip(c); });
+      c.hud.addEventListener("keydown", function (e) {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        if (!c.el.classList.contains("is-docked")) return;
+        e.preventDefault();
+        e.stopPropagation();
+        toggleChip(c);
+      });
+    });
+
+    // Fold the rows away (tablets/phones): the panel keeps its header and
+    // footer, and the chapter's story opens in their place.
+    function dockChapter(c) {
+      var el = c.el;
+      el.classList.add("is-docked");
+      el.classList.remove("is-hud-open");
+      syncChip(c);
+      scheduleOccluders();
+    }
+
+    function revealCard(c, at) {
+      c.el.classList.add("is-revealed");
+      playTextReveal(c.el, 0, at);
+      scheduleOccluders();
+    }
+
+    // o: { hudAt, rows (false: rows are driven elsewhere), cardAt and
+    //      textAt (side-by-side layouts), hold, dock (force),
+    //      step / set (row pacing), keyBeat (extra scan on the
+    //      li[data-key] row the chapter builds up to) }
+    function runChapter(c, o) {
+      o = o || {};
+      if (c.tl) c.tl.kill();
+      var tl = c.tl = gsap.timeline();
+      var t0 = o.hudAt || 0;
+      var dock = !!c.hud && (o.dock || canCollapse());
+      if (c.hud) tl.call(function () { c.el.classList.add("is-live"); scheduleOccluders(); }, null, t0);
+      var t = t0 + ROW_START;
+      if (c.hud && o.rows !== false) {
+        var step = o.step || ROW_STEP, set = o.set || ROW_SET, beat = o.keyBeat || 0;
+        var at = t, lastSet = t;
+        c.rows.forEach(function (li) {
+          var key = li.hasAttribute("data-key");
+          if (key) at += beat * 0.4;                 // a breath before it
+          var tIn = at, tSet = at + set + (key ? beat : 0);
+          tl.call(function () { li.classList.add("is-in"); }, null, tIn);
+          tl.call(function () { li.classList.add("is-set"); }, null, tSet);
+          lastSet = tSet;
+          at = key ? tSet + beat * 0.5 : at + step;  // and a beat after it lands
+        });
+        t = lastSet;
+      }
+      if (c.hud) tl.call(function () { c.el.classList.add("is-complete"); }, null, t + 0.25);
+      var cardAt;
+      if (dock) {
+        var dockAt = t + (o.hold != null ? o.hold : HOLD);
+        tl.call(function () { dockChapter(c); }, null, dockAt);
+        cardAt = dockAt + 0.15;
+      } else {
+        cardAt = t0 + (o.cardAt != null ? o.cardAt : 0.55);
+      }
+      if (c.card) tl.call(function () { revealCard(c, dock ? null : o.textAt); }, null, cardAt);
+      return tl;
+    }
+
+    // The layout changed mid-chapter (rotation, resize): stacked docks any
+    // log still open over a revealed card; laptop/desktop opens it again.
+    function redockActive() {
+      var c = chapters[currentIndex];
+      if (!c || !c.hud) return;
+      if (canCollapse()) {
+        if (c.el.classList.contains("is-revealed") && !c.el.classList.contains("is-docked")) dockChapter(c);
+      } else {
+        c.el.classList.remove("is-docked", "is-hud-open");
+        syncChip(c);
+      }
+    }
+
+    /* ----------------------------------------------------------
+       Sky-label occluders: the active page's visible text panels
+       ---------------------------------------------------------- */
+    var occTimers = [];
+    function refreshOccluders() {
+      var el = texts[currentIndex];
+      var sr = story.getBoundingClientRect();
+      var list = [];
+      if (el && navMode !== "page") {
+        el.querySelectorAll(".hud-panel, .story-title--worx, .story-cta, .story-ignite").forEach(function (p) {
+          var cs = getComputedStyle(p);
+          if (cs.display === "none" || cs.visibility === "hidden") return;
+          var host = p.closest(".landing-hud");
+          var shown = host ? el.classList.contains("is-live") : el.classList.contains("is-revealed") || !p.classList.contains("hud-panel");
+          if (!shown) return;
+          var r = p.getBoundingClientRect();
+          if (r.width < 2 || r.height < 2) return;
+          list.push({ l: r.left - sr.left - 8, t: r.top - sr.top - 6, r: r.right - sr.left + 8, b: r.bottom - sr.top + 6 });
+        });
+      }
+      occluders.length = 0;
+      Array.prototype.push.apply(occluders, list);
+    }
+    function scheduleOccluders() {
+      occTimers.forEach(clearTimeout);
+      occTimers = [60, 700, 1500].map(function (ms) { return setTimeout(refreshOccluders, ms); });
+    }
+
+    /* ----------------------------------------------------------
+       1. Landing frame sequence (SOL 01)
        ---------------------------------------------------------- */
     var landingCanvas = document.querySelector(".story-landing");
     var landingBackCanvas = document.querySelector(".story-landing-back");
     var landingFrontCanvas = document.querySelector(".story-landing-front");
-    var landingStatusEl = document.querySelector(".story-text--landing .story-status");
-    var landingStatusTextEl = landingStatusEl && landingStatusEl.querySelector(".story-status-text");
     var landingSeq = null;
     var landingFX = null;
     var LANDING_DURATION_MS = 4000; // fallback clock when LandingFX is unavailable
-    var LANDING_TEXT_DELAY_MS = 1600; // after the dust burst: card boots in as the legs come through the clearing dust
-    var TEXT_REVEAL_DELAY = 0.2; // seconds; beat between a page becoming active and its mission text starting
+    var ORIGIN_DELAY_MS = 1200;     // after the dust burst: the log turns into the origin log as the legs come through the dust
+    var FRAMES_TIMEOUT_MS = 8000;   // never hold the opening on black longer than this
     var landingRAF = 0;
     var landingTextTimer = null;
+    var landingReady = null;
 
     if (landingCanvas && typeof LandingSequence !== "undefined") {
       landingSeq = new LandingSequence(landingCanvas, {
@@ -108,8 +343,8 @@
         frameHeight: parseInt(landingCanvas.dataset.landingHeight, 10) || 1440,
       });
       landingSeq.resize();
-      var landingReady = landingSeq.preload();
-      landingReady.then(function (info) {
+      var framesLoaded = landingSeq.preload();
+      framesLoaded.then(function (info) {
         console.info(
           "[about] landing sequence: " + info.loadedCount + "/" + info.total +
           " frame(s) found at " + (landingCanvas.dataset.landingBase || "(default path)") +
@@ -117,10 +352,10 @@
         );
         if (!landingFX) landingSeq.refreshPending();
       });
+      // Slow or failing frames never trap the opening on black.
+      landingReady = Promise.race([framesLoaded, new Promise(function (r) { setTimeout(r, FRAMES_TIMEOUT_MS); })]);
     }
 
-    // Cinematic layers for the landing shot (about.css):
-    // grain, vignette, touchdown flash, fade-from-black.
     var landingTerrain = document.querySelector(".story-scene--landing .story-terrain");
     var flashEl = document.querySelector(".story-flash");
     var grainEl = document.querySelector(".story-grain");
@@ -152,24 +387,19 @@
         cameraOriginY: CAMERA_ORIGIN_Y,
         flash: flashEl,
         onFrame: function (info) {
-          if (currentIndex !== 1) updateHud(info);
+          if (currentIndex === 0) updateHud(info);
         },
         reduceMotion: reduceMotion,
       });
+      landingFX.occluders = occluders;
       landingFX.resize();
       if (typeof MartianSky !== "undefined") landingFX.sky = new MartianSky({ reduceMotion: reduceMotion });
     }
 
-    // Section 2's camera angle on the landed ship: left third, turned to
-    // face right (perspective warp, LandingFX still mode, a clean,
-    // stationary ship with no dust). Narrow/portrait screens shift less.
+    // SOL 02's camera angle on the landed ship: left third, turned to
+    // face right. Narrow/portrait screens shift less.
     function summaryPose() {
       var wide = story.clientWidth / Math.max(1, story.clientHeight) > 1.1;
-      // A few degrees of yaw, a ship parked dead square to the camera
-      // reads as a flat cutout; sitting very slightly turned toward the
-      // hatch is what makes it look like it's actually resting on the
-      // ground. dx keeps it left-of-centre without ever touching either
-      // edge, 034's own framing matches 033's almost exactly.
       return { dx: wide ? -0.14 : -0.05, yaw: wide ? 4 : 2 };
     }
 
@@ -185,24 +415,26 @@
       { at: MARKS.clear - 600, text: "Site secured" },
     ];
 
-    var landingTextEl = document.querySelector(".story-text--landing");
+    var landingTextEl = texts[0];
+    var landingChapter = chapters[0];
     var hud = {
       stages: [],
       stage: -1,
       lastText: 0,
-      root: document.querySelector(".landing-hud"),
-      log: document.querySelector(".hud-log"),
-      target: document.querySelector(".hud-target"),
-      label: document.querySelector(".hud-target-label"),
-      line: document.querySelector(".hud-leader-line"),
-      accent: document.querySelector(".hud-leader-accent"),
-      alt: document.querySelector('[data-hud="alt"]'),
-      vel: document.querySelector('[data-hud="vel"]'),
-      dist: document.querySelector('[data-hud="dist"]'),
-      clock: document.querySelector('[data-hud="t"]'),
+      root: landingTextEl.querySelector(".landing-hud"),
+      log: landingTextEl.querySelector(".hud-log"),
+      head: landingTextEl.querySelector(".hud-head"),
+      target: landingTextEl.querySelector(".hud-target"),
+      label: landingTextEl.querySelector(".hud-target-label"),
+      line: landingTextEl.querySelector(".hud-leader-line"),
+      accent: landingTextEl.querySelector(".hud-leader-accent"),
+      alt: landingTextEl.querySelector('[data-hud="alt"]'),
+      vel: landingTextEl.querySelector('[data-hud="vel"]'),
+      dist: landingTextEl.querySelector('[data-hud="dist"]'),
+      clock: landingTextEl.querySelector('[data-hud="t"]'),
     };
     (function buildStages() {
-      var list = document.querySelector(".hud-stages");
+      var list = landingTextEl.querySelector(".hud-stages");
       if (!list) return;
       DESCENT_NARRATION.forEach(function (n) {
         var li = document.createElement("li");
@@ -215,8 +447,9 @@
     function resetHud() {
       hud.stage = -1;
       hud.stages.forEach(function (li) { li.classList.remove("is-done", "is-active"); });
-      if (hud.label) hud.label.textContent = "GLIMPSE-01";
-      if (landingTextEl) landingTextEl.classList.remove("is-live", "is-revealed");
+      if (hud.label) hud.label.textContent = "GLIMPSE";
+      if (hud.clock) hud.clock.textContent = "T+00:00.0";
+      resetChapter(landingChapter);
     }
 
     function fmtAlt(m) { return m >= 1000 ? (m / 1000).toFixed(2) + " KM" : Math.round(m) + " M"; }
@@ -230,86 +463,72 @@
 
     function updateHud(info) {
       var e = info.elapsed;
-      // Stage list.
-      var stage = 0;
-      for (var i = 0; i < DESCENT_NARRATION.length; i++) if (e >= DESCENT_NARRATION[i].at) stage = i;
-      if (stage !== hud.stage) {
-        hud.stage = stage;
-        hud.stages.forEach(function (li, j) {
-          li.classList.toggle("is-done", j < stage);
-          li.classList.toggle("is-active", j === stage);
-        });
-        if (hud.label && e >= MARKS.touchdown) hud.label.textContent = "GLIMPSE-01 · LANDED";
-      }
-      // Telemetry, ~15 Hz so the digits stay readable.
-      if (e - hud.lastText > 66 || e < hud.lastText) {
-        hud.lastText = e;
-        var t = info.telemetry;
-        if (hud.alt) hud.alt.textContent = fmtAlt(t.alt);
-        if (hud.vel) hud.vel.textContent = fmtVel(t.vel);
-        if (hud.dist) hud.dist.textContent = fmtDist(t.dist);
-        if (hud.clock) hud.clock.textContent = fmtClock(e);
+      var origin = landingTextEl.classList.contains("is-origin");
+      if (!origin) {
+        var stage = 0;
+        for (var i = 0; i < DESCENT_NARRATION.length; i++) if (e >= DESCENT_NARRATION[i].at) stage = i;
+        if (stage !== hud.stage) {
+          hud.stage = stage;
+          hud.stages.forEach(function (li, j) {
+            li.classList.toggle("is-done", j < stage);
+            li.classList.toggle("is-active", j === stage);
+          });
+          if (hud.label && e >= MARKS.touchdown) hud.label.textContent = "GLIMPSE · LANDED";
+        }
+        // Telemetry, ~15 Hz so the digits stay readable.
+        if (e - hud.lastText > 66 || e < hud.lastText) {
+          hud.lastText = e;
+          var t = info.telemetry;
+          if (hud.alt) hud.alt.textContent = fmtAlt(t.alt);
+          if (hud.vel) hud.vel.textContent = fmtVel(t.vel);
+          if (hud.dist) hud.dist.textContent = fmtDist(t.dist);
+          if (hud.clock) hud.clock.textContent = fmtClock(e);
+        }
       }
       // The HUD rides the touchdown shake a little: it's part of the shot.
       if (hud.root) hud.root.style.transform = (info.shake.x || info.shake.y)
         ? "translate(" + (info.shake.x * 0.35).toFixed(1) + "px," + (info.shake.y * 0.35).toFixed(1) + "px)" : "";
-      // Target marker + leader line from the active stage to the ship.
+      // Target marker + leader line from the active stage (then the log's
+      // header, once it is the origin log) to the ship.
       var tx = info.ship.x, ty = info.ship.y;
       if (hud.target) hud.target.style.transform = "translate(" + tx.toFixed(1) + "px," + ty.toFixed(1) + "px)";
-      var li = hud.stages[hud.stage];
-      if (li && hud.line && hud.accent && hud.log) {
+      var li = origin ? hud.head : hud.stages[hud.stage];
+      if (li && hud.line && hud.accent && hud.log && !isStacked()) {
         var base = story.getBoundingClientRect();
         var lr = hud.log.getBoundingClientRect();
         var r = li.getBoundingClientRect();
         var ax = lr.right - base.left, ay = r.top + r.height / 2 - base.top;
         var kx = ax + Math.min(60, Math.max(24, (tx - ax) * 0.18));
-        var ex = tx - 20 * (tx >= kx ? 1 : -1), ey = ty; // stop at the outer ring
+        var ex = tx - 20 * (tx >= kx ? 1 : -1), ey = ty;
         hud.accent.setAttribute("points", ax.toFixed(1) + "," + ay.toFixed(1) + " " + kx.toFixed(1) + "," + ay.toFixed(1));
         hud.line.setAttribute("points", kx.toFixed(1) + "," + ay.toFixed(1) + " " + ex.toFixed(1) + "," + ey.toFixed(1));
       }
     }
 
-    function setLandingStatus(text) {
-      if (!landingStatusTextEl) return;
-      landingStatusTextEl.textContent = text;
-      if (landingStatusEl) {
-        landingStatusEl.classList.remove("is-scanned");
-        void landingStatusEl.offsetWidth; // restart the CSS scan-line keyframe
-        landingStatusEl.classList.add("is-scanned");
-      }
-    }
-
     // Time-based, not scroll-based: plays 0→last once and stops. Always
     // cancels any previous run first, so returning to the scene mid-flight
-    // (or fast back-and-forth navigation) never stacks up duplicate loops.
+    // never stacks up duplicate loops.
     function playLanding() {
-      if (!landingSeq) return;
+      if (!landingSeq) { revealOrigin(); return; }
       cancelAnimationFrame(landingRAF);
       clearTimeout(landingTextTimer);
       if (landingFX) landingFX.reset();
       resetHud();
-      // Hold on black until the frames are decoded,
+      // Hold on black until the frames are decoded (or the timeout),
       // so the ship can never arrive missing; then fade up and roll.
       story.classList.add("is-cinema", "is-blackout");
       var token = (playLanding.token = (playLanding.token || 0) + 1);
       (landingReady || Promise.resolve()).then(function () {
         if (token !== playLanding.token) return; // left/re-entered meanwhile
         requestAnimationFrame(function () { story.classList.remove("is-blackout"); });
-        if (landingTextEl) landingTextEl.classList.add("is-live");
+        landingTextEl.classList.add("is-live");
         rollLanding();
       });
     }
 
     function rollLanding() {
-      if (landingStatusEl) gsap.set(landingStatusEl, { autoAlpha: 1, y: 0 });
-      var titleInner = document.querySelector(".story-text--landing .story-title-inner");
-      var subtitle = document.querySelector(".story-text--landing .story-subtitle");
-      if (titleInner) gsap.set(titleInner, { yPercent: 100, autoAlpha: 0, letterSpacing: "0.05em" });
-      if (subtitle) gsap.set(subtitle, { autoAlpha: 0, y: 14 });
-
       var start = null;
       var last = landingSeq.count - 1;
-
       function tick(ts) {
         if (start === null) start = ts;
         var elapsed = ts - start;
@@ -321,38 +540,42 @@
           landingSeq.setFrame(Math.round(progress * last));
           done = progress >= 1;
         }
-
-
         if (!done) {
           landingRAF = requestAnimationFrame(tick);
         } else {
           landingRAF = 0;
           if (landingFX) landingFX.runIdle();
-          landingTextTimer = setTimeout(revealFinalCaption, LANDING_TEXT_DELAY_MS);
+          landingTextTimer = setTimeout(revealOrigin, ORIGIN_DELAY_MS);
         }
       }
       landingRAF = requestAnimationFrame(tick);
     }
 
-    // Clears the temporary descent narration and reveals the
-    // persistent opening caption, status swaps to its resting copy,
-    // title/subtitle play their staggered reveal for the first time.
-    function revealFinalCaption() {
-      var el = document.querySelector(".story-text--landing");
-      if (!el) return;
-      story.classList.remove("is-cinema"); // vignette eases back as the title lands
-      el.classList.add("is-revealed");
-      setLandingStatus("SOL 1 · SITE SECURED");
-      var titleInner = el.querySelector(".story-title-inner");
-      var subtitle = el.querySelector(".story-subtitle");
-      if (reduceMotion) {
-        if (titleInner) gsap.set(titleInner, { yPercent: 0, autoAlpha: 1, letterSpacing: "-0.02em" });
-        if (subtitle) gsap.set(subtitle, { autoAlpha: 1, y: 0 });
-        return;
-      }
-      var tl = gsap.timeline();
-      if (titleInner) tl.to(titleInner, { yPercent: 0, autoAlpha: 1, letterSpacing: "-0.02em", duration: 0.6, ease: "power3.out" }, 0);
-      if (subtitle) tl.to(subtitle, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power1.out" }, 0.2);
+    // SOL 01's one reveal: the descent log becomes the GLIMPSE origin log
+    // and runs its rows while "SITE SECURED" / the title / the subtitle
+    // boot in on the card, as one sequence.
+    function revealOrigin() {
+      if (currentIndex !== 0) return;
+      story.classList.remove("is-cinema", "is-blackout"); // vignette eases back as the title lands
+      landingTextEl.classList.add("is-origin");
+      if (hud.clock) hud.clock.textContent = "SOL 01";
+      if (hud.label) hud.label.textContent = "GLIMPSE · LANDED";
+      runChapter(landingChapter, originTiming());
+    }
+
+    // SOL 01's origin log is the opening's main beat: its rows tell how
+    // WORX BY GLIMPSE grew from within GLIMPSE, holding on MISSION before
+    // it resolves. Side by side, the card lands in step with it: SITE
+    // SECURED with the log's header, the title as ORIGIN resolves to
+    // GLIMPSE, the subtitle ("Ours started with Glimpse.") with
+    // EXPERIENCE. Stacked, the log tells it first (a little quicker),
+    // docks, then the card takes the screen.
+    function originTiming(quick) {
+      if (canCollapse()) return { hudAt: 0.05, step: quick ? 0.2 : 0.34, set: quick ? 0.18 : 0.26, keyBeat: quick ? 0.25 : 0.6, hold: quick ? 0.5 : 1 };
+      return {
+        hudAt: 0.05, step: quick ? 0.22 : 0.46, set: quick ? 0.2 : 0.32, keyBeat: quick ? 0.3 : 0.8,
+        cardAt: 0.1, textAt: { status: 0, title: 0.5, subtitle: 1.35, support: 1.6 },
+      };
     }
 
     function stopLanding() {
@@ -365,113 +588,148 @@
       resetHud();
     }
 
-    // ----------------------------------------------------------
-    // Staggered "mission text" reveal for the 8 story pages: status
-    // line, then title (line-mask clip reveal), then subtitle. Pages
-    // without a .story-status (the closing CTA scene) are left to the
-    // plain container fade goToPage() already does, nothing to stagger.
-    // ----------------------------------------------------------
-    function textParts(el) {
-      return {
-        status: el.querySelector(".story-status"),
-        titleInner: el.querySelector(".story-title-inner"),
-        subtitle: el.querySelector(".story-subtitle"),
-      };
-    }
-
-    function hideTextParts(parts) {
-      if (parts.status) gsap.set(parts.status, { autoAlpha: 0, y: -6 });
-      if (parts.titleInner) gsap.set(parts.titleInner, { yPercent: 100, autoAlpha: 0, letterSpacing: "0.05em" });
-      if (parts.subtitle) gsap.set(parts.subtitle, { autoAlpha: 0, y: 14 });
-    }
-
-    function playTextReveal(el, delay) {
-      var parts = textParts(el);
-      if (!parts.status) return; // legacy/CTA page: nothing to stagger
-      gsap.killTweensOf([parts.status, parts.titleInner, parts.subtitle].filter(Boolean));
-      hideTextParts(parts);
-
-      if (reduceMotion) {
-        gsap.set(parts.status, { autoAlpha: 1, y: 0 });
-        if (parts.titleInner) gsap.set(parts.titleInner, { yPercent: 0, autoAlpha: 1, letterSpacing: "-0.02em" });
-        if (parts.subtitle) gsap.set(parts.subtitle, { autoAlpha: 1, y: 0 });
-        return;
-      }
-
-      var tl = gsap.timeline({ delay: delay || 0 });
-      tl.to(parts.status, { autoAlpha: 1, y: 0, duration: 0.3, ease: "power1.out" }, 0);
-      tl.call(function () {
-        parts.status.classList.remove("is-scanned");
-        void parts.status.offsetWidth; // restart the CSS scan-line keyframe
-        parts.status.classList.add("is-scanned");
-      }, null, 0);
-      if (parts.titleInner) tl.to(parts.titleInner, { yPercent: 0, autoAlpha: 1, letterSpacing: "-0.02em", duration: 0.6, ease: "power3.out" }, 0.16);
-      if (parts.subtitle) tl.to(parts.subtitle, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power1.out" }, 0.3);
+    // Back on SOL 01 from a later page: the landed ship at rest (frame
+    // 033, dust settled, beacon on), no second landing. The shot dips
+    // briefly while the camera "cuts" back to the landing angle.
+    function showLanded(landingLayers) {
+      stopLanding();
+      if (!landingFX) { revealOrigin(); return; }
+      landingFX._lastElapsed = MARKS.clear + 400;
+      landingFX.runIdle();
+      landingTextEl.classList.add("is-live", "is-origin");
+      if (hud.clock) hud.clock.textContent = "SOL 01";
+      if (hud.label) hud.label.textContent = "GLIMPSE · LANDED";
+      runChapter(landingChapter, originTiming(true));
+      gsap.to(landingLayers, { autoAlpha: 1, duration: reduceMotion ? 0.2 : 0.6, ease: "power1.out", overwrite: true });
     }
 
     /* ----------------------------------------------------------
-       2. Per-scene animation hooks (reusable for future chapters)
+       2. Per-scene hooks, directed one by one
        ---------------------------------------------------------- */
-    // Pages whose text sits on a HUD card (about.css "Caption card") boot
-    // the card in as the page arrives and power it down when it leaves,
-    // so it re-boots on every visit. Pages with their own mission log
-    // (.landing-hud) boot it the same way and count its [data-count]
-    // readouts up from zero.
+    var SCENE_DUR = reduceMotion ? 0.4 : 0.95;
+
+    // Default: the page's chapter runs as it arrives, resets as it leaves.
     var sceneAnimations = scenes.map(function (_, idx) {
-      var el = texts[idx];
-      var hasCard = !!(el && el.querySelector(".hud-card"));
-      var hasHud = !!(el && el.querySelector(".landing-hud"));
-      var counts = hasHud ? Array.prototype.slice.call(el.querySelectorAll("[data-count]")) : [];
-      var timer = null;
-      var showCount = function (node, k) {
-        var dec = parseInt(node.dataset.dec || "0", 10);
-        node.textContent = (parseFloat(node.dataset.count) * k).toFixed(dec) + (node.dataset.unit || "");
-      };
+      var c = chapters[idx];
       return {
-        onEnter: function () {
-          if (hasCard) el.classList.add("is-revealed");
-          if (hasHud) {
-            el.classList.add("is-live");
-            clearInterval(timer);
-            if (reduceMotion) counts.forEach(function (n) { showCount(n, 1); });
-            else {
-              var t0 = performance.now();
-              timer = setInterval(function () {
-                var k = Math.min(1, (performance.now() - t0) / 1200);
-                var ez = 1 - Math.pow(1 - k, 3);
-                counts.forEach(function (n) { showCount(n, ez); });
-                if (k >= 1) clearInterval(timer);
-              }, 40);
-            }
-          }
-          playTextReveal(el, hasHud ? 0 : TEXT_REVEAL_DELAY); // HUD pages: caption lands with the log
-        },
-        onLeave: function () {
-          if (hasCard) el.classList.remove("is-revealed");
-          if (hasHud) { clearInterval(timer); el.classList.remove("is-live"); }
-        },
+        onEnter: function () { if (c) runChapter(c, { hudAt: 0.2 }); },
+        onLeave: function () { if (c) resetChapter(c); },
       };
+    });
+
+    function chain(idx, extra) {
+      var base = sceneAnimations[idx];
+      sceneAnimations[idx] = {
+        onEnter: function (from, dir) { base.onEnter(from, dir); if (extra.onEnter) extra.onEnter(from, dir); },
+        onLeave: function (to, dir) { base.onLeave(to, dir); if (extra.onLeave) extra.onLeave(to, dir); },
+      };
+    }
+
+    // SOL 03 · the traverse: the rover drives in across the plain while
+    // the camera pans with it (far ship and terrain slide the other way,
+    // at their own depths). Going on, it pulls away to the right toward
+    // the build site; coming back, it rolls back in from there.
+    var traverse = scenes[2];
+    if (traverse && traverse.querySelector(".story-rover")) chain(2, {
+      onEnter: function (from, dir) {
+        gsap.killTweensOf(traverse);
+        if (reduceMotion) { gsap.set(traverse, { "--drive": 0, "--pan": 0 }); return; }
+        if (dir < 0) {
+          gsap.fromTo(traverse, { "--drive": 0.5, "--pan": -0.5 }, { "--drive": 0, "--pan": 0, duration: 1.6, ease: "power2.out" });
+        } else {
+          gsap.fromTo(traverse, { "--drive": -1.25, "--pan": 1 }, { "--drive": 0, "--pan": 0, duration: 2.8, ease: "power3.out" });
+        }
+      },
+      onLeave: function (to, dir) {
+        if (reduceMotion) return;
+        gsap.killTweensOf(traverse);
+        if (dir > 0) gsap.to(traverse, { "--drive": 0.9, "--pan": -0.4, duration: SCENE_DUR, ease: "power2.in" });
+      },
+    });
+
+    // SOL 04 · the build site powers up in stages: it rises into place,
+    // the floodlights and beacons come on, then the work starts (sparks,
+    // drone, crew footfall). Coming back, it's already working.
+    var build = scenes[3];
+    var buildTimers = [];
+    if (build && build.querySelector(".story-site")) chain(3, {
+      onEnter: function (from, dir) {
+        buildTimers.forEach(clearTimeout);
+        gsap.killTweensOf(build);
+        if (dir < 0 || reduceMotion) {
+          build.classList.add("is-power", "is-work");
+          gsap.set(build, { "--rise": 0 });
+          return;
+        }
+        build.classList.remove("is-power", "is-work");
+        gsap.fromTo(build, { "--rise": 1 }, { "--rise": 0, duration: 2, ease: "power3.out" });
+        buildTimers = [
+          setTimeout(function () { build.classList.add("is-power"); }, 650),
+          setTimeout(function () { build.classList.add("is-work"); }, 1400),
+        ];
+      },
+      onLeave: function () { buildTimers.forEach(clearTimeout); },
+    });
+
+    // SOL 05 · the salute: the hatch light comes up and falls on the
+    // crew as they stand to attention; the camera settles in on the ship.
+    var tribute = scenes[4];
+    var tributeTimer = null;
+    if (tribute && tribute.querySelector(".story-tribute")) chain(4, {
+      onEnter: function (from, dir) {
+        clearTimeout(tributeTimer);
+        gsap.killTweensOf(tribute);
+        if (dir < 0 || reduceMotion) {
+          tribute.classList.add("is-lit");
+          gsap.set(tribute, { "--push": 0 });
+          return;
+        }
+        tribute.classList.remove("is-lit");
+        gsap.fromTo(tribute, { "--push": 1 }, { "--push": 0, duration: 4, ease: "power1.out" });
+        tributeTimer = setTimeout(function () { tribute.classList.add("is-lit"); }, 450);
+      },
+      onLeave: function () { clearTimeout(tributeTimer); },
     });
 
     if (landingCanvas) {
       var landingLayers = [landingCanvas];
       if (landingBackCanvas) landingLayers.push(landingBackCanvas);
       if (landingFrontCanvas) landingLayers.push(landingFrontCanvas);
+
+      var fadeLayersIn = function (fromIndex) {
+        gsap.killTweensOf(landingLayers);
+        var sameShot = fromIndex === 0 || fromIndex === 1 || fromIndex === ASCENT_IDX;
+        if (sameShot || reduceMotion) gsap.set(landingLayers, { autoAlpha: 1 });
+        else gsap.fromTo(landingLayers, { autoAlpha: 0 }, { autoAlpha: 1, duration: SCENE_DUR, delay: SCENE_DUR * 0.12, ease: "power2.out" });
+      };
+      var fadeLayersOut = function (keepIdx) {
+        gsap.to(landingLayers, {
+          autoAlpha: 0, duration: 0.35, overwrite: true,
+          onComplete: function () { if (landingFX && keepIdx.indexOf(currentIndex) < 0) landingFX.reset(); },
+        });
+      };
+      var SHOT_PAGES = [0, 1, ASCENT_IDX];
+
       sceneAnimations[0] = {
-        // Deliberately does NOT call playTextReveal: the landing page's
-        // title/subtitle stay hidden until touchdown + settle, driven
-        // by playLanding()/revealFinalCaption() instead, see §25 of
-        // the approved landing spec (temporary descent narration first,
-        // persistent caption only once the ship has stopped moving).
-        onEnter: function () {
-          gsap.killTweensOf(landingLayers);
-          gsap.set(landingLayers, { autoAlpha: 1 });
-          playLanding();
+        // First visit: the full landing, its caption held until touchdown +
+        // settle (revealOrigin()). Coming back: the landed ship at rest.
+        onEnter: function (fromIndex) {
+          if (fromIndex == null) {
+            gsap.killTweensOf(landingLayers);
+            gsap.set(landingLayers, { autoAlpha: 1 });
+            playLanding();
+            return;
+          }
+          resetChapter(landingChapter);
+          gsap.to(landingLayers, {
+            autoAlpha: 0, duration: reduceMotion ? 0.1 : 0.28, overwrite: true,
+            onComplete: function () { if (currentIndex === 0) showLanded(landingLayers); },
+          });
         },
         onLeave: function (toIndex) {
           if (toIndex === 1 && landingFX) {
-            // Into Section 2: same shot, no teardown, stop the landing's
-            // clock, keep frame 033 + storm alive, and cut to the new angle.
+            // Into SOL 02: same shot, no teardown, stop the landing's
+            // clock, keep the ship + sky alive, and cut to the new angle.
             playLanding.token = (playLanding.token || 0) + 1;
             cancelAnimationFrame(landingRAF);
             landingRAF = 0;
@@ -480,85 +738,54 @@
             resetHud();
             landingFX.setStill(true);
             landingFX.runIdle();
-            landingFX.setPose(summaryPose(), 700, true); // only the left-hand ship: it fades in there
+            landingFX.setPose(summaryPose(), 700, true);
             return;
           }
           stopLanding();
-          if (landingFX) landingFX.reset();
-          gsap.to(landingLayers, { autoAlpha: 0, duration: 0.3, overwrite: true });
+          fadeLayersOut(SHOT_PAGES);
         },
       };
 
-      // Section 2: frame 033 on the left third, turned to face right,
-      // with the Mission Control summary HUD on the right.
-      var summaryText = texts[1];
-      if (summaryText && landingFX) {
-        var sum = {
-          counts: Array.prototype.slice.call(summaryText.querySelectorAll("[data-count]")),
-          countTimer: null,
-        };
-
-        var countUp = function () {
-          clearInterval(sum.countTimer);
-          var t0 = performance.now();
-          sum.countTimer = setInterval(function () {
-            var k = Math.min(1, (performance.now() - t0) / 1200);
-            var ez = 1 - Math.pow(1 - k, 3);
-            sum.counts.forEach(function (el) {
-              var v = parseFloat(el.dataset.count) * ez, dec = parseInt(el.dataset.dec || "0", 10);
-              el.textContent = v.toFixed(dec) + (el.dataset.unit || "");
-            });
-            if (k >= 1) clearInterval(sum.countTimer);
-          }, 40);
-        };
-
+      // SOL 02: the ship on the left third, hatch open, crew out. The
+      // airlock lights flicker on as the pose settles; the readiness log
+      // boots with them and the card follows: one event.
+      var summaryChapter = chapters[1];
+      if (summaryChapter && landingFX) {
         sceneAnimations[1] = {
           onEnter: function (fromIndex) {
-            gsap.killTweensOf(landingLayers);
-            gsap.set(landingLayers, { autoAlpha: 1 });
+            fadeLayersIn(fromIndex);
             if (fromIndex !== 0) {
-              // arriving from further down: show the landed ship directly
               landingFX.setStill(true);
               landingFX.runIdle();
               landingFX.setPose(summaryPose(), 0);
             }
-            summaryText.classList.add("is-live", "is-revealed");
-            playTextReveal(summaryText, 0.5);
-            if (reduceMotion) sum.counts.forEach(function (el) {
-              el.textContent = (+el.dataset.count).toFixed(parseInt(el.dataset.dec || "0", 10)) + (el.dataset.unit || "");
-            });
-            else countUp();
+            runChapter(summaryChapter, { hudAt: fromIndex === 0 ? 0.8 : 0.3, cardAt: 0.75 });
           },
           onLeave: function (toIndex) {
-            clearInterval(sum.countTimer);
-            summaryText.classList.remove("is-live", "is-revealed");
-            if (toIndex !== 0) {
-              gsap.to(landingLayers, {
-                autoAlpha: 0, duration: 0.3, overwrite: true,
-                onComplete: function () { if (landingFX) landingFX.reset(); },
-              });
-            }
+            resetChapter(summaryChapter);
+            if (toIndex !== 0) fadeLayersOut(SHOT_PAGES);
           },
         };
       }
     }
 
     /* ----------------------------------------------------------
-       2b. Ascent page ("Link established" -> "Habitat online"): the
-       landing shot flown the other way (landing-fx.js playAscent()).
-       Plays on scene 0 + the landing canvases like Section 2 does. Two
-       live logs ride it, GLIMPSE-01's ascent log with a leader line to
-       the ship (then to the orbiter it rejoins), and the WORX
-       surface log with one to the habitat. When the links are up the
-       caption lands like Section 1's, and two seconds later the story
-       turns to the final page on its own.
+       2b. SOL 06 (ascent, habitat online): the landing shot flown the
+       other way (landing-fx.js playAscent()). The ship returns to the
+       GLIMPSE orbiter while the habitat powers up below and links up to
+       it; the operations log brings each capability online with it.
+       Once the caption has landed the story turns to the closing page on
+       its own, as it always has (forward visits only: stepping back from
+       the closing page lands on the settled shot and stays there).
        ---------------------------------------------------------- */
-    var ascentText = document.querySelector(".story-text--ascent");
-    var ASCENT_IDX = ascentText ? texts.indexOf(ascentText) : -1;
-    var AUTO_ADVANCE_MS = 2000;
+    var ascentText = texts[ASCENT_IDX];
+    // after the caption lands: long enough to read the chapter's story
+    // (title, subtitle and supporting line) before the closing page
+    var AUTO_ADVANCE_MS = 4200;
 
     if (ascentText && landingFX && typeof LandingFX !== "undefined" && LandingFX.ASCENT) {
       var AS = LandingFX.ASCENT;
+      var ascentChapter = chapters[ASCENT_IDX];
       var ASCENT_NARRATION = [
         { at: 0, text: "Go for launch" },
         { at: AS.ignite, text: "Main engine start" },
@@ -569,6 +796,8 @@
         { at: AS.dock, text: "Rendezvous" },
         { at: AS.link, text: "Link established" },
       ];
+      // When each operations-log row resolves, in ascent time.
+      var WORX_AT = { base: 0, web: AS.pitch, soft: AS.insert, ux: AS.rendezvous, flow: AS.dock, client: AS.link, global: AS.link + 600 };
       var q = function (sel) { return ascentText.querySelector(sel); };
       var ahud = {
         root: q(".ascent-hud"), log: q(".ascent-log"), worx: q(".worx-log"),
@@ -578,9 +807,12 @@
         shipLabel: q('[data-target="ship"] .hud-target-label'),
         shipLine: q('[data-leader="ship-line"]'), shipAccent: q('[data-leader="ship-accent"]'),
         habLine: q('[data-leader="hab-line"]'), habAccent: q('[data-leader="hab-accent"]'),
-        worxRows: {}, caption: false, advanceTimer: null,
+        rows: [], status: q('[data-worx="status"]'),
+        caption: false, opened: false, advance: false, advanceTimer: null,
       };
-      ascentText.querySelectorAll("[data-worx]").forEach(function (el) { ahud.worxRows[el.dataset.worx] = el; });
+      ascentText.querySelectorAll("li [data-worx]").forEach(function (b) {
+        ahud.rows.push({ li: b.parentNode, at: WORX_AT[b.dataset.worx] || 0 });
+      });
       (function () {
         var list = q(".hud-stages");
         if (!list) return;
@@ -592,25 +824,16 @@
         });
       })();
 
-      var setWorx = function (key, text) {
-        var el = ahud.worxRows[key];
-        if (el && el.textContent !== text) el.textContent = text;
-      };
-
-      // The WORX log's statuses, as a function of ascent time.
-      var updateWorx = function (a, tele) {
-        setWorx("poll", a < AS.ignite ? "POLLING" : "ALL GO");
-        setWorx("pad", a < AS.ignite ? "ARMED" : a < AS.pitch ? "HOT" : "CLEAR");
-        var pw = a < AS.pitch ? 12 : Math.round(12 + 88 * Math.min(1, (a - AS.pitch) / (AS.link + 600 - AS.pitch)));
-        setWorx("power", pw + "%");
-        setWorx("dish", a < AS.insert ? "STOWED" : a < AS.rendezvous ? "SLEWING" : "TRACKING");
-        setWorx("range", a >= AS.dock ? "RENDEZVOUS" : fmtDist(tele.dist));
-        setWorx("uplink", a < AS.dock ? "STANDBY" : a < AS.link ? "ACQUIRING" : "LOCKED");
-        if (a < AS.dock) setWorx("signal", "-");
-        else if (a < AS.link) setWorx("signal", "-" + (96 + Math.round(Math.random() * 14)) + " DBM");
-        else setWorx("signal", "-" + Math.round(64 + 22 * Math.max(0, 1 - (a - AS.link) / 900)) + " DBM");
-        setWorx("habitat", a < AS.link + 600 ? "STANDBY" : "ONLINE");
-        setWorx("status", a < AS.link + 600 ? "Worx Crew 2/2 · Ascent GO" : "Worx Crew 2/2 · Habitat ONLINE");
+      // The operations log's rows, as a function of ascent time: each
+      // capability comes online as the habitat powers up.
+      var updateWorx = function (a) {
+        ahud.rows.forEach(function (r, i) {
+          if (a >= 300 + i * 120) r.li.classList.add("is-in");
+          r.li.classList.toggle("is-set", a >= r.at);
+        });
+        var go = a >= AS.link + 600;
+        var txt = go ? "WORX · ALL SYSTEMS GO" : "WORX · SYSTEMS COMING ONLINE";
+        if (ahud.status && ahud.status.textContent !== txt) ahud.status.textContent = txt;
       };
 
       var leader = function (fromEl, fromRight, rowEl, tx, ty, line, accent) {
@@ -630,21 +853,39 @@
         if (accent) accent.setAttribute("points", "");
       };
 
+      // Stacked layouts: the operations log flies as a docked chip (the sky
+      // stays clear for the launch), opens as the links come up to tell its
+      // part, then docks again for the card.
+      var openAscentLog = function () {
+        if (ahud.opened || !canCollapse()) return;
+        ahud.opened = true;
+        ascentText.classList.remove("is-docked");
+      };
+
+      // Turn to the closing page on its own, AUTO_ADVANCE_MS after the
+      // caption has landed. Never fights a turn in flight or a visitor who
+      // has already moved on.
+      var scheduleAdvance = function (afterMs) {
+        clearTimeout(ahud.advanceTimer);
+        if (!ahud.advance) return;
+        ahud.advanceTimer = setTimeout(function autoAdvance() {
+          if (currentIndex !== ASCENT_IDX || navMode !== "story" || !ahud.advance) return;
+          if (isAnimating || document.hidden) { ahud.advanceTimer = setTimeout(autoAdvance, 200); return; }
+          goToPage(ASCENT_IDX + 1, 1);
+        }, afterMs);
+      };
+
       var revealAscentCaption = function () {
         if (ahud.caption) return;
         ahud.caption = true;
         story.classList.remove("is-cinema");
-        ascentText.classList.add("is-revealed");
-        playTextReveal(ascentText, 0);
-        clearTimeout(ahud.advanceTimer);
-        ahud.advanceTimer = setTimeout(function autoAdvance() {
-          if (currentIndex !== ASCENT_IDX) return;
-          if (isAnimating) { ahud.advanceTimer = setTimeout(autoAdvance, 150); return; }
-          goToPage(ASCENT_IDX + 1, 1);
-        }, AUTO_ADVANCE_MS + 700);
+        var tl = runChapter(ascentChapter, { rows: false, hudAt: 0, cardAt: 0.1, hold: 0.5 });
+        // the card's reveal is the timeline's last step, its text takes ~1.1s
+        scheduleAdvance((tl.duration() + 1.1) * 1000 + AUTO_ADVANCE_MS);
       };
 
       var updateAscentHud = function (info) {
+        if (currentIndex !== ASCENT_IDX) return;
         var a = info.elapsed;
         var stage = 0;
         for (var i = 0; i < ASCENT_NARRATION.length; i++) if (a >= ASCENT_NARRATION[i].at) stage = i;
@@ -654,7 +895,7 @@
             li.classList.toggle("is-done", j < stage);
             li.classList.toggle("is-active", j === stage);
           });
-          if (ahud.shipLabel) ahud.shipLabel.textContent = a >= AS.dock ? "GLIMPSE · RENDEZVOUS" : a >= AS.lift ? "GLIMPSE-01 · ASCENT" : "GLIMPSE-01";
+          if (ahud.shipLabel) ahud.shipLabel.textContent = a >= AS.dock ? "GLIMPSE · RENDEZVOUS" : a >= AS.lift ? "GLIMPSE · ASCENT" : "GLIMPSE";
         }
         if (a - ahud.lastText > 66 || a < ahud.lastText) {
           ahud.lastText = a;
@@ -663,113 +904,132 @@
           if (ahud.vel) ahud.vel.textContent = fmtVel(t.vel);
           if (ahud.dist) ahud.dist.textContent = fmtDist(t.dist);
           if (ahud.clock) ahud.clock.textContent = fmtClock(a);
-          updateWorx(a, t);
+          updateWorx(a);
         }
+        if (a >= AS.link) openAscentLog();
         if (ahud.root) ahud.root.style.transform = (info.shake.x || info.shake.y)
           ? "translate(" + (info.shake.x * 0.35).toFixed(1) + "px," + (info.shake.y * 0.35).toFixed(1) + "px)" : "";
         // GLIMPSE target: the ship, then the orbiter it has rejoined
         var sp = info.shipVisible ? info.ship : info.orbiter;
         if (ahud.shipT) ahud.shipT.style.transform = "translate(" + sp.x.toFixed(1) + "px," + sp.y.toFixed(1) + "px)";
-        leader(ahud.log, false, ahud.stages[ahud.stage], sp.x, sp.y, ahud.shipLine, ahud.shipAccent);
+        var side = !isStacked();
+        if (side) leader(ahud.log, false, ahud.stages[ahud.stage], sp.x, sp.y, ahud.shipLine, ahud.shipAccent);
         // WORX target: the habitat, once it's out of the dust
         var habOn = info.habitat && info.habitatAlpha > 0.6;
         if (ahud.habT) {
           ahud.habT.style.opacity = habOn ? "1" : "0";
           if (info.habitat) ahud.habT.style.transform = "translate(" + info.habitat.x.toFixed(1) + "px," + info.habitat.y.toFixed(1) + "px)";
         }
-        if (habOn) {
-          var row = ahud.worxRows[a < AS.link ? "power" : "habitat"];
-          leader(ahud.worx, true, row && row.parentNode, info.habitat.x, info.habitat.y, ahud.habLine, ahud.habAccent);
-        } else clearLeader(ahud.habLine, ahud.habAccent);
+        if (habOn && side) leader(ahud.worx, true, ahud.worx.querySelector(".hud-head"), info.habitat.x, info.habitat.y, ahud.habLine, ahud.habAccent);
+        else clearLeader(ahud.habLine, ahud.habAccent);
         if (a >= AS.done) revealAscentCaption();
       };
 
       var resetAscentHud = function () {
         ahud.stage = -1;
         ahud.caption = false;
-        ahud.lastText = -1e9;
+        ahud.opened = false;
+        ahud.advance = false;
         clearTimeout(ahud.advanceTimer);
+        ahud.lastText = -1e9;
         ahud.stages.forEach(function (li) { li.classList.remove("is-done", "is-active"); });
         clearLeader(ahud.shipLine, ahud.shipAccent);
         clearLeader(ahud.habLine, ahud.habAccent);
         if (ahud.habT) ahud.habT.style.opacity = "0";
-        ascentText.classList.remove("is-live", "is-revealed");
-        hideTextParts(textParts(ascentText));
+        resetChapter(ascentChapter);
       };
 
       sceneAnimations[ASCENT_IDX] = {
-        onEnter: function () {
-          gsap.killTweensOf(landingLayers);
-          gsap.set(landingLayers, { autoAlpha: 1 });
+        onEnter: function (fromIndex, dir) {
+          fadeLayersIn(fromIndex);
           resetAscentHud();
+          ascentText.classList.add("is-live", "is-complete");
+          if (dir < 0) {
+            // Back from the closing page: the settled end shot, no second
+            // launch and no auto-advance (the visitor chose to be here).
+            landingFX.playAscent(updateAscentHud, AS.done + 3000);
+            return;
+          }
+          ahud.advance = true;
           story.classList.add("is-cinema");
-          ascentText.classList.add("is-live");
-          landingFX.playAscent(updateAscentHud);
+          if (canCollapse()) { ascentText.classList.add("is-docked"); syncChip(ascentChapter); }
+          landingFX.playAscent(updateAscentHud, 0);
         },
         onLeave: function () {
           resetAscentHud();
           story.classList.remove("is-cinema");
-          gsap.to(landingLayers, {
-            autoAlpha: 0, duration: 0.3, overwrite: true,
-            onComplete: function () { if (landingFX && currentIndex !== ASCENT_IDX && currentIndex > 1) landingFX.reset(); },
-          });
+          fadeLayersOut(SHOT_PAGES);
         },
       };
 
       // Warm the ascent art up a page early, so it's decoded on arrival.
       if (ASCENT_IDX > 0 && sceneAnimations[ASCENT_IDX - 1]) {
         var prevEnter = sceneAnimations[ASCENT_IDX - 1].onEnter;
-        sceneAnimations[ASCENT_IDX - 1].onEnter = function (fromIndex) {
+        sceneAnimations[ASCENT_IDX - 1].onEnter = function (fromIndex, dir) {
           LandingFX.preloadAscent();
-          prevEnter(fromIndex);
+          prevEnter(fromIndex, dir);
         };
       }
     }
 
     /* ----------------------------------------------------------
-       3. Page-turn navigation (fixed-duration tween, not scrubbed)
+       3. Page turns (fixed-duration timeline, never scrubbed)
        ---------------------------------------------------------- */
 
     // Resting state: only scene 0 / text 0 visible. autoAlpha also sets
     // visibility, so inactive chapters can't be tabbed into.
-    gsap.set(scenes, { autoAlpha: 0, force3D: true });
+    gsap.set(scenes, { autoAlpha: 0, force3D: true, transformOrigin: "50% 58%" });
     gsap.set(scenes[0], { autoAlpha: 1 });
     gsap.set(texts, { autoAlpha: 0, y: 22 });
     gsap.set(texts[0], { autoAlpha: 1, y: 0 });
     scenes[0].classList.add("is-active");
     texts[0].classList.add("is-active");
+    scenes.forEach(function (s, idx) { if (idx) s.classList.add("is-parked"); });
     story.classList.add("has-sky");
+    chapters.forEach(function (c) { hideTextParts(textParts(c.el)); });
 
-    // Mission-text inner elements (status/title/subtitle) start hidden
-    // regardless of their .story-text container's own autoAlpha, so the
-    // very first paint never flashes fully-revealed text before
-    // playTextReveal() runs it. Pages without the mission-text pattern
-    // (the closing CTA scene) have no .story-status and are skipped.
-    texts.forEach(function (t) {
-      var parts = textParts(t);
-      if (parts.status) hideTextParts(parts);
-    });
+    // Depth, not a page flip: going forward the camera moves on through
+    // the old shot (it swells past the lens) and the new one comes up
+    // from a little further off; going back, the old shot recedes and the
+    // previous one returns from just in front. A touch of vertical travel
+    // follows the same direction as the gesture.
+    var D_NEAR = reduceMotion ? 1 : 1.055;
+    var D_FAR = reduceMotion ? 1 : 0.965;
+    var D_Y = reduceMotion ? 0 : 1.6;
 
-    var currentIndex = 0;
-    var isAnimating = false;
-
-    // Tuned down on narrow viewports so it doesn't look broken on a
-    // phone-width stage. Reduced motion drops rotate/scale/shadow
-    // entirely and just crossfades.
-    var outRotate = reduceMotion ? 0 : isCompact ? -5 : -11;
-    var inRotate = reduceMotion ? 0 : isCompact ? 2 : 5;
-    var outScale = reduceMotion ? 1 : isCompact ? 0.97 : 0.94;
-    var inScaleFrom = reduceMotion ? 1 : isCompact ? 1.025 : 1.05;
-    var SCENE_DUR = reduceMotion ? 0.35 : 0.75; // spec target: 0.6–0.9s
-    var COOLDOWN_MS = 70; // swallows trailing momentum ticks from one gesture
-
-    // Section 2 and the ascent page both play on the landing shot.
     function visibleScene(idx) { return idx === 1 || idx === ASCENT_IDX ? scenes[0] : scenes[idx]; }
 
-    function goToPage(targetIndex, direction) {
-      if (isAnimating || targetIndex === currentIndex) return;
-      if (targetIndex < 0 || targetIndex > sceneCount - 1) return;
+    var navToken = 0;
+    var navTl = null;
+    var navFailsafe = null;
 
+    // Scenes off screen hold their CSS loops (dust, beacons, drone,
+    // motes...) still: .is-parked in about.css. Only the shot on screen
+    // (and, mid-turn, the one it's turning from) keeps running.
+    function parkScenes() {
+      var live = visibleScene(currentIndex);
+      scenes.forEach(function (s) { s.classList.toggle("is-parked", s !== live); });
+    }
+
+    function releaseNav(token) {
+      if (token !== navToken) return;
+      clearTimeout(navFailsafe);
+      navTl = null;
+      isAnimating = false;
+      parkScenes();
+    }
+
+    function callHook(idx, name, arg, dir) {
+      var h = sceneAnimations[idx];
+      if (!h || !h[name]) return;
+      try { h[name](arg, dir); } catch (err) { console.error("[about] scene " + idx + " " + name + " failed", err); }
+    }
+
+    function goToPage(targetIndex, direction) {
+      if (isAnimating || navMode !== "story" || targetIndex === currentIndex) return false;
+      if (targetIndex < 0 || targetIndex > LAST) return false;
+
+      var token = ++navToken;
       isAnimating = true;
       var fromIndex = currentIndex;
       var toIndex = targetIndex;
@@ -778,12 +1038,10 @@
       scenes.forEach(function (s, idx) { s.classList.toggle("is-active", idx === toIndex); });
       texts.forEach(function (t, idx) { t.classList.toggle("is-active", idx === toIndex); });
 
-      if (sceneAnimations[fromIndex]) sceneAnimations[fromIndex].onLeave(toIndex);
-      if (sceneAnimations[toIndex]) sceneAnimations[toIndex].onEnter(fromIndex);
+      callHook(fromIndex, "onLeave", toIndex, direction);
+      callHook(toIndex, "onEnter", fromIndex, direction);
+      scheduleOccluders();
 
-      // Section 2 (index 1) continues Section 1's shot on the same terrain
-      // (scene 0 stays up): between them only the text changes, no page
-      // turn on the picture, so it plays as one continuous film.
       story.classList.toggle("has-sky", toIndex <= 1 || toIndex === ASCENT_IDX);
       var outScene = visibleScene(fromIndex);
       var inScene = visibleScene(toIndex);
@@ -791,161 +1049,328 @@
       var outText = texts[fromIndex];
       var inText = texts[toIndex];
       var fwd = direction === 1;
+      inScene.classList.remove("is-parked");
 
-      // Forward: the leaving page peels down/away, the new page rises up
-      // into place. Backward: mirrored, so it reads as turning back to a
-      // previous page rather than replaying the forward turn in reverse.
-      var outTo = fwd
-        ? { rotateX: outRotate, scale: outScale, transformOrigin: "50% 100%" }
-        : { rotateX: -inRotate, scale: inScaleFrom, transformOrigin: "50% 0%" };
-      var inFrom = fwd
-        ? { rotateX: inRotate, scale: inScaleFrom, transformOrigin: "50% 0%" }
-        : { rotateX: -outRotate, scale: outScale, transformOrigin: "50% 100%" };
+      // Unlock from the timeline, with a wall-clock failsafe: a hidden
+      // tab suspends GSAP's ticker, and a missed onComplete must never
+      // leave navigation locked.
+      clearTimeout(navFailsafe);
+      navFailsafe = setTimeout(function () { releaseNav(token); }, SCENE_DUR * 1000 + 700);
+      var tl = navTl = gsap.timeline({ defaults: { ease: "power2.inOut" }, onComplete: function () { releaseNav(token); } });
 
-      // Wall-clock timeout, not GSAP's onComplete: onComplete depends on
-      // the rAF-driven ticker, which browsers fully suspend on a
-      // backgrounded/hidden tab. If the visitor alt-tabs away mid-turn,
-      // an onComplete-based unlock would never fire and permanently
-      // lock page navigation; setTimeout still fires (throttled, but
-      // never stalled) regardless of tab visibility.
-      setTimeout(function () { isAnimating = false; }, SCENE_DUR * 1000 + COOLDOWN_MS);
-
-      var tl = gsap.timeline({ defaults: { ease: "power1.inOut" } });
-
-      if (!sameShot) tl.to(outScene, {
-        autoAlpha: 0,
-        rotateX: outTo.rotateX,
-        scale: outTo.scale,
-        transformOrigin: outTo.transformOrigin,
-        duration: SCENE_DUR,
-      }, 0);
-
-      if (!sameShot) tl.fromTo(inScene,
-        { autoAlpha: 0, rotateX: inFrom.rotateX, scale: inFrom.scale, transformOrigin: inFrom.transformOrigin },
-        { autoAlpha: 1, rotateX: 0, scale: 1, duration: SCENE_DUR },
-        0);
-
-      if (shadow && !reduceMotion && !sameShot) {
-        tl.fromTo(shadow, { autoAlpha: 0 }, { autoAlpha: 0.28, duration: SCENE_DUR * 0.4, ease: "power1.in" }, 0)
-          .to(shadow, { autoAlpha: 0, duration: SCENE_DUR * 0.4, ease: "power1.out" }, SCENE_DUR * 0.5);
+      if (!sameShot) {
+        tl.to(outScene, {
+          autoAlpha: 0, scale: fwd ? D_NEAR : D_FAR, yPercent: fwd ? -D_Y : D_Y,
+          duration: SCENE_DUR, ease: "power2.in",
+        }, 0);
+        tl.fromTo(inScene,
+          { autoAlpha: 0, scale: fwd ? D_FAR : D_NEAR, yPercent: fwd ? D_Y : -D_Y },
+          { autoAlpha: 1, scale: 1, yPercent: 0, duration: SCENE_DUR, ease: "power2.out" },
+          SCENE_DUR * 0.1);
+        if (shadow && !reduceMotion) {
+          tl.fromTo(shadow, { autoAlpha: 0 }, { autoAlpha: 0.32, duration: SCENE_DUR * 0.45, ease: "power1.in" }, 0)
+            .to(shadow, { autoAlpha: 0, duration: SCENE_DUR * 0.5, ease: "power1.out" }, SCENE_DUR * 0.5);
+        }
       }
 
-      tl.to(outText, { autoAlpha: 0, y: fwd ? -16 : 16, duration: SCENE_DUR * 0.55 }, 0);
+      tl.to(outText, { autoAlpha: 0, y: fwd ? -18 : 18, duration: SCENE_DUR * 0.5 }, 0);
       tl.fromTo(inText,
         { autoAlpha: 0, y: fwd ? 22 : -22 },
         { autoAlpha: 1, y: 0, duration: SCENE_DUR * 0.55 },
-        SCENE_DUR * 0.35);
-    }
-
-    // Kick off the landing scene's own animation immediately on load,
-    // no scroll required to see the story "come alive".
-    if (sceneAnimations[0]) sceneAnimations[0].onEnter();
-
-    /* ----------------------------------------------------------
-       4. Wheel / touch capture → page navigation
-       ---------------------------------------------------------- */
-    var WHEEL_MIN_DELTA = 2; // ignores trackpad idle jitter
-
-    // Story only ever occupies the top viewport of the page (it's the
-    // first thing in #main, and the header floats over it), so scrollY
-    // is 0 exactly when the story is what's on screen. Forward input on
-    // the last page, and backward input once the footer has scrolled
-    // into view, is left alone so native scrolling takes over.
-    function shouldIntercept(deltaY) {
-      if (window.scrollY > 0) return false;
-      if (deltaY > 0 && currentIndex === sceneCount - 1) return false;
+        SCENE_DUR * (sameShot ? 0.3 : 0.4));
       return true;
     }
 
-    function attemptNavigate(deltaY) {
-      if (isAnimating) return;
-      goToPage(currentIndex + (deltaY > 0 ? 1 : -1), deltaY > 0 ? 1 : -1);
+    // First scene, gesture backward: a small give, nothing moves on.
+    function nudge(dir) {
+      if (reduceMotion || isAnimating) return;
+      var el = texts[currentIndex];
+      gsap.fromTo(el, { y: dir < 0 ? 10 : -10 }, { y: 0, duration: 0.6, ease: "elastic.out(1, 0.5)", overwrite: "auto" });
+    }
+
+    /* ----------------------------------------------------------
+       Story ↔ page boundary
+       ---------------------------------------------------------- */
+    var scrollTw = null;
+    var scrollDone = null;
+    var scrollFailsafe = null;
+
+    function setLocked(on) { html.classList.toggle("story-locked", on); }
+    function storyBottom() { return story.offsetTop + story.offsetHeight; }
+    function maxScroll() { return Math.max(0, html.scrollHeight - window.innerHeight); }
+    function exitTarget() { return Math.min(storyBottom(), maxScroll()); }
+    function jumpTo(y) {
+      html.style.scrollBehavior = "auto";
+      window.scrollTo(0, y);
+      html.style.scrollBehavior = "";
+    }
+
+    function finishScroll() {
+      clearTimeout(scrollFailsafe);
+      if (scrollTw) { scrollTw.kill(); scrollTw = null; }
+      html.style.scrollBehavior = "";
+      var d = scrollDone; scrollDone = null;
+      if (d) d();
+    }
+
+    // A controlled scroll (base.css scroll-behavior: smooth is suspended
+    // so the browser doesn't smooth every step again).
+    function scrollToY(to, dur, done) {
+      finishScroll();
+      var st = { y: window.scrollY };
+      html.style.scrollBehavior = "auto";
+      scrollDone = function () { jumpTo(to); if (done) done(); };
+      scrollTw = gsap.to(st, {
+        y: to, duration: dur, ease: "power2.inOut",
+        onUpdate: function () { window.scrollTo(0, st.y); },
+        onComplete: finishScroll,
+      });
+      scrollFailsafe = setTimeout(finishScroll, dur * 1000 + 800);
+    }
+
+    // Closing page, forward: hand over to the page below. The final chapter
+    // lifts away a little faster than the page scrolls (parallax).
+    function leaveStory() {
+      if (navMode !== "story" || isAnimating) return false;
+      var target = exitTarget();
+      if (target < 2) return false;
+      navMode = "leaving";
+      setLocked(false);
+      occluders.length = 0;
+      var dur = reduceMotion ? 0.3 : 1.1;
+      if (!reduceMotion) gsap.to(texts[LAST], { y: -60, duration: dur, ease: "power2.in", overwrite: "auto" });
+      scrollToY(target, dur, function () { navMode = "page"; });
+      return true;
+    }
+
+    // Back up into the story from the page: settle on the closing page.
+    function returnToStory() {
+      if (navMode !== "page" && navMode !== "leaving") return false;
+      navMode = "returning";
+      var dur = reduceMotion ? 0.3 : Math.min(1.1, 0.5 + window.scrollY / Math.max(1, story.offsetHeight) * 0.7);
+      gsap.to(texts[LAST], { y: 0, duration: dur, ease: "power2.out", overwrite: "auto" });
+      scrollToY(0, dur, enterStoryMode);
+      return true;
+    }
+
+    function enterStoryMode() {
+      navMode = "story";
+      setLocked(true);
+      if (window.scrollY !== 0) jumpTo(0);
+      gsap.set(texts[currentIndex], { y: 0 });
+      scheduleOccluders();
+    }
+
+    // One step in a direction, wherever the visitor is.
+    function requestStep(dir) {
+      if (navMode === "story") {
+        if (isAnimating) return false;
+        if (dir > 0 && currentIndex === LAST) return leaveStory();
+        if (dir < 0 && currentIndex === 0) { nudge(dir); return true; }
+        return goToPage(currentIndex + dir, dir);
+      }
+      if (navMode === "page" && dir < 0 && window.scrollY <= exitTarget() + 1) return returnToStory();
+      return false;
+    }
+
+    // Input from UI that must keep its own gestures (open menu, chat dock).
+    function uiOwns(target) {
+      if (document.querySelector(".site-header.menu-open, .site-header.mega-open")) return true;
+      return !!(target && target.closest && target.closest(".qc-dock, .mega, .nav-links"));
+    }
+
+    // Kick off the landing on load; never restore a mid-page scroll.
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    jumpTo(0);
+    setLocked(true);
+    callHook(0, "onEnter", undefined, 1);
+
+    /* ----------------------------------------------------------
+       4. Gestures → steps
+       ---------------------------------------------------------- */
+    var WHEEL_GAP_MS = 220;      // silence that ends a wheel gesture
+    var WHEEL_THRESHOLD = 28;    // px of intent before a gesture fires
+    var WHEEL_REKICK = 2.2;      // delta jump that marks a new swipe inside a momentum tail
+    var wheel = { last: 0, accum: 0, used: false, usedAt: 0, lastAbs: 0 };
+
+    function wheelDelta(e) {
+      var d = e.deltaY;
+      if (e.deltaMode === 1) d *= 16;
+      else if (e.deltaMode === 2) d *= window.innerHeight;
+      return d;
     }
 
     window.addEventListener("wheel", function (e) {
-      if (!shouldIntercept(e.deltaY)) return;
-      // Always swallow the event while we're capturing, even a
-      // sub-threshold tick, a trackpad fires dozens of tiny-delta wheel
-      // events per gesture, and leaving any of them unprevented lets the
-      // browser scroll the document by a pixel or two. The "scroll"
-      // safety net below then mistakes that leak for input that bypassed
-      // capture and fires an extra, unwanted page turn, the trackpad
-      // feels like it's double/triple-navigating on a single swipe.
+      if (e.ctrlKey || uiOwns(e.target)) return;                // pinch-zoom, menus
+      // The event's own timestamp, not the time we got to handle it: a
+      // busy frame must not make one swipe look like two.
+      var now = e.timeStamp || performance.now();
+      var dy = wheelDelta(e);
+      var ady = Math.abs(dy);
+      if (Math.abs(e.deltaX) > ady) return;                     // horizontal
+      if (now - wheel.last > WHEEL_GAP_MS) {
+        // A quiet, still-decaying tail soon after a turn is the same
+        // swipe's momentum resurfacing, not a new gesture. (A new swipe
+        // or a mouse notch arrives with a bigger delta.)
+        var tail = wheel.used && now - wheel.usedAt < 1600 && ady < 40 && ady <= Math.max(3, wheel.lastAbs * 1.25);
+        if (!tail) { wheel.accum = 0; wheel.used = false; }
+      } else if (wheel.used && !isAnimating && navMode === "story" &&
+        ady > 14 && ady > wheel.lastAbs * WHEEL_REKICK && now - wheel.usedAt > 350) {
+        wheel.accum = 0; wheel.used = false;                    // a fresh swipe over the tail
+      }
+      wheel.last = now;
+      wheel.lastAbs = ady;
+
+      var owned = navMode !== "page" || (dy < 0 && window.scrollY <= exitTarget() + 1);
+      if (!owned) return;                                       // normal page scroll
       e.preventDefault();
-      if (Math.abs(e.deltaY) < WHEEL_MIN_DELTA) return;
-      attemptNavigate(e.deltaY);
-    }, { passive: false });
-
-    var touchStartY = 0;
-    var touchTracking = false;
-    var TOUCH_THRESHOLD = 40;
-
-    window.addEventListener("touchstart", function (e) {
-      touchStartY = e.touches[0].clientY;
-      touchTracking = true;
-    }, { passive: true });
-
-    window.addEventListener("touchmove", function (e) {
-      if (!touchTracking) return;
-      var dy = touchStartY - e.touches[0].clientY;
-      if (!shouldIntercept(dy)) { touchTracking = false; return; }
-      e.preventDefault();
-      if (Math.abs(dy) > TOUCH_THRESHOLD) {
-        attemptNavigate(dy);
-        touchTracking = false; // one nav per swipe; next touchstart resets
+      if (navMode === "leaving" || navMode === "returning") { wheel.used = true; return; }
+      if (wheel.used) return;
+      if (isAnimating) { wheel.used = true; wheel.usedAt = now; return; }  // no queued turns
+      if (ady < 1) return;
+      if (wheel.accum && (wheel.accum > 0) !== (dy > 0)) wheel.accum = 0;
+      wheel.accum += dy;
+      // a mouse notch (line mode or one big step) is intent on its own
+      if (Math.abs(wheel.accum) >= WHEEL_THRESHOLD || e.deltaMode === 1) {
+        requestStep(wheel.accum > 0 ? 1 : -1);
+        wheel.used = true;
+        wheel.usedAt = now;
+        wheel.accum = 0;
       }
     }, { passive: false });
 
-    window.addEventListener("touchend", function () {
-      touchTracking = false;
+    var touch = { active: false, state: "idle", x: 0, y: 0, t: 0, native: false };
+    function touchThreshold() { return Math.max(34, Math.min(64, window.innerHeight * 0.06)); }
+    function zoomed() { return !!(window.visualViewport && window.visualViewport.scale > 1.05); }
+
+    window.addEventListener("touchstart", function (e) {
+      touch.active = true;
+      if (e.touches.length !== 1 || uiOwns(e.target) || zoomed()) { touch.state = "ignore"; return; }
+      // the visitor takes over a boundary scroll: hand it to them
+      if (navMode === "leaving" || navMode === "returning") { finishScroll(); navMode = "page"; setLocked(false); }
+      touch.state = "pending";
+      touch.x = e.touches[0].clientX;
+      touch.y = e.touches[0].clientY;
+      touch.t = performance.now();
+      touch.native = navMode === "page";
     }, { passive: true });
 
-    // Keyboard: PageDown/Space/ArrowDown and PageUp/ArrowUp turn a page
-    // the same way a wheel/swipe gesture does. Without this, a keyboard
-    // (or scrollbar-thumb drag, see the "scroll" listener below) bypasses
-    // the wheel/touch capture entirely, the browser just scrolls the
-    // document past the pinned #story straight to the footer, so every
-    // chapter after the first is silently skipped.
+    window.addEventListener("touchmove", function (e) {
+      if (touch.state === "ignore" || touch.native || e.touches.length !== 1) return;
+      // While the story owns input the page must not move under it.
+      if (navMode === "story" && e.cancelable) e.preventDefault();
+      if (touch.state === "done" || touch.state === "idle") return;
+      var dx = e.touches[0].clientX - touch.x;
+      var dy = touch.y - e.touches[0].clientY;   // + = swipe up = forward
+      if (touch.state === "pending") {
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;   // still a tap
+        if (Math.abs(dx) > Math.abs(dy) * 1.3) { touch.state = "done"; return; } // horizontal
+        touch.state = "track";
+      }
+      if (Math.abs(dy) >= touchThreshold()) {
+        touch.state = "done";                   // this finger has had its turn
+        if (!isAnimating) requestStep(dy > 0 ? 1 : -1);
+      }
+    }, { passive: false });
+
+    window.addEventListener("touchend", function (e) {
+      if (touch.state === "track" && !touch.native && e.changedTouches.length) {
+        // a short, quick flick counts too
+        var dy = touch.y - e.changedTouches[0].clientY;
+        var dt = Math.max(1, performance.now() - touch.t);
+        if (Math.abs(dy) >= 22 && Math.abs(dy) / dt > 0.45 && !isAnimating) requestStep(dy > 0 ? 1 : -1);
+      }
+      touch.state = "idle";
+      touch.active = e.touches.length > 0;
+      if (!touch.active && navMode === "page") scheduleSettle();
+    }, { passive: true });
+
+    window.addEventListener("touchcancel", function () {
+      touch.state = "idle";
+      touch.active = false;
+    }, { passive: true });
+
+    // Keyboard: one step per press (a held key doesn't skim chapters).
     var NAV_KEYS = { ArrowDown: 1, PageDown: 1, " ": 1, Spacebar: 1, ArrowUp: -1, PageUp: -1 };
     var FOCUSABLE = /^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/;
-
     window.addEventListener("keydown", function (e) {
       var dir = NAV_KEYS[e.key];
-      if (!dir) return;
-      if (document.activeElement && FOCUSABLE.test(document.activeElement.tagName)) return;
-      if (!shouldIntercept(dir)) return;
+      if (!dir || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (document.activeElement && (FOCUSABLE.test(document.activeElement.tagName) || document.activeElement.getAttribute("role") === "button")) return;
+      if (e.key === " " && e.shiftKey) dir = -1;
+      var owned = navMode !== "page" || (dir < 0 && window.scrollY <= exitTarget() + 1);
+      if (!owned) return;
       e.preventDefault();
-      attemptNavigate(dir);
+      if (e.repeat) return;
+      requestStep(dir);
     });
 
-    // Safety net: anything that moves scrollY without going through the
-    // wheel/touch/keyboard capture above (scrollbar-thumb drag, Home/End,
-    // browser scroll restoration, assistive input) would otherwise carry
-    // the visitor past the pinned story and straight into the footer.
-    // Snap back to the top and replay it as a single page turn instead.
-    // behavior: "instant" matters here, base.css sets smooth scrolling
-    // globally, and a smooth scrollTo(0,0) racing an in-flight smooth
-    // scroll (e.g. a dragged scrollbar thumb) settles somewhere between
-    // the two instead of cleanly back at the top.
+    // Scroll that didn't come through the gestures above (scrollbar drag,
+    // End key, find-in-page, restoration, the address bar settling):
+    //  - in the story: put the page back, no page turn;
+    //  - on the page, back at the very top: the story takes over again;
+    //  - on the page, stopped part-way over the story: finish the move in
+    //    the direction it was going (never leave the two half-and-half).
+    var lastY = 0, lastDir = 0, settleTimer = null;
+    function scheduleSettle() {
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(settle, 160);
+    }
+    function settle() {
+      if (navMode !== "page" || touch.active) return;
+      var y = window.scrollY, target = exitTarget();
+      if (y <= 0) { enterStoryMode(); return; }
+      if (y < target - 2) {
+        if (lastDir < 0) returnToStory();
+        else { navMode = "leaving"; scrollToY(target, 0.6, function () { navMode = "page"; }); }
+      }
+    }
     window.addEventListener("scroll", function () {
-      if (window.scrollY === 0 || currentIndex >= sceneCount - 1) return;
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      attemptNavigate(1);
+      var y = window.scrollY;
+      if (y !== lastY) lastDir = y > lastY ? 1 : -1;
+      lastY = y;
+      if (navMode === "leaving" || navMode === "returning") return;
+      if (navMode === "story") {
+        if (y <= 0) return;
+        if (currentIndex === LAST && lastDir > 0) { navMode = "page"; setLocked(false); scheduleSettle(); return; }
+        jumpTo(0);
+        return;
+      }
+      if (y <= 0) { enterStoryMode(); return; }
+      scheduleSettle();
+    }, { passive: true });
+
+    // Hidden tab: finish whatever is in flight so nothing resumes half-way
+    // (or stays locked) when the visitor comes back.
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) return;
+      if (navTl) navTl.progress(1);
+      releaseNav(navToken);
+      if (scrollTw || scrollDone) finishScroll();
+      wheel.used = false; wheel.accum = 0;
+      touch.state = "idle"; touch.active = false;
     });
+    window.addEventListener("blur", function () { touch.state = "idle"; touch.active = false; });
 
     var resizeTimer;
-    window.addEventListener("resize", function () {
+    function onResize() {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
         if (landingSeq) landingSeq.resize();
         syncCameraOrigin();
         if (landingFX) landingFX.resize();
+        if (navMode === "story" && window.scrollY !== 0) jumpTo(0);
+        redockActive();
+        scheduleOccluders();
       }, 200);
-    });
+    }
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", onResize);
   } else {
     story.classList.add("story--fallback");
     document.querySelectorAll(".story-scene, .story-text").forEach(function (el) {
-      el.classList.add("is-active");
+      el.classList.add("is-active", "is-live", "is-revealed", "is-origin", "is-complete", "is-power", "is-work", "is-lit");
     });
   }
 
@@ -958,13 +1383,12 @@
   var ctx = canvas.getContext("2d");
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
   var dots = [];
-  // Section 1's Martian night sky (sky-fx.js: the deep star field, Earth ·
-  // Moon, Saturn, the odd meteor) on every other page too, so the whole
-  // story shares one sky. The sky pages draw it on landing-fx.js's canvas;
-  // here it's drawn with a still camera, its horizon set just above the
-  // plain's hill line so it never paints over the terrain.
+  // The landing's Martian night sky (sky-fx.js: star field, Earth · Moon,
+  // Jupiter, Phobos, Deimos, the odd meteor) on every other page too, so
+  // the whole story shares one sky, drawn with a still camera, its
+  // horizon set just above the plain's hill line.
   var nightSky = typeof MartianSky !== "undefined" ? new MartianSky({ reduceMotion: reduceMotion }) : null;
-  var skyFx = { dpr: dpr, _cam: null, cameraOriginY: 0.62, horizonY: 0.37 };
+  skyFx = { dpr: dpr, _cam: null, cameraOriginY: 0.62, horizonY: 0.37, occluders: occluders };
   function skyHorizon() {
     var t = story.querySelector(".story-scene:not(.story-scene--landing) .story-terrain");
     var sr = story.getBoundingClientRect();
@@ -977,8 +1401,8 @@
   var running = false;
 
   function resize() {
-    canvas.width = Math.max(1, window.innerWidth * dpr);
-    canvas.height = Math.max(1, window.innerHeight * dpr);
+    canvas.width = Math.max(1, story.clientWidth * dpr);
+    canvas.height = Math.max(1, story.clientHeight * dpr);
     skyFx.horizonY = skyHorizon();
   }
 
@@ -1012,16 +1436,16 @@
       ctx.fill();
     }
     ctx.globalAlpha = 1;
-    // A small, distant storm cell low on the horizon, procedural, not
-    // video, so its colour always matches the planet. The sky pages
-    // (chapters 0-1, #story.has-sky) draw it and the orbiter on
-    // landing-fx.js's canvas instead, so only the stars go on here.
+    // The sky pages (#story.has-sky) draw the storm cell, the orbiters and
+    // the labels on landing-fx.js's canvas instead; only stars go on here.
     if (!ownSky) return;
     if (typeof AmbientStorm !== "undefined") AmbientStorm.draw(ctx, canvas.width, canvas.height, { alpha: 0.85 });
-    // The GLIMPSE mothership drifting past, same shared, wall-clock-driven
-    // sprite landing-fx.js draws during the landing/summary chapters, so it
-    // reads as one continuous pass overhead no matter which chapter you're on.
-    if (typeof GlimpseOrbiter !== "undefined") GlimpseOrbiter.draw(ctx, canvas.width, canvas.height, { dpr: dpr });
+    // The GLIMPSE mothership and the HOPE probe, the same shared, wall-clock-driven
+    // passes landing-fx.js draws on the sky pages, so they read as one
+    // continuous pass overhead whichever page you're on.
+    var o = { dpr: dpr, occluders: occluders };
+    if (typeof HopeProbe !== "undefined") HopeProbe.draw(ctx, canvas.width, canvas.height, o);
+    if (typeof GlimpseOrbiter !== "undefined") GlimpseOrbiter.draw(ctx, canvas.width, canvas.height, o);
     if (nightSky) nightSky.drawLabels(ctx, skyFx);
   }
 
@@ -1055,21 +1479,18 @@
 
   if (reduceMotion) {
     paint(); // one static starfield, no drift/twinkle
+    setInterval(function () { if (!document.hidden) paint(); }, 1000); // keeps page-dependent labels right
   }
 
-  // Only animate/paint while some part of the storybook is on
-  // screen; fade the layer out once the visitor reaches the
-  // footer so it never reads as "another chapter".
+  // Only animate/paint while some part of the story is on screen; fade the
+  // layer out once the visitor reaches the footer.
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(
       function (entries) {
         var visible = entries[0].isIntersecting;
         canvas.classList.toggle("is-hidden", !visible);
-        if (visible) {
-          start();
-        } else {
-          stop();
-        }
+        story.classList.toggle("is-offscreen", !visible); // about.css: CSS loops hold still
+        if (visible) start(); else stop();
       },
       { threshold: 0 }
     ).observe(story);

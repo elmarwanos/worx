@@ -82,7 +82,7 @@ module.exports = [
       {
         slug: "video-animation",
         name: "2D/3D Video Animation",
-        short: "Explainers, product films and walkthroughs that move people.",
+        short: "Explainers, product videos and walkthroughs that move people.",
         subs: ["Explainer videos", "Character animation", "Whiteboard animation", "Product demo videos", "Video game trailers", "Medical animation", "3D architectural walkthroughs"]
       },
       {

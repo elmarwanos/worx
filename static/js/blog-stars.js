@@ -12,7 +12,48 @@
 
    Pauses when the page is scrolled past or the tab is hidden;
    reduced motion gets a still star field.
+
+   Article pages load this file too, for one small job only: the
+   "In this article" contents lights the section being read.
    ============================================================ */
+
+// ---- article pages: highlight the TOC entry for the section in view ----
+(function () {
+  "use strict";
+
+  var links = document.querySelectorAll(".blog-toc a[href^='#']");
+  if (!links.length || !("IntersectionObserver" in window)) return;
+
+  var map = [];
+  links.forEach(function (a) {
+    var el = document.getElementById(a.getAttribute("href").slice(1));
+    if (el) map.push({ link: a, el: el });
+  });
+  if (!map.length) return;
+
+  function setActive(link) {
+    map.forEach(function (m) {
+      var on = m.link === link;
+      m.link.classList.toggle("is-active", on);
+      if (on) m.link.setAttribute("aria-current", "true");
+      else m.link.removeAttribute("aria-current");
+    });
+  }
+
+  // a section counts as "being read" once it crosses the upper third
+  var visible = new Set();
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) visible.add(e.target);
+      else visible.delete(e.target);
+    });
+    var current = null;
+    map.forEach(function (m) { if (visible.has(m.el)) current = current || m; });
+    if (current) setActive(current.link);
+  }, { rootMargin: "-30% 0px -55% 0px" });
+
+  map.forEach(function (m) { io.observe(m.el); });
+})();
 (function () {
   "use strict";
 

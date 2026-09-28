@@ -332,7 +332,7 @@
     else if (step.type === "final") body = renderFinal();
     if (body) fieldset.appendChild(body);
 
-    els.err = h("p", { "class": "cw-error", role: "alert", hidden: true });
+    els.err = h("p", { id: "cw-error", "class": "cw-error", role: "alert", hidden: true });
     fieldset.appendChild(els.err);
     els.steps.appendChild(fieldset);
 
@@ -356,6 +356,9 @@
         input,
         h("span", { "class": "cw-option-body" }, [
           h("span", { "class": "cw-option-label" }, [opt.label]),
+          // a plain space keeps label and description apart in the
+          // element's text (screen readers, the cursor readout)
+          opt.desc ? " " : null,
           opt.desc ? h("span", { "class": "cw-option-desc" }, [opt.desc]) : null
         ])
       ]);
@@ -387,7 +390,7 @@
       h("p", { "class": "cw-hint" }, ["Give us the idea in your own words. No technical details needed."])
     ]);
     var textarea = h("textarea", {
-      id: "cw-idea", "class": "cw-input cw-textarea-lg", rows: "6",
+      id: "cw-idea", name: "idea", "class": "cw-input cw-textarea-lg", rows: "6",
       "aria-label": "Tell us about your idea",
       placeholder: "Tell us what you're imagining, what problem you're trying to solve, or what you'd like to improve…"
     });
@@ -452,8 +455,15 @@
       min: String(BUDGET_MIN), max: String(BUDGET_MAX), step: String(BUDGET_STEP), value: String(amount),
       "aria-label": "Budget range in AED", "aria-valuetext": formatAED(amount)
     });
+    // Gradient fill left of the thumb (read by .cw-range in CSS)
+    function paintRange(a) {
+      range.style.setProperty("--cw-fill",
+        ((a - BUDGET_MIN) / (BUDGET_MAX - BUDGET_MIN) * 100).toFixed(2) + "%");
+    }
+    paintRange(amount);
     range.addEventListener("input", function () {
       var a = parseInt(range.value, 10) || DEFAULT_BUDGET_AMOUNT;
+      paintRange(a);
       applyBudget(a);
       value.textContent = formatAED(a);
       range.setAttribute("aria-valuetext", formatAED(a));
@@ -477,12 +487,14 @@
     box.appendChild(h("div", { "class": "cw-field-group" }, [
       h("p", { "class": "cw-field-group-title" }, ["Company"]),
       buildControl(
-        { id: "companyName", label: "Company name", type: "text", required: true, placeholder: "Acme Trading LLC" },
+        { id: "companyName", label: "Company name", type: "text", required: true, placeholder: "Acme Trading LLC",
+          autocomplete: "organization" },
         state.form.companyName,
         function (v) { state.form.companyName = v; clearError(); saveState(); }
       ),
       buildControl(
-        { id: "companyWebsite", label: "Company website (optional)", type: "text", required: false, placeholder: "https://" },
+        { id: "companyWebsite", label: "Company website (optional)", type: "text", required: false, placeholder: "https://",
+          autocomplete: "url", inputmode: "url", spellcheck: "false" },
         state.form.companyWebsite,
         function (v) { state.form.companyWebsite = v; saveState(); }
       )
@@ -491,17 +503,20 @@
     box.appendChild(h("div", { "class": "cw-field-group" }, [
       h("p", { "class": "cw-field-group-title" }, ["Personal"]),
       buildControl(
-        { id: "name", label: "Your name", type: "text", required: true, placeholder: "Jane Doe" },
+        { id: "name", label: "Your name", type: "text", required: true, placeholder: "Jane Doe",
+          autocomplete: "name" },
         state.form.name,
         function (v) { state.form.name = v; clearError(); saveState(); }
       ),
       buildControl(
-        { id: "email", label: "Email", type: "email", required: true, placeholder: "jane@company.com" },
+        { id: "email", label: "Email", type: "email", required: true, placeholder: "jane@company.com",
+          autocomplete: "email", spellcheck: "false" },
         state.form.email,
         function (v) { state.form.email = v; clearError(); saveState(); }
       ),
       buildControl(
-        { id: "phone", label: "Phone / WhatsApp", type: "tel", required: true, placeholder: "+971 50 000 0000" },
+        { id: "phone", label: "Phone / WhatsApp", type: "tel", required: true, placeholder: "+971 50 000 0000",
+          autocomplete: "tel" },
         state.form.phone,
         function (v) { state.form.phone = v; clearError(); saveState(); }
       )
@@ -514,11 +529,19 @@
   function buildControl(def, value, onChange) {
     var id = "cw-" + def.id;
     var control = h("input", {
-      id: id, "class": "cw-input", type: def.type || "text",
+      id: id, name: def.id, "class": "cw-input", type: def.type || "text",
       placeholder: def.placeholder || "", value: value,
-      "aria-required": def.required ? "true" : false
+      autocomplete: def.autocomplete || "off",
+      inputmode: def.inputmode || null,
+      spellcheck: def.spellcheck || null,
+      autocapitalize: def.type === "email" || def.inputmode === "url" ? "off" : null,
+      "aria-required": def.required ? "true" : false,
+      "aria-describedby": "cw-error"
     });
-    control.addEventListener("input", function () { onChange(control.value); });
+    control.addEventListener("input", function () {
+      control.removeAttribute("aria-invalid");
+      onChange(control.value);
+    });
 
     var labelKids = [def.label];
     if (def.required) {
@@ -574,10 +597,17 @@
      8. NAV / VALIDATION
      ---------------------------------------------------------- */
 
-  function showError(msg) {
+  // `fieldId` (optional) marks that input invalid and moves focus to
+  // it, so the visitor lands right where the fix is needed.
+  function showError(msg, fieldId) {
     if (!els.err) return;
     els.err.textContent = msg;
     els.err.hidden = false;
+    var field = fieldId && document.getElementById("cw-" + fieldId);
+    if (field) {
+      field.setAttribute("aria-invalid", "true");
+      field.focus();
+    }
   }
   function clearError() {
     if (els.err) els.err.hidden = true;
@@ -593,19 +623,21 @@
     } else if (step.id === "timeline") {
       if (!f.timeline) return "Pick a timeline to continue.";
     } else if (step.id === "final") {
-      if (!f.companyName.trim()) return "Please add your company name.";
-      if (!f.name.trim()) return "Please add your name.";
-      if (!validEmail(f.email)) return "Please add a valid email address.";
-      if (!f.phone.trim()) return "Please add a phone number.";
+      if (!f.companyName.trim()) return { msg: "Please add your company name.", field: "companyName" };
+      if (!f.name.trim()) return { msg: "Please add your name.", field: "name" };
+      if (!validEmail(f.email)) return { msg: "Please add a valid email address.", field: "email" };
+      if (!f.phone.trim()) return { msg: "Please add a phone number.", field: "phone" };
     }
     // "budget" always has a value (the slider defaults on first render).
     return "";
   }
 
   function validateStep() {
-    var msg = stepError(STEPS[state.stepIndex]);
-    if (msg) { showError(msg); return false; }
-    return true;
+    var err = stepError(STEPS[state.stepIndex]);
+    if (!err) return true;
+    if (typeof err === "string") showError(err);
+    else showError(err.msg, err.field);
+    return false;
   }
 
   function onNext() {
@@ -697,7 +729,7 @@
     var saved = loadState();
     if (saved) {
       if (saved.form) {
-        var ff = freshForm()
+        var ff = freshForm();
         Object.keys(ff).forEach(function (k) {
           if (saved.form[k] != null) ff[k] = saved.form[k];
         });

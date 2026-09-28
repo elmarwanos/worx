@@ -4,8 +4,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR activations that actually activate | Worx</title>
+  <title>AR activations that actually activate - Worx</title>
   <meta name="description" content="What we learned shipping interactive experiences for Expo-scale audiences.">
+  <link rel="canonical" href="https://worxbyglimpse.com/blogs/ar-activations.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Worx">
+  <meta property="og:title" content="AR activations that actually activate">
+  <meta property="og:description" content="What we learned shipping interactive experiences for Expo-scale audiences.">
+  <meta property="og:url" content="https://worxbyglimpse.com/blogs/ar-activations.html">
+  <meta property="og:image" content="https://worxbyglimpse.com/static/assets/blog/AR%20Activations.png">
+  <meta property="og:image:width" content="1600">
+  <meta property="og:image:height" content="900">
+  <meta property="article:published_time" content="2026-03">
+  <meta property="article:section" content="Experience Design">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AR activations that actually activate">
+  <meta name="twitter:description" content="What we learned shipping interactive experiences for Expo-scale audiences.">
+  <meta name="twitter:image" content="https://worxbyglimpse.com/static/assets/blog/AR%20Activations.png">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "AR activations that actually activate", "description": "What we learned shipping interactive experiences for Expo-scale audiences.", "image": "https://worxbyglimpse.com/static/assets/blog/AR%20Activations.png", "datePublished": "2026-03", "articleSection": "Experience Design", "inLanguage": "en", "author": {"@type": "Organization", "name": "Worx", "url": "https://worxbyglimpse.com/"}, "publisher": {"@type": "Organization", "name": "Worx", "url": "https://worxbyglimpse.com/", "logo": {"@type": "ImageObject", "url": "https://worxbyglimpse.com/static/assets/logo-light.png"}}, "mainEntityOfPage": {"@type": "WebPage", "@id": "https://worxbyglimpse.com/blogs/ar-activations.html"}}</script>
 
   <link rel="icon" type="image/png" sizes="32x32" href="../static/assets/favicon-32.png">
   <link rel="apple-touch-icon" href="../static/assets/apple-touch-icon.png">
@@ -22,23 +39,19 @@
   <link rel="stylesheet" href="../static/css/components.css">
   <link rel="stylesheet" href="../static/css/animations.css">
   <link rel="stylesheet" href="../static/css/blog-post.css">
+  <link rel="stylesheet" href="../static/css/blog-cinema.css">
+  <!-- TOC highlight for the section in view (the star field only runs on the index) -->
+  <script src="../static/js/blog-stars.js" defer></script>
+  <link rel="stylesheet" href="../static/css/living-covers.css">
 </head>
 
 <body data-page="blogs">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header">
-    <div class="container nav-bar">
-      <a class="brand" href="../index.html">
-        <img class="brand-mark" src="../static/assets/mark.png" alt="" width="40" height="40">
-        <span class="brand-text">WORX<small>&lt;like/magic&gt;</small></span>
-      </a>
-
-      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-
-      <nav class="nav-links" aria-label="Main navigation">
+    <div class="nav-bar">
+      <a class="brand" href="../index.html"><img class="brand-mark" src="../static/assets/mark.png" alt="" width="40" height="40"><span class="brand-text">WORX<small>&lt;like/magic&gt;</small></span></a>
+      <nav class="nav-links" id="site-nav" aria-label="Main navigation">
         <a href="../index.html" data-nav="home">Home</a>
         <a href="../about/index.html" data-nav="about">About</a>
         <!--WORX:GEN mega-->
@@ -53,16 +66,16 @@
                 <p class="mega-group-title"><span>01</span>Development</p>
                 <ul>
                 <li><a href="../services/web-development.html" data-mega-item data-division="Development" data-short="Fast, secure, search-friendly websites on the right stack." data-subs="Sitecore|Ibexa DXP|SharePoint|WordPress|Drupal|Joomla|ASP.NET|AngularJS|Ruby on Rails" data-more="8"><i aria-hidden="true"></i><span>Web Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-development" data-mega-item data-division="Development" data-short="Storefronts that sell, from boutique brands to marketplaces." data-subs="Shopify|Shopify Plus|WooCommerce|Magento|BigCommerce|Mirakl marketplaces|Headless commerce" data-more="0"><i aria-hidden="true"></i><span>E-commerce Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/ecommerce-development.html" data-mega-item data-division="Development" data-short="Storefronts that sell, from boutique brands to marketplaces." data-subs="Shopify|Shopify Plus|WooCommerce|Magento|BigCommerce|Mirakl marketplaces|Headless commerce" data-more="0"><i aria-hidden="true"></i><span>E-commerce Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 <li><a href="../services/custom-platforms.html" data-mega-item data-division="Development" data-short="Portals, dashboards and tools built around your workflow." data-subs="Web portals|Dashboards &amp; tooling|Integrations|Smart automation|Interactive configurators|Security &amp; compliance" data-more="0"><i aria-hidden="true"></i><span>Custom Platforms</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 </ul>
               </div>
               <div class="mega-group">
                 <p class="mega-group-title"><span>05</span>IT &amp; Enterprise</p>
                 <ul>
-                <li><a href="../services/index.html#sys-it" data-mega-item data-division="IT &amp; Enterprise" data-short="One connected system for finance, people, supply and sales." data-subs="NetSuite|SAP|Microsoft Dynamics 365|Oracle Cloud|Odoo|CRM development" data-more="0"><i aria-hidden="true"></i><span>ERP &amp; CRM</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-it" data-mega-item data-division="IT &amp; Enterprise" data-short="Vetted specialists who join your team in days." data-subs="Hire scrum masters|Hire project managers|Hire SQA engineers|Hire ReactJS developers|Hire NodeJS developers|Hire .NET developers|Hire React Native developers|Hire mobile app developers|Hire SharePoint developers" data-more="3"><i aria-hidden="true"></i><span>IT Resource Outsourcing</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-it" data-mega-item data-division="IT &amp; Enterprise" data-short="Move to the cloud and keep it secure, fast and affordable." data-subs="Digital cloud transformation|Cloud migration|AWS|Microsoft Azure|Security &amp; compliance" data-more="0"><i aria-hidden="true"></i><span>Cloud Transformation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/erp-crm.html" data-mega-item data-division="IT &amp; Enterprise" data-short="One connected system for finance, people, supply and sales." data-subs="NetSuite|SAP|Microsoft Dynamics 365|Oracle Cloud|Odoo|CRM development" data-more="0"><i aria-hidden="true"></i><span>ERP &amp; CRM</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/it-outsourcing.html" data-mega-item data-division="IT &amp; Enterprise" data-short="Vetted specialists who join your team in days." data-subs="Hire scrum masters|Hire project managers|Hire SQA engineers|Hire ReactJS developers|Hire NodeJS developers|Hire .NET developers|Hire React Native developers|Hire mobile app developers|Hire SharePoint developers" data-more="3"><i aria-hidden="true"></i><span>IT Resource Outsourcing</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/cloud-transformation.html" data-mega-item data-division="IT &amp; Enterprise" data-short="Move to the cloud and keep it secure, fast and affordable." data-subs="Digital cloud transformation|Cloud migration|AWS|Microsoft Azure|Security &amp; compliance" data-more="0"><i aria-hidden="true"></i><span>Cloud Transformation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 </ul>
               </div>
             </div>
@@ -76,7 +89,7 @@
               <div class="mega-group">
                 <p class="mega-group-title"><span>04</span>Emerging Tech</p>
                 <ul>
-                <li><a href="../services/index.html#sys-emerging" data-mega-item data-division="Emerging Tech" data-short="Chatbots, automation and search that work while you sleep." data-subs="AI chatbots|Robotic process automation|AI enterprise search|Metaverse development" data-more="0"><i aria-hidden="true"></i><span>Artificial Intelligence</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/artificial-intelligence.html" data-mega-item data-division="Emerging Tech" data-short="Chatbots, automation and search that work while you sleep." data-subs="AI chatbots|Robotic process automation|AI enterprise search|Metaverse development" data-more="0"><i aria-hidden="true"></i><span>Artificial Intelligence</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 <li><a href="../services/ar-vr.html" data-mega-item data-division="Emerging Tech" data-short="Immersive activations engineered to stop crowds." data-subs="Augmented reality|Virtual reality|Mixed reality|Interactive activations|3D &amp; Unity|Event support" data-more="0"><i aria-hidden="true"></i><span>AR / VR &amp; Mixed Reality</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 </ul>
               </div>
@@ -86,9 +99,9 @@
                 <p class="mega-group-title"><span>03</span>Design &amp; Creative</p>
                 <ul>
                 <li><a href="../services/ui-ux-design.html" data-mega-item data-division="Design &amp; Creative" data-short="Research-driven interfaces that make the right action obvious." data-subs="UX design|UX audit|UX workshops|Landing page design|Responsive web design|Design systems|Prototyping|PSD to HTML|Graphic design" data-more="1"><i aria-hidden="true"></i><span>UI/UX Design</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-creative" data-mega-item data-division="Design &amp; Creative" data-short="Identities with a point of view, from logo to packaging." data-subs="Logo design|Corporate identity|Brand guidelines|Packaging design|Brochure design|Business card design" data-more="0"><i aria-hidden="true"></i><span>Digital Branding &amp; Creatives</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-creative" data-mega-item data-division="Design &amp; Creative" data-short="Explainers, product films and walkthroughs that move people." data-subs="Explainer videos|Character animation|Whiteboard animation|Product demo videos|Video game trailers|Medical animation|3D architectural walkthroughs" data-more="0"><i aria-hidden="true"></i><span>2D/3D Video Animation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-creative" data-mega-item data-division="Design &amp; Creative" data-short="Words that sound like you and sell like a pro." data-subs="Website copy|Ad &amp; campaign copy|Brand voice|Content writing|Arabic &amp; English translation" data-more="0"><i aria-hidden="true"></i><span>Copywriting</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/digital-branding.html" data-mega-item data-division="Design &amp; Creative" data-short="Identities with a point of view, from logo to packaging." data-subs="Logo design|Corporate identity|Brand guidelines|Packaging design|Brochure design|Business card design" data-more="0"><i aria-hidden="true"></i><span>Digital Branding &amp; Creatives</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/video-animation.html" data-mega-item data-division="Design &amp; Creative" data-short="Explainers, product videos and walkthroughs that move people." data-subs="Explainer videos|Character animation|Whiteboard animation|Product demo videos|Video game trailers|Medical animation|3D architectural walkthroughs" data-more="0"><i aria-hidden="true"></i><span>2D/3D Video Animation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/copywriting.html" data-mega-item data-division="Design &amp; Creative" data-short="Words that sound like you and sell like a pro." data-subs="Website copy|Ad &amp; campaign copy|Brand voice|Content writing|Arabic &amp; English translation" data-more="0"><i aria-hidden="true"></i><span>Copywriting</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 </ul>
               </div>
             </div>
@@ -117,8 +130,30 @@
         <!--/WORX:GEN mega-->
         <a href="../portfolio/index.html" data-nav="portfolio">Portfolio</a>
         <a href="../blogs/index.html" data-nav="blogs">Blog</a>
-        <a href="../contact/index.html" class="btn btn-primary" data-nav="contact">Let's Talk</a>
+        <a href="../contact/index.html" data-nav="contact" class="nav-link--panel">Contact</a>
+        <!-- in the mobile menu panel only: language + direct contact -->
+        <div class="nav-panel-foot">
+          <div class="lang-switch" role="group" aria-label="Language">
+            <span class="lang-thumb" aria-hidden="true"></span>
+            <button type="button" class="lang-opt is-active" data-lang="en" lang="en" aria-pressed="true">EN</button>
+            <button type="button" class="lang-opt" data-lang="ar" lang="ar" aria-pressed="false">AR</button>
+          </div>
+          <a class="nav-circle" href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a>
+          <a class="nav-circle" href="tel:+971555669847" aria-label="Call +971 55 566 9847"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
+        </div>
       </nav>
+      <div class="nav-actions">
+        <div class="lang-switch" role="group" aria-label="Language">
+          <span class="lang-thumb" aria-hidden="true"></span>
+          <button type="button" class="lang-opt is-active" data-lang="en" lang="en" aria-pressed="true">EN</button>
+          <button type="button" class="lang-opt" data-lang="ar" lang="ar" aria-pressed="false">AR</button>
+        </div>
+        <a class="btn-spark" href="../contact/index.html" data-nav="contact"><span class="btn-spark-bg" aria-hidden="true"></span><span class="btn-spark-txt"><span class="btn-spark-long">Open Channel</span><span class="btn-spark-short">Open Channel</span></span></a>
+        <a class="nav-circle nav-circle--bar" href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a>
+        <a class="nav-circle nav-circle--bar" href="tel:+971555669847" aria-label="Call +971 55 566 9847"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
+      </div>
+      <span class="nav-progress" aria-hidden="true"></span>
     </div>
   </header>
 
@@ -127,9 +162,16 @@
 
       <header class="blog-post-hero">
         <div class="blog-post-shell">
-          <a class="blog-back-link" href="index.html">← Back to Blog</a>
+          <!-- the field note's title card: the About page's HUD panel at
+               its left-hand angle; its cover beside it on a monitor -->
+          <div class="bp-card">
+          <div class="bp-card-head">
+            <span class="bp-rec" aria-hidden="true"></span>
+            <a class="blog-back-link" href="index.html">Field notes</a>
+            <span class="bp-card-log" aria-hidden="true">TRANSMISSION</span>
+          </div>
 
-          <p class="blog-post-category">Experience</p>
+          <p class="blog-post-category">Experience Design</p>
 
           <h1>AR activations that actually activate</h1>
 
@@ -154,17 +196,17 @@
               <strong>4 min read</strong>
             </div>
           </div>
-        </div>
-      </header>
-
+          </div>
       <div class="blog-feature-wrap">
         <div class="blog-feature-art blog-feature-art--image">
           <picture>
-            <source srcset="../static/assets/blog/ar-activations.webp" type="image/webp">
-            <img src="../static/assets/blog/ar-activations.jpg" alt="" width="1600" height="900" decoding="async">
+            <source srcset="../static/assets/blog/AR%20Activations.webp" type="image/webp">
+            <img src="../static/assets/blog/AR%20Activations.png" alt="" width="1920" height="1080" decoding="async" fetchpriority="high">
           </picture>
         </div>
       </div>
+        </div>
+      </header>
 
       <div class="blog-reading-shell">
 
@@ -272,7 +314,12 @@
                 <span class="article-cta-kicker">Have a project in mind?</span>
                 <h3>Let's build an experience that earns attention.</h3>
               </div>
-              <a class="btn btn-primary" href="../contact/index.html">Let's Talk</a>
+              <a class="bc-call" href="https://wa.me/971555669847" target="_blank" rel="noopener">
+                <span class="bc-call-face" aria-hidden="true"><img src="../static/assets/home/marwan-face.webp" alt="" width="52" height="52" decoding="async"><i></i></span>
+                <span class="bc-call-txt"><small aria-hidden="true"><span>Crew online</span><span>Marwan answers</span></small><b>Speak to an expert</b></span>
+                <span class="bc-call-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                <span class="bc-call-vf" aria-hidden="true"></span>
+              </a>
             </div>
 
             <div class="article-end">
@@ -311,7 +358,6 @@
   </main>
 
   <footer class="site-footer">
-    <div class="footer-glow" aria-hidden="true"></div>
     <div class="container">
       <div class="footer-brand">
         <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png" alt="Worx" width="132" height="181"></a>
@@ -329,18 +375,20 @@
         <span class="footer-rule" aria-hidden="true"></span>
       </div>
 
-      <div class="footer-cols">
+      <nav class="footer-cols" aria-label="Footer">
         <div class="footer-col footer-col--contact">
           <h4>Contact Us</h4>
           <ul>
             <li>Publishing Pavilion Bldg - Unit 709 - Me'aisem First - Dubai Production City - Dubai</li>
             <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
             <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
+            <li class="footer-cta-item"><a class="footer-cta" href="../contact/index.html">Speak to an expert <span aria-hidden="true">→</span></a></li>
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Explore</h4>
+          <h4>Overview</h4>
           <ul>
+            <li><a href="../index.html">Home</a></li>
             <li><a href="../about/index.html">About us</a></li>
             <li><a href="../services/index.html">Services</a></li>
             <li><a href="../portfolio/index.html">Portfolio</a></li>
@@ -349,26 +397,70 @@
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Build</h4>
+          <h4>Development</h4>
           <ul>
             <li><a href="../services/web-development.html">Web Development</a></li>
+            <li><a href="../services/ecommerce-development.html">E-commerce Development</a></li>
             <li><a href="../services/custom-platforms.html">Custom Platforms</a></li>
             <li><a href="../services/mobile-apps.html">Mobile App Development</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Experience &amp; Growth</h4>
-          <ul>
-            <li><a href="../services/ui-ux-design.html">UI &amp; UX Design</a></li>
-            <li><a href="../services/ar-vr.html">AR / VR &amp; Activations</a></li>
             <li><a href="../services/seo-sem.html">SEO &amp; SEM</a></li>
           </ul>
         </div>
-      </div>
+        <div class="footer-col">
+          <h4>Design &amp; Creative</h4>
+          <ul>
+            <li><a href="../services/ui-ux-design.html">UI / UX Design</a></li>
+            <li><a href="../services/digital-branding.html">Digital Branding &amp; Creatives</a></li>
+            <li><a href="../services/video-animation.html">2D / 3D Video Animation</a></li>
+            <li><a href="../services/copywriting.html">Copywriting</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Emerging &amp; Enterprise</h4>
+          <ul>
+            <li><a href="../services/artificial-intelligence.html">Artificial Intelligence</a></li>
+            <li><a href="../services/ar-vr.html">AR / VR &amp; Mixed Reality</a></li>
+            <li><a href="../services/erp-crm.html">ERP &amp; CRM</a></li>
+            <li><a href="../services/cloud-transformation.html">Cloud Transformation</a></li>
+            <li><a href="../services/it-outsourcing.html">IT Resource Outsourcing</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
 
+    <!-- The WORX wordmark, drawn in outline across the full width and
+         sunk into the bottom edge, lit from below. A slow light runs
+         along its stroke; on hover the letters fill in under the
+         pointer (main.js). Decorative: the logo above carries the name. -->
+    <div class="footer-mark" aria-hidden="true">
+      <svg class="footer-mark-svg" viewBox="0 0 1000 232" preserveAspectRatio="xMidYMax meet">
+        <defs>
+          <linearGradient id="footer-mark-stroke" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#c04527"/>
+            <stop offset="0.55" stop-color="#e57d23"/>
+            <stop offset="1" stop-color="#faa719"/>
+          </linearGradient>
+          <linearGradient id="footer-mark-shine" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+            <stop offset="0" stop-color="#feeecf" stop-opacity="0"/>
+            <stop offset="0.5" stop-color="#feeecf" stop-opacity="0.9"/>
+            <stop offset="1" stop-color="#feeecf" stop-opacity="0"/>
+            <animateTransform class="footer-mark-anim" attributeName="gradientTransform" type="translate" values="-1 0; 1.2 0" dur="9s" repeatCount="indefinite"/>
+          </linearGradient>
+        </defs>
+        <text class="footer-mark-base" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+        <text class="footer-mark-shine" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+        <text class="footer-mark-knock" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+      </svg>
+      <svg class="footer-mark-svg footer-mark-fill" viewBox="0 0 1000 232" preserveAspectRatio="xMidYMax meet">
+        <text x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+      </svg>
+    </div>
+
+    <div class="container">
       <div class="footer-bottom">
         <span>© <span id="footer-year">2026</span> Worx. All rights reserved.</span>
-        <span>Built for businesses, by creatives.</span>
+        <span class="footer-where">Dubai, UAE <span aria-hidden="true">·</span> <time class="footer-clock" data-tz="Asia/Dubai">--:--</time> GST</span>
+        <a class="footer-top" href="#main">Back to top <span aria-hidden="true">↑</span></a>
       </div>
     </div>
   </footer>
@@ -379,7 +471,9 @@
   <script src="../static/js/logo-eye.js"></script>
   <script src="../static/js/animations.js"></script>
   <script src="../static/js/main.js"></script>
+  <script src="../static/js/reticle.js"></script>
   <script src="../static/js/contact-widget.js"></script>
+  <script src="../static/js/blog-cinema.js"></script>
 
   <script>
     (() => {
@@ -429,6 +523,7 @@
       });
     })();
   </script>
+  <script src="../static/js/living-covers.js"></script>
 </body>
 
 </html>

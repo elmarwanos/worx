@@ -61,6 +61,10 @@
     return node;
   }
 
+  // the site root, from this script's own address (for Marwan's portrait)
+  var me = document.currentScript || document.querySelector('script[src*="contact-widget.js"]');
+  var ROOT = me ? me.src.replace(/static\/js\/contact-widget\.js.*$/, "") : "";
+
   var dock = el("div", "qc-dock");
 
   // Panel ------------------------------------------------------
@@ -71,8 +75,20 @@
   panel.setAttribute("aria-labelledby", "qc-title");
   panel.hidden = true;
 
+  // the console's bar: the relay's id and Dubai's clock
+  var bar = el("div", "qc-bar");
+  bar.setAttribute("aria-hidden", "true");
+  bar.innerHTML = '<span class="qc-rec"></span><span class="qc-bar-id">WORX RELAY \u00B7 QUICK CHANNEL</span><span class="qc-bar-t"><time data-qc-clock>--:--</time> GST</span>';
+  panel.appendChild(bar);
+  var vf = el("span", "qc-vf");
+  vf.setAttribute("aria-hidden", "true");
+  panel.appendChild(vf);
+
   var head = el("div", "qc-panel-head");
   var headText = el("div");
+  var status = el("p", "qc-status", "Channel open");
+  status.setAttribute("aria-hidden", "true");
+  headText.appendChild(status);
   var title = el("h3", null, CONTACT.title);
   title.id = "qc-title";
   headText.appendChild(title);
@@ -84,7 +100,16 @@
   head.appendChild(closeBtn);
   panel.appendChild(head);
 
+  // first: open the channel, the full brief on the contact page
+  var call = el("a", "qc-call");
+  call.href = ROOT + "contact/index.html";
+  call.innerHTML = '<span class="qc-call-beacon" aria-hidden="true"><i></i></span>' +
+    '<span class="qc-call-txt"><small aria-hidden="true"><span>Relay \u00B7 live</span><span>Plan your project</span></small><b>Open Channel</b></span>' +
+    '<span class="qc-call-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>';
+  panel.appendChild(call);
+
   var channels = el("div", "qc-channels");
+  var chN = 0;
   Object.keys(CONTACT.channels).forEach(function (key) {
     var item = CONTACT.channels[key];
     var row = item.href ? el("a", "qc-channel") : el("div", "qc-channel");
@@ -95,11 +120,17 @@
         row.rel = "noopener";
       }
     }
-    row.appendChild(el("span", "qc-ico", item.icon));
+    // a numbered channel on the console, not an emoji
+    var ch = el("span", "qc-ico", "CH " + ("0" + (++chN)).slice(-2));
+    ch.setAttribute("aria-hidden", "true");
+    row.appendChild(ch);
     var meta = el("span", "qc-channel-meta");
     meta.appendChild(el("span", "qc-label", item.label));
     meta.appendChild(el("span", "qc-value", item.value));
     row.appendChild(meta);
+    var go = el("span", "qc-go", item.href ? "\u2197" : "");
+    go.setAttribute("aria-hidden", "true");
+    row.appendChild(go);
     channels.appendChild(row);
   });
   panel.appendChild(channels);
@@ -126,8 +157,9 @@
   form.appendChild(field("email", "Email", "email"));
   form.appendChild(field("message", "Message", "textarea"));
 
-  var submit = el("button", "btn btn-primary", "Send message");
+  var submit = el("button", "qc-send");
   submit.type = "submit";
+  submit.innerHTML = '<span class="qc-send-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span>Transmit message</span>';
   form.appendChild(submit);
 
   var note = el("p", "qc-note");
@@ -142,17 +174,29 @@
   fab.setAttribute("aria-haspopup", "dialog");
   fab.setAttribute("aria-expanded", "false");
   fab.setAttribute("aria-controls", "qc-panel");
+  // the beacon: a live radar in a dark well, the label, its status
   fab.innerHTML =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ' +
-    'aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 ' +
-    '8.38 8.38 0 0 1-3.8-.9L3 20l1.4-4.2A8.38 8.38 0 0 1 3.5 11.5 ' +
-    '8.5 8.5 0 0 1 12 3a8.5 8.5 0 0 1 9 8.5Z"/></svg>';
-  fab.appendChild(el("span", "qc-fab-label", CONTACT.fabLabel));
+    '<span class="qc-radar" aria-hidden="true"><i class="qc-radar-sweep"></i><i class="qc-radar-blip"></i><i class="qc-radar-ping"></i></span>' +
+    '<span class="qc-fab-vf" aria-hidden="true"></span>';
+  var fabTxt = el("span", "qc-fab-txt");
+  fabTxt.appendChild(el("span", "qc-fab-label", CONTACT.fabLabel));
+  var fabSub = el("small", "qc-fab-sub", "Relay \u00B7 live");
+  fabSub.setAttribute("aria-hidden", "true");
+  fabTxt.appendChild(fabSub);
+  fab.appendChild(fabTxt);
 
   dock.appendChild(panel);
   dock.appendChild(fab);
   document.body.appendChild(dock);
+
+  // Dubai's time on the console's bar
+  var clock = panel.querySelector("[data-qc-clock]");
+  try {
+    var fmt = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dubai", hour: "2-digit", minute: "2-digit", hour12: false });
+    var tickClock = function () { clock.textContent = fmt.format(new Date()); };
+    tickClock();
+    setInterval(tickClock, 15000);
+  } catch (e) {}
 
   // --- Open / close -------------------------------------------
   var isOpen = false;
@@ -171,6 +215,9 @@
     lastFocus = document.activeElement;
     panel.hidden = false;
     dock.classList.add("is-ready", "is-open");
+    shown = true;
+    fab.tabIndex = 0;
+    fab.removeAttribute("aria-hidden");
     fab.setAttribute("aria-expanded", "true");
     if (narrow.matches) document.body.style.overflow = "hidden";
     closeBtn.focus();
@@ -190,6 +237,7 @@
     window.setTimeout(function () {
       if (!isOpen) panel.hidden = true;
     }, delay);
+    onScroll();
     if (returnFocus !== false && lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
@@ -258,11 +306,15 @@
   //     footer so the dock never covers the page's own contact.
   var hasHero = !!document.querySelector(".hero");
   var ticking = false;
+  var shown = null;
 
   function updateDock() {
     ticking = false;
     if (isOpen) {
       dock.classList.add("is-ready");
+      shown = true;
+      fab.tabIndex = 0;
+      fab.removeAttribute("aria-hidden");
       return;
     }
     var y = window.scrollY || window.pageYOffset;
@@ -270,7 +322,14 @@
     var distToBottom =
       document.documentElement.scrollHeight - y - window.innerHeight;
     var show = y > revealAt && distToBottom > 240;
+    if (show === shown) return;
+    shown = show;
     dock.classList.toggle("is-ready", show);
+    // while it's faded out, keep the button out of the Tab order and
+    // away from screen readers too
+    fab.tabIndex = show ? 0 : -1;
+    if (show) fab.removeAttribute("aria-hidden");
+    else fab.setAttribute("aria-hidden", "true");
   }
 
   function onScroll() {

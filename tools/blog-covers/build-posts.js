@@ -94,7 +94,7 @@ posts.forEach((p) => {
     return;
   }
   let html = template;
-  html = html.replace(/<title>[^<]*<\/title>/, `<title>${p.title} | Worx</title>`);
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${p.title} - Worx</title>`);
   html = html.replace(/(<meta name="description"\s+content=")[^"]*(")/, "$1" + esc(p.intro) + "$2");
   html = html.replace(/(<p class="blog-post-category">)[^<]*(<\/p>)/, "$1" + p.category.replace("&", "&amp;") + "$2");
   html = html.replace(/(<h1>)[^<]*(<\/h1>)/, "$1" + p.title + "$2");
@@ -110,7 +110,12 @@ ${p.body}
                 <span class="article-cta-kicker">${p.cta[0]}</span>
                 <h3>${p.cta[1]}</h3>
               </div>
-              <a class="btn btn-primary" href="../contact/index.html">Let's Talk</a>
+              <a class="bc-call" href="https://wa.me/971555669847" target="_blank" rel="noopener">
+                <span class="bc-call-face" aria-hidden="true"><img src="../static/assets/home/marwan-face.webp" alt="" width="52" height="52" decoding="async"><i></i></span>
+                <span class="bc-call-txt"><small aria-hidden="true"><span>Crew online</span><span>Marwan answers</span></small><b>Speak to an expert</b></span>
+                <span class="bc-call-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                <span class="bc-call-vf" aria-hidden="true"></span>
+              </a>
             </div>
 
             <div class="article-end">
@@ -129,15 +134,19 @@ ${p.body}
 const byline = (p) => `<p class="blog-byline"><span>By ${AUTHOR}</span><span class="blog-byline-dot" aria-hidden="true"></span><span>${p.minutes} minutes read</span></p>`;
 const [featured, ...rest] = posts;
 
-const cats = [`<button class="blog-cat is-active" type="button" data-filter="all" aria-pressed="true"><span class="blog-cat-arrow" aria-hidden="true">↳</span>All Categories</button>`]
-  .concat(CATEGORIES.map(([k, label]) => `<button class="blog-cat" type="button" data-filter="${k}" aria-pressed="false"><span class="blog-cat-arrow" aria-hidden="true">↳</span>${label}</button>`))
-  .map((b) => "        " + b).join("\n");
+// the category filter: channels on the title card, each with its count
+const two = (n) => String(n).padStart(2, "0");
+const count = (k) => posts.filter((p) => p.filter === k).length;
+const cats = [`<button class="blog-cat is-active" type="button" data-filter="all" aria-pressed="true"><span class="blog-cat-name">All categories</span><span class="blog-cat-n" aria-hidden="true">${two(posts.length)}</span></button>`]
+  .concat(CATEGORIES.map(([k, label]) => `<button class="blog-cat" type="button" data-filter="${k}" aria-pressed="false"><span class="blog-cat-name">${label}</span><span class="blog-cat-n" aria-hidden="true">${two(count(k))}</span></button>`))
+  .map((b) => "            " + b).join("\n");
 
-const cards = rest.map((p) => `        <article class="blog-card" data-category="${p.filter}">
+const cards = rest.map((p, i) => `        <article class="blog-card" data-category="${p.filter}">
           <a class="blog-card-media" href="${p.slug}.html" tabindex="-1" aria-hidden="true">
             ${picture(p.slug, "", "", false)}
           </a>
           <div class="blog-card-body">
+            <span class="blog-card-log" aria-hidden="true">LOG ${two(i + 2)}</span>
             <span class="blog-pill">${p.category.replace("&", "&amp;")}</span>
             <h3 class="blog-card-title"><a href="${p.slug}.html">${p.title}</a></h3>
             ${byline(p)}
@@ -146,30 +155,42 @@ const cards = rest.map((p) => `        <article class="blog-card" data-category=
 
 const main = `  <main id="main" class="blog-page">
 
-    <!-- Built by tools/blog-covers/build-posts.js from posts.js. Our Blog:
-         the category filter set as big type (active one lit with an
-         arrow), the newest post featured, then the card grid. -->
-    <section class="blog-head container">
-      <h1 class="sr-only">Worx blog: notes from the workbench</h1>
-      <p class="blog-eyebrow"><span class="blog-eyebrow-dot" aria-hidden="true"></span>Our Blog</p>
-      <div class="blog-cats" role="group" aria-label="Filter posts by category">
+    <!-- Built by tools/blog-covers/build-posts.js from posts.js. The
+         logbook: a HUD title card (the About page's panel, at its angle)
+         holding the title and the category filter as log rows, the newest
+         post beside it as the incoming transmission, then the logs.
+         blog-cinema.js adds the frame, the comms rail and the tracker. -->
+    <section class="blog-head bl-hero" aria-labelledby="bl-title">
+      <div class="container bl-hero-grid">
+        <div class="bl-card">
+          <div class="bl-card-head" aria-hidden="true">
+            <span class="bp-rec"></span>
+            <span class="bl-card-call">WORX · FIELD NOTES</span>
+            <span class="bl-card-count">${two(posts.length)} LOGS</span>
+          </div>
+          <p class="bl-status" aria-hidden="true">ARCHIVE · OPEN</p>
+          <h1 id="bl-title" class="bl-title">Notes from the <span class="gradient-text">workbench</span></h1>
+          <p class="bl-sub">Field notes from the crew that builds it: engineering, strategy, experience design, mobile and growth.</p>
+          <div class="blog-cats" role="group" aria-label="Filter posts by category">
 ${cats}
+          </div>
+        </div>
+
+        <article class="blog-featured" data-category="${featured.filter}">
+          <div class="bl-tx-bar" aria-hidden="true"><span class="bp-rec"></span><span>LOG 01 · INCOMING TRANSMISSION</span><span class="bl-tx-new">NEW</span></div>
+          <a class="blog-featured-media" href="${featured.slug}.html" tabindex="-1" aria-hidden="true">
+            ${picture(featured.slug, "", "", true)}
+          </a>
+          <div class="blog-featured-body">
+            <span class="blog-pill">${featured.category.replace("&", "&amp;")}</span>
+            <h2 class="blog-featured-title"><a href="${featured.slug}.html">${featured.title}</a></h2>
+            ${byline(featured)}
+          </div>
+        </article>
       </div>
     </section>
 
     <section class="blog-list container" aria-label="Posts">
-
-      <article class="blog-featured" data-category="${featured.filter}" data-reveal>
-        <a class="blog-featured-media" href="${featured.slug}.html" tabindex="-1" aria-hidden="true">
-          ${picture(featured.slug, "", "", true)}
-        </a>
-        <div class="blog-featured-body">
-          <span class="blog-pill">${featured.category.replace("&", "&amp;")}</span>
-          <h2 class="blog-featured-title"><a href="${featured.slug}.html">${featured.title}</a></h2>
-          ${byline(featured)}
-        </div>
-      </article>
-
       <div class="blog-grid">
 ${cards}
       </div>

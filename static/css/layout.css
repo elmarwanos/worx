@@ -4,27 +4,116 @@
    ============================================================ */
 
 /* ---- Header / navigation ---------------------------------- */
+/* One fixed bar with two characters (after digitalgravity.ae):
+   - over the hero (top of the page): full width, no box at all, just
+     the brand, the links and the actions riding on the picture;
+   - once the page scrolls (.is-scrolled, nav.js): it gathers itself
+     into a narrower floating glass pill, a touch tighter, the logo a
+     touch smaller, eased on one long, soft curve (--nav-ease).
+   Mobile (<= 980px) keeps the bar full width: a glass strip slides
+   down behind it on scroll, and the menu is a full-screen black panel
+   sliding in from the right. */
+
+:root {
+  --nav-ease: cubic-bezier(0.135, 0.9, 0.15, 1);
+  /* the site's own ember -> orange -> amber, one knob for the CTA, the
+     language thumb, every hover border and the progress line */
+  --cta-gradient: var(--gradient);
+}
 
 .site-header {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 100;
-  transition: background 0.35s ease, box-shadow 0.35s ease;
-}
-
-/* .is-scrolled is toggled by static/js/nav.js */
-.site-header.is-scrolled {
-  background: rgba(21, 9, 5, 0.82);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 1px 0 var(--line);
+  padding-top: 10px;
+  /* landscape phones with a notch: keep the bar clear of it */
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  pointer-events: none;           /* the bar and its contents opt back in */
 }
 
 .nav-bar {
+  position: relative;             /* the mega menu hangs off it */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-block: 22px;
+  gap: 24px;
+  width: min(var(--container), 100% - 48px);
+  margin: 0 auto;
+  padding: 14px 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background-color: rgba(12, 5, 3, 0);
+  pointer-events: auto;
+  transition:
+    width 0.9s var(--nav-ease),
+    padding 0.9s var(--nav-ease),
+    background-color 0.9s var(--nav-ease),
+    border-color 0.9s var(--nav-ease),
+    box-shadow 0.9s var(--nav-ease);
+}
+
+/* the pill */
+.site-header.is-scrolled .nav-bar {
+  width: min(1100px, 100% - 32px);
+  padding: 8px 10px 8px 22px;
+  background-color: rgba(12, 5, 3, 0.42);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  backdrop-filter: blur(12px) saturate(1.2);
+  box-shadow: 0 18px 50px -24px rgba(0, 0, 0, 0.7);
+}
+
+/* the pill's 1px edge in the site gradient (a masked ring, so it
+   follows the rounded shape), fading in with the pill */
+.nav-bar::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--cta-gradient);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.9s var(--nav-ease);
+}
+
+.site-header.is-scrolled .nav-bar::before {
+  opacity: 1;
+}
+
+.site-header.is-scrolled .brand-mark {
+  width: 34px;
+  height: 34px;
+}
+
+/* A hairline of the CTA gradient along the pill's bottom edge: how far
+   down the page (or, on the About page, how far through the story) you
+   are (--nav-progress, 0..1, nav.js / about-story.js). */
+.nav-progress {
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: -1px;
+  height: 1px;
+  background: var(--cta-gradient);
+  transform: scaleX(var(--nav-progress, 0));
+  transform-origin: left center;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.site-header.is-scrolled .nav-progress {
+  opacity: 0.9;
+}
+
+/* About: every chapter of the story is a hero, so the header keeps its
+   open, hero character there and shows no progress line */
+body[data-page="about"] .nav-progress {
+  display: none;
 }
 
 .brand {
@@ -44,11 +133,13 @@
   height: 40px;
   border-radius: 10px;
   flex-shrink: 0;
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.9s var(--nav-ease), height 0.9s var(--nav-ease);
 }
 
-.brand:hover .brand-mark {
-  transform: rotate(-6deg) scale(1.06);
+@media (hover: hover) {
+  .brand:hover .brand-mark {
+    transform: rotate(-6deg) scale(1.06);
+  }
 }
 
 .brand-text {
@@ -77,100 +168,641 @@
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 36px;
+  gap: 30px;
+  margin-right: auto;
+  margin-left: clamp(16px, 4vw, 64px);
 }
 
 .nav-links a {
   position: relative;
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--muted);
+  color: rgba(254, 238, 207, 0.78);
   transition: color 0.25s ease;
 }
 
-.nav-links a:hover,
-.nav-links a.is-active {
+.nav-links a.is-active,
+.nav-links a:focus-visible {
   color: var(--text);
 }
 
-/* The CTA button keeps its dark label (".nav-links a" would
-   otherwise win specificity and gray it out) */
-.nav-links a.btn-primary,
-.nav-links a.btn-primary:hover {
+@media (hover: hover) {
+  .nav-links a:hover {
+    color: var(--text);
+  }
+}
+
+/* underline draws in from the right on hover, leaves to the left
+   (the digitalgravity.ae curve), in the CTA gradient */
+.nav-links > a::after,
+.nav-links .nav-mega-trigger::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  left: auto;
+  bottom: -6px;
+  width: 0;
+  height: 1px;
+  background: var(--cta-gradient);
+  transition: width 0.4s var(--nav-ease);
+}
+
+.nav-links > a:focus-visible::after,
+.nav-links .nav-mega-trigger:focus-visible::after,
+.nav-item--mega.is-open .nav-mega-trigger::after,
+.nav-links a.is-active::after {
+  left: 0;
+  right: auto;
+  width: 100%;
+}
+
+@media (hover: hover) {
+  .nav-links > a:hover::after,
+  .nav-links .nav-mega-trigger:hover::after {
+    left: 0;
+    right: auto;
+    width: 100%;
+  }
+}
+
+/* keyboard focus in the bar: a soft ring that follows each control's
+   own shape instead of a hard box */
+.site-header a:focus-visible,
+.site-header button:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.site-header .btn-spark:focus-visible,
+.site-header .nav-circle:focus-visible,
+.site-header .nav-toggle:focus-visible,
+.site-header .lang-opt:focus-visible,
+.site-header .nav-sub-toggle:focus-visible {
+  border-radius: 999px;
+}
+
+.nav-link--panel,
+.nav-panel-foot {
+  display: none;
+}
+
+/* ---- header actions ---------------------------------------- */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* EN / AR: a glass pill with a gradient thumb that slides to the
+   active language */
+.lang-switch {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  height: 42px;
+  padding: 4px;
+  border: 1px solid rgba(254, 238, 207, 0.18);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  isolation: isolate;
+}
+
+.lang-thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  z-index: -1;
+  border-radius: 999px;
+  background: var(--cta-gradient);
+  box-shadow: 0 6px 18px -8px rgba(229, 125, 35, 0.8);
+  transition: transform 0.5s var(--nav-ease);
+}
+
+.lang-switch[data-active="ar"] .lang-thumb {
+  transform: translateX(100%);
+}
+
+.lang-opt {
+  position: relative;
+  min-width: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(254, 238, 207, 0.72);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+@media (hover: hover) {
+  .lang-opt:hover {
+    color: var(--text);
+  }
+}
+
+.lang-opt.is-active {
   color: var(--on-accent);
 }
 
-.nav-links a:not(.btn)::after {
+/* the "coming soon" note under the switch (nav.js) */
+.lang-note {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  z-index: 5;
+  width: max-content;
+  max-width: 240px;
+  padding: 10px 14px;
+  border: 1px solid rgba(254, 238, 207, 0.14);
+  border-radius: 14px;
+  background: rgba(12, 5, 3, 0.94);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.8);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--muted);
+  opacity: 0;
+  transform: translate(-50%, -4px);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.4s var(--nav-ease);
+}
+
+.lang-note b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.lang-switch.is-noting .lang-note {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* One hover language for every header control: a hairline border in
+   the site gradient fades in (a masked ::after ring, so it follows the
+   pill / circle shape exactly). */
+.lang-switch::after,
+.btn-spark::after,
+.nav-circle::after {
   content: "";
   position: absolute;
-  left: 0;
-  bottom: -6px;
-  width: 100%;
-  height: 2px;
-  background: var(--gradient);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s ease;
+  inset: -1px;
+  z-index: 1;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--cta-gradient);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
 }
 
-.nav-links a:not(.btn):hover::after,
-.nav-links a:not(.btn).is-active::after {
-  transform: scaleX(1);
+.lang-switch:focus-within::after,
+.btn-spark:focus-visible::after,
+.nav-circle:focus-visible::after {
+  opacity: 1;
 }
 
-/* Mobile menu toggle */
-.nav-toggle {
+@media (hover: hover) {
+  .lang-switch:hover::after,
+  .btn-spark:hover::after,
+  .nav-circle:hover::after {
+    opacity: 1;
+  }
+}
+
+/* "Speak to an expert": the site gradient, calm, no light effects; on
+   hover it goes dark and keeps only the gradient edge */
+.btn-spark {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  padding: 0 1.3em;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--on-accent);
+  white-space: nowrap;
+  box-shadow: 0 10px 26px -14px rgba(229, 125, 35, 0.8);
+  transition: color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-spark-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--cta-gradient);
+}
+
+.btn-spark-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #150905;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.btn-spark-txt {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-spark-short {
   display: none;
-  flex-direction: column;
-  gap: 5px;
-  padding: 8px;
 }
 
-.nav-toggle span {
-  width: 24px;
-  height: 2px;
-  background: var(--text);
-  transition: transform 0.3s ease, opacity 0.3s ease;
+/* "Open Channel": a live beacon before the label, the channel on air:
+   an amber core in a dark ring, blinking, with a pulse going out; on
+   hover (the button goes dark) it burns brighter */
+.site-header .btn-spark .btn-spark-txt {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
 }
 
-@media (max-width: 860px) {
-  .nav-toggle {
-    display: flex;
+.site-header .btn-spark .btn-spark-txt::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #faa719;
+  box-shadow: 0 0 0 2px rgba(21, 9, 5, 0.85), 0 0 8px 2px rgba(250, 167, 25, 0.9);
+  animation: nav-live 1.4s ease-in-out infinite, nav-pulse 2.4s ease-out infinite;
+}
+
+@keyframes nav-live {
+  50% { background: #fff1d6; }
+}
+
+@keyframes nav-pulse {
+  0%   { box-shadow: 0 0 0 2px rgba(21, 9, 5, 0.85), 0 0 8px 2px rgba(250, 167, 25, 0.9), 0 0 0 2px rgba(250, 167, 25, 0.7); }
+  70%  { box-shadow: 0 0 0 2px rgba(21, 9, 5, 0.85), 0 0 8px 2px rgba(250, 167, 25, 0.9), 0 0 0 10px rgba(250, 167, 25, 0); }
+  100% { box-shadow: 0 0 0 2px rgba(21, 9, 5, 0.85), 0 0 8px 2px rgba(250, 167, 25, 0.9), 0 0 0 10px rgba(250, 167, 25, 0); }
+}
+
+@media (hover: hover) {
+  .site-header .btn-spark:hover .btn-spark-txt::before {
+    background: #fff1d6;
+    box-shadow: 0 0 0 2px rgba(250, 167, 25, 0.5), 0 0 14px 4px rgba(250, 167, 25, 0.95);
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header .btn-spark .btn-spark-txt::before { animation: none; }
+}
+
+.btn-spark:focus-visible {
+  color: var(--text);
+  box-shadow: 0 10px 26px -14px rgba(229, 125, 35, 0.5);
+}
+
+.btn-spark:focus-visible .btn-spark-bg::after {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .btn-spark:hover {
+    color: var(--text);
+    box-shadow: 0 10px 26px -14px rgba(229, 125, 35, 0.5);
   }
 
+  .btn-spark:hover .btn-spark-bg::after {
+    opacity: 1;
+  }
+}
+
+/* email / phone: glass circles, the gradient edge on hover */
+.nav-circle {
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--text);
+  transition: color 0.3s ease;
+}
+
+.nav-circle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 1px solid rgba(254, 238, 207, 0.18);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.12);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: border-color 0.35s ease, background 0.35s ease;
+}
+
+.nav-circle svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.nav-circle:focus-visible {
+  color: var(--accent-2);
+}
+
+.nav-circle:focus-visible::before {
+  border-color: transparent;
+  background: rgba(229, 125, 35, 0.08);
+}
+
+@media (hover: hover) {
+  .nav-circle:hover {
+    color: var(--accent-2);
+  }
+
+  .nav-circle:hover::before {
+    border-color: transparent;
+    background: rgba(229, 125, 35, 0.08);
+  }
+}
+
+/* Mobile menu toggle: a white disc, two lines that cross into an X */
+.nav-toggle {
+  display: none;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.3s var(--nav-ease);
+}
+
+.nav-toggle:active { transform: scale(0.94); }
+
+.nav-toggle span {
+  grid-area: 1 / 1;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: #150905;
+  transition: transform 0.5s var(--nav-ease);
+}
+
+.nav-toggle span:first-child { transform: translateY(-3.5px); }
+.nav-toggle span:last-child  { transform: translateY(3.5px); }
+
+.site-header.menu-open .nav-toggle span:first-child { transform: rotate(45deg); }
+.site-header.menu-open .nav-toggle span:last-child  { transform: rotate(-45deg); }
+
+/* while the mobile menu is open: no progress line, no floating chat
+   bubble over the panel */
+.site-header.menu-open .nav-progress { opacity: 0 !important; }
+
+body.nav-open .qc-dock {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* crowded widths: the contact circles go first, then the spare words */
+@media (max-width: 1180px) {
+  .nav-circle--bar { display: none; }
+  .nav-links { gap: 24px; margin-left: 24px; }
+}
+
+@media (max-width: 980px) {
+  .nav-bar,
+  .site-header.is-scrolled .nav-bar {
+    width: calc(100% - 32px);
+    padding: 10px 0;
+    border-color: transparent;
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  .nav-bar::before { display: none; }
+
+  /* the glass strip behind the bar, sliding down once the page scrolls */
+  .site-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-bottom: 1px solid rgba(254, 238, 207, 0.1);
+    background: rgba(12, 5, 3, 0.55);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    transform: translateY(-100%);
+    transition: transform 0.9s var(--nav-ease);
+  }
+
+  .site-header.is-scrolled::before,
+  .site-header.menu-open::before {
+    transform: none;
+  }
+
+  .site-header { padding-top: 0; }
+
+  .nav-toggle { display: grid; }
+
+  .nav-actions > .lang-switch { display: none; }
+
+  .nav-progress { left: 0; right: 0; bottom: -1px; }
+
+  /* the menu: a black panel sliding in from the right */
   .nav-links {
     position: fixed;
     inset: 0;
     z-index: -1;
+    display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 28px;
-    background: rgba(21, 9, 5, 0.97);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .nav-links a {
-    font-size: 1.4rem;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    margin: 0;
+    padding:
+      calc(92px + env(safe-area-inset-top, 0px))
+      calc(clamp(20px, 7vw, 56px) + env(safe-area-inset-right, 0px))
+      calc(28px + env(safe-area-inset-bottom, 0px))
+      calc(clamp(20px, 7vw, 56px) + env(safe-area-inset-left, 0px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    background: #0a0403;
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform 0.6s var(--nav-ease), visibility 0s linear 0.6s;
   }
 
   .site-header.menu-open .nav-links {
-    opacity: 1;
-    pointer-events: auto;
+    transform: none;
+    visibility: visible;
+    transition: transform 0.6s var(--nav-ease), visibility 0s;
   }
 
-  .site-header.menu-open .nav-toggle span:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
+  .nav-links > a,
+  .nav-links .nav-mega-trigger {
+    padding: 16px 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 1.1rem + 1.6vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    color: var(--text);
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .site-header.menu-open .nav-toggle span:nth-child(2) {
-    opacity: 0;
+  /* touch feedback: the link slides a hair to the right while pressed */
+  .nav-links > a,
+  .nav-links .nav-mega-trigger {
+    transition: color 0.25s ease, transform 0.35s var(--nav-ease);
   }
 
-  .site-header.menu-open .nav-toggle span:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
+  .nav-links > a:active,
+  .nav-links .nav-mega-trigger:active {
+    color: var(--accent-2);
+    transform: translateX(4px);
   }
+
+  .nav-links > a,
+  .nav-links > .nav-item--mega {
+    border-top: 1px solid rgba(254, 238, 207, 0.12);
+  }
+
+  .nav-links > a:first-child { border-top: 0; }
+
+  .nav-links > a::after,
+  .nav-links .nav-mega-trigger::after { display: none; }
+
+  .nav-link--panel { display: block; }
+
+  .nav-panel-foot {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 32px;
+  }
+
+  .nav-panel-foot .nav-circle { width: 44px; height: 44px; }
+
+  .nav-panel-foot .lang-switch { margin-right: auto; }
+
+  /* links rise in one after another as the panel arrives */
+  .site-header.menu-open .nav-links > * {
+    animation: nav-item-in 0.7s var(--nav-ease) both;
+  }
+  .site-header.menu-open .nav-links > :nth-child(2) { animation-delay: 0.05s; }
+  .site-header.menu-open .nav-links > :nth-child(3) { animation-delay: 0.1s; }
+  .site-header.menu-open .nav-links > :nth-child(4) { animation-delay: 0.15s; }
+  .site-header.menu-open .nav-links > :nth-child(5) { animation-delay: 0.2s; }
+  .site-header.menu-open .nav-links > :nth-child(6) { animation-delay: 0.25s; }
+  .site-header.menu-open .nav-links > :nth-child(n+7) { animation-delay: 0.3s; }
+}
+
+@keyframes nav-item-in {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* landscape phones: a shorter panel, so tighter rows and a smaller scale */
+@media (max-width: 980px) and (max-height: 520px) and (orientation: landscape) {
+  .nav-links {
+    padding-top: calc(72px + env(safe-area-inset-top, 0px));
+  }
+
+  .nav-links > a,
+  .nav-links .nav-mega-trigger {
+    padding: 10px 0;
+    font-size: 1.25rem;
+  }
+
+  .nav-panel-foot { padding-top: 22px; }
+}
+
+@media (max-width: 420px) {
+  .btn-spark-long { display: none; }
+  .btn-spark-short { display: inline; }
+  .brand-text small { display: none; }
+}
+
+/* the narrowest phones (320-360): everything in the bar has to fit
+   beside the toggle without touching the edge */
+@media (max-width: 360px) {
+  .nav-bar,
+  .site-header.is-scrolled .nav-bar {
+    gap: 10px;
+    width: calc(100% - 24px);
+  }
+  .brand { gap: 8px; font-size: 1.2rem; letter-spacing: 0.12em; }
+  .brand-mark,
+  .site-header.is-scrolled .brand-mark { width: 34px; height: 34px; }
+  .nav-actions { gap: 8px; }
+  .btn-spark { padding: 0 1em; font-size: 0.9rem; }
+}
+
+/* 320-340: the bar still has ~18px too little room; tighten each piece
+   a touch rather than dropping any of them */
+@media (max-width: 340px) {
+  .nav-bar,
+  .site-header.is-scrolled .nav-bar { gap: 8px; width: calc(100% - 20px); }
+  .brand { gap: 6px; font-size: 1.08rem; letter-spacing: 0.08em; }
+  .brand-mark,
+  .site-header.is-scrolled .brand-mark { width: 30px; height: 30px; }
+  .nav-actions { gap: 6px; }
+  .btn-spark { padding: 0 0.8em; font-size: 0.82rem; }
+  .nav-toggle { width: 38px; height: 38px; }
+}
+
+/* large and wide screens: the bar grows with the room, a touch */
+@media (min-width: 1800px) {
+  .site-header.is-scrolled .nav-bar { width: min(1240px, 100% - 32px); }
+  .nav-links { gap: 36px; }
+  .nav-links a { font-size: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-bar,
+  .nav-bar::before,
+  .brand-mark,
+  .lang-thumb,
+  .lang-note,
+  .nav-toggle,
+  .nav-toggle span,
+  .nav-progress,
+  .nav-links,
+  .nav-links a,
+  .nav-links a::after,
+  .site-header::before,
+  .site-header::after { transition: none !important; }
+  .site-header.menu-open .nav-links > * { animation: none; }
 }
 
 /* ---- Page hero (interior pages) --------------------------- */
@@ -188,40 +820,19 @@
 }
 
 /* ---- Footer ------------------------------------------------ */
-/* The stacked logo centred on a warm glow, the social row between two
-   rules that fade out to the edges, then the link columns, each
-   heading marked with a slim accent bar. */
+/* No box of its own: the footer sits on the page's own background, so
+   whatever section is above flows straight into it. The stacked logo,
+   the social row between two rules that fade out to the edges, five
+   link columns, then the WORX wordmark in outline across the full
+   width, sunk into the bottom edge and lit from below, with a slim
+   legal line under it. */
 
 .site-footer {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  border-top: 1px solid var(--line);
-  background:
-    radial-gradient(ellipse 60% 55% at 50% 0%, rgba(66, 29, 15, 0.55), transparent 70%),
-    linear-gradient(180deg, #120704 0%, #0e0503 100%);
-  padding-block: clamp(56px, 7vw, 88px) 32px;
+  padding-top: clamp(40px, 5vw, 72px);
   margin-top: var(--section-pad);
-}
-
-/* soft ember glow breathing behind the logo */
-.footer-glow {
-  position: absolute;
-  left: 50%;
-  top: -140px;
-  z-index: -1;
-  width: min(760px, 110vw);
-  height: 460px;
-  transform: translateX(-50%);
-  background: radial-gradient(closest-side, rgba(231, 125, 17, 0.2), rgba(192, 69, 39, 0.08) 55%, transparent);
-  filter: blur(8px);
-  pointer-events: none;
-  animation: footer-glow 9s ease-in-out infinite alternate;
-}
-
-@keyframes footer-glow {
-  from { opacity: 0.7; transform: translateX(-50%) scale(0.96); }
-  to   { opacity: 1;   transform: translateX(-50%) scale(1.04); }
 }
 
 .footer-brand {
@@ -233,7 +844,6 @@
 
 .brand--footer {
   display: inline-block;
-  filter: drop-shadow(0 10px 30px rgba(231, 125, 17, 0.18));
 }
 
 .footer-tagline {
@@ -248,7 +858,7 @@
   display: flex;
   align-items: center;
   gap: clamp(16px, 3vw, 36px);
-  margin: clamp(32px, 4vw, 48px) 0 clamp(40px, 5vw, 60px);
+  margin: clamp(32px, 4vw, 48px) 0 clamp(44px, 5vw, 64px);
 }
 
 .footer-rule {
@@ -267,15 +877,32 @@
 }
 
 .footer-social a {
+  position: relative;
+  isolation: isolate;
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border: 1px solid rgba(254, 238, 207, 0.14);
   border-radius: 50%;
   color: var(--text);
-  background: rgba(254, 238, 207, 0.03);
-  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  transition: color 0.35s ease, border-color 0.35s ease, background 0.35s ease, transform 0.45s var(--nav-ease);
+}
+
+/* the same hover language as the header: a gradient hairline ring */
+.footer-social a::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--cta-gradient);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
 }
 
 .footer-social svg {
@@ -284,21 +911,30 @@
   fill: currentColor;
 }
 
-.footer-social a:hover,
 .footer-social a:focus-visible {
-  color: #150905;
-  border-color: var(--accent-2);
-  background: var(--accent-2);
-  box-shadow: 0 0 22px rgba(250, 167, 25, 0.45);
-  transform: translateY(-2px);
+  color: var(--accent-2);
+  border-color: transparent;
+  background: rgba(229, 125, 35, 0.08);
+}
+
+.footer-social a:focus-visible::after { opacity: 1; }
+
+@media (hover: hover) {
+  .footer-social a:hover {
+    color: var(--accent-2);
+    border-color: transparent;
+    background: rgba(229, 125, 35, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .footer-social a:hover::after { opacity: 1; }
 }
 
 /* ---- link columns ------------------------------------------ */
 .footer-cols {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1.1fr 1.2fr;
-  gap: 40px;
-  margin-bottom: 56px;
+  grid-template-columns: 1.35fr 0.8fr 1fr 1.05fr 1.05fr;
+  gap: 40px 32px;
 }
 
 .footer-col h4 {
@@ -306,7 +942,7 @@
   padding-left: 12px;
   border-left: 2px solid var(--accent-2);
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.25;
@@ -314,10 +950,15 @@
 }
 
 .footer-col li {
-  margin-bottom: 14px;
-  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+  margin-bottom: 13px;
+  font-size: 0.93rem;
   line-height: 1.55;
   color: var(--muted);
+}
+
+.footer-col--contact li:first-child {
+  max-width: 30ch;
 }
 
 .footer-col a {
@@ -334,45 +975,252 @@
   bottom: -3px;
   width: 100%;
   height: 1px;
-  background: var(--accent-2);
+  background: var(--cta-gradient);
   transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s ease;
+  transform-origin: right;
+  transition: transform 0.45s var(--nav-ease);
 }
 
-.footer-col a:hover,
 .footer-col a:focus-visible {
   color: var(--text);
 }
 
-.footer-col a:hover::after,
 .footer-col a:focus-visible::after {
   transform: scaleX(1);
+  transform-origin: left;
 }
 
+@media (hover: hover) {
+  .footer-col a:hover {
+    color: var(--text);
+  }
+
+  .footer-col a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+.footer-cta-item {
+  margin-top: 22px;
+}
+
+.footer-col a.footer-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--accent-2);
+}
+
+.footer-col a.footer-cta span {
+  transition: transform 0.45s var(--nav-ease);
+}
+
+.footer-col a.footer-cta:focus-visible span {
+  transform: translateX(4px);
+}
+
+@media (hover: hover) {
+  .footer-col a.footer-cta:hover span {
+    transform: translateX(4px);
+  }
+}
+
+/* ---- the wordmark ------------------------------------------ */
+/* Outline type (Jost, the display face) stretched edge to edge by
+   textLength, its baseline below the SVG's bottom so the letters sink
+   into the edge. A warm light rises behind it; a slow highlight runs
+   along the stroke (SMIL, in the SVG); main.js fills the letters in
+   under the pointer (--mx / --my on .footer-mark). */
+.footer-mark {
+  --mx: 50%;
+  --my: 120%;
+  position: relative;
+  z-index: 0;
+  width: min(100% - 32px, 1440px);
+  margin: clamp(48px, 7vw, 96px) auto 0;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.footer-mark::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -35%;
+  z-index: -1;
+  width: 90%;
+  height: 110%;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(229, 125, 35, 0.22), rgba(192, 69, 39, 0.1) 55%, transparent);
+  pointer-events: none;
+}
+
+.footer-mark-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+.footer-mark text {
+  font-family: var(--font-display);
+  font-size: 330px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Jost's letters are built from overlapping shapes (the R's leg over
+   its bowl): stroked as-is, the overlaps would draw lines inside the
+   letters. So each outline is drawn at twice its width and the page
+   colour is filled back over the letters (.footer-mark-knock), leaving
+   only the true outer outline, plus the faintest trace of the glow. */
+.footer-mark-base {
+  fill: transparent;
+  stroke: url(#footer-mark-stroke);
+  stroke-width: 2.8;
+  stroke-opacity: 0.6;
+}
+
+.footer-mark-shine {
+  fill: transparent;
+  stroke: url(#footer-mark-shine);
+  stroke-width: 3.2;
+}
+
+.footer-mark-knock {
+  fill: var(--ink);
+  fill-opacity: 0.9;
+}
+
+/* the fill that appears under the pointer */
+.footer-mark-fill {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: radial-gradient(circle clamp(120px, 18vw, 260px) at var(--mx) var(--my), #000 0%, rgba(0, 0, 0, 0.35) 45%, transparent 75%);
+  mask-image: radial-gradient(circle clamp(120px, 18vw, 260px) at var(--mx) var(--my), #000 0%, rgba(0, 0, 0, 0.35) 45%, transparent 75%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.footer-mark-fill text {
+  fill: url(#footer-mark-stroke);
+  opacity: 0.9;
+}
+
+.footer-mark.is-lit .footer-mark-fill {
+  opacity: 1;
+}
+
+/* ---- bottom line ------------------------------------------- */
 .footer-bottom {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  align-items: center;
+  gap: 12px 24px;
   justify-content: space-between;
-  padding-top: 28px;
+  padding: 22px 0 calc(26px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
   font-size: 0.85rem;
   color: var(--muted);
 }
 
-@media (max-width: 960px) {
+.footer-where {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.footer-clock {
+  color: var(--accent-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.footer-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  transition: color 0.25s ease;
+}
+
+.footer-top span {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(254, 238, 207, 0.18);
+  border-radius: 50%;
+  transition: border-color 0.25s ease, transform 0.3s ease;
+}
+
+.footer-top:focus-visible {
+  color: var(--text);
+}
+
+.footer-top:focus-visible span {
+  border-color: var(--accent-2);
+  transform: translateY(-3px);
+}
+
+@media (hover: hover) {
+  .footer-top:hover {
+    color: var(--text);
+  }
+
+  .footer-top:hover span {
+    border-color: var(--accent-2);
+    transform: translateY(-3px);
+  }
+}
+
+@media (max-width: 1100px) {
+  /* contact runs across the top, the four link columns sit under it */
   .footer-cols {
-    grid-template-columns: 1fr 1fr;
-    gap: 36px 28px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 40px 24px;
+  }
+
+  .footer-col--contact {
+    grid-column: 1 / -1;
+  }
+
+  .footer-col--contact ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 32px;
+  }
+
+  .footer-col--contact li,
+  .footer-cta-item {
+    margin: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .footer-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 36px 24px;
+  }
+
+  .footer-col--contact ul {
+    display: block;
+  }
+
+  .footer-col--contact li {
+    margin-bottom: 12px;
+  }
+
+  .footer-cta-item {
+    margin-top: 18px;
   }
 }
 
 @media (max-width: 560px) {
-  .footer-cols {
-    grid-template-columns: 1fr;
-  }
-
   .footer-bottom {
     flex-direction: column;
     align-items: center;
@@ -380,8 +1228,18 @@
   }
 }
 
+@media (max-width: 340px) {
+  .footer-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .footer-glow { animation: none; }
+  .footer-mark-shine { display: none; }
+  .footer-mark-fill,
+  .footer-social a,
+  .footer-col a::after,
+  .footer-top span { transition: none; }
 }
 
 /* ---- Services mega menu ------------------------------------- */
@@ -420,7 +1278,7 @@
 .mega {
   position: absolute;
   left: 50%;
-  top: calc(100% - 6px);
+  top: calc(100% + 10px);
   width: min(1260px, 96vw);
   transform: translate(-50%, 12px);
   opacity: 0;
@@ -432,7 +1290,21 @@
     radial-gradient(700px 300px at 85% 0%, rgba(229, 125, 35, 0.12), transparent 70%),
     #0c0503;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
-  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.35s;
+  transition: opacity 0.3s ease, transform 0.45s var(--nav-ease), visibility 0s linear 0.45s;
+}
+
+/* short desktop windows: the panel scrolls inside itself rather than
+   running off the bottom of the screen (only there, since the scroll
+   box clips the hover bridge; nav.js's close delay covers the gap) */
+@media (min-width: 981px) and (max-height: 700px) {
+  .mega {
+    max-height: calc(100vh - 110px);
+    max-height: calc(100dvh - 110px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(254, 238, 207, 0.2) transparent;
+  }
 }
 
 /* Hover bridge between the trigger and the panel */
@@ -454,10 +1326,29 @@ html:not(.js) .nav-item--mega:hover .mega {
   transition-delay: 0s;
 }
 
-.site-header.mega-open {
-  background: rgba(12, 5, 3, 0.94);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+/* mega open: the bar goes solid and the page behind dims */
+.site-header.mega-open .nav-bar {
+  border-color: rgba(254, 238, 207, 0.16);
+  background-color: rgba(10, 4, 3, 0.94);
+}
+
+.site-header::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  background: rgba(8, 3, 2, 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+
+.site-header.mega-open::after {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s;
 }
 
 .mega-panel {
@@ -537,18 +1428,28 @@ html:not(.js) .nav-item--mega:hover .mega {
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
-.nav-links .mega-group a:hover,
 .nav-links .mega-group a:focus-visible,
 .nav-links .mega-group a.is-previewing {
   color: var(--accent-2);
   padding-left: 8px;
 }
 
-.mega-group a:hover svg,
 .mega-group a:focus-visible svg,
 .mega-group a.is-previewing svg {
   opacity: 1;
   transform: translateX(4px);
+}
+
+@media (hover: hover) {
+  .nav-links .mega-group a:hover {
+    color: var(--accent-2);
+    padding-left: 8px;
+  }
+
+  .mega-group a:hover svg {
+    opacity: 1;
+    transform: translateX(4px);
+  }
 }
 
 /* Right column: clients by default, a service preview on hover */
@@ -605,9 +1506,11 @@ html:not(.js) .mega-client {
   to { opacity: 1; transform: none; }
 }
 
-.mega-client:hover {
-  color: var(--text);
-  background: rgba(250, 167, 25, 0.06);
+@media (hover: hover) {
+  .mega-client:hover {
+    color: var(--text);
+    background: rgba(250, 167, 25, 0.06);
+  }
 }
 
 .mega-client img {
@@ -619,9 +1522,11 @@ html:not(.js) .mega-client {
   transition: filter 0.25s ease, opacity 0.25s ease;
 }
 
-.mega-client:hover img {
-  filter: none;
-  opacity: 1;
+@media (hover: hover) {
+  .mega-client:hover img {
+    filter: none;
+    opacity: 1;
+  }
 }
 
 /* Typographic wordmarks until real logo files are dropped in */
@@ -730,8 +1635,14 @@ html:not(.js) .mega-client {
   color: var(--text);
 }
 
-.nav-links .mega-foot .mega-all:hover {
+.nav-links .mega-foot .mega-all:focus-visible {
   color: var(--accent-2);
+}
+
+@media (hover: hover) {
+  .nav-links .mega-foot .mega-all:hover {
+    color: var(--accent-2);
+  }
 }
 
 .nav-links .mega-foot .mega-all::after {
@@ -751,39 +1662,49 @@ html:not(.js) .mega-client {
 }
 
 /* Mobile: Services expands as an accordion inside the full-screen menu */
-@media (max-width: 860px) {
-  .site-header .nav-links {
-    justify-content: flex-start;
-    padding: 110px 8vw 60px;
-    overflow-y: auto;
-  }
-
+@media (max-width: 980px) {
   .nav-item--mega {
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-between;
     width: 100%;
   }
 
+  .nav-links .nav-mega-trigger { flex: 1; }
+
+  /* the expand chevron: a small, quiet glyph (about 12px across; the
+     path fills half of its 24-unit box) level with the "Services"
+     text, no ring, inside a full 44px tap target that overhangs the
+     right edge so the glyph lines up with the rows' end */
   .nav-sub-toggle {
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
-    margin-left: 6px;
-    border: 1px solid var(--line-strong);
+    width: 44px;
+    height: 44px;
+    margin-right: -16px;
+    padding: 0;
+    border: 0;
     border-radius: 50%;
     background: none;
-    color: var(--text);
+    color: rgba(254, 238, 207, 0.85);
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.3s ease, background-color 0.3s ease;
   }
 
   .nav-sub-toggle svg {
-    width: 18px;
+    width: 24px;
+    height: 24px;
     fill: none;
     stroke: currentColor;
-    stroke-width: 2;
-    transition: transform 0.3s ease;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.5s var(--nav-ease);
   }
+
+  .nav-sub-toggle:active { background-color: rgba(254, 238, 207, 0.06); }
+
+  .nav-item--mega.is-open .nav-sub-toggle { color: var(--accent-2); }
 
   .nav-item--mega.is-open .nav-sub-toggle svg {
     transform: rotate(180deg);
@@ -797,13 +1718,15 @@ html:not(.js) .mega-client {
     position: static;
     width: 100%;
     display: none;
-    margin-top: 18px;
+    margin: 4px 0 18px;
+    overflow: hidden;           /* nav.js eases its height open / shut */
     transform: none;
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
     border-radius: 18px;
     box-shadow: none;
+    transition: none;
   }
 
   .nav-item--mega.is-open .mega {
@@ -838,5 +1761,45 @@ html:not(.js) .mega-client {
     flex-wrap: wrap;
     padding: 14px 20px 18px;
     gap: 12px;
+  }
+
+  /* touch: the rows answer the finger, not a hover */
+  .nav-links .mega-group a:active {
+    color: var(--accent-2);
+    padding-left: 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .mega-panel { padding: 16px; }
+  .mega-foot { padding: 14px 16px 16px; }
+  .nav-links .mega-foot .mega-all { margin-left: 0; }
+  .mega-foot .mega-cta { width: 100%; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mega,
+  .nav-caret,
+  .nav-sub-toggle svg,
+  .nav-links .mega-group a,
+  .mega-group a svg { transition: none !important; }
+  .mega-client,
+  .nav-item--mega.is-open .mega-client { animation: none; opacity: 1; transform: none; }
+  .mega-preview { animation: none; }
+}
+
+/* ---- Quick contact dock: safe areas ------------------------- */
+/* The dock's look lives in components.css; here it only learns the
+   notch / home-indicator insets on phones (body > raises the
+   specificity over components.css, which loads later). */
+body > .qc-dock {
+  right: calc(clamp(16px, 4vw, 32px) + env(safe-area-inset-right, 0px));
+  bottom: calc(clamp(16px, 4vw, 32px) + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 480px) {
+  body > .qc-dock {
+    left: calc(16px + env(safe-area-inset-left, 0px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
   }
 }

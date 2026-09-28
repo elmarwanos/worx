@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Services | Worx</title>
+  <title>Services - Worx</title>
   <meta name="description" content="Web and e-commerce development, custom platforms, mobile apps, UI/UX, branding, 2D/3D animation, copywriting, AI, AR/VR, ERP and IT outsourcing. Every discipline under one roof, launched from Dubai by Worx.">
 
   <link rel="icon" type="image/png" sizes="32x32" href="../static/assets/favicon-32.png">
@@ -18,17 +18,15 @@
   <link rel="stylesheet" href="../static/css/components.css">
   <link rel="stylesheet" href="../static/css/animations.css">
   <link rel="stylesheet" href="../static/css/services.css">
+  <link rel="stylesheet" href="../static/css/ignite.css">
 </head>
 <body data-page="services" class="cx-page">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header">
-    <div class="container nav-bar">
+    <div class="nav-bar">
       <a class="brand" href="../index.html"><img class="brand-mark" src="../static/assets/mark.png" alt="" width="40" height="40"><span class="brand-text">WORX<small>&lt;like/magic&gt;</small></span></a>
-      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-      <nav class="nav-links" aria-label="Main navigation">
+      <nav class="nav-links" id="site-nav" aria-label="Main navigation">
         <a href="../index.html" data-nav="home">Home</a>
         <a href="../about/index.html" data-nav="about">About</a>
         <!--WORX:GEN mega-->
@@ -43,16 +41,16 @@
                 <p class="mega-group-title"><span>01</span>Development</p>
                 <ul>
                 <li><a href="../services/web-development.html" data-mega-item data-division="Development" data-short="Fast, secure, search-friendly websites on the right stack." data-subs="Sitecore|Ibexa DXP|SharePoint|WordPress|Drupal|Joomla|ASP.NET|AngularJS|Ruby on Rails" data-more="8"><i aria-hidden="true"></i><span>Web Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-development" data-mega-item data-division="Development" data-short="Storefronts that sell, from boutique brands to marketplaces." data-subs="Shopify|Shopify Plus|WooCommerce|Magento|BigCommerce|Mirakl marketplaces|Headless commerce" data-more="0"><i aria-hidden="true"></i><span>E-commerce Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/ecommerce-development.html" data-mega-item data-division="Development" data-short="Storefronts that sell, from boutique brands to marketplaces." data-subs="Shopify|Shopify Plus|WooCommerce|Magento|BigCommerce|Mirakl marketplaces|Headless commerce" data-more="0"><i aria-hidden="true"></i><span>E-commerce Development</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 <li><a href="../services/custom-platforms.html" data-mega-item data-division="Development" data-short="Portals, dashboards and tools built around your workflow." data-subs="Web portals|Dashboards &amp; tooling|Integrations|Smart automation|Interactive configurators|Security &amp; compliance" data-more="0"><i aria-hidden="true"></i><span>Custom Platforms</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 </ul>
               </div>
               <div class="mega-group">
                 <p class="mega-group-title"><span>05</span>IT &amp; Enterprise</p>
                 <ul>
-                <li><a href="../services/index.html#sys-it" data-mega-item data-division="IT &amp; Enterprise" data-short="One connected system for finance, people, supply and sales." data-subs="NetSuite|SAP|Microsoft Dynamics 365|Oracle Cloud|Odoo|CRM development" data-more="0"><i aria-hidden="true"></i><span>ERP &amp; CRM</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-it" data-mega-item data-division="IT &amp; Enterprise" data-short="Vetted specialists who join your team in days." data-subs="Hire scrum masters|Hire project managers|Hire SQA engineers|Hire ReactJS developers|Hire NodeJS developers|Hire .NET developers|Hire React Native developers|Hire mobile app developers|Hire SharePoint developers" data-more="3"><i aria-hidden="true"></i><span>IT Resource Outsourcing</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-it" data-mega-item data-division="IT &amp; Enterprise" data-short="Move to the cloud and keep it secure, fast and affordable." data-subs="Digital cloud transformation|Cloud migration|AWS|Microsoft Azure|Security &amp; compliance" data-more="0"><i aria-hidden="true"></i><span>Cloud Transformation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/erp-crm.html" data-mega-item data-division="IT &amp; Enterprise" data-short="One connected system for finance, people, supply and sales." data-subs="NetSuite|SAP|Microsoft Dynamics 365|Oracle Cloud|Odoo|CRM development" data-more="0"><i aria-hidden="true"></i><span>ERP &amp; CRM</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/it-outsourcing.html" data-mega-item data-division="IT &amp; Enterprise" data-short="Vetted specialists who join your team in days." data-subs="Hire scrum masters|Hire project managers|Hire SQA engineers|Hire ReactJS developers|Hire NodeJS developers|Hire .NET developers|Hire React Native developers|Hire mobile app developers|Hire SharePoint developers" data-more="3"><i aria-hidden="true"></i><span>IT Resource Outsourcing</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/cloud-transformation.html" data-mega-item data-division="IT &amp; Enterprise" data-short="Move to the cloud and keep it secure, fast and affordable." data-subs="Digital cloud transformation|Cloud migration|AWS|Microsoft Azure|Security &amp; compliance" data-more="0"><i aria-hidden="true"></i><span>Cloud Transformation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 </ul>
               </div>
             </div>
@@ -66,7 +64,7 @@
               <div class="mega-group">
                 <p class="mega-group-title"><span>04</span>Emerging Tech</p>
                 <ul>
-                <li><a href="../services/index.html#sys-emerging" data-mega-item data-division="Emerging Tech" data-short="Chatbots, automation and search that work while you sleep." data-subs="AI chatbots|Robotic process automation|AI enterprise search|Metaverse development" data-more="0"><i aria-hidden="true"></i><span>Artificial Intelligence</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/artificial-intelligence.html" data-mega-item data-division="Emerging Tech" data-short="Chatbots, automation and search that work while you sleep." data-subs="AI chatbots|Robotic process automation|AI enterprise search|Metaverse development" data-more="0"><i aria-hidden="true"></i><span>Artificial Intelligence</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 <li><a href="../services/ar-vr.html" data-mega-item data-division="Emerging Tech" data-short="Immersive activations engineered to stop crowds." data-subs="Augmented reality|Virtual reality|Mixed reality|Interactive activations|3D &amp; Unity|Event support" data-more="0"><i aria-hidden="true"></i><span>AR / VR &amp; Mixed Reality</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 </ul>
               </div>
@@ -76,9 +74,9 @@
                 <p class="mega-group-title"><span>03</span>Design &amp; Creative</p>
                 <ul>
                 <li><a href="../services/ui-ux-design.html" data-mega-item data-division="Design &amp; Creative" data-short="Research-driven interfaces that make the right action obvious." data-subs="UX design|UX audit|UX workshops|Landing page design|Responsive web design|Design systems|Prototyping|PSD to HTML|Graphic design" data-more="1"><i aria-hidden="true"></i><span>UI/UX Design</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-creative" data-mega-item data-division="Design &amp; Creative" data-short="Identities with a point of view, from logo to packaging." data-subs="Logo design|Corporate identity|Brand guidelines|Packaging design|Brochure design|Business card design" data-more="0"><i aria-hidden="true"></i><span>Digital Branding &amp; Creatives</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-creative" data-mega-item data-division="Design &amp; Creative" data-short="Explainers, product films and walkthroughs that move people." data-subs="Explainer videos|Character animation|Whiteboard animation|Product demo videos|Video game trailers|Medical animation|3D architectural walkthroughs" data-more="0"><i aria-hidden="true"></i><span>2D/3D Video Animation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
-                <li><a href="../services/index.html#sys-creative" data-mega-item data-division="Design &amp; Creative" data-short="Words that sound like you and sell like a pro." data-subs="Website copy|Ad &amp; campaign copy|Brand voice|Content writing|Arabic &amp; English translation" data-more="0"><i aria-hidden="true"></i><span>Copywriting</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/digital-branding.html" data-mega-item data-division="Design &amp; Creative" data-short="Identities with a point of view, from logo to packaging." data-subs="Logo design|Corporate identity|Brand guidelines|Packaging design|Brochure design|Business card design" data-more="0"><i aria-hidden="true"></i><span>Digital Branding &amp; Creatives</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/video-animation.html" data-mega-item data-division="Design &amp; Creative" data-short="Explainers, product videos and walkthroughs that move people." data-subs="Explainer videos|Character animation|Whiteboard animation|Product demo videos|Video game trailers|Medical animation|3D architectural walkthroughs" data-more="0"><i aria-hidden="true"></i><span>2D/3D Video Animation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/copywriting.html" data-mega-item data-division="Design &amp; Creative" data-short="Words that sound like you and sell like a pro." data-subs="Website copy|Ad &amp; campaign copy|Brand voice|Content writing|Arabic &amp; English translation" data-more="0"><i aria-hidden="true"></i><span>Copywriting</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 </ul>
               </div>
             </div>
@@ -107,8 +105,30 @@
         <!--/WORX:GEN mega-->
         <a href="../portfolio/index.html" data-nav="portfolio">Portfolio</a>
         <a href="../blogs/index.html" data-nav="blogs">Blog</a>
-        <a href="../contact/index.html" class="btn btn-primary" data-nav="contact">Let's Talk</a>
+        <a href="../contact/index.html" data-nav="contact" class="nav-link--panel">Contact</a>
+        <!-- in the mobile menu panel only: language + direct contact -->
+        <div class="nav-panel-foot">
+          <div class="lang-switch" role="group" aria-label="Language">
+            <span class="lang-thumb" aria-hidden="true"></span>
+            <button type="button" class="lang-opt is-active" data-lang="en" lang="en" aria-pressed="true">EN</button>
+            <button type="button" class="lang-opt" data-lang="ar" lang="ar" aria-pressed="false">AR</button>
+          </div>
+          <a class="nav-circle" href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a>
+          <a class="nav-circle" href="tel:+971555669847" aria-label="Call +971 55 566 9847"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
+        </div>
       </nav>
+      <div class="nav-actions">
+        <div class="lang-switch" role="group" aria-label="Language">
+          <span class="lang-thumb" aria-hidden="true"></span>
+          <button type="button" class="lang-opt is-active" data-lang="en" lang="en" aria-pressed="true">EN</button>
+          <button type="button" class="lang-opt" data-lang="ar" lang="ar" aria-pressed="false">AR</button>
+        </div>
+        <a class="btn-spark" href="../contact/index.html" data-nav="contact"><span class="btn-spark-bg" aria-hidden="true"></span><span class="btn-spark-txt"><span class="btn-spark-long">Open Channel</span><span class="btn-spark-short">Open Channel</span></span></a>
+        <a class="nav-circle nav-circle--bar" href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a>
+        <a class="nav-circle nav-circle--bar" href="tel:+971555669847" aria-label="Call +971 55 566 9847"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
+      </div>
+      <span class="nav-progress" aria-hidden="true"></span>
     </div>
   </header>
 
@@ -120,7 +140,6 @@
   <div class="cx-grain" aria-hidden="true"></div>
   <div class="cx-letterbox" aria-hidden="true"><span></span><span></span></div>
   <div class="cx-countdown" aria-hidden="true"><span data-countdown></span></div>
-  <div class="cx-cursor" aria-hidden="true"><span class="cx-cursor-dot"></span><span class="cx-cursor-ring"><em data-cursor-label></em></span></div>
 
   <!-- ====== Left HUD: comms / social ====== -->
   <aside class="cx-comms" aria-label="Worx on social media">
@@ -173,15 +192,32 @@
       </div>
 
       <div class="cx-hero-copy">
-        <p class="cx-kicker"><span class="tag-code">&lt;like/magic&gt;</span> Every discipline. One crew.</p>
-        <h1 class="cx-title">
-          <span class="cx-line"><span>We build</span></span>
-          <span class="cx-line cx-line--slot"><span class="cx-slot" data-slot><em class="gradient-text">everything.</em><em class="gradient-text">everywhere.</em><em class="gradient-text is-final">all at once.</em></span></span>
-        </h1>
-        <p class="cx-hero-sub">From first idea to living product: design, code, content, intelligence and the systems behind them, engineered under one roof in Dubai and launched like a mission.</p>
-        <div class="cx-hero-cta">
-          <a href="../contact/index.html" class="btn btn-primary" data-magnetic data-cursor="Launch">Start a mission</a>
-          <a href="#fleet" class="cx-textlink" data-cursor="Scroll">Explore the fleet <span aria-hidden="true">↓</span></a>
+        <!-- the mission's title card: the About page's HUD panel at its
+             left-hand angle (the log head, the status line, the title,
+             the brief, the call), over the eclipse -->
+        <div class="cx-card" role="group" aria-label="Mission 001 · Services">
+          <div class="cx-card-head" aria-hidden="true">
+            <span class="cx-card-rec"></span>
+            <span class="cx-card-call"><span class="tag-code">&lt;like/magic&gt;</span> · MISSION 001 · SERVICES</span>
+            <span class="cx-card-sol"><!--WORX:GEN count-services-->13<!--/WORX:GEN count-services--> ONLINE</span>
+          </div>
+          <p class="cx-kicker">Every discipline. One crew.</p>
+          <h1 class="cx-title">
+            <span class="cx-line"><span>We build</span></span>
+            <span class="cx-line cx-line--slot"><span class="cx-slot" data-slot><em class="gradient-text">everything.</em><em class="gradient-text">everywhere.</em><em class="gradient-text is-final">all at once.</em></span></span>
+          </h1>
+          <p class="cx-hero-sub">From first idea to living product: design, code, content, intelligence and the systems behind them, engineered under one roof in Dubai and launched like a mission.</p>
+          <div class="cx-hero-cta">
+            <!-- the call: one of the crew picks up -->
+            <a href="https://wa.me/971555669847" class="cx-call" target="_blank" rel="noopener" data-cursor="Talk">
+              <span class="cx-call-face" aria-hidden="true"><img src="../static/assets/home/marwan-face.webp" alt="" width="52" height="52" decoding="async"><i></i></span>
+              <span class="cx-call-txt"><small aria-hidden="true"><span>Crew online</span><span>Marwan answers</span></small><b>Speak to an expert</b></span>
+              <span class="cx-call-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="cx-call-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+              <span class="cx-call-vf" aria-hidden="true"></span>
+            </a>
+            <a href="#fleet" class="cx-textlink" data-cursor="Scroll">Explore the fleet <span aria-hidden="true">↓</span></a>
+          </div>
         </div>
       </div>
 
@@ -191,28 +227,35 @@
     <section class="cx-manifesto" id="manifesto" data-chapter-section="manifesto">
       <div class="cx-manifesto-pin">
         <p class="eyebrow">Crew manifesto</p>
-        <p class="cx-manifesto-text" data-scrub-words>Others hand over files. We hand over <mark>momentum</mark>. Brands, apps, platforms, films, AI and the systems underneath, designed, built and flown by one crew, with the marketing engine of Glimpse on the next desk. <mark><!--WORX:GEN count-divisions-->5<!--/WORX:GEN count-divisions--> divisions.</mark> <mark><!--WORX:GEN count-caps-->100<!--/WORX:GEN count-caps-->+ capabilities.</mark> <mark>One crew.</mark> Zero hand-offs.</p>
+        <p class="cx-manifesto-text" data-scrub-words>Others hand over files. We hand over <mark>momentum</mark>. Brands, apps, platforms, AI and the systems underneath, imagined, designed and built by one amazing crew. <mark>One crew.</mark> <mark>One vision.</mark> Zero hand-offs.</p>
 
+        <!-- the crew's record: four figures on one instrument line; each
+             number rolls in on mechanical reels (services.js), its trace
+             drawing along the line beneath it -->
         <div class="cx-telemetry">
           <div class="cx-tele">
+            <span class="cx-tele-idx" aria-hidden="true">01</span>
+            <strong><span data-count="300">300</span><em>+</em></strong>
             <span class="cx-tele-label">Projects delivered</span>
-            <strong><span data-count="300">0</span>+</strong>
-            <span class="cx-tele-bar"><i style="--v:1"></i></span>
+            <span class="cx-tele-bar" aria-hidden="true" style="--v:1"><i></i></span>
           </div>
           <div class="cx-tele">
+            <span class="cx-tele-idx" aria-hidden="true">02</span>
+            <strong><span data-count="12">12</span><em>+</em></strong>
             <span class="cx-tele-label">Loyal clients</span>
-            <strong><span data-count="12">0</span>+</strong>
-            <span class="cx-tele-bar"><i style="--v:.6"></i></span>
+            <span class="cx-tele-bar" aria-hidden="true" style="--v:.6"><i></i></span>
           </div>
           <div class="cx-tele">
+            <span class="cx-tele-idx" aria-hidden="true">03</span>
+            <strong><span data-count="95">95</span><em>%</em></strong>
             <span class="cx-tele-label">Client satisfaction</span>
-            <strong><span data-count="95">0</span>%</strong>
-            <span class="cx-tele-bar"><i style="--v:.95"></i></span>
+            <span class="cx-tele-bar" aria-hidden="true" style="--v:.95"><i></i></span>
           </div>
           <div class="cx-tele">
+            <span class="cx-tele-idx" aria-hidden="true">04</span>
+            <strong><span data-count="10">10</span><em>%+</em></strong>
             <span class="cx-tele-label">Growth per year</span>
-            <strong><span data-count="10">0</span>%+</strong>
-            <span class="cx-tele-bar"><i style="--v:.4"></i></span>
+            <span class="cx-tele-bar" aria-hidden="true" style="--v:.4"><i></i></span>
           </div>
         </div>
       </div>
@@ -240,28 +283,13 @@
               <p>Websites and platforms engineered to load fast, rank well and scale.</p>
               <ul class="cx-svc-list">
                 <li><a href="../services/web-development.html" data-cursor="Explore"><b>Web Development</b><span>Sitecore · Ibexa DXP · SharePoint · WordPress <em>+13</em></span></a></li>
-                <li><a href="../services/index.html#sys-development" data-cursor="Explore"><b>E-commerce Development</b><span>Shopify · Shopify Plus · WooCommerce · Magento <em>+3</em></span></a></li>
+                <li><a href="../services/ecommerce-development.html" data-cursor="Explore"><b>E-commerce Development</b><span>Shopify · Shopify Plus · WooCommerce · Magento <em>+3</em></span></a></li>
                 <li><a href="../services/custom-platforms.html" data-cursor="Explore"><b>Custom Platforms</b><span>Web portals · Dashboards &amp; tooling · Integrations · Smart automation <em>+2</em></span></a></li>
               </ul>
             <!--/WORX:GEN panel:development--></div>
-            <div class="cx-scene cx-scene--web" aria-hidden="true" data-tilt>
-              <div class="sw-browser">
-                <div class="sw-bar"><i></i><i></i><i></i><span class="sw-url">https://<b data-type-url></b></span></div>
-                <div class="sw-body">
-                  <pre class="sw-code"><code data-code></code></pre>
-                  <div class="sw-site">
-                    <span class="sw-nav"></span>
-                    <span class="sw-heroblk"><i></i><i></i><i class="sw-btn"></i></span>
-                    <span class="sw-cards"><i></i><i></i><i></i></span>
-                    <span class="sw-foot"></span>
-                  </div>
-                </div>
-              </div>
-              <div class="sw-score">
-                <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="34"/><circle class="sw-score-arc" cx="40" cy="40" r="34"/></svg>
-                <b data-score>0</b>
-                <span>Performance</span>
-              </div>
+            <div class="cx-scene cx-scene--fw" aria-hidden="true" data-tilt>
+              <canvas class="cx-fw" data-fleet-world="web"></canvas>
+              <span class="cx-fw-vf"></span>
             </div>
           </article>
 
@@ -276,55 +304,9 @@
                 <li><a href="../services/mobile-apps.html" data-cursor="Explore"><b>Mobile App Development</b><span>iOS apps · Android apps · Flutter · React Native <em>+6</em></span></a></li>
               </ul>
             <!--/WORX:GEN panel:mobile--></div>
-            <div class="cx-scene cx-scene--mobile" aria-hidden="true">
-              <div class="sm-orbit sm-orbit--back"><div class="sm-orbit-plane"><span class="sm-orbit-ring"></span><span class="sm-arm"><b><i>iOS</i></b></span><span class="sm-arm"><b><i>Android</i></b></span><span class="sm-arm"><b><i>Flutter</i></b></span><span class="sm-arm"><b><i>React Native</i></b></span><span class="sm-arm"><b><i>PWA</i></b></span><span class="sm-arm"><b><i>Kiosk</i></b></span></div></div>
-              <div class="sm-stage" data-tilt>
-                <div class="sm-phone">
-                  <span class="sm-notch"></span>
-                  <div class="sm-app">
-                    <div class="sm-status"><b>9:41</b><span><i></i><i></i><i></i><em></em></span></div>
-                    <div class="sm-screens">
-                      <section class="sm-screen sm-screen--home">
-                        <p class="sm-hello">Good evening,<b>Captain</b></p>
-                        <div class="sm-hero-card">
-                          <span class="sm-ring"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16"/><circle class="sm-ring-arc" cx="20" cy="20" r="16"/></svg><b>72%</b></span>
-                          <p><em>Mission 042</em>In orbit · 2 days to go</p>
-                        </div>
-                        <div class="sm-tiles"><i></i><i></i><i></i><i></i></div>
-                        <div class="sm-rows"><span><i></i><em></em></span><span><i></i><em></em></span></div>
-                      </section>
-                      <section class="sm-screen sm-screen--stats">
-                        <p class="sm-title">Activity<em>This week</em></p>
-                        <div class="sm-bars"><i style="--h:.45"></i><i style="--h:.7"></i><i style="--h:.5"></i><i style="--h:.9"></i><i style="--h:.65"></i><i style="--h:1"></i><i style="--h:.8"></i></div>
-                        <div class="sm-kpis"><span><b>2.4k</b>Daily users</span><span><b>4.9</b>Store rating</span></div>
-                      </section>
-                      <section class="sm-screen sm-screen--map">
-                        <div class="sm-map">
-                          <svg viewBox="0 0 100 120" preserveAspectRatio="none"><path class="sm-road" d="M10 110 C 20 80, 70 90, 60 60 S 30 30, 85 12"/><path class="sm-route" pathLength="200" d="M10 110 C 20 80, 70 90, 60 60 S 30 30, 85 12"/><circle class="sm-rover-dot" r="3"><animateMotion dur="3.2s" repeatCount="indefinite" path="M10 110 C 20 80, 70 90, 60 60 S 30 30, 85 12"/></circle></svg>
-                          <span class="sm-pin"></span>
-                        </div>
-                        <div class="sm-sheet"><p><b>Rover arriving</b>3 min away</p><span class="sm-btn">Track</span></div>
-                      </section>
-                      <section class="sm-screen sm-screen--chat">
-                        <p class="sm-title">Worx crew<em>online</em></p>
-                        <p class="sm-msg sm-msg--in">Build finished. Ready to ship?</p>
-                        <p class="sm-msg sm-msg--out">Ship it.</p>
-                        <p class="sm-msg sm-msg--in">Live on iOS &amp; Android.</p>
-                        <div class="sm-release"><span class="sm-release-icon"></span><p><b>v2.4 is live</b>Rolling out worldwide</p><span class="sm-release-stores"><i>App Store</i><i>Google Play</i></span></div>
-                        <span class="sm-typing"><i></i><i></i><i></i></span>
-                      </section>
-                    </div>
-                    <div class="sm-tabbar"><i></i><i></i><i></i><i></i><span class="sm-tab-dot"></span></div>
-                  </div>
-                  <span class="sm-tap"></span>
-                  <span class="sm-glare"></span>
-                </div>
-                <span class="sm-shadow"></span>
-              </div>
-              <div class="sm-orbit sm-orbit--front"><div class="sm-orbit-plane"><span class="sm-arm"><b><i>iOS</i></b></span><span class="sm-arm"><b><i>Android</i></b></span><span class="sm-arm"><b><i>Flutter</i></b></span><span class="sm-arm"><b><i>React Native</i></b></span><span class="sm-arm"><b><i>PWA</i></b></span><span class="sm-arm"><b><i>Kiosk</i></b></span></div></div>
-              <span class="sm-toast sm-toast--1"><i></i>New build ready</span>
-              <span class="sm-toast sm-toast--2"><i></i>Rated 5 stars</span>
-              <span class="sm-toast sm-toast--3"><i></i>Shipped to iOS &amp; Android</span>
+            <div class="cx-scene cx-scene--fw" aria-hidden="true" data-tilt>
+              <canvas class="cx-fw" data-fleet-world="mobile"></canvas>
+              <span class="cx-fw-vf"></span>
             </div>
           </article>
 
@@ -337,28 +319,14 @@
               <p>Interfaces, identities, words and motion that make brands unmistakable.</p>
               <ul class="cx-svc-list">
                 <li><a href="../services/ui-ux-design.html" data-cursor="Explore"><b>UI/UX Design</b><span>UX design · UX audit · UX workshops · Landing page design <em>+6</em></span></a></li>
-                <li><a href="../services/index.html#sys-creative" data-cursor="Explore"><b>Digital Branding &amp; Creatives</b><span>Logo design · Corporate identity · Brand guidelines · Packaging design <em>+2</em></span></a></li>
-                <li><a href="../services/index.html#sys-creative" data-cursor="Explore"><b>2D/3D Video Animation</b><span>Explainer videos · Character animation · Whiteboard animation · Product demo videos <em>+3</em></span></a></li>
-                <li><a href="../services/index.html#sys-creative" data-cursor="Explore"><b>Copywriting</b><span>Website copy · Ad &amp; campaign copy · Brand voice · Content writing <em>+1</em></span></a></li>
+                <li><a href="../services/digital-branding.html" data-cursor="Explore"><b>Digital Branding &amp; Creatives</b><span>Logo design · Corporate identity · Brand guidelines · Packaging design <em>+2</em></span></a></li>
+                <li><a href="../services/video-animation.html" data-cursor="Explore"><b>2D/3D Video Animation</b><span>Explainer videos · Character animation · Whiteboard animation · Product demo videos <em>+3</em></span></a></li>
+                <li><a href="../services/copywriting.html" data-cursor="Explore"><b>Copywriting</b><span>Website copy · Ad &amp; campaign copy · Brand voice · Content writing <em>+1</em></span></a></li>
               </ul>
             <!--/WORX:GEN panel:creative--></div>
-            <div class="cx-scene cx-scene--uiux" aria-hidden="true" data-tilt>
-              <div class="su-board">
-                <span class="su-label">Artboard 01 · Home</span>
-                <span class="su-b su-b1"></span>
-                <span class="su-b su-b2"></span>
-                <span class="su-b su-b3"></span>
-                <span class="su-b su-b4"></span>
-                <span class="su-b su-b5"></span>
-                <span class="su-b su-b6"></span>
-                <svg class="su-cursor" viewBox="0 0 24 24"><path d="M4 2l16 9.5-7 1.6-3.4 6.9z"/></svg>
-              </div>
-              <div class="su-film"><span class="su-film-play"></span><span class="su-film-meta"><b>Explainer_v3.mp4</b><i><em></em></i></span></div>
-              <div class="su-swatches"><i></i><i></i><i></i><i></i><i></i></div>
-              <div class="su-layers">
-                <span>Layers</span>
-                <em>Navigation</em><em>Hero</em><em>Feature grid</em><em>Call to action</em>
-              </div>
+            <div class="cx-scene cx-scene--fw" aria-hidden="true" data-tilt>
+              <canvas class="cx-fw" data-fleet-world="uiux"></canvas>
+              <span class="cx-fw-vf"></span>
             </div>
           </article>
 
@@ -370,23 +338,13 @@
               <h3>Emerging Tech</h3>
               <p>AI and immersive experiences that put you a step ahead.</p>
               <ul class="cx-svc-list">
-                <li><a href="../services/index.html#sys-emerging" data-cursor="Explore"><b>Artificial Intelligence</b><span>AI chatbots · Robotic process automation · AI enterprise search · Metaverse development</span></a></li>
+                <li><a href="../services/artificial-intelligence.html" data-cursor="Explore"><b>Artificial Intelligence</b><span>AI chatbots · Robotic process automation · AI enterprise search · Metaverse development</span></a></li>
                 <li><a href="../services/ar-vr.html" data-cursor="Explore"><b>AR / VR &amp; Mixed Reality</b><span>Augmented reality · Virtual reality · Mixed reality · Interactive activations <em>+2</em></span></a></li>
               </ul>
             <!--/WORX:GEN panel:emerging--></div>
-            <div class="cx-scene cx-scene--arvr" aria-hidden="true">
-              <div class="sa-floor"></div>
-              <div class="sa-holo" data-tilt>
-                <div class="sa-cube">
-                  <i class="sa-f1"></i><i class="sa-f2"></i><i class="sa-f3"></i><i class="sa-f4"></i><i class="sa-f5"></i><i class="sa-f6"></i>
-                </div>
-                <span class="sa-beam"></span>
-              </div>
-              <span class="sa-ring"></span>
-              <span class="sa-hud sa-hud--tl">TRACKING <b>LOCKED</b></span>
-              <span class="sa-hud sa-hud--br">90 FPS · 6DOF</span>
-              <span class="sa-bracket"></span>
-              <div class="sa-chat"><span class="sa-chat-tag">AI assistant</span><p class="sa-chat-q">Which plan suits a 20-person team?</p><p class="sa-chat-a"><span class="sa-dots"><i></i><i></i><i></i></span><span class="sa-chat-text">The Growth plan. Want me to book a demo?</span></p></div>
+            <div class="cx-scene cx-scene--fw" aria-hidden="true" data-tilt>
+              <canvas class="cx-fw" data-fleet-world="arvr"></canvas>
+              <span class="cx-fw-vf"></span>
             </div>
           </article>
 
@@ -398,48 +356,14 @@
               <h3>IT &amp; Enterprise</h3>
               <p>The systems, clouds and people that keep a business running.</p>
               <ul class="cx-svc-list">
-                <li><a href="../services/index.html#sys-it" data-cursor="Explore"><b>ERP &amp; CRM</b><span>NetSuite · SAP · Microsoft Dynamics 365 · Oracle Cloud <em>+2</em></span></a></li>
-                <li><a href="../services/index.html#sys-it" data-cursor="Explore"><b>IT Resource Outsourcing</b><span>Hire scrum masters · Hire project managers · Hire SQA engineers · Hire ReactJS developers <em>+8</em></span></a></li>
-                <li><a href="../services/index.html#sys-it" data-cursor="Explore"><b>Cloud Transformation</b><span>Digital cloud transformation · Cloud migration · AWS · Microsoft Azure <em>+1</em></span></a></li>
+                <li><a href="../services/erp-crm.html" data-cursor="Explore"><b>ERP &amp; CRM</b><span>NetSuite · SAP · Microsoft Dynamics 365 · Oracle Cloud <em>+2</em></span></a></li>
+                <li><a href="../services/it-outsourcing.html" data-cursor="Explore"><b>IT Resource Outsourcing</b><span>Hire scrum masters · Hire project managers · Hire SQA engineers · Hire ReactJS developers <em>+8</em></span></a></li>
+                <li><a href="../services/cloud-transformation.html" data-cursor="Explore"><b>Cloud Transformation</b><span>Digital cloud transformation · Cloud migration · AWS · Microsoft Azure <em>+1</em></span></a></li>
               </ul>
             <!--/WORX:GEN panel:it--></div>
-            <div class="cx-scene cx-scene--platform" aria-hidden="true" data-tilt>
-              <svg class="sp-graph" viewBox="0 0 400 320">
-                <g class="sp-links">
-                  <path id="sp-l1" d="M200 160 L70 60"/>
-                  <path id="sp-l2" d="M200 160 L330 60"/>
-                  <path id="sp-l3" d="M200 160 L360 180"/>
-                  <path id="sp-l4" d="M200 160 L290 280"/>
-                  <path id="sp-l5" d="M200 160 L100 280"/>
-                  <path id="sp-l6" d="M200 160 L40 170"/>
-                </g>
-                <g class="sp-pulses">
-                  <circle r="3.5"><animateMotion dur="2.2s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1"><mpath href="#sp-l1"/></animateMotion></circle>
-                  <circle r="3.5"><animateMotion dur="2.8s" repeatCount="indefinite"><mpath href="#sp-l2"/></animateMotion></circle>
-                  <circle r="3.5"><animateMotion dur="1.9s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1"><mpath href="#sp-l3"/></animateMotion></circle>
-                  <circle r="3.5"><animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#sp-l4"/></animateMotion></circle>
-                  <circle r="3.5"><animateMotion dur="3.1s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1"><mpath href="#sp-l5"/></animateMotion></circle>
-                  <circle r="3.5"><animateMotion dur="2.3s" repeatCount="indefinite"><mpath href="#sp-l6"/></animateMotion></circle>
-                </g>
-                <g class="sp-nodes">
-                  <g transform="translate(70 60)"><circle r="22"/><text y="4">CRM</text></g>
-                  <g transform="translate(330 60)"><circle r="22"/><text y="4">ERP</text></g>
-                  <g transform="translate(360 180)"><circle r="22"/><text y="4">CLOUD</text></g>
-                  <g transform="translate(290 280)"><circle r="22"/><text y="4">DATA</text></g>
-                  <g transform="translate(100 280)"><circle r="22"/><text y="4">HR</text></g>
-                  <g transform="translate(40 170)"><circle r="22"/><text y="4">SAP</text></g>
-                </g>
-                <g class="sp-core" transform="translate(200 160)">
-                  <circle class="sp-core-halo" r="46"/>
-                  <circle r="34"/>
-                  <text y="5">CORE</text>
-                </g>
-              </svg>
-              <div class="sp-dash">
-                <p>Systems in sync</p>
-                <div class="sp-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-                <div class="sp-rows"><span><em></em>NetSuite</span><span><em></em>Dynamics 365</span><span><em></em>Odoo</span></div>
-              </div>
+            <div class="cx-scene cx-scene--fw" aria-hidden="true" data-tilt>
+              <canvas class="cx-fw" data-fleet-world="platform"></canvas>
+              <span class="cx-fw-vf"></span>
             </div>
           </article>
 
@@ -488,34 +412,34 @@
       <div class="cx-wall">
         <div class="cx-wall-grid">
           <a class="cx-tile" href="../portfolio/index.html" data-cursor="Watch">
-            <video muted loop playsinline preload="none" data-src="../static/assets/portfolio/videos/chaumet.mp4"></video>
-            <span class="cx-tile-rec"><i></i>REC · CAM 01</span>
-            <span class="cx-tile-meta"><b>Chaumet</b>UI &amp; UX · Luxury e-commerce</span>
-          </a>
-          <a class="cx-tile" href="../portfolio/index.html" data-cursor="Watch">
-            <video muted loop playsinline preload="none" data-src="../static/assets/portfolio/videos/LG.mp4"></video>
-            <span class="cx-tile-rec"><i></i>REC · CAM 02</span>
-            <span class="cx-tile-meta"><b>LG Kitchen Planner</b>Custom platform</span>
-          </a>
-          <a class="cx-tile" href="../portfolio/index.html" data-cursor="Watch">
             <video muted loop playsinline preload="none" data-src="../static/assets/portfolio/videos/Hyundai.mp4"></video>
-            <span class="cx-tile-rec"><i></i>REC · CAM 03</span>
+            <span class="cx-tile-rec"><i></i>REC · CAM 01</span>
             <span class="cx-tile-meta"><b>Hyundai</b>Mobile &amp; web</span>
           </a>
           <a class="cx-tile" href="../portfolio/index.html" data-cursor="Watch">
-            <video muted loop playsinline preload="none" data-src="../static/assets/portfolio/videos/UAE-Pavilion.mp4"></video>
-            <span class="cx-tile-rec"><i></i>REC · CAM 04</span>
-            <span class="cx-tile-meta"><b>UAE Pavilion</b>Interactive experience</span>
-          </a>
-          <a class="cx-tile" href="../portfolio/index.html" data-cursor="Watch">
-            <video muted loop playsinline preload="none" data-src="../static/assets/portfolio/videos/Modon.mp4"></video>
-            <span class="cx-tile-rec"><i></i>REC · CAM 05</span>
-            <span class="cx-tile-meta"><b>Modon</b>Web development · Drupal</span>
+            <video muted loop playsinline preload="none" data-src="../static/assets/portfolio/videos/Glimpse.mp4"></video>
+            <span class="cx-tile-rec"><i></i>REC · CAM 02</span>
+            <span class="cx-tile-meta"><b>The Glimpse Project</b>Website · Creative studio</span>
           </a>
           <a class="cx-tile" href="../portfolio/index.html" data-cursor="Watch">
             <video muted loop playsinline preload="none" data-src="../static/assets/portfolio/videos/Genesis.mp4"></video>
-            <span class="cx-tile-rec"><i></i>REC · CAM 06</span>
+            <span class="cx-tile-rec"><i></i>REC · CAM 03</span>
             <span class="cx-tile-meta"><b>Genesis</b>Web development</span>
+          </a>
+          <a class="cx-tile" href="../portfolio/index.html" data-cursor="Watch">
+            <video muted loop playsinline preload="none" data-src="../static/assets/portfolio/videos/LG.mp4"></video>
+            <span class="cx-tile-rec"><i></i>REC · CAM 04</span>
+            <span class="cx-tile-meta"><b>LG &amp; LG Kitchen Planner</b>Custom platform</span>
+          </a>
+          <a class="cx-tile" href="../portfolio/index.html" data-cursor="Watch">
+            <video muted loop playsinline preload="none" data-src="../static/assets/portfolio/videos/Hisense.mp4"></video>
+            <span class="cx-tile-rec"><i></i>REC · CAM 05</span>
+            <span class="cx-tile-meta"><b>Hisense</b>Campaign sites · Electronics</span>
+          </a>
+          <a class="cx-tile" href="../portfolio/index.html" data-cursor="Watch">
+            <video muted loop playsinline preload="none" data-src="../static/assets/portfolio/videos/chaumet.mp4"></video>
+            <span class="cx-tile-rec"><i></i>REC · CAM 06</span>
+            <span class="cx-tile-meta"><b>Chaumet</b>UI &amp; UX · Luxury e-commerce</span>
           </a>
         </div>
       </div>
@@ -642,7 +566,7 @@
           </div>
         <!--/WORX:GEN mission--></div>
           <div class="cx-mission-foot">
-            <a class="btn btn-primary cx-ignite-btn" href="../contact/index.html" data-magnetic data-warp data-cursor="Send"><span data-cta-label>Start a project</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <a class="ig-btn cx-ignite-btn" href="../contact/index.html" data-warp data-cursor="Send"><span class="ig-core"><span class="ig-state" aria-hidden="true">IGNITION</span><span class="ig-label" data-cta-label>Start a project</span></span></a>
             <p class="cx-mission-note">Not sure yet? Skip the list and just say hello.</p>
           </div>
         </div>
@@ -651,7 +575,6 @@
   </main>
 
   <footer class="site-footer">
-    <div class="footer-glow" aria-hidden="true"></div>
     <div class="container">
       <div class="footer-brand">
         <a class="brand brand--footer" href="../index.html"><img src="../static/assets/logo-light.png" alt="Worx" width="132" height="181"></a>
@@ -669,18 +592,20 @@
         <span class="footer-rule" aria-hidden="true"></span>
       </div>
 
-      <div class="footer-cols">
+      <nav class="footer-cols" aria-label="Footer">
         <div class="footer-col footer-col--contact">
           <h4>Contact Us</h4>
           <ul>
             <li>Publishing Pavilion Bldg - Unit 709 - Me'aisem First - Dubai Production City - Dubai</li>
             <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
             <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
+            <li class="footer-cta-item"><a class="footer-cta" href="../contact/index.html">Speak to an expert <span aria-hidden="true">→</span></a></li>
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Explore</h4>
+          <h4>Overview</h4>
           <ul>
+            <li><a href="../index.html">Home</a></li>
             <li><a href="../about/index.html">About us</a></li>
             <li><a href="../services/index.html">Services</a></li>
             <li><a href="../portfolio/index.html">Portfolio</a></li>
@@ -689,32 +614,76 @@
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Build</h4>
+          <h4>Development</h4>
           <ul>
             <li><a href="../services/web-development.html">Web Development</a></li>
+            <li><a href="../services/ecommerce-development.html">E-commerce Development</a></li>
             <li><a href="../services/custom-platforms.html">Custom Platforms</a></li>
             <li><a href="../services/mobile-apps.html">Mobile App Development</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Experience &amp; Growth</h4>
-          <ul>
-            <li><a href="../services/ui-ux-design.html">UI &amp; UX Design</a></li>
-            <li><a href="../services/ar-vr.html">AR / VR &amp; Activations</a></li>
             <li><a href="../services/seo-sem.html">SEO &amp; SEM</a></li>
           </ul>
         </div>
-      </div>
+        <div class="footer-col">
+          <h4>Design &amp; Creative</h4>
+          <ul>
+            <li><a href="../services/ui-ux-design.html">UI / UX Design</a></li>
+            <li><a href="../services/digital-branding.html">Digital Branding &amp; Creatives</a></li>
+            <li><a href="../services/video-animation.html">2D / 3D Video Animation</a></li>
+            <li><a href="../services/copywriting.html">Copywriting</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Emerging &amp; Enterprise</h4>
+          <ul>
+            <li><a href="../services/artificial-intelligence.html">Artificial Intelligence</a></li>
+            <li><a href="../services/ar-vr.html">AR / VR &amp; Mixed Reality</a></li>
+            <li><a href="../services/erp-crm.html">ERP &amp; CRM</a></li>
+            <li><a href="../services/cloud-transformation.html">Cloud Transformation</a></li>
+            <li><a href="../services/it-outsourcing.html">IT Resource Outsourcing</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
 
+    <!-- The WORX wordmark, drawn in outline across the full width and
+         sunk into the bottom edge, lit from below. A slow light runs
+         along its stroke; on hover the letters fill in under the
+         pointer (main.js). Decorative: the logo above carries the name. -->
+    <div class="footer-mark" aria-hidden="true">
+      <svg class="footer-mark-svg" viewBox="0 0 1000 232" preserveAspectRatio="xMidYMax meet">
+        <defs>
+          <linearGradient id="footer-mark-stroke" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#c04527"/>
+            <stop offset="0.55" stop-color="#e57d23"/>
+            <stop offset="1" stop-color="#faa719"/>
+          </linearGradient>
+          <linearGradient id="footer-mark-shine" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+            <stop offset="0" stop-color="#feeecf" stop-opacity="0"/>
+            <stop offset="0.5" stop-color="#feeecf" stop-opacity="0.9"/>
+            <stop offset="1" stop-color="#feeecf" stop-opacity="0"/>
+            <animateTransform class="footer-mark-anim" attributeName="gradientTransform" type="translate" values="-1 0; 1.2 0" dur="9s" repeatCount="indefinite"/>
+          </linearGradient>
+        </defs>
+        <text class="footer-mark-base" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+        <text class="footer-mark-shine" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+        <text class="footer-mark-knock" x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+      </svg>
+      <svg class="footer-mark-svg footer-mark-fill" viewBox="0 0 1000 232" preserveAspectRatio="xMidYMax meet">
+        <text x="500" y="262" text-anchor="middle" textLength="980" lengthAdjust="spacingAndGlyphs">WORX</text>
+      </svg>
+    </div>
+
+    <div class="container">
       <div class="footer-bottom">
         <span>© <span id="footer-year">2026</span> Worx. All rights reserved.</span>
-        <span>Built for businesses, by creatives.</span>
+        <span class="footer-where">Dubai, UAE <span aria-hidden="true">·</span> <time class="footer-clock" data-tz="Asia/Dubai">--:--</time> GST</span>
+        <a class="footer-top" href="#main">Back to top <span aria-hidden="true">↑</span></a>
       </div>
     </div>
   </footer>
 
 <!--WORX:GEN catalogue-json-->
-  <script type="application/json" id="cx-catalogue">[{"slug":"web-development","name":"Web Development","division":"Development","divIndex":0,"short":"Fast, secure, search-friendly websites on the right stack.","subs":["Sitecore","Ibexa DXP","SharePoint","WordPress","Drupal","Joomla","ASP.NET","AngularJS","Ruby on Rails","CMS development","Laravel","PHP","Python","Enterprise development","Website maintenance","Pentesting","WhatsApp integration"],"href":"../services/web-development.html"},{"slug":"ecommerce","name":"E-commerce Development","division":"Development","divIndex":0,"short":"Storefronts that sell, from boutique brands to marketplaces.","subs":["Shopify","Shopify Plus","WooCommerce","Magento","BigCommerce","Mirakl marketplaces","Headless commerce"],"href":"../services/index.html#sys-development"},{"slug":"custom-platforms","name":"Custom Platforms","division":"Development","divIndex":0,"short":"Portals, dashboards and tools built around your workflow.","subs":["Web portals","Dashboards & tooling","Integrations","Smart automation","Interactive configurators","Security & compliance"],"href":"../services/custom-platforms.html"},{"slug":"mobile-apps","name":"Mobile App Development","division":"Mobile","divIndex":1,"short":"Native and cross-platform apps, maintained for years.","subs":["iOS apps","Android apps","Flutter","React Native","Hybrid apps","Progressive web apps","Event & kiosk apps","Unity & 3D apps","Backend & APIs","App maintenance"],"href":"../services/mobile-apps.html"},{"slug":"ui-ux-design","name":"UI/UX Design","division":"Design & Creative","divIndex":2,"short":"Research-driven interfaces that make the right action obvious.","subs":["UX design","UX audit","UX workshops","Landing page design","Responsive web design","Design systems","Prototyping","PSD to HTML","Graphic design","Google 3D map design"],"href":"../services/ui-ux-design.html"},{"slug":"branding","name":"Digital Branding & Creatives","division":"Design & Creative","divIndex":2,"short":"Identities with a point of view, from logo to packaging.","subs":["Logo design","Corporate identity","Brand guidelines","Packaging design","Brochure design","Business card design"],"href":"../services/index.html#sys-creative"},{"slug":"video-animation","name":"2D/3D Video Animation","division":"Design & Creative","divIndex":2,"short":"Explainers, product films and walkthroughs that move people.","subs":["Explainer videos","Character animation","Whiteboard animation","Product demo videos","Video game trailers","Medical animation","3D architectural walkthroughs"],"href":"../services/index.html#sys-creative"},{"slug":"copywriting","name":"Copywriting","division":"Design & Creative","divIndex":2,"short":"Words that sound like you and sell like a pro.","subs":["Website copy","Ad & campaign copy","Brand voice","Content writing","Arabic & English translation"],"href":"../services/index.html#sys-creative"},{"slug":"artificial-intelligence","name":"Artificial Intelligence","division":"Emerging Tech","divIndex":3,"short":"Chatbots, automation and search that work while you sleep.","subs":["AI chatbots","Robotic process automation","AI enterprise search","Metaverse development"],"href":"../services/index.html#sys-emerging"},{"slug":"ar-vr","name":"AR / VR & Mixed Reality","division":"Emerging Tech","divIndex":3,"short":"Immersive activations engineered to stop crowds.","subs":["Augmented reality","Virtual reality","Mixed reality","Interactive activations","3D & Unity","Event support"],"href":"../services/ar-vr.html"},{"slug":"erp-crm","name":"ERP & CRM","division":"IT & Enterprise","divIndex":4,"short":"One connected system for finance, people, supply and sales.","subs":["NetSuite","SAP","Microsoft Dynamics 365","Oracle Cloud","Odoo","CRM development"],"href":"../services/index.html#sys-it"},{"slug":"it-outsourcing","name":"IT Resource Outsourcing","division":"IT & Enterprise","divIndex":4,"short":"Vetted specialists who join your team in days.","subs":["Hire scrum masters","Hire project managers","Hire SQA engineers","Hire ReactJS developers","Hire NodeJS developers","Hire .NET developers","Hire React Native developers","Hire mobile app developers","Hire SharePoint developers","Hire Dynamics 365 developers","Hire AWS resources","Hire Azure developers"],"href":"../services/index.html#sys-it"},{"slug":"cloud","name":"Cloud Transformation","division":"IT & Enterprise","divIndex":4,"short":"Move to the cloud and keep it secure, fast and affordable.","subs":["Digital cloud transformation","Cloud migration","AWS","Microsoft Azure","Security & compliance"],"href":"../services/index.html#sys-it"}]</script>
+  <script type="application/json" id="cx-catalogue">[{"slug":"web-development","name":"Web Development","division":"Development","divIndex":0,"short":"Fast, secure, search-friendly websites on the right stack.","subs":["Sitecore","Ibexa DXP","SharePoint","WordPress","Drupal","Joomla","ASP.NET","AngularJS","Ruby on Rails","CMS development","Laravel","PHP","Python","Enterprise development","Website maintenance","Pentesting","WhatsApp integration"],"href":"../services/web-development.html"},{"slug":"ecommerce","name":"E-commerce Development","division":"Development","divIndex":0,"short":"Storefronts that sell, from boutique brands to marketplaces.","subs":["Shopify","Shopify Plus","WooCommerce","Magento","BigCommerce","Mirakl marketplaces","Headless commerce"],"href":"../services/ecommerce-development.html"},{"slug":"custom-platforms","name":"Custom Platforms","division":"Development","divIndex":0,"short":"Portals, dashboards and tools built around your workflow.","subs":["Web portals","Dashboards & tooling","Integrations","Smart automation","Interactive configurators","Security & compliance"],"href":"../services/custom-platforms.html"},{"slug":"mobile-apps","name":"Mobile App Development","division":"Mobile","divIndex":1,"short":"Native and cross-platform apps, maintained for years.","subs":["iOS apps","Android apps","Flutter","React Native","Hybrid apps","Progressive web apps","Event & kiosk apps","Unity & 3D apps","Backend & APIs","App maintenance"],"href":"../services/mobile-apps.html"},{"slug":"ui-ux-design","name":"UI/UX Design","division":"Design & Creative","divIndex":2,"short":"Research-driven interfaces that make the right action obvious.","subs":["UX design","UX audit","UX workshops","Landing page design","Responsive web design","Design systems","Prototyping","PSD to HTML","Graphic design","Google 3D map design"],"href":"../services/ui-ux-design.html"},{"slug":"branding","name":"Digital Branding & Creatives","division":"Design & Creative","divIndex":2,"short":"Identities with a point of view, from logo to packaging.","subs":["Logo design","Corporate identity","Brand guidelines","Packaging design","Brochure design","Business card design"],"href":"../services/digital-branding.html"},{"slug":"video-animation","name":"2D/3D Video Animation","division":"Design & Creative","divIndex":2,"short":"Explainers, product videos and walkthroughs that move people.","subs":["Explainer videos","Character animation","Whiteboard animation","Product demo videos","Video game trailers","Medical animation","3D architectural walkthroughs"],"href":"../services/video-animation.html"},{"slug":"copywriting","name":"Copywriting","division":"Design & Creative","divIndex":2,"short":"Words that sound like you and sell like a pro.","subs":["Website copy","Ad & campaign copy","Brand voice","Content writing","Arabic & English translation"],"href":"../services/copywriting.html"},{"slug":"artificial-intelligence","name":"Artificial Intelligence","division":"Emerging Tech","divIndex":3,"short":"Chatbots, automation and search that work while you sleep.","subs":["AI chatbots","Robotic process automation","AI enterprise search","Metaverse development"],"href":"../services/artificial-intelligence.html"},{"slug":"ar-vr","name":"AR / VR & Mixed Reality","division":"Emerging Tech","divIndex":3,"short":"Immersive activations engineered to stop crowds.","subs":["Augmented reality","Virtual reality","Mixed reality","Interactive activations","3D & Unity","Event support"],"href":"../services/ar-vr.html"},{"slug":"erp-crm","name":"ERP & CRM","division":"IT & Enterprise","divIndex":4,"short":"One connected system for finance, people, supply and sales.","subs":["NetSuite","SAP","Microsoft Dynamics 365","Oracle Cloud","Odoo","CRM development"],"href":"../services/erp-crm.html"},{"slug":"it-outsourcing","name":"IT Resource Outsourcing","division":"IT & Enterprise","divIndex":4,"short":"Vetted specialists who join your team in days.","subs":["Hire scrum masters","Hire project managers","Hire SQA engineers","Hire ReactJS developers","Hire NodeJS developers","Hire .NET developers","Hire React Native developers","Hire mobile app developers","Hire SharePoint developers","Hire Dynamics 365 developers","Hire AWS resources","Hire Azure developers"],"href":"../services/it-outsourcing.html"},{"slug":"cloud","name":"Cloud Transformation","division":"IT & Enterprise","divIndex":4,"short":"Move to the cloud and keep it secure, fast and affordable.","subs":["Digital cloud transformation","Cloud migration","AWS","Microsoft Azure","Security & compliance"],"href":"../services/cloud-transformation.html"}]</script>
   <!--/WORX:GEN catalogue-json-->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
@@ -722,9 +691,14 @@
   <script src="../static/js/nav.js"></script>
   <script src="../static/js/logo-eye.js"></script>
   <script src="../static/js/main.js"></script>
+  <script src="../static/js/reticle.js"></script>
   <script src="../static/js/contact-widget.js"></script>
+  <script src="../static/js/code-worlds.js"></script>
+  <script src="../static/js/fleet-worlds.js"></script>
+  <script src="../static/js/flight-fx.js"></script>
   <script src="../static/js/services.js"></script>
   <script src="../static/js/jet-fire.js"></script>
   <script src="../static/js/services-hero.js"></script>
+  <script src="../static/js/ignite.js"></script>
 </body>
 </html>
