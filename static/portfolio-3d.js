@@ -812,7 +812,7 @@
                                                                                     <h4>Contact</h4>
                                                                                     <ul>
                                                                                         <li><a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></li>
-                                                                                        <li><a href="tel:+971555669847">+971 55 566 9847</a></li>
+                                                                                        <li><a href="tel:+971586190026">+971 58 619 0026</a></li>
                                                                                         <li>Unit 404 Makateb 2,<br>Dubai Production City,<br>PO Box 503417, Dubai, UAE</li>
                                                                                         </ul>
                                                                                         </div>

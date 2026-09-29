@@ -71,19 +71,34 @@ function replaceBlock(html, name, content, file) {
 
 const chevron = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
+// The software Worx builds and sells: group 01 of the menu, ahead of the
+// service divisions. Not in the catalogue (it is a product, with its own
+// page, not a service on the services page).
+const PRODUCTS = {
+  name: "Products",
+  services: [{
+    name: "CRAMS",
+    href: "crams/index.html",
+    live: true, // its dot blinks: a live product
+    short: "One platform for every lead, shared by every department.",
+    subs: ["Lead capture", "Assignment", "Follow-ups", "Status tracking", "Reporting", "Data management", "Performance monitoring"]
+  }]
+};
+
 function megaMenu(prefix) {
-  // Spread divisions over three columns, balancing the number of links
+  // Spread the groups over three columns, balancing the number of links
+  const groups = [PRODUCTS].concat(catalogue);
   const buckets = [[], [], []];
   const load = [0, 0, 0];
-  catalogue.forEach((d, i) => {
+  groups.forEach((d, i) => {
     const k = load.indexOf(Math.min(...load));
     buckets[k].push(i);
     load[k] += d.services.length + 1.5;
   });
   const cols = buckets.map((pair) => pair.map((i) => {
-    const d = catalogue[i];
+    const d = groups[i];
     const links = d.services.map((s) => `
-                <li><a href="${href(s, prefix, d)}" data-mega-item data-division="${esc(d.name)}" data-short="${esc(s.short)}" data-subs="${esc(s.subs.slice(0, 9).join("|"))}" data-more="${Math.max(0, s.subs.length - 9)}"><i aria-hidden="true"></i><span>${esc(s.name)}</span>${chevron}</a></li>`).join("");
+                <li><a href="${s.href ? prefix + s.href : href(s, prefix, d)}"${s.live ? ' class="mega-live"' : ""} data-mega-item data-division="${esc(d.name)}" data-short="${esc(s.short)}" data-subs="${esc(s.subs.slice(0, 9).join("|"))}" data-more="${Math.max(0, s.subs.length - 9)}"><i aria-hidden="true"></i><span>${esc(s.name)}</span>${chevron}</a></li>`).join("");
     return `
               <div class="mega-group">
                 <p class="mega-group-title"><span>${pad(i + 1)}</span>${esc(d.name)}</p>
@@ -291,11 +306,11 @@ page = replaceBlock(page, "starmap", `
 // the shapes): each names its shape (data-km), and gets its own size,
 // pace, direction and drift from its place in the row.
 const BELT_NEAR = [
+  { home: "CRAMS" },                 // ours, built in-house (its own look): the belt starts here
   "JavaScript", "TypeScript",        // the languages we write in
   "React", "Next.js",                // Web Development
   "Shopify", "Magento",              // E-commerce Development
   "Laravel", "Node.js",              // Custom Platforms
-  { home: "CRAMS" },                 // ours: built in-house (its own look)
   "Flutter", "React Native",         // Mobile App Development
   "TensorFlow",                      // Artificial Intelligence
   "Unity", "Unreal Engine"           // AR / VR & Mixed Reality
@@ -312,7 +327,8 @@ const KBO_SHAPES = ["48% 52% 44% 56% / 55% 45% 55% 45%", "60% 40% 52% 48% / 42% 
 // CRAMS, the software we build ourselves, is the belt's home world: the
 // brand's gradient, a small moon on a tilted orbit, a line of its own
 // (services.css .cx-home). The rest keep the belt's plain lettering.
-const homeWorld = (name) => `<span class="cx-home"><small aria-hidden="true">Built in-house · Worx</small><b>${esc(name)}</b><i class="cx-home-orbit" aria-hidden="true"><i class="cx-home-moon"><i></i></i></i></span>`;
+// it links to its own page (crams/index.html)
+const homeWorld = (name) => `<a class="cx-home" href="../crams/index.html" data-cursor="Explore"><small aria-hidden="true">Built in-house · Worx</small><b>${esc(name)}</b><i class="cx-home-orbit" aria-hidden="true"><i class="cx-home-moon"><i></i></i></i></a>`;
 const belt = (list, seed) => list.map((w, i) => {
   const n = i + seed;
   const kbo = `<i class="cx-kbo" aria-hidden="true" data-km="${(n * 5) % 8}" style="--kr:${KBO_SHAPES[n % 4]};--ks:${(0.75 + ((n * 37) % 50) / 100).toFixed(2)};--kt:${7 + ((n * 53) % 9)}s;--kd:${n % 3 ? "normal" : "reverse"};--ka:${(n * 67) % 360}deg;--kf:${(4 + ((n * 29) % 5)).toFixed(0)}s"></i>`;
@@ -347,7 +363,9 @@ fs.writeFileSync(pageFile, page);
 /* ---- 3. Contact page: the same services for the planner ------ */
 const contactFile = path.join(ROOT, "contact/index.html");
 let contact = fs.readFileSync(contactFile, "utf8");
-const contactList = catalogue.map((d) => ({ division: d.name, services: d.services.map((s) => s.name) }));
+// ...and, last, what Worx sells: CRAMS (crams/index.html), so "Book a demo" arrives ticked
+const contactList = catalogue.map((d) => ({ division: d.name, services: d.services.map((s) => s.name) }))
+  .concat([{ division: "Products", services: ["CRAMS"] }]);
 contact = replaceBlock(contact, "contact-services", `<script type="application/json" id="cw-services">${JSON.stringify(contactList)}</script>`, contactFile);
 fs.writeFileSync(contactFile, contact);
 

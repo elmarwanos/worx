@@ -576,7 +576,10 @@
   $$("[data-marquee]").forEach(function (row) {
     var dir = parseFloat(row.getAttribute("data-marquee"));
     var inner = $(".cx-marquee-inner", row);
-    row.appendChild(inner.cloneNode(true)).setAttribute("aria-hidden", "true");
+    var copy = row.appendChild(inner.cloneNode(true));
+    copy.setAttribute("aria-hidden", "true");
+    // the copy is only there for the loop: its links (CRAMS) stay out of the tab order
+    $$("a", copy).forEach(function (l) { l.setAttribute("tabindex", "-1"); });
     var items = $$(".cx-marquee-inner", row);
     var loop = gsap.fromTo(items,
       { xPercent: dir > 0 ? 0 : -100 },
