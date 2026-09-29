@@ -21,7 +21,7 @@
     subjectPrefix: "Project enquiry from ",
     ctaText: /quick enquiry|get a quote|talk to mission control/i,
     whatsapp: {
-      href: "https://wa.me/971555669847",
+      href: "https://wa.me/971586190026",
       greeting: "Hi Worx, I'd like to talk about a project.",
       label: "WhatsApp",
       ariaLabel: "Chat with Worx on WhatsApp (opens in a new tab)",
@@ -38,14 +38,14 @@
       phone: {
         icon: "📞",
         label: "Phone",
-        value: "+971 55 566 9847",
-        href: "tel:+971555669847"
+        value: "+971 58 619 0026",
+        href: "tel:+971586190026"
       },
       whatsapp: {
         icon: "💬",
         label: "WhatsApp",
         value: "Message the studio",
-        href: "https://wa.me/971555669847",
+        href: "https://wa.me/971586190026",
         external: true
       },
       office: {
