@@ -306,11 +306,11 @@ page = replaceBlock(page, "starmap", `
 // the shapes): each names its shape (data-km), and gets its own size,
 // pace, direction and drift from its place in the row.
 const BELT_NEAR = [
+  { home: "CRAMS" },                 // ours, built in-house (its own look): the belt starts here
   "JavaScript", "TypeScript",        // the languages we write in
   "React", "Next.js",                // Web Development
   "Shopify", "Magento",              // E-commerce Development
   "Laravel", "Node.js",              // Custom Platforms
-  { home: "CRAMS" },                 // ours: built in-house (its own look)
   "Flutter", "React Native",         // Mobile App Development
   "TensorFlow",                      // Artificial Intelligence
   "Unity", "Unreal Engine"           // AR / VR & Mixed Reality
