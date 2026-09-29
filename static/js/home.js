@@ -185,6 +185,26 @@
       [6.6, "THE SUN IGNITES", 9.21e9 * YR, 1.0e2],
       [7.25, "INNER SOLAR SYSTEM", 13.8e9 * YR, 1.0],
     ];
+    // what is on screen, read off the film's own clock (video.currentTime),
+    // so the label can never drift from the picture and a loop starts it
+    // again at SOLAR SYSTEM. [film s the stage starts, label]
+    var STAGES = [
+      [0.0, "SOLAR SYSTEM"],
+      [1.1, "COSMIC EXPANSION"],
+      [2.15, "PRIMORDIAL NEBULA"],
+      [2.85, "PROTOPLANETARY DISK"],
+      [4.6, "PLANETARY ACCRETION"],
+      [5.55, "MOLTEN COLLISION"],
+      [6.75, "BLACK HOLE"],
+      [7.85, "EVENT HORIZON"],
+      [8.25, "COSMIC BLACKOUT"],
+      [8.85, "WORX"],
+    ];
+    var stageAt = function (t) {
+      var si = 0;
+      for (var i = 0; i < STAGES.length; i++) if (t >= STAGES[i][0]) si = i;
+      return si;
+    };
     var smooth = function (x) { x = clamp01(x); return x * x * (3 - 2 * x); };
     var logLerp = function (a, b, k) { return Math.pow(10, Math.log10(a) + (Math.log10(b) - Math.log10(a)) * k); };
     var fmtTime = function (sec) {
@@ -235,9 +255,9 @@
       ptr.tx = e.clientX / window.innerWidth * 2 - 1;
       ptr.ty = e.clientY / window.innerHeight * 2 - 1;
     }, { passive: true });
-    // the flight recorder at rest in the singularity
+    // the flight recorder at rest on the title card: the film's last stage
     var restRecorder = function () {
-      if (lastLabel !== "SINGULARITY") { lastLabel = "SINGULARITY"; scramble(labelEl, "SINGULARITY", 520); }
+      if (lastLabel !== "WORX") { lastLabel = "WORX"; scramble(labelEl, "WORX", 520); }
       timeEl.textContent = "0 s";
       auEl.textContent = "0.00";
       reelEl.style.transform = "scaleX(0)";
@@ -310,9 +330,8 @@
           var kk = ci === CHAPTERS.length - 1 ? 1 : smooth((t - c0[0]) / span);
           var cosmic = logLerp(c0[2], c1[2], kk), au = logLerp(c0[3], c1[3], kk);
           if (t < 0.25) { cosmic = logLerp(5.4e-44, 1e-32, t / 0.25); au = logLerp(1e-30, 1e-6, t / 0.25); }
-          var label = c0[1];
+          var si = stageAt(t), label = STAGES[si][1];
           if (k > 0.02) {
-            label = k > 0.82 ? "SINGULARITY" : "COLLAPSE";
             cosmic = logLerp(13.8e9 * YR, 5.4e-44, k);
             au = logLerp(1, 1e-30, Math.pow(k, 0.7));
           }
@@ -323,7 +342,8 @@
           reelEl.style.transform = "scaleX(" + f.toFixed(4) + ")";
           headEl.style.left = (f * 100).toFixed(2) + "%";
           if (!ticks.length && d) {
-            CHAPTERS.forEach(function (c) {
+            STAGES.forEach(function (c) {
+              if (c[0] >= d) return;   // past the cut: the title card's
               var em = document.createElement("em");
               em.style.left = (c[0] / d * 100).toFixed(2) + "%";
               ticksEl.appendChild(em);
@@ -331,8 +351,8 @@
             });
           }
           ticks.forEach(function (em, j) {
-            em.classList.toggle("is-past", j < ci && k <= 0.02);
-            em.classList.toggle("is-now", j === ci && k <= 0.02);
+            em.classList.toggle("is-past", j < si && k <= 0.02);
+            em.classList.toggle("is-now", j === si && k <= 0.02);
           });
         }
         requestAnimationFrame(direct);

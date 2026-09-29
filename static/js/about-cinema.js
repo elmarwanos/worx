@@ -4,7 +4,7 @@
    story; this only watches it, never drives it). Styles: about.css
    "Director's layer".
      - the air: Martian dust hanging in the light at three depths,
-       drifting on the wind, a few out-of-focus motes near the lens,
+       drifting on the wind,
        all leaning with the pointer (depth parallax);
      - the gust: each cut to a new shot is carried by a sweep of dust
        and light across the frame, in the direction of travel;
@@ -53,16 +53,14 @@
     return c;
   }
   var MOTE = sprite([[0, "rgba(255,224,170,1)"], [0.35, "rgba(250,167,25,0.45)"], [1, "rgba(229,125,35,0)"]]);
-  var BOKEH = sprite([[0, "rgba(255,196,120,0.0)"], [0.62, "rgba(255,196,120,0.18)"], [0.7, "rgba(255,210,150,0.35)"], [0.78, "rgba(255,196,120,0.1)"], [1, "rgba(255,196,120,0)"]]);
   var DUST = sprite([[0, "rgba(214,140,80,0.5)"], [0.5, "rgba(180,100,55,0.2)"], [1, "rgba(150,80,40,0)"]]);
 
   /* ---- the air ------------------------------------------------------ */
   var seed = 17, rnd = function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
   var motes = [];
-  for (var i = 0; i < 110; i++) {
-    var d = i < 70 ? 0.25 + rnd() * 0.3 : i < 102 ? 0.6 + rnd() * 0.3 : 1.2 + rnd() * 0.5;
-    // the big out-of-focus motes stay low in frame, clear of the sky
-    motes.push({ x: rnd(), y: i >= 102 ? 0.55 + rnd() * 0.4 : rnd(), d: d, s: rnd() * 6.28, big: i >= 102 });
+  for (var i = 0; i < 102; i++) {
+    var d = i < 70 ? 0.25 + rnd() * 0.3 : 0.6 + rnd() * 0.3;
+    motes.push({ x: rnd(), y: rnd(), d: d, s: rnd() * 6.28 });
   }
   var ptr = { x: 0, y: 0, tx: 0, ty: 0 };
   window.addEventListener("pointermove", function (e) {
@@ -82,19 +80,12 @@
         m.x += (wind * m.d + Math.sin(t * 0.3 + m.s) * 0.002) * dt;
         m.y += (Math.cos(t * 0.21 + m.s) * 0.003 - 0.001 * m.d) * dt;
         if (m.x > 1.05) m.x -= 1.1;
-        if (m.big) { if (m.y < 0.5) m.y = 0.95; else if (m.y > 1.02) m.y = 0.55; }
-        else if (m.y < -0.05) m.y += 1.1; else if (m.y > 1.05) m.y -= 1.1;
+        if (m.y < -0.05) m.y += 1.1; else if (m.y > 1.05) m.y -= 1.1;
       }
       var px = m.x * W - ptr.x * 60 * m.d, py = m.y * H - ptr.y * 36 * m.d;
-      if (m.big) {
-        var r = 26 + m.d * 30;
-        ax.globalAlpha = 0.22 + 0.12 * Math.sin(t * 0.5 + m.s);
-        ax.drawImage(BOKEH, px - r, py - r, r * 2, r * 2);
-      } else {
-        var rr = (0.8 + m.d * 2.2) * (1 + 0.25 * Math.sin(t * 1.3 + m.s * 3));
-        ax.globalAlpha = 0.18 + 0.4 * m.d;
-        ax.drawImage(MOTE, px - rr * 3, py - rr * 3, rr * 6, rr * 6);
-      }
+      var rr = (0.8 + m.d * 2.2) * (1 + 0.25 * Math.sin(t * 1.3 + m.s * 3));
+      ax.globalAlpha = 0.18 + 0.4 * m.d;
+      ax.drawImage(MOTE, px - rr * 3, py - rr * 3, rr * 6, rr * 6);
     }
     ax.globalAlpha = 1;
     ax.globalCompositeOperation = "source-over";

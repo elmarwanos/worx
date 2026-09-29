@@ -774,9 +774,13 @@
   margin: 0;
 }
 
+/* the monitor: its 40px title bar, then the photo at exactly its own
+   16:9 (tools/blog-covers/web-covers.js cuts the copies to it), so the
+   screen shows the whole photo at any width: no crop, no gap */
 .blog-post-hero .blog-feature-art {
   height: auto;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: auto;
+  padding-top: 40px;
   border-radius: 22px;
   box-shadow: 0 60px 120px -60px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(254, 238, 207, 0.06);
   transform: perspective(1400px) rotateY(calc((1 - var(--flat)) * -9deg)) rotateX(calc((1 - var(--flat)) * 3deg));
@@ -785,8 +789,9 @@
 }
 
 .blog-post-hero .blog-feature-art picture {
-  position: absolute;
-  inset: 40px 0 0;
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
 }
 
 .blog-post-hero .blog-feature-art img {

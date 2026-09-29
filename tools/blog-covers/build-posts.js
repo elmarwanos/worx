@@ -10,8 +10,9 @@
      (newest) and the card grid rebuilt.
 
    Usage (from this folder): node build-posts.js
-   Covers: static/assets/blog/<slug>.webp/.jpg, imported by
-   import-covers.js from the blog-feature-images folder.
+   Covers: the photos in static/assets/blog/, named by post (COVERS
+   below), as cut to the frames' shape by web-covers.js into
+   static/assets/blog/web/ (16:9) and web/4x3/ (the home page's cards).
    ============================================================ */
 
 const fs = require("fs");
@@ -40,10 +41,24 @@ function readingTime(post) {
 }
 posts.forEach((p) => { p.minutes = readingTime(p); });
 
+// each post's feature photo, by its file name in static/assets/blog/
+const COVERS = {
+  "generative-search": "Generative Search",
+  "technical-seo-launch": "Technical SEO Launch",
+  "app-launch-checklist": "App Launch Checklist",
+  "native-vs-cross-platform": "Native vs Cross-Platform",
+  "bilingual-websites": "Bilingual Websites",
+  "website-timeline": "Website Timeline",
+  "headless-commerce": "Headless Commerce",
+  "performance-seo": "Performance SEO",
+  "choosing-your-stack": "Choosing Your Stack",
+  "ar-activations": "AR Activations"
+};
+const coverSrc = (slug) => "../static/assets/blog/web/" + encodeURIComponent(COVERS[slug] || slug) + ".jpg";
+
 function picture(slug, alt, cls, eager) {
   return `<picture${cls ? ` class="${cls}"` : ""}>
-            <source srcset="../static/assets/blog/${slug}.webp" type="image/webp">
-            <img src="../static/assets/blog/${slug}.jpg" alt="${esc(alt)}" width="1600" height="900"${eager ? "" : ' loading="lazy"'} decoding="async">
+            <img src="${coverSrc(slug)}" alt="${esc(alt)}" width="1920" height="1080"${eager ? "" : ' loading="lazy"'} decoding="async">
           </picture>`;
 }
 

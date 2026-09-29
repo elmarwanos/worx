@@ -5,7 +5,8 @@
    never a technical spec sheet. Worx makes the technical calls
    during discovery; the client just explains what they need.
 
-     1. What do you want to build?  (+ their idea, in their words)
+     1. What do you need?  (the services, as on /services, the kind of
+        build, and their idea in their own words)
      2. What do you want it to achieve?
      3. Timeline
      4. Budget
@@ -35,6 +36,12 @@
   var MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
   var FORMSPREE_ENDPOINT = "https://formspree.io/f/xeaojvzn";
   var IDEA_CAP = 1400; // keep the idea field a reasonable size
+
+  // EmailJS sends the client a confirmation email once Formspree has
+  // captured the lead (Formspree's own autoresponder is a paid feature).
+  var EMAILJS_PUBLIC_KEY = "wm49sHmSgdQ04r0O-";
+  var EMAILJS_SERVICE_ID = "service_5rgzqe1";
+  var EMAILJS_TEMPLATE_ID = "template_j30lcxg";
 
   var BUILD_OPTIONS = [
     { value: "website",    label: "Website",             desc: "A site that tells people who you are, or gets you found" },
@@ -70,7 +77,7 @@
   var DEFAULT_BUDGET_AMOUNT = 50000;
 
   var STEPS = [
-    { id: "build",    legend: "What do you want to build?", type: "build" },
+    { id: "build",    legend: "What do you need?", type: "build" },
     { id: "goal",     legend: "What do you want it to achieve?", type: "goal" },
     { id: "timeline", legend: "What's your timeline?",
       type: "radio", field: "timeline", options: TIMELINE_OPTIONS },
@@ -86,6 +93,7 @@
 
   function freshForm() {
     return {
+      services: [],
       buildType: "", idea: "",
       goal: "", goalOther: "",
       timeline: "",
@@ -102,15 +110,41 @@
     completedAt: null
   };
 
-  // Services picked in the mission builder on /services arrive as
-  // ?services=Web Development,SEO and seed the idea box.
+  // Services picked in the brief builder on /services arrive as
+  // ?services=Web Development,UI/UX Design. They become the brief on
+  // question 1 (removable), ride on the mission ticket and go with the
+  // enquiry. A fresh pick always wins over a saved draft (init()).
+  var incoming = [];
   try {
     var picked = new URLSearchParams(window.location.search).get("services");
     if (picked) {
-      state.form.idea = "Services I'm interested in: " +
-        picked.split(",").map(function (s) { return s.trim(); }).filter(Boolean).join(", ") + ".\n\n";
+      incoming = picked.split(",").map(function (x) { return x.trim().slice(0, 60); })
+        .filter(function (x, i, a) { return x && a.indexOf(x) === i; }).slice(0, 16);
     }
   } catch (e) {}
+
+  // The services, grouped as on /services (the page carries them as
+  // #cw-services, written by tools/services/build.js from catalogue.js,
+  // so both pages always offer the same list).
+  var SERVICE_GROUPS = [];
+  try { SERVICE_GROUPS = JSON.parse(document.getElementById("cw-services").textContent) || []; } catch (e) {}
+  var ALL_SERVICES = [];
+  SERVICE_GROUPS.forEach(function (g) { g.services.forEach(function (n) { ALL_SERVICES.push(n); }); });
+  // a pick that arrives must be one of them
+  if (ALL_SERVICES.length) incoming = incoming.filter(function (x) { return ALL_SERVICES.indexOf(x) >= 0; });
+
+  // the build card a pick points to, when it only points to one
+  var SERVICE_BUILD = {
+    "Web Development": "website", "E-commerce Development": "website", "UI/UX Design": "website",
+    "Mobile App Development": "mobile-app",
+    "Custom Platforms": "platform", "ERP & CRM": "platform", "Cloud Transformation": "platform",
+    "Artificial Intelligence": "platform", "IT Resource Outsourcing": "platform"
+  };
+  function buildFromServices(list) {
+    var types = [];
+    list.forEach(function (x) { var t = SERVICE_BUILD[x]; if (t && types.indexOf(t) < 0) types.push(t); });
+    return types.length === 1 ? types[0] : "";
+  }
 
   var firstRender = true;
 
@@ -153,7 +187,7 @@
 
   function anyAnswered() {
     var f = state.form;
-    return !!(f.buildType || f.idea.trim() || f.goal ||
+    return !!((f.services && f.services.length) || f.buildType || f.idea.trim() || f.goal ||
       f.timeline || f.companyName.trim() || f.name.trim() || f.email.trim() || f.phone.trim());
   }
 
@@ -214,7 +248,11 @@
   function applyCopy(saved) {
     var title = document.getElementById("contact-title");
     var intro = document.getElementById("contact-intro");
-    if (saved && saved.completedAt) {
+    if (incoming.length) {
+      if (title) title.innerHTML = 'Your brief is <span class="gradient-text">on board</span>';
+      if (intro) intro.textContent = "You picked " + (incoming.length === 1 ? "a service" : incoming.length + " services") +
+        ". A few quick questions and it's on its way to the crew.";
+    } else if (saved && saved.completedAt) {
       if (title) title.innerHTML = 'Good to <span class="gradient-text">hear from you</span>';
       if (intro) intro.textContent = "We've already got your enquiry on file, send another any time.";
     } else if (saved && anyAnswered()) {
@@ -233,7 +271,34 @@
   // shows up as a plain field in that notification and in the
   // Formspree dashboard.
 
-  // This is where you would add the EMAILJS service ID
+  // EmailJS reads these as {{variable}} placeholders in template_j30lcxg.
+  // company_name is Worx's own name (the sender), not the client's.
+  function buildEmailJsParams() {
+    var f = state.form;
+    return {
+      to_name: f.name,
+      to_email: f.email,
+      reply_to: f.email,
+      company_name: "The Worx Team",
+      client_company: f.companyName,
+      services: f.services && f.services.length ? f.services.join(", ") : "-",
+      build_type: labelFor(BUILD_OPTIONS, f.buildType) || "-",
+      idea: truncate(f.idea.trim(), IDEA_CAP),
+      goal: f.goal === "other" ? (f.goalOther.trim() || "Something else") : (labelFor(GOAL_OPTIONS, f.goal) || "-"),
+      timeline: labelFor(TIMELINE_OPTIONS, f.timeline) || "-",
+      budget: f.budget ? f.budget.label : "-"
+    };
+  }
+
+  function sendConfirmationEmail() {
+    if (typeof emailjs === "undefined") return;
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, buildEmailJsParams())
+      .catch(function (err) {
+        // Best effort: the lead is already captured via Formspree, so a
+        // failed confirmation email never blocks the success screen.
+        console.error("EmailJS confirmation failed:", err);
+      });
+  }
 
   function buildFormspreePayload() {
     var f = state.form;
@@ -241,6 +306,7 @@
       _subject: "New enquiry, " + (f.companyName || "Website project") +
         (f.buildType ? " (" + labelFor(BUILD_OPTIONS, f.buildType) + ")" : ""),
       _replyto: f.email,
+      services: f.services && f.services.length ? f.services.join(", ") : "-",
       building: labelFor(BUILD_OPTIONS, f.buildType) || "-",
       idea: truncate(f.idea.trim(), IDEA_CAP),
       goal: labelFor(GOAL_OPTIONS, f.goal) || "-",
@@ -467,6 +533,7 @@
   // --- Question 1: what to build + their idea, in their own words ----
   function renderBuild() {
     var box = h("div", null);
+    if (SERVICE_GROUPS.length) box.appendChild(renderServices());
     var buildCards = renderCards(BUILD_OPTIONS, "buildType", state.form.buildType,
       "What do you want to build?", function (value) {
         state.form.buildType = value;
@@ -495,6 +562,54 @@
     idea.appendChild(textarea);
     box.appendChild(idea);
     return box;
+  }
+
+  // The services they need: the same list, groups and chips as the
+  // brief builder on /services. Picks made there arrive ticked; either
+  // a service or a build card is enough to go on.
+  function renderServices() {
+    var f = state.form;
+    if (!f.services) f.services = [];
+    var count = h("span", { "class": "cw-svc-count" });
+    var paintCount = function () {
+      var n = f.services.length;
+      count.textContent = n ? n + (n === 1 ? " service" : " services") + " on board" : "Pick any that fit";
+      wrap.classList.toggle("is-armed", n > 0);
+    };
+    var wrap = h("div", { "class": "cw-svc", role: "group", "aria-label": "The services you need" }, [
+      h("div", { "class": "cw-svc-head" }, [
+        h("p", { "class": "cw-svc-title" }, [h("i", { "aria-hidden": "true" }), "The services you need"]),
+        count
+      ])
+    ]);
+    var grid = h("div", { "class": "cw-svc-grid" });
+    var i = 0;
+    SERVICE_GROUPS.forEach(function (g) {
+      var group = h("div", { "class": "cw-svc-group" }, [h("p", null, [g.division])]);
+      g.services.forEach(function (name) {
+        var on = f.services.indexOf(name) >= 0;
+        var chip = h("button", { type: "button", "class": "cw-chip", "aria-pressed": on ? "true" : "false", style: "--i:" + (i++) }, [name]);
+        chip.addEventListener("click", function () {
+          var was = chip.getAttribute("aria-pressed") === "true";
+          chip.setAttribute("aria-pressed", was ? "false" : "true");
+          f.services = was ? f.services.filter(function (n) { return n !== name; })
+            : ALL_SERVICES.filter(function (n) { return n === name || f.services.indexOf(n) >= 0; });
+          chip.classList.remove("is-pop");
+          if (!was && !reducedMotion) { void chip.offsetWidth; chip.classList.add("is-pop"); }
+          paintCount();
+          clearError();
+          renderProgress();
+          saveState();
+        });
+        chip.addEventListener("animationend", function (e) { if (e.animationName === "cw-chip-pulse") chip.classList.remove("is-pop"); });
+        group.appendChild(chip);
+      });
+      grid.appendChild(group);
+    });
+    wrap.appendChild(grid);
+    wrap.appendChild(h("p", { "class": "cw-svc-then" }, ["And what kind of build is it?"]));
+    paintCount();
+    return wrap;
   }
 
   // --- Question 2: what they want it to achieve ----------------------
@@ -654,12 +769,12 @@
       var v = h("b", { "class": cls || null });
       return { el: h("div", { "class": "cw-ticket-row" }, [h("span", null, [k]), v]), v: v };
     };
-    var tBuild = row("Build"), tGoal = row("Objective"), tTime = row("Trajectory"), tBudget = row("Budget");
+    var tServices = row("Services"), tBuild = row("Build"), tGoal = row("Objective"), tTime = row("Trajectory"), tBudget = row("Budget");
     var tCompany = row("Company", "is-crew"), tName = row("Crew", "is-crew"), tMail = row("Channel", "is-crew");
     var stamp = h("span", { "class": "cw-ticket-stamp" }, ["Cleared for launch"]);
     var ticket = h("aside", { "class": "cw-ticket", "aria-label": "Your mission ticket" }, [
       h("p", { "class": "cw-ticket-head" }, [h("i", { "aria-hidden": "true" }), "Mission ticket ", h("span", null, [ticketId])]),
-      h("div", { "class": "cw-ticket-rows" }, [tBuild.el, tGoal.el, tTime.el, tBudget.el]),
+      h("div", { "class": "cw-ticket-rows" }, [tServices.el, tBuild.el, tGoal.el, tTime.el, tBudget.el]),
       h("div", { "class": "cw-ticket-tear", "aria-hidden": "true" }),
       h("div", { "class": "cw-ticket-rows" }, [tCompany.el, tName.el, tMail.el]),
       h("div", { "class": "cw-ticket-foot" }, [h("span", { "class": "cw-ticket-code", "aria-hidden": "true" }), stamp])
@@ -674,6 +789,7 @@
       if (v && !reducedMotion) { r.el.classList.remove("is-fresh"); void r.el.offsetWidth; r.el.classList.add("is-fresh"); }
     };
     var updateTicket = function () {
+      put(tServices, f.services && f.services.length ? f.services.join(", ") : "", "None picked");
       put(tBuild, labelFor(BUILD_OPTIONS, f.buildType), "Not set");
       put(tGoal, f.goal === "other" ? (f.goalOther || "Something else") : labelFor(GOAL_OPTIONS, f.goal), "Not set");
       put(tTime, labelFor(TIMELINE_OPTIONS, f.timeline), "Not set");
@@ -806,7 +922,7 @@
   function stepError(step) {
     var f = state.form;
     if (step.id === "build") {
-      if (!f.buildType) return "Pick one to continue.";
+      if (!f.buildType && !(f.services && f.services.length)) return "Pick a service or a build to continue.";
     } else if (step.id === "goal") {
       if (!f.goal) return "Pick one to continue.";
     } else if (step.id === "timeline") {
@@ -893,7 +1009,9 @@
     })
       .then(function (res) {
         if (!res.ok) throw new Error("Formspree responded with " + res.status);
-          
+
+        sendConfirmationEmail();
+
         state.completedAt = Date.now();
         saveState();
         // a beat for the ticket's lift-off before the result
@@ -950,6 +1068,8 @@
      ---------------------------------------------------------- */
 
   function init() {
+    if (typeof emailjs !== "undefined") emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
     var fallback = document.querySelector(".cw-fallback");
     if (fallback) fallback.hidden = true;
 
@@ -969,9 +1089,23 @@
       if (!state.form.budget) applyBudget(DEFAULT_BUDGET_AMOUNT);
     }
 
+    // services arriving from /services: they are the brief now. A sent
+    // enquiry on file starts a new one; a draft keeps its answers but
+    // takes the new list and opens on question 1.
+    if (incoming.length) {
+      if (saved && saved.completedAt) { state.form = freshForm(); applyBudget(DEFAULT_BUDGET_AMOUNT); state.completedAt = null; }
+      state.form.services = incoming.slice();
+      if (!state.form.buildType) state.form.buildType = buildFromServices(incoming);
+      state.stepIndex = 0;
+      state.view = "form";
+      saveState();
+    }
+
     applyCopy(saved);
 
-    if (saved && saved.completedAt) {
+    if (incoming.length) {
+      // straight into the brief
+    } else if (saved && saved.completedAt) {
       state.view = "success";           // already sent, offer to start another
     } else if (saved && anyAnswered()) {
       showResume();                     // half-finished, offer to resume
@@ -980,6 +1114,34 @@
     }
 
     render();
+
+    // arriving with a brief from /services: skip the hero and bring the
+    // planner up (as the hero's own "open channel" key does), once the
+    // page has settled so the landing point holds
+    if (incoming.length) {
+      if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+      var toPlanner = function () {
+        var target = document.getElementById("contact-planner");
+        if (!target) return;
+        var instant = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 90, behavior: instant ? "auto" : "smooth" });
+      };
+      var go = function () {
+        window.setTimeout(function () {
+          var from = window.scrollY;
+          toPlanner();
+          // if the glide never got going, land there directly
+          window.setTimeout(function () {
+            var target = document.getElementById("contact-planner");
+            if (target && Math.abs(window.scrollY - from) < 40 && target.getBoundingClientRect().top > 200) {
+              window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 90, behavior: "auto" });
+            }
+          }, 900);
+        }, 350);
+      };
+      if (document.readyState === "complete") go();
+      else window.addEventListener("load", go, { once: true });
+    }
   }
 
   init();

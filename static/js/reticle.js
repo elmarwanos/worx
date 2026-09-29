@@ -56,6 +56,26 @@
   // over these the system cursor is the right one
   var PLAIN = "input, textarea, select, [contenteditable], iframe";
 
+  // The box round the words you can see in t: every line of its text,
+  // leaving out text kept for screen readers only (.visually-hidden,
+  // e.g. "(opens the live site)"), which is laid out on one long
+  // unwrapped line and would stretch the frame far past the words.
+  function wordsOf(t) {
+    var walk = document.createTreeWalker(t, NodeFilter.SHOW_TEXT), n, rg = document.createRange();
+    var l = Infinity, tp = Infinity, r = -Infinity, b = -Infinity;
+    while ((n = walk.nextNode())) {
+      if (!n.nodeValue.trim() || (n.parentNode.closest && n.parentNode.closest(".visually-hidden, .sr-only"))) continue;
+      rg.selectNodeContents(n);
+      var rs = rg.getClientRects();
+      for (var i = 0; i < rs.length; i++) {
+        if (!rs[i].width || !rs[i].height) continue;
+        l = Math.min(l, rs[i].left); tp = Math.min(tp, rs[i].top);
+        r = Math.max(r, rs[i].right); b = Math.max(b, rs[i].bottom);
+      }
+    }
+    return r > l ? { left: l, top: tp, width: r - l, height: b - tp } : null;
+  }
+
   // The frame for a target, in viewport px ({ l, t, w, h }), or null
   // when it is too big to frame (a whole section): then the reticle
   // stays its own size, riding the pointer.
@@ -66,10 +86,8 @@
     // a wide block link round a line of words (a project title, a
     // footer link across its column): frame the words themselves
     if (!t.querySelector("img, video, canvas, picture")) {
-      var rg = document.createRange();
-      rg.selectNodeContents(t);
-      var c = rg.getBoundingClientRect();
-      if (c.width && c.height && c.width <= 720 && c.height <= 220) return { l: c.left - 8, t: c.top - 6, w: c.width + 16, h: c.height + 12 };
+      var c = wordsOf(t);
+      if (c && c.width <= 720 && c.height <= 220) return { l: c.left - 8, t: c.top - 6, w: c.width + 16, h: c.height + 12 };
     }
     // a card, a film, a panel: frame the whole of it (a whole section
     // is too much to lock onto)

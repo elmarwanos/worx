@@ -3485,26 +3485,6 @@ body[data-page="portfolio"] main > .section:last-child {
 .pf-scan-chips button:focus-visible { outline: none; }
 .pf-scan-chips button:focus-visible::after { opacity: 1; }
 
-/* the scan: a beam crosses the console when a sector is picked */
-.pf-scan-sweep {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: linear-gradient(100deg, transparent 40%, rgba(250, 167, 25, 0.22) 49%, rgba(255, 226, 170, 0.5) 50%, rgba(250, 167, 25, 0.22) 51%, transparent 60%) no-repeat;
-  background-size: 60% 100%;
-  background-position: -120% 0;
-  opacity: 0;
-}
-
-.pf-scan.is-scanning .pf-scan-sweep { animation: pf-scan-sweep 0.9s var(--scan-ease); }
-
-@keyframes pf-scan-sweep {
-  0%   { opacity: 1; background-position: -120% 0; }
-  80%  { opacity: 1; }
-  100% { opacity: 0; background-position: 260% 0; }
-}
-
 /* phones: one swipeable row of sectors */
 @media (max-width: 767px) {
   .pf-scan {
@@ -3560,6 +3540,168 @@ body[data-page="portfolio"] main > .section:last-child {
 }
 
 .pf-tuner-freq { color: rgba(254, 238, 207, 0.5); }
+
+/* ---- the old radio (portfolio.js "the old radio") ----------------
+   --sig: the signal under the needle (1 on a station, 0 between)
+   --static: how much static shows (tuning by hand, between stations) */
+.pf-tuner { --sig: 1; --static: 0; }
+
+.pf-tuner .pf-scan-read { flex-wrap: wrap; }
+.pf-tuner .pf-scan-tag { display: inline-flex; align-items: center; gap: 8px; }
+
+/* how to tune it, said once, quietly */
+.pf-tuner-hint {
+  margin-left: 4px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(254, 238, 207, 0.16);
+  color: rgba(254, 238, 207, 0.35);
+}
+@media (hover: none) {
+  .pf-tuner-hint { font-size: 0; }
+  .pf-tuner-hint::after { content: "Swipe to tune"; font-size: 0.6rem; }
+}
+
+/* the signal meter: five bars, lit by the signal under the needle */
+.pf-tuner-sig {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 14px;
+  margin-left: auto;
+}
+.pf-tuner-sig i {
+  width: 3px;
+  border-radius: 1px;
+  background: rgba(254, 238, 207, 0.14);
+  transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+.pf-tuner-sig i:nth-child(1) { height: 30%; }
+.pf-tuner-sig i:nth-child(2) { height: 45%; }
+.pf-tuner-sig i:nth-child(3) { height: 62%; }
+.pf-tuner-sig i:nth-child(4) { height: 80%; }
+.pf-tuner-sig i:nth-child(5) { height: 100%; }
+.pf-tuner-sig i:nth-child(1) { --on: clamp(0, calc((var(--sig) - 0.02) * 100), 1); }
+.pf-tuner-sig i:nth-child(2) { --on: clamp(0, calc((var(--sig) - 0.25) * 100), 1); }
+.pf-tuner-sig i:nth-child(3) { --on: clamp(0, calc((var(--sig) - 0.5) * 100), 1); }
+.pf-tuner-sig i:nth-child(4) { --on: clamp(0, calc((var(--sig) - 0.72) * 100), 1); }
+.pf-tuner-sig i:nth-child(5) { --on: clamp(0, calc((var(--sig) - 0.92) * 100), 1); }
+.pf-tuner-sig i {
+  background: rgba(250, 167, 25, calc(0.14 + var(--on) * 0.86));
+  box-shadow: 0 0 calc(var(--on) * 6px) rgba(250, 167, 25, 0.7);
+}
+
+/* the display row: the name, and the knob beside it */
+.pf-tuner-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* the tuning knob: ridged, lit from above, it turns as the band moves;
+   drag across it to fine-tune */
+.pf-tuner-knob {
+  --turn: 0deg;
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 32%, rgba(255, 236, 205, 0.22), transparent 55%),
+    repeating-conic-gradient(from var(--turn), rgba(254, 238, 207, 0.16) 0 4deg, rgba(0, 0, 0, 0.28) 4deg 10deg),
+    radial-gradient(circle, #3a1d10, #1a0b06 70%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 236, 205, 0.18),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(254, 238, 207, 0.14),
+    0 8px 20px -8px rgba(0, 0, 0, 0.9),
+    0 0 calc(var(--sig) * 18px) rgba(229, 125, 35, calc(var(--sig) * 0.35));
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* the cap and its marker, turning with the band */
+.pf-tuner-knob i {
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%, #4a2615, #1c0c06 75%);
+  box-shadow: inset 0 1px 0 rgba(255, 236, 205, 0.12), 0 2px 6px rgba(0, 0, 0, 0.6);
+  transform: rotate(var(--turn));
+}
+.pf-tuner-knob i::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  width: 2px;
+  height: 8px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--accent-2);
+  box-shadow: 0 0 6px var(--accent-2);
+}
+.pf-tuner-knob:active { cursor: grabbing; }
+
+/* the static: a grain over the dial, thick between stations */
+.pf-tuner-static {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: calc(var(--static) * 0.55);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 0.9  0 0 0 0 0.75  0 0 0 1.1 -0.35'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(180deg, rgba(254, 238, 207, 0.05) 0 1px, transparent 1px 3px);
+  mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+  transition: opacity 0.25s ease;
+}
+.pf-tuner.is-tuning .pf-tuner-static { animation: pf-static 0.18s steps(3) infinite; }
+@keyframes pf-static {
+  0% { background-position: 0 0, 0 0; }
+  33% { background-position: -38px 21px, 0 1px; }
+  66% { background-position: 27px -44px, 0 2px; }
+  100% { background-position: -11px 9px, 0 0; }
+}
+
+/* the name fades with the signal while tuning */
+.pf-tuner.is-tuning .pf-tuner-name { opacity: calc(0.45 + var(--sig) * 0.55); }
+
+/* the band takes a hand: grab it and drag (touch keeps its swipe) */
+@media (hover: hover) and (pointer: fine) {
+  .pf-tuner-band { cursor: grab; }
+  .pf-tuner-band.is-dragging,
+  .pf-tuner-band.is-dragging .pf-station { cursor: grabbing; }
+}
+.pf-tuner-band { -webkit-user-select: none; user-select: none; }
+.pf-tuner-band.is-dragging .pf-station { transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease; }
+
+/* the needle glows with the signal, and springs as a station locks */
+.pf-tuner-needle::after { opacity: calc(0.55 + var(--sig) * 0.45); }
+.pf-tuner.is-scanning .pf-tuner-needle { animation: pf-needle-spring 0.7s cubic-bezier(0.3, 1.6, 0.5, 1); transform-origin: 50% 100%; }
+@keyframes pf-needle-spring {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(4deg); }
+  50% { transform: rotate(-2.5deg); }
+  75% { transform: rotate(1deg); }
+  100% { transform: rotate(0); }
+}
+
+@media (max-width: 767px) {
+  .pf-tuner-knob { width: 40px; height: 40px; }
+  .pf-tuner-knob i { inset: 8px; }
+  .pf-tuner-sig { height: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-tuner.is-tuning .pf-tuner-static,
+  .pf-tuner.is-scanning .pf-tuner-needle { animation: none; }
+  .pf-tuner-static { display: none; }
+}
 .pf-tuner-freq b { font-weight: 500; color: var(--accent-2); font-variant-numeric: tabular-nums; }
 
 .pf-tuner-display {
@@ -4126,8 +4268,23 @@ body[data-page="portfolio"] main > .section:last-child {
     transform: none;
     transition: opacity 0.35s ease calc(var(--i) * 30ms), transform 0.5s var(--rail-ease) calc(var(--i) * 30ms), width 0.5s var(--rail-ease), color 0.3s ease;
   }
-  /* no hover on touch: the drawer only opens from the tab */
-  .pf-rail:hover .pf-rail-panel::before { clip-path: inset(0 0 0 100% round 18px); opacity: 0; }
+  /* no hover on touch: the drawer only opens from the tab. A tap leaves
+     a sticky hover and the focus behind; neither may hold the names out
+     once the drawer has closed (the desktop reveal above keys on both) */
+  .pf-rail:not(.is-open):hover .pf-rail-panel::before,
+  .pf-rail:not(.is-open):focus-within .pf-rail-panel::before { clip-path: inset(0 0 0 100% round 18px); opacity: 0; }
+  .pf-rail:not(.is-open):hover .pf-rail-head,
+  .pf-rail:not(.is-open):focus-within .pf-rail-head { opacity: 0; }
+  .pf-rail:not(.is-open):hover .pf-rail-label,
+  .pf-rail:not(.is-open):hover .pf-rail-n,
+  .pf-rail:not(.is-open):hover .pf-rail-tick,
+  .pf-rail:not(.is-open):focus-within .pf-rail-label,
+  .pf-rail:not(.is-open):focus-within .pf-rail-n,
+  .pf-rail:not(.is-open):focus-within .pf-rail-tick { opacity: 0; transform: translateX(14px); }
+  .pf-rail:not(.is-open):hover .pf-rail-panel,
+  .pf-rail:not(.is-open):focus-within .pf-rail-panel,
+  .pf-rail:not(.is-open):hover .pf-rail-list button,
+  .pf-rail:not(.is-open):focus-within .pf-rail-list button { pointer-events: none; }
   .pf-rail.is-open:hover .pf-rail-panel::before { clip-path: inset(0 0 0 0 round 18px); opacity: 1; }
 }
 
@@ -4288,7 +4445,6 @@ body[data-page="portfolio"] main > .section:last-child {
 @media (prefers-reduced-motion: reduce) {
   .pf-scan-tag i,
   .pf-rail-head i { animation: none; }
-  .pf-scan.is-scanning .pf-scan-sweep,
   .pf-rail.is-on .pf-rail-panel::after,
   .pf-rail.is-scanning .pf-rail-beam,
   .pf-next.is-in .pf-next-streaks i { animation: none; }
