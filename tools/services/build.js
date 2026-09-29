@@ -71,19 +71,34 @@ function replaceBlock(html, name, content, file) {
 
 const chevron = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
+// The software Worx builds and sells: group 01 of the menu, ahead of the
+// service divisions. Not in the catalogue (it is a product, with its own
+// page, not a service on the services page).
+const PRODUCTS = {
+  name: "Products",
+  services: [{
+    name: "CRAMS",
+    href: "crams/index.html",
+    live: true, // its dot blinks: a live product
+    short: "One platform for every lead, shared by every department.",
+    subs: ["Lead capture", "Assignment", "Follow-ups", "Status tracking", "Reporting", "Data management", "Performance monitoring"]
+  }]
+};
+
 function megaMenu(prefix) {
-  // Spread divisions over three columns, balancing the number of links
+  // Spread the groups over three columns, balancing the number of links
+  const groups = [PRODUCTS].concat(catalogue);
   const buckets = [[], [], []];
   const load = [0, 0, 0];
-  catalogue.forEach((d, i) => {
+  groups.forEach((d, i) => {
     const k = load.indexOf(Math.min(...load));
     buckets[k].push(i);
     load[k] += d.services.length + 1.5;
   });
   const cols = buckets.map((pair) => pair.map((i) => {
-    const d = catalogue[i];
+    const d = groups[i];
     const links = d.services.map((s) => `
-                <li><a href="${href(s, prefix, d)}" data-mega-item data-division="${esc(d.name)}" data-short="${esc(s.short)}" data-subs="${esc(s.subs.slice(0, 9).join("|"))}" data-more="${Math.max(0, s.subs.length - 9)}"><i aria-hidden="true"></i><span>${esc(s.name)}</span>${chevron}</a></li>`).join("");
+                <li><a href="${s.href ? prefix + s.href : href(s, prefix, d)}"${s.live ? ' class="mega-live"' : ""} data-mega-item data-division="${esc(d.name)}" data-short="${esc(s.short)}" data-subs="${esc(s.subs.slice(0, 9).join("|"))}" data-more="${Math.max(0, s.subs.length - 9)}"><i aria-hidden="true"></i><span>${esc(s.name)}</span>${chevron}</a></li>`).join("");
     return `
               <div class="mega-group">
                 <p class="mega-group-title"><span>${pad(i + 1)}</span>${esc(d.name)}</p>

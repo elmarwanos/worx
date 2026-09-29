@@ -2,16 +2,19 @@
    Worx | crams.js
    The CRAMS film (crams/index.html, styles in crams.css).
 
-   THE SYSTEM: one canvas behind the page. CRAMS is a core star; the
-   departments are worlds in orbit round it; leads are signals. The
-   page's chapters each set how the system looks, and scrolling blends
-   from one to the next, so the story plays out behind the words:
-     ignition   the core lit, the departments in orbit, leads streaming
-                in and being handed on
-     gap        the core out, the worlds adrift, leads falling between
-                them and fading (the lost ones glow ember red)
-     connected  the core relit, the worlds drawn back into orbit, lines
-                of light to each, every lead delivered
+   THE SYSTEM: one canvas behind the page, drawn as an atom. CRAMS is
+   the nucleus (a cluster of nucleons with a pulsar's beams sweeping out
+   of it); the departments are electrons on three crossed shells; leads
+   are particles; a quantum field of dust fills the dark and streaks
+   with the speed of the scroll. The page's chapters each set how the
+   system looks, and scrolling blends from one to the next, so the
+   story plays out behind the words:
+     ignition   the nucleus lit, the shells turning, leads streaming in
+                and being handed on
+     gap        fission: the nucleus splits, the electrons fly off their
+                shells, leads fall between them (the lost glow ember red)
+     connected  fusion: the nucleus reforms, the electrons snap back onto
+                their shells, lines of light to each, every lead delivered
      lifecycle  the system to one side, the owner of each stage lit
      truth ...  the system settling behind, then a last full blaze
                 under the launch
@@ -24,9 +27,10 @@
    THE FORGE: the wordmark is made of leads. Signals stream in from the
    edges and settle into the letters, then the letters take over.
 
-   TITLE CARDS: before each chapter the film cuts to its name, letterbox
-   bars closing in, the name assembling letter by letter, blurring away
-   as the chapter begins.
+   QUANTUM TRANSITIONS: no cuts between chapters. Each chapter's
+   content materializes out of a blur as it scrolls in and dissolves as
+   it scrolls out, and every change of chapter throws a burst of
+   particles out of the nucleus.
 
    THE HUD: fixed over the film; the chapter and its timecode, the
    chapter strip and the signal.
@@ -81,8 +85,10 @@
   var worlds = DEPTS.map(function (d, i) {
     return {
       d: d, i: i,
-      a: (i / DEPTS.length) * Math.PI * 2 + 0.3,
-      r: i % 2 ? 1.0 : 0.78,
+      // two electrons per shell, opposite each other
+      shell: i % 3,
+      a: (i % 3) * 1.1 + (i >= 3 ? Math.PI : 0),
+      r: [0.8, 1.0, 0.9][i % 3],
       sz: 7 + (i % 3) * 1.6,
       driftA: (i / DEPTS.length) * Math.PI * 2 + (Math.random() - 0.5) * 0.9,
       driftR: 1.15 + Math.random() * 0.4,
@@ -91,20 +97,40 @@
     };
   });
   var hotDept = -1;
+  // the three shells, crossed like an atom's
+  var SHELLS = [-0.52, 0.52, 1.5708];
+
+  // the nucleus: nucleons packed in a ball, turning (protons amber,
+  // neutrons cream); in fission they fly apart
+  var nucleons = [];
+  for (var ni = 0; ni < 15; ni++) {
+    var u = Math.random() * 2 - 1, th = Math.random() * Math.PI * 2, rr = 0.35 + Math.random() * 0.65;
+    var sq = Math.sqrt(1 - u * u);
+    nucleons.push({ x: sq * Math.cos(th) * rr, y: u * rr, z: sq * Math.sin(th) * rr, p: ni % 2 === 0, ph: Math.random() * 6.28, fx: Math.random() * 2 - 1, fy: Math.random() * 2 - 1 });
+  }
+
+  // the quantum field: dust at three depths, drifting with the scroll
+  var field = [];
+  for (var fi = 0; fi < 150; fi++) field.push({ x: Math.random(), y: Math.random(), z: 0.25 + Math.random() * 0.75, ph: Math.random() * 6.28 });
+  // particle pairs flashing in and out of the field, and bursts from the nucleus
+  var pairs = [], sparks = [];
+  var scrollV = 0, lastSY = window.scrollY;
 
   // how the system looks in each chapter
   //   cx, cy: its centre (share of the view); sc: its size; spread: 0 in
   //   orbit .. 1 adrift; core: the star; links: the lines of light;
   //   lost: leads falling between; flow: leads delivered; dim: all of it;
-  //   tilt: how flat the orbit is seen; labels: the departments' names
+  //   tilt: how flat the orbit is seen; labels: the departments' names;
+  //   atom: 0 all shells in one plane .. 1 crossed; beam: the pulsar's beams;
+  //   neb: how bright the nebula behind burns
   var KEYS = {
-    ignition:  { cx: 0.68, cy: 0.5,  sc: 0.5,  spread: 0.06, core: 0.85, links: 0.25, lost: 0,   flow: 1,   dim: 0.7,  tilt: 0.34, labels: 0 },
-    gap:       { cx: 0.7,  cy: 0.5,  sc: 0.34, spread: 1,    core: 0.06, links: 0,    lost: 1,   flow: 0,   dim: 0.95, tilt: 0.5,  labels: 1 },
-    connected: { cx: 0.7,  cy: 0.44, sc: 0.3,  spread: 0,    core: 1,    links: 1,    lost: 0,   flow: 1,   dim: 1,    tilt: 0.42, labels: 1 },
-    lifecycle: { cx: 0.8,  cy: 0.5,  sc: 0.2,  spread: 0,    core: 0.7,  links: 0.6,  lost: 0,   flow: 0.5, dim: 0.35, tilt: 0.4,  labels: 0.6 },
-    truth:     { cx: 0.5,  cy: 0.5,  sc: 0.48, spread: 0,    core: 0.55, links: 0.45, lost: 0,   flow: 0.6, dim: 0.4,  tilt: 0.3,  labels: 0 },
-    crew:      { cx: 0.5,  cy: 0.5,  sc: 0.58, spread: 0,    core: 0.4,  links: 0.3,  lost: 0,   flow: 0.4, dim: 0.28, tilt: 0.28, labels: 0 },
-    launch:    { cx: 0.5,  cy: 0.66, sc: 0.78, spread: 0,    core: 0.5,  links: 0.4,  lost: 0,   flow: 1,   dim: 0.7,  tilt: 0.3,  labels: 0 }
+    ignition:  { cx: 0.68, cy: 0.5,  sc: 0.5,  spread: 0.06, core: 0.85, links: 0.25, lost: 0,   flow: 1,   dim: 0.7,  tilt: 0.34, labels: 0, atom: 1,   beam: 0.6, neb: 0.95 },
+    gap:       { cx: 0.7,  cy: 0.5,  sc: 0.34, spread: 1,    core: 0.06, links: 0,    lost: 1,   flow: 0,   dim: 0.95, tilt: 0.5,  labels: 1, atom: 0.5, beam: 0, neb: 0.8 },
+    connected: { cx: 0.7,  cy: 0.44, sc: 0.3,  spread: 0,    core: 1,    links: 1,    lost: 0,   flow: 1,   dim: 1,    tilt: 0.42, labels: 1, atom: 1,   beam: 1, neb: 0.9 },
+    lifecycle: { cx: 0.8,  cy: 0.5,  sc: 0.2,  spread: 0,    core: 0.7,  links: 0.6,  lost: 0,   flow: 0.5, dim: 0.35, tilt: 0.4,  labels: 0.6, atom: 0.9, beam: 0.35, neb: 0.55 },
+    truth:     { cx: 0.5,  cy: 0.5,  sc: 0.48, spread: 0,    core: 0.55, links: 0.45, lost: 0,   flow: 0.6, dim: 0.4,  tilt: 0.3,  labels: 0, atom: 1,   beam: 0.5, neb: 0.7 },
+    crew:      { cx: 0.5,  cy: 0.5,  sc: 0.58, spread: 0,    core: 0.4,  links: 0.3,  lost: 0,   flow: 0.4, dim: 0.28, tilt: 0.28, labels: 0, atom: 1,   beam: 0.3, neb: 0.55 },
+    launch:    { cx: 0.5,  cy: 0.66, sc: 0.78, spread: 0,    core: 0.5,  links: 0.4,  lost: 0,   flow: 1,   dim: 0.7,  tilt: 0.3,  labels: 0, atom: 1,   beam: 1, neb: 1 }
   };
   var chapters = $$("[data-cr-chapter]").map(function (el) { var n = el.getAttribute("data-cr-chapter"); return { el: el, n: n, k: KEYS[n] || KEYS.connected }; });
   var nowChapter = "ignition", rings = [];
@@ -119,6 +145,11 @@
     // arriving at connected or the launch: the core sends out a shockwave
     if (a.n !== nowChapter) {
       if ((a.n === "connected" || a.n === "launch") && !reduced) rings.push({ r: 0, a: 1 }, { r: -0.18, a: 0.7 });
+      // every change of chapter: a burst of particles out of the nucleus
+      if (!reduced) for (var bi = 0; bi < 46; bi++) {
+        var ba = Math.random() * Math.PI * 2, bs = 0.15 + Math.random() * 0.55;
+        sparks.push({ x: coreX, y: coreY, vx: Math.cos(ba) * bs, vy: Math.sin(ba) * bs * 0.8, life: 1, hot: Math.random() < 0.3 });
+      }
       nowChapter = a.n;
     }
     var r = a.el.getBoundingClientRect();
@@ -143,6 +174,101 @@
   };
 
   var coreX = 0, coreY = 0, R = 0;
+
+  /* ---------------------------------------------------------------
+     THE COSMOS: the site's sky behind the system. An ember nebula,
+     painted once off screen (soft puffs of ember, orange and cocoa,
+     dark lanes cut through them) and a starfield at three depths, the
+     nearest drifting fastest as the page scrolls. The nebula runs hot
+     (a red layer over it) while the system is in fission.
+     --------------------------------------------------------------- */
+  var cos = $("[data-cr-cosmos]"), cctx = cos && cos.getContext ? cos.getContext("2d") : null;
+  var neb = null, nebHot = null, stars = [];
+  var rnd = function (a2, b2) { return a2 + Math.random() * (b2 - a2); };
+  var paintNebula = function (w, hh, hot) {
+    var cv = document.createElement("canvas"); cv.width = w; cv.height = hh;
+    var g = cv.getContext("2d");
+    var cols = hot ? [[229, 72, 60], [192, 69, 39], [250, 110, 40]] : [[192, 69, 39], [229, 125, 35], [250, 167, 25], [120, 42, 18], [66, 29, 15]];
+    // clouds hug the edges, as on the home page, leaving the middle clear
+    var clouds = hot ? [[0.78, 0.3, 0.3], [0.2, 0.75, 0.28], [0.5, 0.5, 0.22]]
+      : [[0.02, 0.22, 0.34], [0.98, 0.12, 0.3], [0.95, 0.62, 0.34], [0.06, 0.8, 0.3], [0.55, 1.0, 0.3], [0.6, 0.02, 0.22]];
+    g.globalCompositeOperation = "lighter";
+    clouds.forEach(function (cl) {
+      for (var k = 0; k < 70; k++) {
+        var x = (cl[0] + rnd(-1, 1) * cl[2] * 0.8) * w, y = (cl[1] + rnd(-1, 1) * cl[2] * 0.9) * hh;
+        var r = rnd(0.04, 0.2) * Math.max(w, hh), col = cols[(Math.random() * cols.length) | 0];
+        var gr = g.createRadialGradient(x, y, 0, x, y, r);
+        var al = rnd(0.012, hot ? 0.05 : 0.04);
+        gr.addColorStop(0, "rgba(" + col.join(",") + "," + al + ")");
+        gr.addColorStop(0.6, "rgba(" + col.join(",") + "," + al * 0.35 + ")");
+        gr.addColorStop(1, "rgba(" + col.join(",") + ",0)");
+        g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+      }
+      // a few hot cores inside the cloud
+      for (var q = 0; q < 6; q++) {
+        var qx = (cl[0] + rnd(-0.5, 0.5) * cl[2]) * w, qy = (cl[1] + rnd(-0.5, 0.5) * cl[2]) * hh, qr = rnd(0.02, 0.06) * w;
+        var qg = g.createRadialGradient(qx, qy, 0, qx, qy, qr);
+        qg.addColorStop(0, "rgba(255,214,150," + rnd(0.03, 0.07) + ")"); qg.addColorStop(1, "rgba(255,214,150,0)");
+        g.fillStyle = qg; g.beginPath(); g.arc(qx, qy, qr, 0, Math.PI * 2); g.fill();
+      }
+    });
+    // dark lanes of dust through the clouds
+    g.globalCompositeOperation = "destination-out";
+    for (var d = 0; d < 40; d++) {
+      var dx = Math.random() * w, dy = Math.random() * hh, dr = rnd(0.03, 0.12) * w;
+      var dg = g.createRadialGradient(dx, dy, 0, dx, dy, dr);
+      dg.addColorStop(0, "rgba(0,0,0," + rnd(0.2, 0.5) + ")"); dg.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = dg; g.beginPath(); g.arc(dx, dy, dr, 0, Math.PI * 2); g.fill();
+    }
+    return cv;
+  };
+  var sizeCosmos = function () {
+    if (!cctx) return;
+    cos.width = Math.round(W * dpr); cos.height = Math.round(H * dpr);
+    // the nebula is taller than the view so it can drift with the scroll,
+    // painted at half size (it is all soft light)
+    var nw = Math.max(320, Math.round(W / 2)), nh = Math.round(H * 1.8 / 2);
+    neb = paintNebula(nw, nh, false); nebHot = paintNebula(nw, nh, true);
+    var n = Math.round(Math.min(520, W * H / 3200));
+    stars = [];
+    for (var s = 0; s < n; s++) {
+      var z = Math.random();
+      stars.push({ x: Math.random(), y: Math.random(), z: z, r: 0.35 + z * z * 1.3, ph: Math.random() * 6.28, sp: rnd(0.6, 2.2),
+        warm: Math.random() < 0.35, flare: z > 0.988 });
+    }
+  };
+  var drawCosmos = function (time) {
+    if (!cctx) return;
+    cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cctx.clearRect(0, 0, W, H);
+    var doc = Math.max(1, document.documentElement.scrollHeight - H), prog = clamp(window.scrollY / doc, 0, 1);
+    // the nebula drifts up through the page, slower than the words
+    var ny = -prog * H * 0.8 - lean.y * 20, nx = -lean.x * 24;
+    cctx.globalAlpha = S.neb;
+    cctx.drawImage(neb, nx - 12, ny, W + 24, H * 1.8);
+    if (S.spread > 0.02) { cctx.globalAlpha = S.spread * 0.9; cctx.drawImage(nebHot, nx - 12, ny, W + 24, H * 1.8); }
+    cctx.globalAlpha = 1;
+    // the stars, three depths of parallax, each twinkling on its own beat
+    var sy = window.scrollY;
+    for (var i2 = 0; i2 < stars.length; i2++) {
+      var st2 = stars[i2];
+      var y2 = ((st2.y * H - sy * (0.02 + st2.z * 0.12)) % H + H) % H;
+      var x2 = st2.x * W - lean.x * st2.z * 30;
+      var tw2 = reduced ? 0.8 : 0.55 + 0.45 * Math.sin(time * 0.001 * st2.sp + st2.ph);
+      var al2 = (0.25 + st2.z * 0.7) * tw2;
+      cctx.fillStyle = st2.warm ? "rgba(255,214,160," + al2.toFixed(3) + ")" : "rgba(254,244,228," + al2.toFixed(3) + ")";
+      if (st2.r < 0.9) cctx.fillRect(x2, y2, st2.r * 1.4, st2.r * 1.4);
+      else { cctx.beginPath(); cctx.arc(x2, y2, st2.r, 0, Math.PI * 2); cctx.fill(); }
+      if (st2.flare) {
+        // the brightest: a glow and four fine spikes
+        var fl2 = 6 + st2.z * 5, fg = cctx.createRadialGradient(x2, y2, 0, x2, y2, fl2);
+        fg.addColorStop(0, "rgba(255,226,180," + (0.5 * tw2).toFixed(3) + ")"); fg.addColorStop(1, "rgba(255,226,180,0)");
+        cctx.fillStyle = fg; cctx.beginPath(); cctx.arc(x2, y2, fl2, 0, Math.PI * 2); cctx.fill();
+        cctx.strokeStyle = "rgba(255,236,205," + (0.45 * tw2).toFixed(3) + ")"; cctx.lineWidth = 0.6;
+        cctx.beginPath(); cctx.moveTo(x2 - fl2 * 1.6, y2); cctx.lineTo(x2 + fl2 * 1.6, y2); cctx.moveTo(x2, y2 - fl2); cctx.lineTo(x2, y2 + fl2); cctx.stroke();
+      }
+    }
+  };
   var lean = { x: 0, y: 0, tx: 0, ty: 0 };
   window.addEventListener("pointermove", function (e) {
     if (e.pointerType !== "mouse") return;
@@ -153,19 +279,87 @@
     ctx.clearRect(0, 0, W, H);
     lean.x += (lean.tx - lean.x) * Math.min(1, dt * 0.004); lean.y += (lean.ty - lean.y) * Math.min(1, dt * 0.004);
     coreX = W * S.cx - lean.x * 40; coreY = H * S.cy - lean.y * 26; R = Math.min(W, H) * S.sc;
+    drawCosmos(time);
     var dim = S.dim;
-
-    // the orbit rings
     ctx.globalCompositeOperation = "lighter";
-    [0.78, 1.0].forEach(function (rr, k) {
+
+    // the quantum field: nearer dust drifts faster with the scroll and
+    // stretches into streaks when the page moves quickly
+    var sv = scrollV;
+    for (var f = 0; f < field.length; f++) {
+      var p = field[f];
+      p.y -= (sv * p.z * 0.6) / H;
+      p.x += Math.sin(time * 0.0003 + p.ph) * 0.00004 * dt * p.z;
+      if (p.y < -0.02) p.y += 1.04; else if (p.y > 1.02) p.y -= 1.04;
+      var fx = p.x * W, fy = p.y * H, tw = 0.5 + 0.5 * Math.sin(time * 0.002 + p.ph * 3);
+      var fa = (0.12 + 0.28 * tw) * p.z * (0.5 + dim * 0.5);
+      var len = clamp(sv * p.z * 1.4, -90, 90);
+      if (Math.abs(len) > 2) {
+        ctx.strokeStyle = "rgba(255,226,170," + (fa * 0.8).toFixed(3) + ")";
+        ctx.lineWidth = p.z * 1.2;
+        ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx, fy + len); ctx.stroke();
+      } else {
+        ctx.fillStyle = "rgba(255,226,170," + fa.toFixed(3) + ")";
+        ctx.fillRect(fx - p.z * 0.7, fy - p.z * 0.7, p.z * 1.4, p.z * 1.4);
+      }
+    }
+    // particle pairs: born together, spinning apart, annihilating in a flash
+    if (!reduced && Math.random() < dt * 0.0012) pairs.push({ x: Math.random() * W, y: Math.random() * H, t: 0, a: Math.random() * 6.28 });
+    for (var pi = pairs.length - 1; pi >= 0; pi--) {
+      var pr = pairs[pi]; pr.t += dt * 0.0009;
+      if (pr.t >= 1) { pairs.splice(pi, 1); continue; }
+      var sep = Math.sin(pr.t * Math.PI) * 14, ang = pr.a + pr.t * 5;
+      var pa = Math.sin(pr.t * Math.PI) * 0.7;
+      ctx.fillStyle = "rgba(255,214,150," + pa.toFixed(3) + ")";
+      ctx.beginPath(); ctx.arc(pr.x + Math.cos(ang) * sep, pr.y + Math.sin(ang) * sep, 1.3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(229,125,35," + pa.toFixed(3) + ")";
+      ctx.beginPath(); ctx.arc(pr.x - Math.cos(ang) * sep, pr.y - Math.sin(ang) * sep, 1.3, 0, Math.PI * 2); ctx.fill();
+      if (pr.t > 0.9) {
+        var fl = (1 - pr.t) * 10;
+        var gf = ctx.createRadialGradient(pr.x, pr.y, 0, pr.x, pr.y, 12);
+        gf.addColorStop(0, "rgba(255,240,210," + (0.8 * (1 - fl)).toFixed(3) + ")");
+        gf.addColorStop(1, "rgba(255,240,210,0)");
+        ctx.fillStyle = gf; ctx.beginPath(); ctx.arc(pr.x, pr.y, 12, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    // the electron shells, crossed round the nucleus
+    SHELLS.forEach(function (rot, k) {
+      var rr = [0.8, 1.0, 0.9][k];
       ctx.beginPath();
-      ctx.ellipse(coreX, coreY, R * rr, R * rr * S.tilt, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(250,167,25," + ((0.07 + 0.08 * S.links) * dim * (1 - S.spread * 0.85)).toFixed(3) + ")";
+      ctx.ellipse(coreX, coreY, R * rr, R * rr * S.tilt, rot * S.atom, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(250,167,25," + ((0.07 + 0.09 * S.links) * dim * (1 - S.spread * 0.85)).toFixed(3) + ")";
       ctx.lineWidth = 1;
-      ctx.setLineDash(k ? [2, 7] : []);
+      ctx.setLineDash(k === 1 ? [2, 7] : []);
       ctx.stroke();
     });
     ctx.setLineDash([]);
+
+    // the pulsar's beams: two cones of light sweeping out of the nucleus
+    if (S.beam > 0.02 && S.core > 0.1) {
+      var bA = reduced ? 0.6 : time * 0.00045, bL = R * 1.7, bw = 0.03;
+      for (var side = 0; side < 2; side++) {
+        var th0 = bA + side * Math.PI;
+        var gb = ctx.createRadialGradient(coreX, coreY, 0, coreX, coreY, bL);
+        gb.addColorStop(0, "rgba(255,236,205," + (0.2 * S.beam * dim * S.core).toFixed(3) + ")");
+        gb.addColorStop(0.4, "rgba(250,167,25," + (0.05 * S.beam * dim * S.core).toFixed(3) + ")");
+        gb.addColorStop(1, "rgba(250,167,25,0)");
+        ctx.fillStyle = gb;
+        ctx.beginPath(); ctx.moveTo(coreX, coreY);
+        ctx.arc(coreX, coreY, bL, th0 - bw, th0 + bw); ctx.closePath(); ctx.fill();
+      }
+    }
+
+    // bursts: particles thrown out of the nucleus at each change of chapter
+    for (var si = sparks.length - 1; si >= 0; si--) {
+      var sp = sparks[si];
+      sp.x += sp.vx * dt; sp.y += sp.vy * dt; sp.vx *= 0.985; sp.vy *= 0.985;
+      sp.life -= dt * 0.0011;
+      if (sp.life <= 0) { sparks.splice(si, 1); continue; }
+      ctx.strokeStyle = "rgba(" + (sp.hot ? "255,240,210" : "250,167,25") + "," + (sp.life * 0.8).toFixed(3) + ")";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(sp.x, sp.y); ctx.lineTo(sp.x - sp.vx * 18, sp.y - sp.vy * 18); ctx.stroke();
+    }
 
     // shockwaves from the core
     for (var ri = rings.length - 1; ri >= 0; ri--) {
@@ -182,8 +376,9 @@
 
     // the worlds: in orbit, or adrift
     worlds.forEach(function (w) {
-      if (!reduced) w.a += dt * 0.00006 * (w.r < 0.9 ? 1.3 : 1);
-      var ox = Math.cos(w.a) * R * w.r, oy = Math.sin(w.a) * R * w.r * S.tilt;
+      if (!reduced) w.a += dt * 0.00011 * (w.r < 0.85 ? 1.35 : w.r < 0.95 ? 1.15 : 1);
+      var ex = Math.cos(w.a) * R * w.r, ey = Math.sin(w.a) * R * w.r * S.tilt, sr = SHELLS[w.shell] * S.atom;
+      var ox = ex * Math.cos(sr) - ey * Math.sin(sr), oy = ex * Math.sin(sr) + ey * Math.cos(sr);
       var da = w.driftA + Math.sin(time * 0.00012 + w.ph) * 0.25;
       var dx = Math.cos(da) * R * w.driftR, dy = Math.sin(da) * R * w.driftR * 0.72 + Math.sin(time * 0.0004 + w.ph) * R * 0.05;
       var k = ease(S.spread);
@@ -219,6 +414,24 @@
     ctx.beginPath(); ctx.arc(coreX, coreY, cr * 4.2, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "rgba(255,248,232," + (0.9 * Math.min(1, S.core) * dim).toFixed(3) + ")";
     ctx.beginPath(); ctx.arc(coreX, coreY, cr * 0.32, 0, Math.PI * 2); ctx.fill();
+    // the nucleons, turning; in fission (spread) they fly apart
+    var nR = Math.max(cr, Math.min(R * 0.16, 44) * 0.5) * 0.62, spin = reduced ? 0.4 : time * 0.0005;
+    var cs0 = Math.cos(spin), sn0 = Math.sin(spin), split = ease(S.spread);
+    var drawn = nucleons.map(function (n) {
+      var x = n.x * cs0 + n.z * sn0, z = -n.x * sn0 + n.z * cs0;
+      var jig = reduced ? 0 : Math.sin(time * 0.006 + n.ph) * 0.05;
+      return { x: coreX + (x + jig + n.fx * split * 5) * nR, y: coreY + (n.y + jig + n.fy * split * 3.5) * nR, z: z, p: n.p };
+    }).sort(function (a2, b2) { return a2.z - b2.z; });
+    var nA = dim * Math.max(S.core, split * 0.55);
+    drawn.forEach(function (n) {
+      var ns = nR * (0.3 + (n.z + 1) * 0.06);
+      var gn = ctx.createRadialGradient(n.x - ns * 0.3, n.y - ns * 0.35, ns * 0.1, n.x, n.y, ns);
+      gn.addColorStop(0, "rgba(255,248,232," + (nA * 0.95).toFixed(3) + ")");
+      gn.addColorStop(0.5, n.p ? "rgba(250,167,25," + (nA * 0.9).toFixed(3) + ")" : "rgba(254,226,190," + (nA * 0.8).toFixed(3) + ")");
+      gn.addColorStop(1, "rgba(120,40,14," + (nA * 0.2).toFixed(3) + ")");
+      ctx.fillStyle = gn;
+      ctx.beginPath(); ctx.arc(n.x, n.y, ns, 0, Math.PI * 2); ctx.fill();
+    });
     // an anamorphic streak through the core
     if (S.core > 0.05) {
       var st = ctx.createLinearGradient(coreX - R * 1.3, 0, coreX + R * 1.3, 0);
@@ -314,6 +527,7 @@
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = window.innerWidth; H = window.innerHeight;
     cvs.width = Math.round(W * dpr); cvs.height = Math.round(H * dpr);
+    sizeCosmos();
   }
 
   if (ctx) {
@@ -330,6 +544,8 @@
         if (!useGsap) requestAnimationFrame(tick);
         if (document.hidden) { last = 0; return; }
         var dt = last ? Math.min(50, now - last) : 16; last = now;
+        var sy = window.scrollY;
+        scrollV += ((sy - lastSY) - scrollV) * 0.25; lastSY = sy;
         var T = target();
         // the system eases toward the chapter, like a camera move
         Object.keys(T).forEach(function (k) { S[k] += (T[k] - S[k]) * Math.min(1, dt * 0.0035); });
@@ -435,7 +651,7 @@
      THE HUD: the signal readout names the chapter you are in
      --------------------------------------------------------------- */
   var sigEl = $("[data-cr-signal]");
-  var NAMES = { ignition: "ALL DEPARTMENTS", gap: "SIGNAL LOST", connected: "CONNECTED", lifecycle: "TRACKING LEAD", truth: "SINGLE SOURCE", crew: "BUILT IN-HOUSE", launch: "READY FOR LAUNCH" };
+  var NAMES = { ignition: "ALL DEPARTMENTS", gap: "FISSION · SIGNAL LOST", connected: "FUSION · CONNECTED", lifecycle: "TRACKING LEAD", truth: "SINGLE SOURCE", crew: "BUILT IN-HOUSE", launch: "READY FOR LAUNCH" };
   if (sigEl && "IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (en) {
       en.forEach(function (e) { if (e.isIntersecting) sigEl.textContent = NAMES[e.target.getAttribute("data-cr-chapter")] || sigEl.textContent; });
@@ -518,21 +734,30 @@
   else ready(function () { runForge(); light(); });
 
   /* ---------------------------------------------------------------
-     TITLE CARDS: letters split, progress through the card's scroll
+     QUANTUM TRANSITIONS: each chapter's content materializes as it
+     scrolls in and dissolves as it scrolls out, both ways
      --------------------------------------------------------------- */
-  var cards = $$("[data-cr-card]");
-  cards.forEach(function (c) {
-    var t = $("[data-cr-tc-title]", c);
-    if (!t) return;
-    var txt = t.textContent; t.textContent = "";
-    t.setAttribute("aria-label", txt);
-    txt.split("").forEach(function (ch, i) {
-      var sp = document.createElement("span");
-      if (ch === " ") { sp.className = "cr-tc-sp"; sp.innerHTML = "&nbsp;"; } else sp.textContent = ch;
-      sp.style.setProperty("--i", i);
-      t.appendChild(sp);
+  var qs = $$(".cr-hero-grid, .cr-panel, .cr-depts, .cr-pillars, .cr-crew-grid, .cr-launch-inner");
+  qs.forEach(function (el) { el.setAttribute("data-cr-q", ""); });
+  var quantum = function (vh) {
+    if (reduced) return;
+    qs.forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      // in: from its top at the bottom of the view to 30% up it;
+      // out: as its bottom climbs through the top quarter
+      var qi = el.classList.contains("cr-hero-grid") ? 1 : ease((vh - r.top) / (vh * 0.32));
+      var qo = ease(r.bottom / (vh * 0.28));
+      var q = Math.min(qi, qo);
+      if (q > 0.995) {
+        if (el.style.opacity) { el.style.opacity = ""; el.style.translate = ""; el.style.scale = ""; el.style.filter = ""; }
+        return;
+      }
+      el.style.opacity = (q * q).toFixed(3);
+      el.style.translate = "0 " + ((1 - qi) * 60 - (1 - qo) * 40).toFixed(1) + "px";
+      el.style.scale = (0.94 + 0.06 * q).toFixed(3);
+      el.style.filter = "blur(" + ((1 - q) * 9).toFixed(1) + "px)";
     });
-  });
+  };
   // the HUD
   var hud = $("[data-cr-hud]"), hudCh = $("[data-cr-hud-ch]"), hudName = $("[data-cr-hud-name]");
   var strip = hud ? $$("li", $("[data-cr-hud-strip]", hud)) : [];
@@ -543,20 +768,8 @@
   var frameTick = false;
   var onScroll = function () {
     frameTick = false;
-    var vh = window.innerHeight, inCard = false;
-    cards.forEach(function (c) {
-      var r = c.getBoundingClientRect();
-      var p = clamp(-r.top / Math.max(1, r.height - vh), 0, 1);
-      var visible = r.top < vh && r.bottom > 0;
-      c.style.setProperty("--tp", p.toFixed(3));
-      // letterbox: closes in as the card arrives, opens as it leaves
-      c.style.setProperty("--lb", (visible ? Math.sin(Math.PI * clamp(p * 1.1, 0, 1)) : 0).toFixed(3));
-      var on = visible && p > 0.04 && p < 0.86 && r.top <= vh * 0.2;
-      c.classList.toggle("is-on", on || (visible && p >= 0.86));
-      c.classList.toggle("is-out", visible && p >= 0.86);
-      if (on) inCard = true;
-    });
-    main.classList.toggle("is-card", inCard);
+    var vh = window.innerHeight;
+    quantum(vh);
     // past the film (the footer): the HUD steps aside
     main.classList.toggle("is-past", main.getBoundingClientRect().bottom < vh * 0.6);
     if (hud && nowChapter !== hudNow) {
@@ -573,7 +786,6 @@
   window.addEventListener("resize", requestScroll);
   // nowChapter follows the system's reading of the page; keep the HUD in
   // step even when the system is still (reduced motion)
-  if (reduced) { cards.forEach(function (c) { c.classList.add("is-on"); }); }
   setInterval(function () { if (!document.hidden) { target(); onScroll(); } }, 400);
   onScroll();
 
@@ -595,10 +807,9 @@
   }
 
   /* ---------------------------------------------------------------
-     THE GLASS: each chapter's panel boots in (a flicker, its log rows
-     running in) as it comes into view
+     THE TICKET: boots in (a flicker) as it comes into view
      --------------------------------------------------------------- */
-  var glasses = $$(".cr-panel, .cr-glass:not(.cr-hero-panel), .cr-ticket");
+  var glasses = $$(".cr-ticket");
   if ("IntersectionObserver" in window && !reduced) {
     var bio = new IntersectionObserver(function (en) {
       en.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("is-boot"); bio.unobserve(e.target); } });

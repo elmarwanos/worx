@@ -68,7 +68,8 @@
   var BUDGET_MIN = 5000;
   var BUDGET_MAX = 250000;
   var BUDGET_STEP = 1000;
-  var DEFAULT_BUDGET_AMOUNT = 50000;
+  // the gauge opens with its needle at the middle of the dial
+  var DEFAULT_BUDGET_AMOUNT = 125000;
 
   var STEPS = [
     { id: "build",    legend: "What do you need?", type: "build" },
@@ -199,6 +200,14 @@
     amount = Math.min(BUDGET_MAX, Math.max(BUDGET_MIN, amount || DEFAULT_BUDGET_AMOUNT));
     state.form.budget = { currency: "AED", amount: amount, label: formatAED(amount) };
   }
+
+  // Full mission access: past the top of the scale, no ceiling
+  var FULL_LABEL = "Full mission access";
+  function applyFullBudget() {
+    state.form.budget = { currency: "AED", amount: BUDGET_MAX, full: true, label: FULL_LABEL + " (" + formatAED(BUDGET_MAX) + "+)" };
+  }
+  function budgetFull() { return !!(state.form.budget && state.form.budget.full); }
+  function budgetText() { return budgetFull() ? FULL_LABEL : formatAED(budgetAmount()); }
 
   /* ----------------------------------------------------------
      4. PERSISTENCE  (best-effort, the questionnaire works without it)
@@ -620,10 +629,32 @@
   }
 
   // --- Budget: the thrust reactor ------------------------------------
-  // A gauge the budget drives: its arc fills and its needle swings as the
-  // figure climbs, the figure counts up to where the slider is, and the
-  // mission tier the amount buys is named beneath it. Quick picks for a
-  // thumb; the slider itself (keyboard and screen readers) underneath.
+  // A round instrument the budget drives: a bezel, a glass face, a thrust
+  // scale with its redline, a plasma arc that fills and a needle that
+  // swings (and hums) as the figure climbs. The figure counts to the
+  // slider, and the mission class the amount buys is named beside it.
+  // Quick picks for a thumb; the slider (keyboard, screen readers) below.
+  //
+  // Full mission access, the last pick, is off the scale (see overload):
+  //   slam      the needle hits the stop pin
+  //   redline   it fights the pin, the ticks burn red one by one, the
+  //             overload lamp blinks, heat haze warps the dial, sparks
+  //             spit off the pin, the figure runs away
+  //   critical  the reactor shakes harder and harder, hairline cracks
+  //             creep over the glass, smoke, electrical arcs, the
+  //             figure splits into red and blue
+  //   hold      a beat of stillness
+  //   break     time slows: a flash, a shockwave, the glass bursts into
+  //             shards, the needle snaps and its tip flies at the camera,
+  //             spinning and blurring until it fills the screen; the stub
+  //             stays jammed on the pin, white hot, and slowly cools; the
+  //             ticks shake loose, the console jolts
+  //   after     embers, smoke and the odd arc over the wreck
+  // The glass breaks along one fracture web (glassWeb): the cracks and the
+  // pieces are the same shapes. Sparks, glass, dust, steam and arcs are a small physics system on
+  // a canvas over the gauge (reactorFX). Any other pick, or the slider,
+  // repairs it, and coming back to the question starts it fresh at the
+  // middle of the dial. Reduced motion: straight to the broken gauge, still.
   var BUDGET_TIERS = [
     { max: 20000, name: "Launchpad", desc: "A focused site, a landing page or an MVP." },
     { max: 60000, name: "Low orbit", desc: "A full website, a store or a first app." },
@@ -634,34 +665,462 @@
   function tierOf(a) { for (var i = 0; i < BUDGET_TIERS.length; i++) if (a < BUDGET_TIERS[i].max) return i; return BUDGET_TIERS.length - 1; }
   function shortAED(a) { return a >= 1000 ? Math.round(a / 1000) + "K" : String(a); }
 
+  // the dial's geometry, in svg units: centre, a 220 degree sweep
+  var GX = 130, GY = 125, SWEEP = 220, START = 200, gaugeUid = 0;
+  function dialPt(p, r) {
+    var a = (START - SWEEP * p) * Math.PI / 180;
+    return [GX + Math.cos(a) * r, GY - Math.sin(a) * r];
+  }
+  function arcPath(p0, p1, r) {
+    var a = dialPt(p0, r), b = dialPt(p1, r);
+    return "M" + a[0].toFixed(2) + " " + a[1].toFixed(2) + "A" + r + " " + r + " 0 " + ((p1 - p0) * SWEEP > 180 ? 1 : 0) + " 1 " + b[0].toFixed(2) + " " + b[1].toFixed(2);
+  }
+  // where the needle slams: the stop pin just past the top of the scale
+  var PIN = dialPt(1.03, 84), IMPACT = dialPt(0.97, 62);
+
+  // the fracture: one web that is both the cracks and the shards. Rays
+  // run out from the impact, rings circle it, each edge jagged; the cells
+  // between them are the pieces of glass. The cracks are drawn along the
+  // web's edges, so every shard that flies is exactly a piece the cracks
+  // cut. The first three rays are the hairlines that creep in before the
+  // break. Cells: ring 0-1 blast at the camera, ring 2-3 fall out of the
+  // frame, the rest stay in it, a little out of true, and some let go later.
+  var WEB_RAYS = 13, WEB_RINGS = [9, 20, 34, 52, 76, 106, 150, 200];
+  function glassWeb() {
+    var I = IMPACT, N = WEB_RAYS, rings = WEB_RINGS, V = [], cells = [], i, k;
+    var angles = [];
+    for (i = 0; i < N; i++) angles.push(i / N * Math.PI * 2 + (Math.random() - 0.5) * 0.28);
+    var jag = function (p, q, amt) {
+      var mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2, dx = q[0] - p[0], dy = q[1] - p[1], l = Math.hypot(dx, dy) || 1, o = (Math.random() - 0.5) * amt;
+      return [mx - dy / l * o, my + dx / l * o];
+    };
+    for (k = 0; k < rings.length; k++) {
+      V.push(angles.map(function (a) {
+        var r = rings[k] * (1 + (Math.random() - 0.5) * 0.22), aa = a + (Math.random() - 0.5) * 0.08;
+        return [I[0] + Math.cos(aa) * r, I[1] + Math.sin(aa) * r];
+      }));
+    }
+    // a jagged midpoint on every ring edge and every ray edge
+    var ringMid = V.map(function (row, rk) { return row.map(function (p, ri) { return jag(p, row[(ri + 1) % N], 2 + rk * 1.6); }); });
+    var rayMid = V.map(function (row, rk) { return row.map(function (p, ri) { return jag(rk ? V[rk - 1][ri] : I, p, 2 + rk * 1.8); }); });
+    var inFace = function (p) { return Math.hypot(p[0] - GX, p[1] - GY) < 108; };
+    for (k = 0; k < rings.length; k++) {
+      for (i = 0; i < N; i++) {
+        var n = (i + 1) % N, pts;
+        if (k === 0) pts = [I, rayMid[0][i], V[0][i], ringMid[0][i], V[0][n], rayMid[0][n]];
+        else pts = [V[k - 1][i], ringMid[k - 1][i], V[k - 1][n], rayMid[k][n], V[k][n], ringMid[k][i], V[k][i], rayMid[k][i]];
+        if (!pts.some(inFace)) continue;
+        // keep the piece inside the frame: points past the rim sit on it
+        pts = pts.map(function (p) {
+          var dx = p[0] - GX, dy = p[1] - GY, d = Math.hypot(dx, dy);
+          return d > 107 ? [GX + dx / d * 107, GY + dy / d * 107] : p;
+        });
+        cells.push({ pts: pts, ring: k });
+      }
+    }
+    var f1 = function (p) { return p[0].toFixed(1) + " " + p[1].toFixed(1); };
+    var rays = angles.map(function (a, ri) {
+      var d = "M" + f1(I);
+      for (var rk = 0; rk < rings.length; rk++) d += "L" + f1(rayMid[rk][ri]) + "L" + f1(V[rk][ri]);
+      return { d: d, early: ri % 4 === 1 && ri < 12 };
+    });
+    var ringPaths = V.map(function (row, rk) {
+      var d = "M" + f1(row[0]);
+      for (var ri = 0; ri < N; ri++) d += "L" + f1(ringMid[rk][ri]) + "L" + f1(row[(ri + 1) % N]);
+      return { d: d, ring: rk };
+    });
+    return { cells: cells, rays: rays, rings: ringPaths };
+  }
+
+  // a vintage instrument: a brass bezel, knurled and screwed down, an aged
+  // ivory face (foxed with age, lit from behind like an old dashboard), a
+  // serif scale with painted green, amber and red bands, a blued steel
+  // needle with a red lacquered tip on a brass hub, a red jewel lamp, and
+  // domed glass over it all
+  function gaugeSVG(u, web) {
+    var ticks = "", labels = "";
+    for (var t = 0; t <= 44; t++) {
+      var p = t / 44, major = t % 11 === 0;
+      var a = dialPt(p, major ? 70 : (t % 11 === 5 || t % 11 === 6) ? 76 : 79), b = dialPt(p, 84);
+      ticks += '<line x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) + '" x2="' + b[0].toFixed(1) + '" y2="' + b[1].toFixed(1) + '"' + (major ? ' class="is-major"' : "") + "/>";
+      if (major) { var l = dialPt(p, 58); labels += '<text x="' + l[0].toFixed(1) + '" y="' + (l[1] + 4).toFixed(1) + '">' + Math.round(p * 100) + "</text>"; }
+    }
+    // the cracks: rays first, then the rings, each ring a beat later
+    var cracks = web.rays.map(function (c) { return '<path d="' + c.d + '" pathLength="1"' + (c.early ? ' class="is-early"' : "") + "/>"; }).join("") +
+      web.rings.map(function (c) { return '<path d="' + c.d + '" pathLength="1" style="transition-delay:' + (0.04 + c.ring * 0.035).toFixed(3) + 's"/>'; }).join("");
+    // the pane: each piece of glass as a facet, hidden until it breaks
+    var pane = web.cells.map(function (c) {
+      return '<polygon points="' + c.pts.map(function (p) { return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ") + '" style="--fo:' + (0.03 + Math.random() * 0.13).toFixed(3) +
+        ";--fx:" + ((Math.random() - 0.5) * 1.4).toFixed(2) + "px;--fy:" + ((Math.random() - 0.5) * 1.4).toFixed(2) + "px;--fr:" + ((Math.random() - 0.5) * 1.6).toFixed(2) + 'deg"/>';
+    }).join("");
+    var screws = [45, 135, 225, 315].map(function (deg) {
+      var r = deg * Math.PI / 180, x = GX + Math.cos(r) * 112, y = GY + Math.sin(r) * 112, s = (deg * 1.7) % 180;
+      return '<g class="cw-g-screw"><circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3" fill="url(#cwh' + u + ')"/><path d="M' + (x - 2.2).toFixed(1) + " " + y.toFixed(1) + "h4.4" + '" transform="rotate(' + s.toFixed(0) + " " + x.toFixed(1) + " " + y.toFixed(1) + ')"/></g>';
+    }).join("");
+    return '<svg viewBox="0 0 260 250">' +
+      "<defs>" +
+        '<linearGradient id="cwb' + u + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbeab4"/><stop offset=".2" stop-color="#c8963c"/><stop offset=".45" stop-color="#6b4715"/><stop offset=".62" stop-color="#e8c476"/><stop offset=".8" stop-color="#9a6a24"/><stop offset="1" stop-color="#4a300c"/></linearGradient>' +
+        '<radialGradient id="cwf' + u + '" cx=".46" cy=".4" r=".66"><stop offset="0" stop-color="#fbf3de"/><stop offset=".55" stop-color="#efe1bd"/><stop offset=".85" stop-color="#d9c08e"/><stop offset="1" stop-color="#b3935c"/></radialGradient>' +
+        '<linearGradient id="cwn' + u + '" x1="0" x2="1"><stop offset="0" stop-color="#3b4a5c"/><stop offset=".5" stop-color="#10151c"/><stop offset="1" stop-color="#2a3442"/></linearGradient>' +
+        '<linearGradient id="cwr' + u + '" x1="0" x2="1"><stop offset="0" stop-color="#e0473a"/><stop offset=".5" stop-color="#a3170f"/><stop offset="1" stop-color="#c8342a"/></linearGradient>' +
+        '<radialGradient id="cwh' + u + '" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff4cc"/><stop offset=".4" stop-color="#c8963c"/><stop offset="1" stop-color="#4a300c"/></radialGradient>' +
+        '<radialGradient id="cwj' + u + '" cx=".38" cy=".32" r=".7"><stop offset="0" stop-color="#ffd6cc"/><stop offset=".35" stop-color="#d4261c"/><stop offset="1" stop-color="#4a0604"/></radialGradient>' +
+        '<radialGradient id="cws' + u + '" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#1a0c05" stop-opacity=".95"/><stop offset=".5" stop-color="#3a1f0e" stop-opacity=".6"/><stop offset="1" stop-color="#3a1f0e" stop-opacity="0"/></radialGradient>' +
+        '<linearGradient id="cwl' + u + '" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".5" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
+        '<clipPath id="cwc' + u + '"><circle cx="' + GX + '" cy="' + GY + '" r="106"/></clipPath>' +
+        // where glass has fallen out, there is no glare and no crack
+        '<mask id="cwk' + u + '" maskUnits="userSpaceOnUse" x="0" y="0" width="260" height="250"><rect width="260" height="250" fill="#fff"/><g class="cw-g-holes"></g></mask>' +
+        // age: foxing and stains in the paper of the face
+        '<filter id="cwa' + u + '" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="4" seed="7"/><feColorMatrix values="0 0 0 0 0.42  0 0 0 0 0.27  0 0 0 0 0.1  0 0 0 -1.6 1.05"/></filter>' +
+        '<filter id="cwx' + u + '" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.07" numOctaves="2" seed="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter>' +
+      "</defs>" +
+      // the brass: a knurled outer ring, the bezel, its screws
+      '<circle class="cw-g-knurl" cx="' + GX + '" cy="' + GY + '" r="119.5"/>' +
+      '<circle class="cw-g-bezel" cx="' + GX + '" cy="' + GY + '" r="112" stroke="url(#cwb' + u + ')"/>' +
+      '<circle class="cw-g-rim" cx="' + GX + '" cy="' + GY + '" r="116.8"/>' +
+      // the face, aged, lit from behind
+      '<circle cx="' + GX + '" cy="' + GY + '" r="106" fill="url(#cwf' + u + ')"/>' +
+      '<g clip-path="url(#cwc' + u + ')"><rect x="20" y="15" width="220" height="220" filter="url(#cwa' + u + ')" class="cw-g-age"/></g>' +
+      '<circle class="cw-g-heat" cx="' + GX + '" cy="' + GY + '" r="106"/>' +
+      '<circle class="cw-g-scorch" cx="' + IMPACT[0].toFixed(1) + '" cy="' + IMPACT[1].toFixed(1) + '" r="70" fill="url(#cws' + u + ')" clip-path="url(#cwc' + u + ')"/>' +
+      screws +
+      // the dial: everything the heat haze warps
+      '<g class="cw-g-dial">' +
+        '<path class="cw-g-band cw-g-band--g" d="' + arcPath(0, 0.6, 88) + '"/>' +
+        '<path class="cw-g-band cw-g-band--a" d="' + arcPath(0.6, 0.85, 88) + '"/>' +
+        '<path class="cw-g-band cw-g-band--r" d="' + arcPath(0.85, 1, 88) + '"/>' +
+        '<path class="cw-g-edge" d="' + arcPath(0, 1, 84) + '"/>' +
+        '<g class="cw-gauge-ticks">' + ticks + "</g>" +
+        '<g class="cw-g-labels">' + labels + "</g>" +
+        '<text class="cw-g-cap" x="' + GX + '" y="94">THRUST</text>' +
+        '<text class="cw-g-unit" x="' + GX + '" y="103">per cent</text>' +
+        '<g class="cw-g-lamp"><circle cx="' + GX + '" cy="152" r="6.5" class="cw-g-lampring"/><circle cx="' + GX + '" cy="152" r="4.6" fill="url(#cwj' + u + ')" class="cw-g-jewel"/></g>' +
+        '<text class="cw-g-brand" x="' + GX + '" y="176">Worx Instrument Co.</text>' +
+        '<text class="cw-g-serial" x="' + GX + '" y="185">DUBAI · Nº 250</text>' +
+      "</g>" +
+      '<circle class="cw-g-pin" cx="' + PIN[0].toFixed(1) + '" cy="' + PIN[1].toFixed(1) + '" r="2.4" fill="url(#cwh' + u + ')"/>' +
+      // the needle: blued steel with a counterweight, a red lacquered tip;
+      // a stub and a tip, so it can snap
+      '<g class="cw-gauge-needle"><g class="cw-g-hum">' +
+        '<g class="cw-g-stub"><path d="M128.6 125L129.2 150h1.6l.6-25z" fill="url(#cwn' + u + ')"/><circle cx="130" cy="147" r="4.2" fill="none" stroke="url(#cwn' + u + ')" stroke-width="2"/><polygon points="127.4,125 128.8,84 131.2,84 132.6,125" fill="url(#cwn' + u + ')"/><polygon class="cw-g-hot" points="127.4,125 128.8,84 131.2,84 132.6,125"/></g>' +
+        '<g class="cw-g-tip"><polygon points="128.8,84 129.4,62 130.6,62 131.2,84" fill="url(#cwn' + u + ')"/><polygon points="129.4,62 130,36 130.6,62" fill="url(#cwr' + u + ')"/></g>' +
+      "</g></g>" +
+      '<circle cx="' + GX + '" cy="' + GY + '" r="9" fill="url(#cwh' + u + ')" class="cw-gauge-hub"/>' +
+      '<path class="cw-g-hubslot" d="M126 122.5l8 5"/>' +
+      '<circle cx="' + GX + '" cy="' + GY + '" r="2" class="cw-g-hubcore"/>' +
+      // the glass: domed, with a window's reflection, the pane's facets
+      // and the cracks waiting in it
+      '<g clip-path="url(#cwc' + u + ')"><g mask="url(#cwk' + u + ')">' +
+        '<circle class="cw-g-dome" cx="' + GX + '" cy="' + GY + '" r="106"/>' +
+        '<ellipse cx="96" cy="58" rx="84" ry="40" transform="rotate(-28 96 58)" fill="url(#cwl' + u + ')" class="cw-g-glare"/>' +
+        '<path class="cw-g-glint" d="M44 118A88 88 0 0 1 84 46"/>' +
+        '<g class="cw-g-pane">' + pane + "</g>" +
+        '<g class="cw-gauge-crack">' + cracks + "</g>" +
+      "</g></g>" +
+    "</svg>";
+  }
+
+  // --- the reactor's physics: sparks, shards, embers, steam, arcs
+  function reactorFX(gaugeEl, wrap) {
+    var cv = document.createElement("canvas");
+    cv.className = "cw-gauge-fx"; cv.setAttribute("aria-hidden", "true");
+    gaugeEl.appendChild(cv);
+    var svg = gaugeEl.querySelector("svg"), g = cv.getContext("2d");
+    var parts = [], rings = [], bolts = [], stars = [], raf = 0, last = 0, seen = false;
+    var W = 0, H = 0, dpr = 1, sc = 1, ox = 0, oy = 0, floor = 0;
+    var ambient = 0, nextArc = 0, onArc = null, ts = 1, slowFor = 0;
+    function fit() {
+      var r = cv.getBoundingClientRect(), s = svg.getBoundingClientRect();
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      if (Math.round(r.width * dpr) !== cv.width || Math.round(r.height * dpr) !== cv.height) { cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
+      W = r.width; H = r.height; sc = s.width / 260; ox = s.left - r.left; oy = s.top - r.top; floor = oy + 236 * sc;
+    }
+    var X = function (x) { return ox + x * sc; }, Y = function (y) { return oy + y * sc; };
+    function add(p) { if (parts.length < 420) parts.push(p); }
+    var api = {
+      sparks: function (n, x, y, spread, power, dir) {
+        for (var i = 0; i < n; i++) {
+          var a = (dir == null ? Math.random() * Math.PI * 2 : dir + (Math.random() - 0.5) * spread), v = (0.5 + Math.random()) * power;
+          add({ k: "s", x: X(x), y: Y(y), vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1, dec: 0.012 + Math.random() * 0.02, w: 0.8 + Math.random() * 1.2 });
+        }
+      },
+      // fine splinters: small slivers thrown out with the blast
+      shards: function (n, x, y) {
+        fit();
+        for (var i = 0; i < n; i++) {
+          var a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 7, sz = (2 + Math.random() * 5) * sc, pts = [];
+          var m = 3 + (Math.random() * 2 | 0);
+          for (var q = 0; q < m; q++) { var aa = q / m * Math.PI * 2 + Math.random() * 0.8; pts.push(Math.cos(aa) * sz * (0.4 + Math.random() * 0.9), Math.sin(aa) * sz * (0.3 + Math.random() * 0.5)); }
+          add({ k: "g", x: X(x + (Math.random() - 0.5) * 30), y: Y(y + (Math.random() - 0.5) * 30), vx: Math.cos(a) * v, vy: Math.sin(a) * v - 3, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4,
+            flip: Math.random() * 6, vf: (Math.random() - 0.5) * 0.5, z: 1, vz: 0, g0: 0.34, delay: 0, fly: false, pts: pts, life: 1, rest: 0 });
+        }
+      },
+      // a real piece of the pane (svg points): "fly" blasts it at the
+      // camera, spinning, growing as it comes; "fall" lets it drop out of
+      // the frame after its delay (it trembles for a moment first)
+      pane: function (pts, mode, delay) {
+        fit();
+        var cx = 0, cy = 0, rel = [];
+        pts.forEach(function (p) { cx += p[0]; cy += p[1]; });
+        cx /= pts.length; cy /= pts.length;
+        pts.forEach(function (p) { rel.push((p[0] - cx) * sc, (p[1] - cy) * sc); });
+        var dx = cx - IMPACT[0], dy = cy - IMPACT[1], dl = Math.hypot(dx, dy) || 1, fly = mode === "fly";
+        var push = fly ? 1.2 + Math.random() * 3.2 : 0.2 + Math.random() * 0.7;
+        add({ k: "g", x: X(cx), y: Y(cy), vx: dx / dl * push, vy: dy / dl * push - (fly ? 1.2 : 0), rot: 0, vr: (Math.random() - 0.5) * (fly ? 0.22 : 0.06),
+          flip: 0, vf: (Math.random() - 0.5) * (fly ? 0.34 : 0.1), z: 1, vz: fly ? 0.012 + Math.random() * 0.02 : 0, g0: fly ? 0.04 : 0.3,
+          delay: delay || 0, fly: fly, pts: rel, life: 1, rest: 0, big: true });
+      },
+      // glass dust: glitter that catches the light as it falls
+      glitter: function (n, x, y, spread) {
+        fit();
+        for (var i = 0; i < n; i++) {
+          var a = Math.random() * Math.PI * 2, v = Math.random() * (spread || 4);
+          add({ k: "d", x: X(x), y: Y(y), vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1.5, ph: Math.random() * 6, life: 1, dec: 0.006 + Math.random() * 0.01 });
+        }
+      },
+      // the instant of impact: a star of light at the point of failure
+      impact: function (x, y) { stars.push({ x: X(x), y: Y(y), t: 0, rays: 22 }); },
+      // a jet of steam from a point, blasting out and billowing
+      steam: function (n, x, y, dir, power) {
+        for (var i = 0; i < n; i++) {
+          var a = dir + (Math.random() - 0.5) * 0.5, v = (0.6 + Math.random()) * power;
+          add({ k: "m", x: X(x), y: Y(y), vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: (4 + Math.random() * 5) * sc, gr: 0.5 + Math.random() * 0.6, life: 1, dec: 0.01 + Math.random() * 0.008, a: 0.5 });
+        }
+      },
+      smoke: function (n, x, y, big) {
+        for (var i = 0; i < n; i++) add({ k: "m", x: X(x + (Math.random() - 0.5) * 50), y: Y(y + (Math.random() - 0.5) * 20), vx: (Math.random() - 0.3) * 0.5, vy: -0.5 - Math.random() * 0.9, r: (big ? 18 : 10) * sc, gr: 0.28 + Math.random() * 0.3, life: 1, dec: 0.004 + Math.random() * 0.004, a: big ? 0.34 : 0.22 });
+      },
+      embers: function (n, x, y) {
+        for (var i = 0; i < n; i++) add({ k: "e", x: X(x + (Math.random() - 0.5) * 120), y: Y(y + (Math.random() - 0.5) * 60), vx: (Math.random() - 0.5) * 0.4, vy: -0.3 - Math.random() * 0.7, ph: Math.random() * 6, life: 1, dec: 0.004 + Math.random() * 0.006 });
+      },
+      shock: function (x, y) { rings.push({ x: X(x), y: Y(y), r: 4, a: 1 }, { x: X(x), y: Y(y), r: -30, a: 0.6 }); },
+      arc: function () {
+        // a crackle of current across the wreck, from the hub or the rim
+        var a0 = Math.random() * Math.PI * 2, a1 = a0 + 1 + Math.random() * 2.5;
+        var from = Math.random() < 0.5 ? [GX, GY] : [GX + Math.cos(a0) * 100, GY + Math.sin(a0) * 100];
+        var to = [GX + Math.cos(a1) * (40 + Math.random() * 64), GY + Math.sin(a1) * (40 + Math.random() * 64)];
+        var pts = [], n = 9;
+        for (var i = 0; i <= n; i++) {
+          var k = i / n, jit = i && i < n ? (Math.random() - 0.5) * 22 : 0;
+          pts.push(X(from[0] + (to[0] - from[0]) * k + jit), Y(from[1] + (to[1] - from[1]) * k + (Math.random() - 0.5) * 22 * (i && i < n ? 1 : 0)));
+        }
+        bolts.push({ pts: pts, life: 1 });
+        api.sparks(6, to[0], to[1], 0, 2.2);
+        if (onArc) onArc();
+      },
+      ambient: function (level) { ambient = level; if (level) start(); },
+      // time slows right down, then eases back to full speed
+      slowmo: function (ms) { ts = 0.12; slowFor = ms; start(); },
+      onArc: function (fn) { onArc = fn; },
+      clear: function () { parts = []; rings = []; bolts = []; stars = []; ambient = 0; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); },
+      start: function () { start(); }
+    };
+    function start() { if (!raf) { last = 0; raf = requestAnimationFrame(tick); } }
+    function tick(now) {
+      raf = 0;
+      if (!wrap.isConnected) { if (seen) { api.clear(); return; } raf = requestAnimationFrame(tick); return; }
+      seen = true;
+      var dt = last ? Math.min(50, now - last) : 16; last = now;
+      if (ts < 1) ts = Math.min(1, ts + dt / slowFor * 0.88);
+      var f = dt / 16 * ts; dt *= ts;
+      fit();
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.clearRect(0, 0, W, H);
+      // the wreck keeps smouldering
+      if (ambient) {
+        if (Math.random() < 0.05 * f * ambient) api.smoke(1, GX + (Math.random() - 0.5) * 60, GY + 10, false);
+        if (Math.random() < 0.08 * f * ambient) api.embers(1, GX, GY + 20);
+        if (now > nextArc) { if (nextArc) api.arc(); nextArc = now + 700 + Math.random() * 2200 / ambient; }
+      }
+      // smoke under everything else
+      g.globalCompositeOperation = "source-over";
+      for (var i = parts.length - 1; i >= 0; i--) {
+        var p = parts[i];
+        if (p.k !== "m") continue;
+        p.x += p.vx * f; p.y += p.vy * f; p.r += p.gr * f; p.life -= p.dec * f;
+        p.vx *= Math.pow(0.95, f); p.vy = p.vy * Math.pow(0.95, f) - 0.02 * f;
+        if (p.life <= 0) { parts.splice(i, 1); continue; }
+        var sg = g.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+        sg.addColorStop(0, "rgba(236,228,214," + (p.a * p.life * 0.8).toFixed(3) + ")"); sg.addColorStop(0.6, "rgba(200,190,176," + (p.a * p.life * 0.3).toFixed(3) + ")"); sg.addColorStop(1, "rgba(160,150,140,0)");
+        g.fillStyle = sg; g.beginPath(); g.arc(p.x, p.y, p.r, 0, Math.PI * 2); g.fill();
+      }
+      // the glass: each piece tumbles in three dimensions (its flip
+      // squashes it edge on), catches the light when it faces the lamp,
+      // and shows the green of its cut edge
+      for (i = parts.length - 1; i >= 0; i--) {
+        p = parts[i];
+        if (p.k !== "g") continue;
+        var jit = 0;
+        if (p.delay > 0) {
+          p.delay -= dt;
+          if (p.delay < 320) jit = (Math.random() - 0.5) * 1.4 * sc;   // it trembles, then lets go
+        } else {
+          p.vy += p.g0 * f; p.x += p.vx * f; p.y += p.vy * f; p.rot += p.vr * f; p.flip += p.vf * f;
+          if (p.fly) {
+            // coming at the camera, faster and faster
+            p.z += p.vz * f; p.vz *= Math.pow(1.045, f);
+            if (p.z > 2.4) p.life -= 0.045 * f;
+          } else if (p.y > floor) {
+            p.y = floor; p.vy *= -0.3; p.vx *= 0.5; p.vr *= 0.5; p.vf *= 0.4;
+            if (Math.abs(p.vy) > 2 && p.big) api.glitter(4, (p.x - ox) / sc, (p.y - oy) / sc, 2.5);
+            if (Math.abs(p.vy) < 1) { p.vy = 0; p.rest += dt; }
+          }
+          p.vx *= 0.995;
+          if (p.rest > 1100) p.life -= 0.018 * f;
+        }
+        if (p.life <= 0 || p.x < -60 || p.x > W + 60 || p.y > H + 60) { parts.splice(i, 1); continue; }
+        var cf = Math.cos(p.flip), sx = Math.abs(cf) < 0.06 ? (cf < 0 ? -0.06 : 0.06) : cf;
+        var glint = Math.pow(Math.max(0, Math.sin(p.flip * 1.3 + p.rot + 0.6)), 10);
+        var la = p.life * (p.fly ? Math.max(0, 1 - (p.z - 1) * 0.12) + 0.2 : 1);
+        g.save(); g.translate(p.x + jit, p.y); g.rotate(p.rot); g.scale(p.z * sx, p.z);
+        g.beginPath(); g.moveTo(p.pts[0], p.pts[1]);
+        for (var q = 2; q < p.pts.length; q += 2) g.lineTo(p.pts[q], p.pts[q + 1]);
+        g.closePath();
+        g.fillStyle = "rgba(255,246,232," + ((0.05 + (1 - Math.abs(cf)) * 0.07 + glint * 0.6) * la).toFixed(3) + ")"; g.fill();
+        g.lineWidth = 0.8 / p.z; g.strokeStyle = "rgba(255,248,236," + ((0.32 + glint * 0.6) * la).toFixed(3) + ")"; g.stroke();
+        // the cut edge of the glass, faintly green
+        g.beginPath(); g.moveTo(p.pts[0], p.pts[1]); g.lineTo(p.pts[2], p.pts[3]); g.lineTo(p.pts[4], p.pts[5]);
+        g.lineWidth = 1.6 / p.z; g.strokeStyle = "rgba(186,255,222," + ((0.28 + glint * 0.5) * la).toFixed(3) + ")"; g.stroke();
+        g.restore();
+        if (glint > 0.85 && Math.random() < 0.25 * f) api.glitter(1, (p.x - ox) / sc, (p.y - oy) / sc, 0.6);
+      }
+      // sparks, embers, shockwaves, arcs: light, added up
+      g.globalCompositeOperation = "lighter";
+      for (i = parts.length - 1; i >= 0; i--) {
+        p = parts[i];
+        if (p.k === "s") {
+          p.vy += 0.22 * f; p.x += p.vx * f; p.y += p.vy * f; p.vx *= 0.985; p.life -= p.dec * f;
+          if (p.y > floor) { p.y = floor; p.vy *= -0.4; p.vx *= 0.7; }
+          if (p.life <= 0) { parts.splice(i, 1); continue; }
+          var hot = p.life > 0.6 ? "255,244,214" : p.life > 0.3 ? "250,167,25" : "229,90,40";
+          g.strokeStyle = "rgba(" + hot + "," + Math.min(1, p.life * 1.4).toFixed(3) + ")"; g.lineWidth = p.w;
+          g.beginPath(); g.moveTo(p.x - p.vx * 2.2, p.y - p.vy * 2.2); g.lineTo(p.x, p.y); g.stroke();
+        } else if (p.k === "d") {
+          p.vy += 0.07 * f; p.x += p.vx * f; p.y += p.vy * f; p.vx *= 0.98; p.life -= p.dec * f;
+          if (p.y > floor) { p.y = floor; p.vy *= -0.3; p.vx *= 0.6; }
+          if (p.life <= 0) { parts.splice(i, 1); continue; }
+          // it twinkles: a four point star when it catches the light
+          var tw = Math.sin(now * 0.025 + p.ph * 7);
+          if (tw > 0.55) {
+            var sl = (1.5 + (tw - 0.55) * 7) * p.life;
+            g.strokeStyle = "rgba(255,250,240," + p.life.toFixed(3) + ")"; g.lineWidth = 0.8;
+            g.beginPath(); g.moveTo(p.x - sl, p.y); g.lineTo(p.x + sl, p.y); g.moveTo(p.x, p.y - sl); g.lineTo(p.x, p.y + sl); g.stroke();
+          } else { g.fillStyle = "rgba(255,244,228," + (p.life * 0.5).toFixed(3) + ")"; g.fillRect(p.x, p.y, 1, 1); }
+        } else if (p.k === "e") {
+          p.x += (p.vx + Math.sin(now * 0.003 + p.ph) * 0.3) * f; p.y += p.vy * f; p.life -= p.dec * f;
+          if (p.life <= 0) { parts.splice(i, 1); continue; }
+          var fl = 0.5 + 0.5 * Math.sin(now * 0.02 + p.ph * 5);
+          g.fillStyle = "rgba(250," + (140 + fl * 60 | 0) + ",40," + (p.life * (0.5 + fl * 0.5)).toFixed(3) + ")";
+          g.beginPath(); g.arc(p.x, p.y, 1.1 + fl * 0.6, 0, Math.PI * 2); g.fill();
+        }
+      }
+      for (i = rings.length - 1; i >= 0; i--) {
+        var rg = rings[i]; rg.r += 5.5 * f * sc; rg.a -= 0.028 * f;
+        if (rg.a <= 0) { rings.splice(i, 1); continue; }
+        if (rg.r <= 0) continue;
+        g.strokeStyle = "rgba(255,226,180," + (rg.a * 0.8).toFixed(3) + ")"; g.lineWidth = 1 + rg.a * 5;
+        g.beginPath(); g.arc(rg.x, rg.y, rg.r, 0, Math.PI * 2); g.stroke();
+      }
+      for (i = stars.length - 1; i >= 0; i--) {
+        var st = stars[i]; st.t += dt / 340;
+        if (st.t >= 1) { stars.splice(i, 1); continue; }
+        var ease = 1 - Math.pow(1 - st.t, 3), sa = (1 - st.t);
+        var core = g.createRadialGradient(st.x, st.y, 0, st.x, st.y, 60 * sc * (0.4 + ease));
+        core.addColorStop(0, "rgba(255,252,244," + sa.toFixed(3) + ")"); core.addColorStop(0.3, "rgba(255,214,150," + (sa * 0.5).toFixed(3) + ")"); core.addColorStop(1, "rgba(250,167,25,0)");
+        g.fillStyle = core; g.beginPath(); g.arc(st.x, st.y, 60 * sc * (0.4 + ease), 0, Math.PI * 2); g.fill();
+        for (var ry = 0; ry < st.rays; ry++) {
+          var ra = ry / st.rays * Math.PI * 2 + (ry % 2) * 0.1, rl = (ry % 3 ? 70 : 150) * sc * ease;
+          g.strokeStyle = "rgba(255,246,228," + (sa * (ry % 3 ? 0.35 : 0.8)).toFixed(3) + ")"; g.lineWidth = ry % 3 ? 0.6 : 1.2;
+          g.beginPath(); g.moveTo(st.x + Math.cos(ra) * rl * 0.15, st.y + Math.sin(ra) * rl * 0.15); g.lineTo(st.x + Math.cos(ra) * rl, st.y + Math.sin(ra) * rl); g.stroke();
+        }
+      }
+      for (i = bolts.length - 1; i >= 0; i--) {
+        var bt = bolts[i]; bt.life -= 0.09 * f;
+        if (bt.life <= 0) { bolts.splice(i, 1); continue; }
+        if (Math.random() < 0.5) {   // current flickers
+          [[5, "250,167,25", 0.3], [1.3, "255,246,228", 1]].forEach(function (pass) {
+            g.strokeStyle = "rgba(" + pass[1] + "," + (pass[2] * bt.life).toFixed(3) + ")"; g.lineWidth = pass[0];
+            g.beginPath(); g.moveTo(bt.pts[0], bt.pts[1]);
+            for (var q2 = 2; q2 < bt.pts.length; q2 += 2) g.lineTo(bt.pts[q2] + (Math.random() - 0.5) * 2, bt.pts[q2 + 1] + (Math.random() - 0.5) * 2);
+            g.stroke();
+          });
+        }
+      }
+      g.globalCompositeOperation = "source-over";
+      if (parts.length || rings.length || bolts.length || stars.length || ambient) raf = requestAnimationFrame(tick);
+    }
+    return api;
+  }
+
+  // the needle's tip, snapped off, flies at the camera: out of the gauge,
+  // spinning faster, growing and blurring as it comes, until it fills the
+  // screen and hits the lens (a smear of red and blue, a blink)
+  function flyToCamera(tipEl, deg) {
+    var r = tipEl.getBoundingClientRect();
+    if (!r.width || !tipEl.animate) return;
+    var len = Math.hypot(r.width, r.height), w = Math.max(6, len / 7);
+    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    var fly = h("div", { "class": "cw-flytip", "aria-hidden": "true" });
+    fly.innerHTML = '<svg viewBox="0 0 10 64" preserveAspectRatio="none"><defs><linearGradient id="cwft" x1="0" x2="1"><stop offset="0" stop-color="#fff6e4"/><stop offset=".5" stop-color="#faa719"/><stop offset="1" stop-color="#c04527"/></linearGradient></defs><polygon points="3.4,64 5,0 6.6,64" fill="url(#cwft)"/><circle cx="5" cy="3" r="2.2" fill="#fff3dc"/></svg>';
+    fly.style.cssText = "left:" + (cx - w / 2).toFixed(1) + "px;top:" + (cy - len / 2).toFixed(1) + "px;width:" + w.toFixed(1) + "px;height:" + len.toFixed(1) + "px";
+    document.body.appendChild(fly);
+    var dx = window.innerWidth * 0.5 - cx + (Math.random() - 0.5) * 120, dy = window.innerHeight * 0.45 - cy;
+    var anim = fly.animate([
+      { transform: "translate(0,0) rotate(" + deg + "deg) scale(1)", filter: "blur(0) drop-shadow(0 0 6px #faa719)", opacity: 1 },
+      { offset: 0.3, transform: "translate(" + (dx * 0.06).toFixed(1) + "px," + (dy * 0.06 - 30).toFixed(1) + "px) rotate(" + (deg + 90) + "deg) scale(1.4)", filter: "blur(0) drop-shadow(0 0 10px #faa719)", opacity: 1 },
+      { offset: 0.75, transform: "translate(" + (dx * 0.55).toFixed(1) + "px," + (dy * 0.55).toFixed(1) + "px) rotate(" + (deg + 420) + "deg) scale(5)", filter: "blur(3px) drop-shadow(0 0 18px #faa719)", opacity: 1 },
+      { transform: "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px) rotate(" + (deg + 900) + "deg) scale(26)", filter: "blur(22px) drop-shadow(0 0 40px #faa719)", opacity: 0.2 }
+    ], { duration: 1500, easing: "cubic-bezier(0.55, 0, 0.9, 0.6)", fill: "forwards" });
+    setTimeout(function () {
+      var lens = h("div", { "class": "cw-lens", "aria-hidden": "true" });
+      document.body.appendChild(lens);
+      setTimeout(function () { lens.remove(); }, 600);
+    }, 1320);
+    anim.onfinish = function () { fly.remove(); };
+  }
+
+  // the whole screen blinks white at the break
+  function screenFlash() {
+    var fl = h("div", { "class": "cw-flash", "aria-hidden": "true" });
+    document.body.appendChild(fl);
+    setTimeout(function () { fl.remove(); }, 700);
+  }
+
   function renderBudget() {
-    if (!state.form.budget) applyBudget(DEFAULT_BUDGET_AMOUNT);
+    // every visit starts the gauge fresh at the middle of the dial: an
+    // earlier Full mission access does not come back broken
+    if (!state.form.budget || budgetFull()) applyBudget(DEFAULT_BUDGET_AMOUNT);
     var amount = budgetAmount();
     var wrap = h("div", { "class": "cw-reactor" });
+    var u = ++gaugeUid;
 
-    // the gauge: a half ring of ticks, the fill arc, the needle
-    var ticks = "";
-    for (var t = 0; t <= 40; t++) {
-      var ang = Math.PI * (1 - t / 40), major = t % 10 === 0;
-      var r1 = major ? 88 : 93, r2 = 100;
-      ticks += '<line x1="' + (120 + Math.cos(ang) * r1).toFixed(1) + '" y1="' + (124 - Math.sin(ang) * r1).toFixed(1) + '" x2="' + (120 + Math.cos(ang) * r2).toFixed(1) + '" y2="' + (124 - Math.sin(ang) * r2).toFixed(1) + '"' + (major ? ' class="is-major"' : "") + "/>";
-    }
+    var web = glassWeb();
     var gauge = h("div", { "class": "cw-gauge", "aria-hidden": "true" });
-    gauge.innerHTML =
-      '<svg viewBox="0 0 240 136">' +
-        '<defs><linearGradient id="cw-gauge-g" x1="0" x2="1"><stop offset="0" stop-color="#c04527"/><stop offset=".55" stop-color="#e57d23"/><stop offset="1" stop-color="#faa719"/></linearGradient></defs>' +
-        '<g class="cw-gauge-ticks">' + ticks + "</g>" +
-        '<path class="cw-gauge-track" d="M28 124A92 92 0 0 1 212 124" pathLength="1"/>' +
-        '<path class="cw-gauge-fill" d="M28 124A92 92 0 0 1 212 124" pathLength="1"/>' +
-        '<g class="cw-gauge-needle"><path d="M120 124L120 44"/><circle cx="120" cy="44" r="3"/></g>' +
-        '<circle class="cw-gauge-hub" cx="120" cy="124" r="7"/>' +
-      "</svg>" +
-      '<span class="cw-gauge-glow"></span>';
+    gauge.innerHTML = gaugeSVG(u, web) + '<span class="cw-gauge-glow"></span>';
+    var fx = reactorFX(gauge, wrap);
+    var needle = gauge.querySelector(".cw-gauge-needle"), stub = gauge.querySelector(".cw-g-stub"), tip = gauge.querySelector(".cw-g-tip");
+    var dial = gauge.querySelector(".cw-g-dial"), heat = gauge.querySelector("#cwx" + u + " feDisplacementMap"), turb = gauge.querySelector("#cwx" + u + " feTurbulence");
+    var svgTicks = [].slice.call(gauge.querySelectorAll(".cw-gauge-ticks line"));
+    var cracks = [].slice.call(gauge.querySelectorAll(".cw-gauge-crack path"));
+    var facets = [].slice.call(gauge.querySelectorAll(".cw-g-pane polygon")), holes = gauge.querySelector(".cw-g-holes");
+    // a piece leaves the frame: its facet goes, and a hole opens in the
+    // glass (no glare, no cracks where there is no glass)
+    function dropCell(k) {
+      if (facets[k].classList.contains("is-gone")) return false;
+      facets[k].classList.add("is-gone");
+      var hole = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+      hole.setAttribute("points", facets[k].getAttribute("points"));
+      hole.setAttribute("fill", "#000");
+      holes.appendChild(hole);
+      return true;
+    }
+    function centroid(pts) { var x = 0, y = 0; pts.forEach(function (p) { x += p[0]; y += p[1]; }); return [x / pts.length, y / pts.length]; }
 
     var tierName = h("p", { "class": "cw-reactor-tier" });
     var value = h("p", { "class": "cw-budget-value", role: "status", "aria-live": "polite" }, [formatAED(amount)]);
     var tierDesc = h("p", { "class": "cw-reactor-desc" });
     var read = h("div", { "class": "cw-reactor-read" }, [tierName, value, tierDesc]);
+    var core = h("div", { "class": "cw-reactor-core" }, [gauge, read]);
 
     var range = h("input", {
       type: "range", "class": "cw-range",
@@ -693,11 +1152,12 @@
         if (lastTier !== -1) { wrap.classList.remove("is-shift"); void wrap.offsetWidth; wrap.classList.add("is-shift"); }
         lastTier = ti;
       }
-      picks.forEach(function (b) { b.classList.toggle("is-on", +b.getAttribute("data-amount") === a); });
+      picks.forEach(function (b) { b.classList.toggle("is-on", !budgetFull() && +b.getAttribute("data-amount") === a); });
     }
     function set(a, fromPick) {
       a = Math.max(BUDGET_MIN, Math.min(BUDGET_MAX, a));
       if (fromPick) range.value = String(a);
+      repair();
       applyBudget(a);
       paint(a);
       countTo(a);
@@ -712,8 +1172,196 @@
     });
     range.addEventListener("input", function () { set(parseInt(range.value, 10) || DEFAULT_BUDGET_AMOUNT, false); });
 
-    wrap.appendChild(h("div", { "class": "cw-reactor-core" }, [gauge, read]));
-    wrap.appendChild(h("div", { "class": "cw-picks", role: "group", "aria-label": "Quick budget picks" }, picks));
+    // --- Full mission access: pushing the reactor past its limit ---
+    var full = h("button", { type: "button", "class": "cw-pick cw-pick--full", "aria-pressed": "false" }, [
+      h("i", { "aria-hidden": "true" }), "Full mission access"
+    ]);
+    var timers = [], director = 0, scramble = 0;
+    var later = function (fn, ms) { timers.push(setTimeout(fn, ms)); };
+    // the needle's angle for a share of the scale (0 at the bottom left)
+    var angleOf = function (p) { return -110 + 220 * p; };
+
+    // the figure runs away: faster and faster, past anything real
+    function runaway() {
+      var v = BUDGET_MAX, speed = 1.03;
+      (function spin() {
+        speed = Math.min(1.32, speed + 0.004);
+        v = v * speed + Math.random() * 9000;
+        // past a billion the digits glitch: the dial cannot count that high
+        value.textContent = v > 1e9 ? formatAED(1e9 + Math.floor(Math.random() * 8.99e9)).replace(/\d/g, function (dg) { return Math.random() < 0.3 ? "#%&*"[(Math.random() * 4) | 0] : dg; }) : formatAED(Math.round(v));
+        scramble = setTimeout(spin, 45);
+      })();
+    }
+    function stopDirector() {
+      cancelAnimationFrame(director); director = 0;
+      clearTimeout(scramble);
+      core.style.transform = "";
+      needle.style.transform = "";
+      dial.removeAttribute("filter");
+      if (heat) heat.setAttribute("scale", "0");
+    }
+    function repair() {
+      timers.forEach(clearTimeout); timers = [];
+      stopDirector();
+      if (!wrap.classList.contains("is-full")) return;
+      wrap.classList.remove("is-full", "is-redline", "is-critical", "is-hold", "is-broken", "is-settled", "is-zap");
+      svgTicks.forEach(function (l) { l.removeAttribute("style"); });
+      cracks.forEach(function (c) { c.classList.remove("is-on"); });
+      facets.forEach(function (fa) { fa.classList.remove("is-gone"); });
+      holes.innerHTML = "";
+      fx.clear();
+      full.classList.remove("is-on"); full.setAttribute("aria-pressed", "false");
+      lastTier = -1;
+    }
+    function scatterTicks(settled) {
+      svgTicks.forEach(function (l, k) {
+        var a = Math.PI * (1 - k / 44);
+        l.style.setProperty("--tx", (Math.cos(a) * (20 + Math.random() * 60)).toFixed(1) + "px");
+        l.style.setProperty("--ty", (60 + Math.random() * 110).toFixed(1) + "px");
+        l.style.setProperty("--tr", ((Math.random() - 0.5) * 720).toFixed(0) + "deg");
+        l.style.transitionDelay = (settled ? 0 : Math.random() * 0.2).toFixed(2) + "s";
+        l.style.stroke = "";
+      });
+    }
+    function brokenCopy() {
+      value.textContent = "No limit";
+      tierName.textContent = "Mission class · Off the scale";
+      tierDesc.textContent = "No ceiling. We scope the whole mission with you, every platform, every team.";
+    }
+    function broken(settled) {
+      stopDirector();
+      wrap.classList.remove("is-redline", "is-critical", "is-hold");
+      wrap.classList.add("is-broken");
+      if (settled) wrap.classList.add("is-settled");
+      // what is left of the needle stays jammed against the pin
+      needle.style.transform = "rotate(" + (angleOf(1.03) + 1.5) + "deg)";
+      cracks.forEach(function (c) { c.classList.add("is-on"); });
+      scatterTicks(settled);
+      brokenCopy();
+      // the glass: the middle goes at once, the next ring falls out, the
+      // rest hangs on in the frame
+      var flying = [], falling = [];
+      web.cells.forEach(function (c, k) {
+        if (c.ring <= 1) flying.push(k);
+        else if (c.ring === 2 || (c.ring === 3 && Math.random() < 0.6) || (c.ring === 4 && Math.random() < 0.15)) falling.push(k);
+      });
+      flying.concat(falling).forEach(dropCell);
+      if (reducedMotion) return;
+      // the hub flickers when current crackles over the wreck
+      fx.onArc(function () { wrap.classList.remove("is-zap"); void wrap.offsetWidth; wrap.classList.add("is-zap"); });
+      fx.ambient(1);
+      if (settled) return;
+      // the break itself
+      fx.slowmo(900);
+      flyToCamera(tip, angleOf(1.03) + 1.5);
+      screenFlash();
+      var con = wrap.closest(".ct-console") || wrap;
+      con.classList.remove("cw-impact"); void con.offsetWidth; con.classList.add("cw-impact");
+      later(function () { con.classList.remove("cw-impact"); }, 900);
+      fx.shock(IMPACT[0], IMPACT[1]);
+      fx.impact(IMPACT[0], IMPACT[1]);
+      // the pieces of the pane: the middle blasts at the camera, the next
+      // ring trembles and falls out of the frame, one after another
+      flying.forEach(function (k) { fx.pane(web.cells[k].pts, "fly", Math.random() * 40); });
+      falling.forEach(function (k) {
+        var c = web.cells[k];
+        fx.pane(c.pts, "fall", 90 + (c.ring - 2) * 260 + Math.random() * 420);
+      });
+      fx.shards(40, IMPACT[0], IMPACT[1]);
+      fx.glitter(90, IMPACT[0], IMPACT[1], 7);
+      // and long after, a loose piece lets go now and then
+      (function loosen(n) {
+        if (!n) return;
+        later(function () {
+          var pool = [];
+          web.cells.forEach(function (c, k) { if (c.ring >= 3 && !facets[k].classList.contains("is-gone")) pool.push(k); });
+          if (!pool.length) return;
+          var k = pool[(Math.random() * pool.length) | 0], c = web.cells[k], m = centroid(c.pts);
+          dropCell(k);
+          fx.pane(c.pts, "fall", 380);
+          later(function () { fx.glitter(10, m[0], m[1], 2); }, 380);
+          loosen(n - 1);
+        }, 1800 + Math.random() * 3200);
+      })(7);
+      fx.sparks(90, IMPACT[0], IMPACT[1], 0, 6);
+      fx.sparks(30, PIN[0], PIN[1], 1.2, 7, -Math.PI / 2);
+      // where it snapped: a spray of white-hot sparks
+      var snap = dialPt(1.03, 41);
+      fx.sparks(40, snap[0], snap[1], 0, 5);
+      // the boiler lets go: steam blasts out all round the rim
+      for (var sj = 0; sj < 8; sj++) { var sa = sj / 8 * Math.PI * 2 + Math.random() * 0.4; fx.steam(7, GX + Math.cos(sa) * 110, GY + Math.sin(sa) * 110, sa, 7); }
+      fx.smoke(8, GX, GY, true);
+      fx.embers(24, GX, GY);
+      later(function () { fx.arc(); }, 260);
+      later(function () { fx.arc(); }, 520);
+    }
+    function overload() {
+      if (wrap.classList.contains("is-full")) return;
+      repair();
+      applyFullBudget();
+      range.value = String(BUDGET_MAX);
+      paint(BUDGET_MAX);
+      range.setAttribute("aria-valuetext", FULL_LABEL);
+      full.classList.add("is-on"); full.setAttribute("aria-pressed", "true");
+      wrap.classList.add("is-full");
+      renderProgress();
+      saveState();
+      if (reducedMotion) { broken(true); return; }
+
+      // slam: the needle hits the pin (css), then the director takes it
+      tierName.textContent = "Warning · Thrust at limit";
+      tierDesc.textContent = "The reactor is running past what the dial can show.";
+      runaway();
+      later(function () { wrap.classList.add("is-redline"); }, 260);
+      svgTicks.slice().reverse().forEach(function (l, k) { later(function () { l.style.stroke = "#ff5a45"; }, 300 + k * 26); });
+      later(function () {
+        wrap.classList.add("is-critical");
+        tierName.textContent = "Critical · Limit exceeded";
+        tierDesc.textContent = "Hold on.";
+        fx.ambient(0.6);
+      }, 1500);
+      // the glass starts to go: hairline cracks creep out of the impact
+      [1650, 2000, 2350].forEach(function (ms, k) { later(function () { var early = cracks.filter(function (c) { return c.classList.contains("is-early"); }); if (early[k]) early[k].classList.add("is-on"); fx.glitter(6, IMPACT[0], IMPACT[1], 1.5); fx.sparks(8, IMPACT[0], IMPACT[1], 0, 2.5); }, ms); });
+      later(function () { wrap.classList.add("is-hold"); fx.ambient(0); }, 2750);
+      later(function () { broken(false); }, 2880);
+
+      var t0 = performance.now(), lastSpark = 0, lastSeed = 0;
+      (function direct(now) {
+        var t = now - t0;
+        if (t > 260 && t < 2750) {
+          var crit = t > 1500 ? (t - 1500) / 1250 : 0;
+          var amp = t < 1500 ? 1.5 + (t - 260) / 1240 * 2.5 : 4 + crit * 7;
+          // the needle fights the pin: pinned just past it, juddering
+          var n = Math.sin(t * 0.09) * 0.55 + Math.sin(t * 0.23 + 1) * 0.3 + (Math.random() - 0.5) * 0.5;
+          needle.style.transform = "rotate(" + (angleOf(1.03) + 1.5 + Math.abs(n) * amp).toFixed(2) + "deg)";
+          // the whole reactor shakes, worse and worse
+          var s = t < 1500 ? 0.5 : 1 + crit * 4.5;
+          core.style.transform = "translate(" + ((Math.random() - 0.5) * s * 2).toFixed(2) + "px," + ((Math.random() - 0.5) * s * 2).toFixed(2) + "px) rotate(" + ((Math.random() - 0.5) * s * 0.25).toFixed(2) + "deg)";
+          // heat haze warps the dial
+          if (heat) {
+            if (!dial.getAttribute("filter")) dial.setAttribute("filter", "url(#cwx" + u + ")");
+            heat.setAttribute("scale", Math.min(8, (t - 260) / 2400 * 8).toFixed(2));
+            if (now - lastSeed > 60) { lastSeed = now; turb.setAttribute("seed", String((Math.random() * 100) | 0)); }
+          }
+          // sparks spit off the pin
+          if (now - lastSpark > (t < 1500 ? 140 : 70)) {
+            lastSpark = now; fx.sparks(t < 1500 ? 3 : 7, PIN[0], PIN[1], 1.6, t < 1500 ? 2.6 : 4, -Math.PI / 2 - 0.4);
+            // past critical the seal goes: steam hisses out by the pin, harder and harder
+            if (t > 1500) fx.steam(1 + (crit * 3 | 0), 226, 70, -0.7, 3 + crit * 5);
+          }
+        } else if (t >= 2750) {
+          // the hold: a beat of stillness before it goes
+          core.style.transform = "";
+          if (heat) heat.setAttribute("scale", "0");
+          return;
+        }
+        director = requestAnimationFrame(direct);
+      })(t0);
+    }
+    full.addEventListener("click", overload);
+
+    wrap.appendChild(core);
+    wrap.appendChild(h("div", { "class": "cw-picks", role: "group", "aria-label": "Quick budget picks" }, picks.concat([full])));
     wrap.appendChild(range);
     wrap.appendChild(h("div", { "class": "cw-range-scale", "aria-hidden": "true" }, [
       h("span", null, [formatAED(BUDGET_MIN)]),
@@ -761,7 +1409,7 @@
       put(tBuild, labelFor(BUILD_OPTIONS, f.buildType), "Not set");
       put(tGoal, f.goal === "other" ? (f.goalOther || "Something else") : labelFor(GOAL_OPTIONS, f.goal), "Not set");
       put(tTime, labelFor(TIMELINE_OPTIONS, f.timeline), "Not set");
-      put(tBudget, formatAED(budgetAmount()), "Not set");
+      put(tBudget, budgetText(), "Not set");
       put(tCompany, f.companyName, "Awaiting");
       put(tName, f.name, "Awaiting");
       put(tMail, f.email, "Awaiting");

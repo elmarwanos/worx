@@ -186,30 +186,6 @@ body[data-page="about"] .nav-progress {
   color: var(--text);
 }
 
-/* CRAMS, the product Worx sells: a live signal beside its name */
-.nav-links a.nav-crams {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.nav-crams i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent-2);
-  box-shadow: 0 0 10px var(--accent-2);
-  animation: nav-crams-ping 2.4s ease-in-out infinite;
-}
-
-@keyframes nav-crams-ping {
-  50% { opacity: 0.35; box-shadow: 0 0 4px var(--accent-2); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nav-crams i { animation: none; }
-}
-
 @media (hover: hover) {
   .nav-links a:hover {
     color: var(--text);
@@ -1453,6 +1429,17 @@ html:not(.js) .nav-item--mega:hover .mega {
   border-radius: 50%;
   background: var(--gradient);
   box-shadow: 0 0 10px rgba(229, 125, 35, 0.6);
+}
+
+/* a live product (CRAMS): its dot keeps blinking */
+.mega-group a.mega-live i { animation: mega-live 1.6s ease-in-out infinite; }
+
+@keyframes mega-live {
+  50% { opacity: 0.25; box-shadow: 0 0 2px rgba(229, 125, 35, 0.3); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mega-group a.mega-live i { animation: none; }
 }
 
 .mega-group a span {
