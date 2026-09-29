@@ -37,6 +37,12 @@
   var FORMSPREE_ENDPOINT = "https://formspree.io/f/xeaojvzn";
   var IDEA_CAP = 1400; // keep the idea field a reasonable size
 
+  // EmailJS sends the client a confirmation email once Formspree has
+  // captured the lead (Formspree's own autoresponder is a paid feature).
+  var EMAILJS_PUBLIC_KEY = "wm49sHmSgdQ04r0O-";
+  var EMAILJS_SERVICE_ID = "service_5rgzqe1";
+  var EMAILJS_TEMPLATE_ID = "template_j30lcxg";
+
   var BUILD_OPTIONS = [
     { value: "website",    label: "Website",             desc: "A site that tells people who you are, or gets you found" },
     { value: "web-app",    label: "Web application",     desc: "Something people log into and actually use" },
@@ -275,7 +281,34 @@
   // shows up as a plain field in that notification and in the
   // Formspree dashboard.
 
-  // This is where you would add the EMAILJS service ID
+  // EmailJS reads these as {{variable}} placeholders in template_j30lcxg.
+  // company_name is Worx's own name (the sender), not the client's.
+  function buildEmailJsParams() {
+    var f = state.form;
+    return {
+      to_name: f.name,
+      to_email: f.email,
+      reply_to: f.email,
+      company_name: "The Worx Team",
+      client_company: f.companyName,
+      services: f.services && f.services.length ? f.services.join(", ") : "-",
+      build_type: labelFor(BUILD_OPTIONS, f.buildType) || "-",
+      idea: truncate(f.idea.trim(), IDEA_CAP),
+      goal: f.goal === "other" ? (f.goalOther.trim() || "Something else") : (labelFor(GOAL_OPTIONS, f.goal) || "-"),
+      timeline: labelFor(TIMELINE_OPTIONS, f.timeline) || "-",
+      budget: f.budget ? f.budget.label : "-"
+    };
+  }
+
+  function sendConfirmationEmail() {
+    if (typeof emailjs === "undefined") return;
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, buildEmailJsParams())
+      .catch(function (err) {
+        // Best effort: the lead is already captured via Formspree, so a
+        // failed confirmation email never blocks the success screen.
+        console.error("EmailJS confirmation failed:", err);
+      });
+  }
 
   function buildFormspreePayload() {
     var f = state.form;
@@ -1625,7 +1658,9 @@
     })
       .then(function (res) {
         if (!res.ok) throw new Error("Formspree responded with " + res.status);
-          
+
+        sendConfirmationEmail();
+
         state.completedAt = Date.now();
         saveState();
         // a beat for the ticket's lift-off before the result
@@ -1682,6 +1717,8 @@
      ---------------------------------------------------------- */
 
   function init() {
+    if (typeof emailjs !== "undefined") emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
     var fallback = document.querySelector(".cw-fallback");
     if (fallback) fallback.hidden = true;
 
