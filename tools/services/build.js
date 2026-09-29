@@ -312,7 +312,8 @@ const KBO_SHAPES = ["48% 52% 44% 56% / 55% 45% 55% 45%", "60% 40% 52% 48% / 42% 
 // CRAMS, the software we build ourselves, is the belt's home world: the
 // brand's gradient, a small moon on a tilted orbit, a line of its own
 // (services.css .cx-home). The rest keep the belt's plain lettering.
-const homeWorld = (name) => `<span class="cx-home"><small aria-hidden="true">Built in-house · Worx</small><b>${esc(name)}</b><i class="cx-home-orbit" aria-hidden="true"><i class="cx-home-moon"><i></i></i></i></span>`;
+// it links to its own page (crams/index.html)
+const homeWorld = (name) => `<a class="cx-home" href="../crams/index.html" data-cursor="Explore"><small aria-hidden="true">Built in-house · Worx</small><b>${esc(name)}</b><i class="cx-home-orbit" aria-hidden="true"><i class="cx-home-moon"><i></i></i></i></a>`;
 const belt = (list, seed) => list.map((w, i) => {
   const n = i + seed;
   const kbo = `<i class="cx-kbo" aria-hidden="true" data-km="${(n * 5) % 8}" style="--kr:${KBO_SHAPES[n % 4]};--ks:${(0.75 + ((n * 37) % 50) / 100).toFixed(2)};--kt:${7 + ((n * 53) % 9)}s;--kd:${n % 3 ? "normal" : "reverse"};--ka:${(n * 67) % 360}deg;--kf:${(4 + ((n * 29) % 5)).toFixed(0)}s"></i>`;
@@ -347,7 +348,9 @@ fs.writeFileSync(pageFile, page);
 /* ---- 3. Contact page: the same services for the planner ------ */
 const contactFile = path.join(ROOT, "contact/index.html");
 let contact = fs.readFileSync(contactFile, "utf8");
-const contactList = catalogue.map((d) => ({ division: d.name, services: d.services.map((s) => s.name) }));
+// ...and, last, what Worx sells: CRAMS (crams/index.html), so "Book a demo" arrives ticked
+const contactList = catalogue.map((d) => ({ division: d.name, services: d.services.map((s) => s.name) }))
+  .concat([{ division: "Products", services: ["CRAMS"] }]);
 contact = replaceBlock(contact, "contact-services", `<script type="application/json" id="cw-services">${JSON.stringify(contactList)}</script>`, contactFile);
 fs.writeFileSync(contactFile, contact);
 

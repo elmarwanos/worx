@@ -186,6 +186,30 @@ body[data-page="about"] .nav-progress {
   color: var(--text);
 }
 
+/* CRAMS, the product Worx sells: a live signal beside its name */
+.nav-links a.nav-crams {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.nav-crams i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 10px var(--accent-2);
+  animation: nav-crams-ping 2.4s ease-in-out infinite;
+}
+
+@keyframes nav-crams-ping {
+  50% { opacity: 0.35; box-shadow: 0 0 4px var(--accent-2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-crams i { animation: none; }
+}
+
 @media (hover: hover) {
   .nav-links a:hover {
     color: var(--text);

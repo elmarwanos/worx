@@ -1,55 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Native, Cross-Platform or PWA? How to Choose | Worx</title>
-  <meta name="description"
-    content="There's no single right way to build a mobile app, but there is a right way for your product, budget and roadmap. Here's how we decide between the options.">
-  <link rel="canonical" href="https://worxbyglimpse.com/blogs/native-vs-cross-platform.html">
-
-  <meta property="og:type" content="article">
+  <title>CRAMS | Lead Management Software by Worx</title>
+  <meta name="description" content="CRAMS by Worx: one platform for the whole lead lifecycle. Capture, assign, follow up, track, report and monitor, with sales, marketing, service, operations and management connected in one system.">
+  <link rel="canonical" href="https://worxbyglimpse.com/crams/">
+  <meta property="og:type" content="product">
   <meta property="og:site_name" content="Worx">
-  <meta property="og:title" content="Native, Cross-Platform or PWA? How to Choose | Worx">
-  <meta property="og:description" content="There's no single right way to build a mobile app, but there is a right way for your product, budget and roadmap. Here's how we decide between the options.">
-  <meta property="og:url" content="https://worxbyglimpse.com/blogs/native-vs-cross-platform.html">
-  <meta property="og:image" content="https://worxbyglimpse.com/static/assets/blog/web/Native%20vs%20Cross-Platform.jpg">
-  <meta property="og:image:width" content="1600">
-  <meta property="og:image:height" content="900">
-  <meta property="article:published_time" content="2026-07">
-  <meta property="article:section" content="Mobile Apps">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Native, Cross-Platform or PWA? How to Choose | Worx">
-  <meta name="twitter:description" content="There's no single right way to build a mobile app, but there is a right way for your product, budget and roadmap. Here's how we decide between the options.">
-  <meta name="twitter:image" content="https://worxbyglimpse.com/static/assets/blog/web/Native%20vs%20Cross-Platform.jpg">
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Native, cross-platform or PWA? Choosing your app approach", "description": "There's no single right way to build a mobile app. There is a right way for your product, budget and roadmap. Here's how we decide.", "image": "https://worxbyglimpse.com/static/assets/blog/web/Native%20vs%20Cross-Platform.jpg", "datePublished": "2026-07", "articleSection": "Mobile Apps", "inLanguage": "en", "author": {"@type": "Organization", "name": "Worx", "url": "https://worxbyglimpse.com/"}, "publisher": {"@type": "Organization", "name": "Worx", "url": "https://worxbyglimpse.com/", "logo": {"@type": "ImageObject", "url": "https://worxbyglimpse.com/static/assets/logo-light.png"}}, "mainEntityOfPage": {"@type": "WebPage", "@id": "https://worxbyglimpse.com/blogs/native-vs-cross-platform.html"}}</script>
+  <meta property="og:title" content="CRAMS | Lead Management Software by Worx">
+  <meta property="og:description" content="One platform. Every lead. Every department. Connected.">
+  <meta name="twitter:card" content="summary">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "CRAMS", "applicationCategory": "BusinessApplication", "description": "A custom software platform developed in-house by Worx to help organizations manage lead and customer data across multiple departments through one centralized, connected system.", "creator": {"@type": "Organization", "name": "Worx", "url": "https://worxbyglimpse.com/"}}</script>
 
   <link rel="icon" type="image/png" sizes="32x32" href="../static/assets/favicon-32.png">
   <link rel="apple-touch-icon" href="../static/assets/apple-touch-icon.png">
   <meta name="theme-color" content="#150905">
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../static/css/base.css">
   <link rel="stylesheet" href="../static/css/layout.css">
   <link rel="stylesheet" href="../static/css/components.css">
   <link rel="stylesheet" href="../static/css/animations.css">
-  <link rel="stylesheet" href="../static/css/blog-post.css">
-  <link rel="stylesheet" href="../static/css/blog-cinema.css">
-  <!-- TOC highlight for the section in view (the star field only runs on the index) -->
-  <script src="../static/js/blog-stars.js" defer></script>
-  <link rel="stylesheet" href="../static/css/living-covers.css">
+  <link rel="stylesheet" href="../static/css/ignite.css">
+  <link rel="stylesheet" href="../static/css/crams.css">
   <!-- Vercel Web Analytics: the plain-HTML tag, no npm package -->
   <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
-
-<body data-page="blogs">
+<body data-page="crams" class="is-crams">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!--WORX:HEADER-->
@@ -165,192 +146,305 @@
   </header>
   <!--/WORX:HEADER-->
 
-  <main id="main">
-    <article class="blog-post">
+  <!-- CRAMS, the software Worx builds and sells: its own film.
+       One canvas behind the whole page (crams.js, "the system") holds a
+       core star, CRAMS, and the departments in orbit round it; leads are
+       signals travelling between them. As you scroll the system acts the
+       story out: the departments drift apart and leads fall between them
+       (the gap), the core lights and draws them into orbit (connected),
+       then one lead is followed through its whole life (the lifecycle),
+       and the system settles behind the rest of the page. -->
+  <main id="main" class="cr" data-cr>
+    <canvas class="cr-system" aria-hidden="true" data-cr-system></canvas>
+    <span class="cr-grain" aria-hidden="true"></span>
+    <span class="cr-vignette" aria-hidden="true"></span>
 
-      <header class="blog-post-hero">
-        <div class="blog-post-shell">
-          <!-- the field note's title card: the About page's HUD panel at
-               its left-hand angle; its cover beside it on a monitor -->
-          <div class="bp-card">
-          <div class="bp-card-head">
-            <span class="bp-rec" aria-hidden="true"></span>
-            <a class="blog-back-link" href="index.html">Field notes</a>
-            <span class="bp-card-log" aria-hidden="true">TRANSMISSION</span>
+    <!-- the film's HUD, fixed for the whole page: four fine corners, the
+         chapter and its timecode above, the chapter strip and the signal
+         below (crams.js keeps it current) -->
+    <div class="cr-hud" aria-hidden="true" data-cr-hud>
+      <i class="cr-hud-c cr-hud-c--tl"></i><i class="cr-hud-c cr-hud-c--tr"></i><i class="cr-hud-c cr-hud-c--bl"></i><i class="cr-hud-c cr-hud-c--br"></i>
+      <p class="cr-hud-top"><span class="cr-hud-rec"></span><b>CRAMS</b><span class="cr-hud-sep">/</span><span data-cr-hud-ch>CH 00</span><span class="cr-hud-name" data-cr-hud-name>Ignition</span></p>
+      <p class="cr-hud-time">TC <b data-cr-clock>00:00:00:00</b></p>
+      <ol class="cr-hud-strip" data-cr-hud-strip><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ol>
+      <p class="cr-hud-sig"><span class="cr-hud-bars"><i></i><i></i><i></i><i></i><i></i></span><b data-cr-signal>ALL DEPARTMENTS</b></p>
+    </div>
+
+    <!-- ====== 00 · Ignition ====== -->
+    <section class="cr-hero" data-cr-chapter="ignition" aria-labelledby="cr-title">
+      <!-- the wordmark is forged from leads: signals stream in from the
+           edges and settle into the letters (crams.js, "the forge") -->
+      <canvas class="cr-forge" aria-hidden="true" data-cr-forge></canvas>
+      <div class="cr-hero-grid container">
+        <!-- the product's panel: the service pages' HUD recipe (one
+             smoked-glass panel on an angle, projected rather than boxed):
+             the crumb, the log booting in, then the pitch and the call -->
+        <div class="cr-glass cr-hero-panel" role="group" aria-label="CRAMS, product 01">
+          <div class="cr-glass-head">
+            <span class="cr-rec" aria-hidden="true"></span>
+            <p class="cr-crumb"><a href="../index.html">Worx</a><span aria-hidden="true">/</span><span>Products</span><span aria-hidden="true">/</span><span>CRAMS</span></p>
+            <span class="cr-glass-mod" aria-hidden="true">PRD 01</span>
           </div>
-
-          <p class="blog-post-category">Mobile Apps</p>
-
-          <h1>Native, cross-platform or PWA? Choosing your app approach</h1>
-
-          <p class="blog-post-intro">
-            There's no single right way to build a mobile app. There is a right way for your product, budget and roadmap. Here's how we decide.
-          </p>
-
-          <div class="blog-post-meta">
-            <div class="blog-post-author">
-              <span class="author-mark">W</span>
-              <div>
-                <span class="meta-label">Written by</span>
-                <strong>Worx</strong>
-              </div>
-            </div>
-
-            <div class="blog-post-meta-item">
-              <span class="meta-label">Published</span>
-              <strong>July 2026</strong>
-            </div>
-
-            <div class="blog-post-meta-item">
-              <span class="meta-label">Reading time</span>
-              <strong>3 min read</strong>
-            </div>
-          </div>
-          </div>
-      <div class="blog-feature-wrap">
-        <div class="blog-feature-art blog-feature-art--image">
-          <picture>
-            <img src="../static/assets/blog/web/Native%20vs%20Cross-Platform.jpg" alt="" width="1920" height="1080" decoding="async" fetchpriority="high">
-          </picture>
-        </div>
-      </div>
-        </div>
-      </header>
-
-      <div class="blog-reading-shell">
-
-        <aside class="blog-share" aria-label="Share this article">
-          <span class="share-label">Share</span>
-
-          <a class="share-button share-linkedin" href="#" data-share="linkedin" aria-label="Share on LinkedIn"
-            title="Share on LinkedIn">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M6.5 8.4H3.2V19h3.3V8.4ZM4.85 3A1.93 1.93 0 1 0 4.85 6.86 1.93 1.93 0 0 0 4.85 3ZM19.8 12.92c0-3.2-1.7-4.69-3.98-4.69-1.84 0-2.66 1.01-3.12 1.72V8.4H9.4V19h3.3v-5.25c0-1.38.26-2.72 1.97-2.72 1.68 0 1.7 1.57 1.7 2.81V19h3.3l.13-6.08Z" />
-            </svg>
-          </a>
-
-          <a class="share-button share-facebook" href="#" data-share="facebook" aria-label="Share on Facebook"
-            title="Share on Facebook">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M13.7 21v-8h2.7l.4-3.1h-3.1V7.92c0-.9.25-1.51 1.56-1.51h1.66V3.62a22.5 22.5 0 0 0-2.42-.12c-2.4 0-4.04 1.46-4.04 4.15V9.9H7.75V13h2.71v8h3.24Z" />
-            </svg>
-          </a>
-
-          <a class="share-button share-x" href="#" data-share="x" aria-label="Share on X" title="Share on X">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M18.3 3H21l-5.9 6.74L22 21h-5.4l-4.23-5.53L7.53 21H4.82l6.28-7.18L4.5 3h5.54l3.82 5.05L18.3 3Zm-.95 16.02h1.5L9.22 4.88H7.61l9.74 14.14Z" />
-            </svg>
-          </a>
-
-          <button class="share-button share-copy" type="button" data-share="copy" aria-label="Copy article link"
-            title="Copy article link">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M8.5 15.5 15.5 8.5M7.05 12.95l-1.6 1.6a3.54 3.54 0 0 0 5 5l2.1-2.1a3.54 3.54 0 0 0 0-5M16.95 11.05l1.6-1.6a3.54 3.54 0 0 0-5-5l-2.1 2.1a3.54 3.54 0 0 0 0 5" />
-            </svg>
-          </button>
-
-          <span class="copy-status" aria-live="polite">Copied</span>
-        </aside>
-
-        <div class="blog-article-layout">
-          <nav class="blog-toc" aria-label="Article contents">
-            <span class="toc-title">In this article</span>
-            <a href="#options">The three options</a>
-            <a href="#questions">The questions that decide it</a>
-            <a href="#cost">The cost nobody quotes</a>
-            <a href="#choose">How we usually land</a>
-          </nav>
-
-          <div class="blog-article-content">
-
-      <p class="article-lead">"Should we build native?" is one of the first questions in almost every app conversation. The honest answer is that it depends on what the app needs to do, who it is for and how it will grow. Each approach is a good choice for some products and an expensive mistake for others.</p>
-
-      <section id="options">
-        <span class="section-number">01</span>
-        <h2>The three options</h2>
-        <ul class="article-checklist">
-          <li><strong>Native</strong><span>Separate apps written in Swift for iOS and Kotlin for Android. The most direct access to the platform, the most polished feel, and two codebases to maintain.</span></li>
-          <li><strong>Cross-platform</strong><span>One codebase, typically React Native or Flutter, compiled to both platforms. Most of the native feel for most apps, with one team and one set of features to build.</span></li>
-          <li><strong>Progressive web app</strong><span>A website that installs to the home screen and works offline. No app store in the way, one codebase shared with the web, but more limited access to device features.</span></li>
-        </ul>
-      </section>
-
-      <section id="questions">
-        <span class="section-number">02</span>
-        <h2>The questions that decide it</h2>
-        <p>Rather than starting from technology, we start from the product:</p>
-        <p><strong>What does it need from the device?</strong> Heavy use of the camera, Bluetooth, background location, AR or complex animations pushes towards native, or towards cross-platform with native modules where needed.</p>
-        <p><strong>Does it need the app stores?</strong> Discovery in the stores, in-app purchases and push notifications on every device point to a store app. An internal tool or a companion to a website may not need a store at all.</p>
-        <p><strong>How fast does it need to change?</strong> If the product will iterate weekly, one codebase ships every change to everyone at once.</p>
-        <blockquote><p>Choose the approach that fits the next three years of the product, not just the first release.</p></blockquote>
-      </section>
-
-      <section id="cost">
-        <span class="section-number">03</span>
-        <h2>The cost nobody quotes</h2>
-        <p>The build is only the first cost. Every approach also has to be maintained: OS updates every year, new devices, security patches, store policy changes. Two native codebases roughly double that ongoing work. A PWA has the lowest ongoing cost but relies on what browsers support. Cross-platform sits in between, with the added job of keeping the framework itself up to date.</p>
-      </section>
-
-      <div class="article-stat">
-        <span class="article-stat-label">The real question</span>
-        <strong>What does the product need?</strong>
-        <p>Start there, and the technology usually chooses itself.</p>
-      </div>
-
-      <section id="choose">
-        <span class="section-number">04</span>
-        <h2>How we usually land</h2>
-        <p>For most business apps, cross-platform gives the best balance of experience, speed and cost. We recommend native when the app lives or dies on deep device features or platform-level polish, and a PWA when reach and simplicity matter more than the store. Whatever the choice, we make it on paper with you first, with the trade-offs written down.</p>
-      </section>
-    
-            <div class="article-cta">
-              <div>
-                <span class="article-cta-kicker">Not sure which way to build?</span>
-                <h3>Let's map your app before we write code.</h3>
-              </div>
-              <a class="bc-call" href="https://wa.me/971555669847" target="_blank" rel="noopener">
-                <span class="bc-call-face" aria-hidden="true"><img src="../static/assets/home/marwan-face.webp" alt="" width="52" height="52" decoding="async"><i></i></span>
-                <span class="bc-call-txt"><small aria-hidden="true"><span>Crew online</span><span>Marwan answers</span></small><b>Quick Enquiry</b></span>
-                <span class="bc-call-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                <span class="bc-call-vf" aria-hidden="true"></span>
+          <ul class="cr-log" aria-hidden="true">
+            <li><span>Product</span><b>CRAMS</b></li>
+            <li><span>Built by</span><b>Worx · in-house</b></li>
+            <li><span>Departments</span><b>All, connected</b></li>
+            <li><span>Status</span><b class="is-on">Available</b></li>
+          </ul>
+          <div class="cr-glass-caption">
+            <p class="cr-glass-status" aria-hidden="true">Product 01 · Lead platform</p>
+            <h1 class="cr-hero-title" id="cr-title"><span class="visually-hidden">CRAMS by Worx. </span><span class="cr-tagline"><span>One platform.</span> <span>Every lead.</span> <span>Every department.</span> <span class="gradient-text">Connected.</span></span></h1>
+            <p class="cr-lede">A software platform built in-house by Worx that brings an organization's lead and customer data together in one centralized, connected system, shared across every department.</p>
+            <div class="cr-actions">
+              <a class="cr-cta" href="../contact/index.html?services=CRAMS" data-cursor="Demo">
+                <span class="cr-cta-ring" aria-hidden="true"></span>
+                <span class="cr-cta-txt"><small aria-hidden="true">Get CRAMS</small><b>Book a demo</b></span>
+                <span class="cr-cta-go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
               </a>
+              <a class="cr-ghost" href="#lifecycle"><span>See how it works</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
             </div>
+          </div>
+        </div>
+        <!-- across the bay: the wordmark, forged from leads, the system
+             turning behind it -->
+        <div class="cr-hero-mark" aria-hidden="true">
+          <span class="cr-word" data-cr-word><span>C</span><span>R</span><span>A</span><span>M</span><span>S</span></span>
+          <span class="cr-by">by <b>Worx</b></span>
+          <span class="cr-mark-read"><i></i>Signal locked · all departments</span>
+        </div>
+      </div>
+    </section>
 
-            <div class="article-end">
-              <a href="index.html" class="article-back">← All articles</a>
+    <!-- title card: the film cuts to the chapter's name (crams.js, "title cards") -->
+    <div class="cr-tc" data-cr-chapter="gap" data-cr-card aria-hidden="true">
+      <div class="cr-tc-pin">
+        <span class="cr-tc-bar cr-tc-bar--t"></span><span class="cr-tc-bar cr-tc-bar--b"></span>
+        <div class="cr-tc-inner">
+          <p class="cr-tc-k"><span>Chapter</span><b>01</b><span>/ 06</span></p>
+          <p class="cr-tc-title" data-cr-tc-title>The gap</p>
+          <p class="cr-tc-sub">Where leads go missing</p>
+        </div>
+        <span class="cr-tc-scan"></span>
+      </div>
+    </div>
+
+    <!-- ====== 01 · The gap ====== -->
+    <section class="cr-gap" data-cr-chapter="gap" aria-labelledby="cr-gap-title">
+      <div class="cr-panel container">
+        <p class="cr-kicker"><i aria-hidden="true"></i>The gap</p>
+        <h2 class="cr-h2" id="cr-gap-title" data-cr-split>Leads are not lost in one place. They fall <span class="gradient-text">between departments.</span></h2>
+        <p class="cr-body">When sales, marketing, customer service and operations each keep their own lists, a lead's story splits into pieces. Hand-offs go quiet, follow-ups slip, and nobody sees the whole of it.</p>
+        <ul class="cr-gap-list" aria-label="What goes wrong">
+          <li><i aria-hidden="true"></i>Details retyped from one team to the next</li>
+          <li><i aria-hidden="true"></i>No clear owner once a lead changes hands</li>
+          <li><i aria-hidden="true"></i>Reports stitched together by hand</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- title card: the film cuts to the chapter's name (crams.js, "title cards") -->
+    <div class="cr-tc" data-cr-chapter="connected" data-cr-card aria-hidden="true">
+      <div class="cr-tc-pin">
+        <span class="cr-tc-bar cr-tc-bar--t"></span><span class="cr-tc-bar cr-tc-bar--b"></span>
+        <div class="cr-tc-inner">
+          <p class="cr-tc-k"><span>Chapter</span><b>02</b><span>/ 06</span></p>
+          <p class="cr-tc-title" data-cr-tc-title>Connected</p>
+          <p class="cr-tc-sub">Every department, one orbit</p>
+        </div>
+        <span class="cr-tc-scan"></span>
+      </div>
+    </div>
+
+    <!-- ====== 02 · Connected ====== -->
+    <section class="cr-orbit" id="departments" data-cr-chapter="connected" aria-labelledby="cr-orbit-title">
+      <div class="cr-panel container">
+        <p class="cr-kicker"><i aria-hidden="true"></i>Connected</p>
+        <h2 class="cr-h2" id="cr-orbit-title" data-cr-split>One system. <span class="gradient-text">Every department in orbit.</span></h2>
+        <p class="cr-body">Built around real organizational workflows, CRAMS connects every team to the same lead, so information moves between departments and stays structured, accessible and traceable on the way.</p>
+      </div>
+      <!-- each department is a world round the core: point at one to see
+           it light up in the system behind (crams.js) -->
+      <ol class="cr-depts container" data-cr-depts>
+        <li class="cr-dept" data-dept="0" tabindex="0"><span class="cr-dept-dot" aria-hidden="true"></span><b>Sales</b><span>Takes the lead on: assignment, follow-ups and every status change.</span></li>
+        <li class="cr-dept" data-dept="1" tabindex="0"><span class="cr-dept-dot" aria-hidden="true"></span><b>Marketing</b><span>Captures the lead, then sees exactly what happened next.</span></li>
+        <li class="cr-dept" data-dept="2" tabindex="0"><span class="cr-dept-dot" aria-hidden="true"></span><b>Customer service</b><span>Picks up the conversation with the full history in hand.</span></li>
+        <li class="cr-dept" data-dept="3" tabindex="0"><span class="cr-dept-dot" aria-hidden="true"></span><b>Operations</b><span>Keeps the data clean, complete and moving on time.</span></li>
+        <li class="cr-dept" data-dept="4" tabindex="0"><span class="cr-dept-dot" aria-hidden="true"></span><b>Management</b><span>Reporting and performance across every team, in one view.</span></li>
+        <li class="cr-dept" data-dept="5" tabindex="0"><span class="cr-dept-dot" aria-hidden="true"></span><b>Every other team</b><span>One place to look, one version of the truth.</span></li>
+      </ol>
+    </section>
+
+    <!-- title card: the film cuts to the chapter's name (crams.js, "title cards") -->
+    <div class="cr-tc" data-cr-chapter="lifecycle" data-cr-card aria-hidden="true">
+      <div class="cr-tc-pin">
+        <span class="cr-tc-bar cr-tc-bar--t"></span><span class="cr-tc-bar cr-tc-bar--b"></span>
+        <div class="cr-tc-inner">
+          <p class="cr-tc-k"><span>Chapter</span><b>03</b><span>/ 06</span></p>
+          <p class="cr-tc-title" data-cr-tc-title>The lifecycle</p>
+          <p class="cr-tc-sub">One lead, followed all the way</p>
+        </div>
+        <span class="cr-tc-scan"></span>
+      </div>
+    </div>
+
+    <!-- ====== 03 · The lifecycle (pinned) ====== -->
+    <!-- One lead, followed from first contact to performance: a signal
+         runs down the flight path, and the ticket beside it (an
+         illustration, not the product's own screens) updates at each stop -->
+    <section class="cr-life" id="lifecycle" data-cr-chapter="lifecycle" aria-labelledby="cr-life-title">
+      <div class="cr-life-pin" data-cr-life>
+        <div class="cr-life-grid container">
+          <div class="cr-life-head">
+            <p class="cr-kicker"><i aria-hidden="true"></i>The lead lifecycle</p>
+            <h2 class="cr-h2" id="cr-life-title">Every lead, <span class="gradient-text">from first signal to results.</span></h2>
+            <ol class="cr-path" data-cr-path>
+              <li class="cr-path-comet" aria-hidden="true"></li>
+              <li data-step="0"><b>Lead capture</b><span>Every new enquiry lands in one place, wherever it came from.</span></li>
+              <li data-step="1"><b>Assignment</b><span>Routed to the right team and the right person, with no lead left unowned.</span></li>
+              <li data-step="2"><b>Follow-ups</b><span>Next steps scheduled and kept, so no conversation goes quiet.</span></li>
+              <li data-step="3"><b>Status tracking</b><span>Where every lead stands, visible to every department.</span></li>
+              <li data-step="4"><b>Reporting</b><span>Clear reports from the same data every team works in.</span></li>
+              <li data-step="5"><b>Data management</b><span>Records kept structured, complete and in one place.</span></li>
+              <li data-step="6"><b>Performance monitoring</b><span>See how teams, sources and pipelines are really doing.</span></li>
+            </ol>
+          </div>
+          <div class="cr-ticket-wrap" aria-hidden="true">
+            <div class="cr-ticket" data-cr-ticket>
+              <div class="cr-ticket-bar"><span class="cr-rec"></span><span>CRAMS · LEAD RECORD</span><span class="cr-ticket-ill">ILLUSTRATION</span></div>
+              <div class="cr-ticket-body">
+                <p class="cr-ticket-k">Stage <b data-t-stage-n>01</b> / 07</p>
+                <p class="cr-ticket-stage" data-t-stage>Lead capture</p>
+                <div class="cr-ticket-rows">
+                  <div><span>Owner</span><b data-t-owner>Marketing</b></div>
+                  <div><span>Status</span><b data-t-status>New</b></div>
+                  <div><span>Next step</span><b data-t-next>Assign to sales</b></div>
+                  <div><span>Seen by</span><b data-t-seen>1 department</b></div>
+                </div>
+                <div class="cr-ticket-trail">
+                  <p>Trail</p>
+                  <ol data-t-trail></ol>
+                </div>
+                <div class="cr-ticket-meter"><i data-t-meter></i></div>
+              </div>
+              <span class="cr-ticket-vf"></span>
             </div>
           </div>
         </div>
       </div>
-    </article>
+    </section>
 
-    <section class="related-posts">
-      <div class="container">
-        <div class="related-heading">
-          <div>
-            <p class="eyebrow">Keep reading</p>
-            <h2>Related articles</h2>
+    <!-- title card: the film cuts to the chapter's name (crams.js, "title cards") -->
+    <div class="cr-tc" data-cr-chapter="truth" data-cr-card aria-hidden="true">
+      <div class="cr-tc-pin">
+        <span class="cr-tc-bar cr-tc-bar--t"></span><span class="cr-tc-bar cr-tc-bar--b"></span>
+        <div class="cr-tc-inner">
+          <p class="cr-tc-k"><span>Chapter</span><b>04</b><span>/ 06</span></p>
+          <p class="cr-tc-title" data-cr-tc-title>One truth</p>
+          <p class="cr-tc-sub">Every record in one place</p>
+        </div>
+        <span class="cr-tc-scan"></span>
+      </div>
+    </div>
+
+    <!-- ====== 04 · A single source of truth ====== -->
+    <section class="cr-truth" data-cr-chapter="truth" aria-labelledby="cr-truth-title">
+      <div class="cr-panel container">
+        <p class="cr-kicker"><i aria-hidden="true"></i>A single source of truth</p>
+        <h2 class="cr-h2" id="cr-truth-title" data-cr-split>The entire lead lifecycle, <span class="gradient-text">in one place.</span></h2>
+      </div>
+      <div class="cr-pillars container">
+        <article class="cr-pillar" data-pillar="structured">
+          <div class="cr-pillar-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <h3>Structured</h3>
+          <p>Every lead is kept in the same clear shape, so nothing depends on who typed it in.</p>
+        </article>
+        <article class="cr-pillar" data-pillar="accessible">
+          <div class="cr-pillar-art" aria-hidden="true"><span class="cr-pillar-core"></span><i style="--a:0deg"></i><i style="--a:60deg"></i><i style="--a:120deg"></i><i style="--a:180deg"></i><i style="--a:240deg"></i><i style="--a:300deg"></i></div>
+          <h3>Accessible</h3>
+          <p>Every department works from the same record, at the moment they need it.</p>
+        </article>
+        <article class="cr-pillar" data-pillar="traceable">
+          <div class="cr-pillar-art" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b></div>
+          <h3>Traceable</h3>
+          <p>Each step a lead takes is on the record, from the first touch to the final result.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- title card: the film cuts to the chapter's name (crams.js, "title cards") -->
+    <div class="cr-tc" data-cr-chapter="crew" data-cr-card aria-hidden="true">
+      <div class="cr-tc-pin">
+        <span class="cr-tc-bar cr-tc-bar--t"></span><span class="cr-tc-bar cr-tc-bar--b"></span>
+        <div class="cr-tc-inner">
+          <p class="cr-tc-k"><span>Chapter</span><b>05</b><span>/ 06</span></p>
+          <p class="cr-tc-title" data-cr-tc-title>In-house</p>
+          <p class="cr-tc-sub">Built by Worx</p>
+        </div>
+        <span class="cr-tc-scan"></span>
+      </div>
+    </div>
+
+    <!-- ====== 05 · Built in-house ====== -->
+    <!-- the crew dossier: the founder in a viewfinder, his record on the
+         angled glass beside him -->
+    <section class="cr-crew" data-cr-chapter="crew" aria-labelledby="cr-crew-title">
+      <div class="cr-crew-grid container">
+        <figure class="cr-crew-shot">
+          <div class="cr-crew-frame">
+            <img src="../static/assets/crams/marwan.webp" alt="Marwan Bassam, Founder and Managing Director of Worx" width="900" height="900" loading="lazy" decoding="async">
+            <span class="cr-crew-scan" aria-hidden="true"></span>
+            <span class="cr-crew-vf" aria-hidden="true"></span>
+            <span class="cr-crew-rec" aria-hidden="true"><i></i>REC · CREW 01</span>
+            <span class="cr-crew-id" aria-hidden="true">ID · WX-001</span>
           </div>
-          <a href="index.html">View all articles →</a>
-        </div>
-
-        <div class="related-grid">
-          <a class="related-card" href="app-launch-checklist.html">
-            <span class="related-category">Mobile Apps</span>
-            <h3>The app launch checklist we run before every release</h3>
-            <span class="related-arrow">↗</span>
+          <figcaption class="visually-hidden">Marwan Bassam</figcaption>
+        </figure>
+        <div class="cr-glass cr-crew-panel">
+          <div class="cr-glass-head">
+            <span class="cr-rec" aria-hidden="true"></span>
+            <p class="cr-crumb"><span>Crew dossier</span><span aria-hidden="true">/</span><span>Founder</span></p>
+            <span class="cr-glass-mod" aria-hidden="true">WX-001</span>
+          </div>
+          <p class="cr-kicker"><i aria-hidden="true"></i>Built in-house</p>
+          <h2 class="cr-h2" id="cr-crew-title">Made by a team that builds <span class="gradient-text">software for a living.</span></h2>
+          <p class="cr-body">CRAMS was developed in-house by Worx under the direction of <b>Marwan Bassam</b>, Founder and Managing Director of Worx and a full-stack developer, combining technical expertise with an understanding of how different departments need to work together.</p>
+          <ul class="cr-log cr-log--crew">
+            <li><span>Name</span><b>Marwan Bassam</b></li>
+            <li><span>Role</span><b>Founder &amp; Managing Director</b></li>
+            <li><span>Discipline</span><b>Full-stack developer</b></li>
+            <li><span>Mission</span><b class="is-on">Directed CRAMS</b></li>
+          </ul>
+          <!-- Marwan's LinkedIn: paste his profile's address into href and
+               remove "hidden" to show the button -->
+          <a class="cr-linkedin" href="" target="_blank" rel="noopener" data-cursor="Connect" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.06c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-4z"/></svg>
+            <span>Connect with Marwan on LinkedIn</span>
           </a>
-
-          <a class="related-card" href="generative-search.html">
-            <span class="related-category">SEO &amp; Growth</span>
-            <h3>Getting found in AI answers: a practical guide to generative search</h3>
-            <span class="related-arrow">↗</span>
-          </a>
         </div>
+      </div>
+    </section>
+
+    <!-- title card: the film cuts to the chapter's name (crams.js, "title cards") -->
+    <div class="cr-tc" data-cr-chapter="launch" data-cr-card aria-hidden="true">
+      <div class="cr-tc-pin">
+        <span class="cr-tc-bar cr-tc-bar--t"></span><span class="cr-tc-bar cr-tc-bar--b"></span>
+        <div class="cr-tc-inner">
+          <p class="cr-tc-k"><span>Chapter</span><b>06</b><span>/ 06</span></p>
+          <p class="cr-tc-title" data-cr-tc-title>Launch</p>
+          <p class="cr-tc-sub">Bring CRAMS to your organization</p>
+        </div>
+        <span class="cr-tc-scan"></span>
+      </div>
+    </div>
+
+    <!-- ====== 06 · Launch ====== -->
+    <section class="cr-launch" data-cr-chapter="launch" aria-labelledby="cr-launch-title">
+      <div class="cr-launch-inner container">
+        <p class="cr-kicker"><i aria-hidden="true"></i>Bring CRAMS to your organization</p>
+        <h2 class="cr-launch-title" id="cr-launch-title">CRAMS by Worx.</h2>
+        <p class="cr-tagline cr-tagline--end"><span>One platform.</span> <span>Every lead.</span> <span>Every department.</span> <span class="gradient-text">Connected.</span></p>
+        <a class="ig-btn cr-ignite" href="../contact/index.html?services=CRAMS" data-cursor="Demo"><span class="ig-core"><span class="ig-state" aria-hidden="true">IGNITION</span><span class="ig-label">Book a demo</span></span></a>
+        <p class="cr-launch-note">Or write to us at <a href="mailto:Hello@worxbyglimpse.com">Hello@worxbyglimpse.com</a></p>
       </div>
     </section>
   </main>
@@ -481,57 +575,7 @@
   <script src="../static/js/main.js"></script>
   <script src="../static/js/reticle.js"></script>
   <script src="../static/js/contact-widget.js"></script>
-  <script src="../static/js/blog-cinema.js"></script>
-
-  <script>
-    (() => {
-      const pageUrl = window.location.href;
-      const pageTitle = document.title;
-
-      document.querySelectorAll('[data-share]').forEach((button) => {
-        button.addEventListener('click', async (event) => {
-          event.preventDefault();
-          const network = button.dataset.share;
-
-          if (network === 'linkedin') {
-            window.open(
-              `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`,
-              '_blank',
-              'noopener,noreferrer,width=720,height=620'
-            );
-          }
-
-          if (network === 'facebook') {
-            window.open(
-              `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`,
-              '_blank',
-              'noopener,noreferrer,width=720,height=620'
-            );
-          }
-
-          if (network === 'x') {
-            window.open(
-              `https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(pageTitle)}`,
-              '_blank',
-              'noopener,noreferrer,width=720,height=620'
-            );
-          }
-
-          if (network === 'copy') {
-            try {
-              await navigator.clipboard.writeText(pageUrl);
-              const status = document.querySelector('.copy-status');
-              status.classList.add('is-visible');
-              setTimeout(() => status.classList.remove('is-visible'), 1600);
-            } catch (error) {
-              window.prompt('Copy this link:', pageUrl);
-            }
-          }
-        });
-      });
-    })();
-  </script>
-  <script src="../static/js/living-covers.js"></script>
+  <script src="../static/js/ignite.js"></script>
+  <script src="../static/js/crams.js"></script>
 </body>
-
 </html>

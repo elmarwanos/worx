@@ -4746,3 +4746,214 @@ html.hm-sheet-lock body { overflow: hidden; }
 @media (min-width: 2400px) {
   .hm { --hm-wrap: min(92rem, 100vw - 320px); }
 }
+
+/* ================================================================
+   04 · CRAMS, the software Worx sells (a teaser for crams/index.html)
+   The promise beside a small live orbit: the departments turn round
+   the CRAMS core on two rings (opposite ways, their names kept
+   upright), and leads stream into the core. CSS only.
+   ================================================================ */
+.hm-crams-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(24px, 5vw, 70px);
+  align-items: center;
+  padding: clamp(28px, 5vw, 64px);
+  border: 1px solid rgba(254, 238, 207, 0.14);
+  border-radius: 30px;
+  background:
+    radial-gradient(ellipse 60% 80% at 85% 50%, rgba(229, 125, 35, 0.2), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 0% 0%, rgba(192, 69, 39, 0.18), transparent 70%),
+    linear-gradient(160deg, rgba(40, 18, 9, 0.8), rgba(12, 5, 2, 0.85));
+  box-shadow: 0 60px 120px -60px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(254, 238, 207, 0.06);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hm-crams-title { display: grid; margin: 6px 0 0; line-height: 0.9; }
+
+.hm-crams-word {
+  font-family: var(--font-display);
+  font-size: clamp(3.6rem, 9vw, 7.4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: linear-gradient(180deg, #fff3dc 5%, #faa719 60%, #c04527);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 0.1em rgba(229, 125, 35, 0.3));
+}
+
+.hm-crams-by {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.hm-crams-tag {
+  margin: 22px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 1.9vw, 1.6rem);
+  font-weight: 500;
+}
+
+.hm-crams-lede { max-width: 50ch; margin: 14px 0 0; line-height: 1.7; color: var(--muted); }
+
+.hm-crams-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 24px;
+  margin-top: 28px;
+}
+
+/* the orbit */
+.hm-crams-orbit {
+  --sz: min(100%, 440px);
+  position: relative;
+  justify-self: center;
+  width: var(--sz);
+  aspect-ratio: 1;
+}
+
+.hm-crams-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(250, 167, 25, 0.2);
+}
+
+.hm-crams-ring--a { inset: 20%; }
+.hm-crams-ring--b { inset: 5%; border-style: dashed; border-color: rgba(254, 238, 207, 0.14); }
+
+.hm-crams-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22%;
+  aspect-ratio: 1;
+  margin: -11% 0 0 -11%;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff6e4 0 14%, #faa719 36%, rgba(229, 125, 35, 0.5) 58%, rgba(192, 69, 39, 0) 72%);
+  animation: hm-crams-pulse 3.2s ease-in-out infinite;
+}
+
+.hm-crams-core b {
+  position: absolute;
+  top: 100%;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  color: var(--accent-2);
+}
+
+@keyframes hm-crams-pulse {
+  50% { transform: scale(1.08); filter: brightness(1.12); }
+}
+
+/* two rings of departments, turning opposite ways */
+.hm-crams-spin {
+  position: absolute;
+  border-radius: 50%;
+  animation: hm-crams-turn 36s linear infinite;
+}
+
+.hm-crams-spin--a { inset: 20%; }
+.hm-crams-spin--b { inset: 5%; animation-duration: 52s; animation-direction: reverse; }
+
+.hm-crams-spin i {
+  position: absolute;
+  inset: 0;
+  transform: rotate(calc(var(--k) * 120deg));
+}
+
+.hm-crams-spin--b i { transform: rotate(calc(var(--k) * 120deg + 60deg)); }
+
+/* a world on the ring, its name kept upright as the ring turns */
+.hm-crams-spin b {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 110px;
+  height: 14px;
+  margin: -7px 0 0 -55px;
+  display: flex;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(254, 238, 207, 0.7);
+  transform: rotate(calc(var(--k) * -120deg));
+  animation: hm-crams-unturn 36s linear infinite;
+}
+
+.hm-crams-spin--b b { transform: rotate(calc(var(--k) * -120deg - 60deg)); animation-duration: 52s; animation-direction: reverse; }
+
+.hm-crams-spin b::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -12px;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff6e4, #faa719 55%, #5a2410);
+  box-shadow: 0 0 14px rgba(250, 167, 25, 0.7);
+}
+
+.hm-crams-spin b { padding-top: 6px; }
+
+@keyframes hm-crams-turn { to { transform: rotate(360deg); } }
+@keyframes hm-crams-unturn { from { rotate: 0deg; } to { rotate: -360deg; } }
+
+/* leads streaming into the core */
+.hm-crams-signal {
+  position: absolute;
+  inset: 0;
+  transform: rotate(calc(var(--s) * 127deg + 24deg));
+  pointer-events: none;
+}
+
+.hm-crams-signal::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 99%;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: #fff3dc;
+  box-shadow: 0 0 10px #faa719, 14px 0 12px -4px rgba(250, 167, 25, 0.5);
+  animation: hm-crams-lead 3.4s cubic-bezier(0.5, 0, 0.75, 0) infinite;
+  animation-delay: calc(var(--s) * 1.15s);
+}
+
+@keyframes hm-crams-lead {
+  0% { left: 99%; opacity: 0; }
+  15% { opacity: 1; }
+  100% { left: 52%; opacity: 0; }
+}
+
+@media (max-width: 860px) {
+  .hm-crams-card { grid-template-columns: minmax(0, 1fr); }
+  .hm-crams-orbit { --sz: min(100%, 360px); order: -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-crams-core,
+  .hm-crams-spin,
+  .hm-crams-spin b,
+  .hm-crams-signal::after { animation: none; }
+}
