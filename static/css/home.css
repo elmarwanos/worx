@@ -885,23 +885,51 @@
   background: rgba(229, 125, 35, 0.06);
 }
 
-/* each client's name set the way its brand sets it */
-.bm--chaumet { font-family: Georgia, "Times New Roman", serif; text-transform: uppercase; letter-spacing: 0.34em; font-size: 1rem; }
-.bm--hyundai { font-style: italic; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; font-size: 1rem; }
-.bm--modon { font-family: var(--font-display); font-weight: 500; text-transform: uppercase; letter-spacing: 0.46em; font-size: 1rem; }
-.bm--genesis { font-family: var(--font-display); font-weight: 500; text-transform: uppercase; letter-spacing: 0.56em; font-size: 0.86rem; }
-.bm--kia { font-family: var(--font-display); font-weight: 700; font-style: italic; text-transform: uppercase; font-size: 1.9rem; }
-.bm--uae-pavilion { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.8rem; }
-.bm--hudayriyat { font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: 1.3rem; }
-.bm--wealthface { font-weight: 600; font-size: 1.25rem; letter-spacing: -0.02em; }
-.bm--hisense { font-weight: 700; font-size: 1.4rem; letter-spacing: -0.03em; }
-.bm--unicef { font-weight: 700; font-size: 1.45rem; }
-.bm--universal { font-family: Georgia, "Times New Roman", serif; text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.8rem; }
-.bm--roxy { font-family: var(--font-display); font-weight: 700; font-style: italic; text-transform: uppercase; letter-spacing: 0.06em; font-size: 1.05rem; }
-.bm--lg { font-family: var(--font-display); font-weight: 700; font-size: 1.9rem; }
-.bm--tiara { font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: 1.25rem; letter-spacing: 0.04em; }
-.bm--duni { font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; }
-.bm--glimpse { font-family: var(--font-display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3em; font-size: 0.95rem; }
+/* each client's own logo (static/assets/clients, the files the Services
+   mega menu uses), drawn as a mask in the card's colour: cream at rest,
+   the text colour on hover. --s is the mark's height in px on a wide
+   screen; it scales down to three quarters of that on a phone. The width
+   caps the long wordmarks, so they sit level with the emblems. */
+.bm-logo {
+  --s: 34;
+  display: block;
+  width: clamp(110px, 11.5vw, 168px);
+  height: clamp(calc(var(--s) * 0.75px), calc(var(--s) * 0.095vw), calc(var(--s) * 1px));
+  background: currentColor;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bm:hover .bm-logo { transform: scale(1.05); }
+.bm--chaumet .bm-logo { --s: 30; }
+.bm--hyundai .bm-logo { --s: 42; }
+.bm--modon .bm-logo { --s: 30; }
+.bm--genesis .bm-logo { --s: 40; }
+.bm--kia .bm-logo { --s: 32; }
+.bm--uae-pavilion .bm-logo { --s: 54; }
+.bm--hudayriyat .bm-logo { --s: 56; }
+.bm--wealthface .bm-logo { --s: 30; }
+.bm--hisense .bm-logo { --s: 28; }
+.bm--unicef .bm-logo { --s: 36; }
+.bm--universal .bm-logo { --s: 60; }
+.bm--roxy .bm-logo { --s: 38; }
+.bm--lg .bm-logo { --s: 44; }
+.bm--tiara .bm-logo { --s: 58; }
+.bm--duni .bm-logo { --s: 48; }
+.bm--glimpse .bm-logo { --s: 50; }
+/* a logo with its line of text under it (Glimpse) */
+.bm.has-cap { grid-template-rows: auto auto; align-content: center; gap: clamp(6px, 0.6vw, 9px); }
+.bm.has-cap .bm-logo { --s: 40; }
+.bm-cap {
+  font-size: clamp(0.62rem, 0.7vw, 0.74rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
 
 .hm-regions {
   display: flex;

@@ -598,6 +598,11 @@
       var setOpen = function (on) {
         rail.classList.toggle("is-open", on);
         tab.setAttribute("aria-expanded", on ? "true" : "false");
+        // closing the drawer with a sector still focused inside: hand the
+        // focus back to the tab, so nothing keeps the drawer's names out
+        if (!on && drawer.matches && rail.contains(document.activeElement) && document.activeElement !== tab) {
+          try { tab.focus({ preventScroll: true }); } catch (e) { tab.focus(); }
+        }
       };
       tab.addEventListener("click", function () { setOpen(!rail.classList.contains("is-open")); });
       document.addEventListener("pointerdown", function (e) { if (rail.classList.contains("is-open") && !rail.contains(e.target)) setOpen(false); });
@@ -649,6 +654,7 @@
       // ---- the tuner ---------------------------------------------------
       var band = scan.querySelector("[data-scan-band]");
       var freqEl = scan.querySelector("[data-scan-freq]");
+      var staticAmt = 0;   // 0 clear .. 1 all static (between stations, tuning by hand)
       var freqOfKey = function (k) { for (var i = 0; i < SECTORS.length; i++) if (SECTORS[i].k === k) return SECTORS[i].freq; return ""; };
       // the name decodes as it locks: noise, resolving left to right
       var GLYPHS = "01<>/#%&*+=?ABCDEFXYZ";
@@ -692,7 +698,7 @@
         // settled: tune to what is under the needle (scrollend where the
         // browser has it, a short quiet spell otherwise)
         var settle = function () {
-          if (performance.now() < autoUntil) return;
+          if (performance.now() < autoUntil || handOn) return;
           var st = underNeedle();
           if (st && st.getAttribute("data-industry") !== current) pick(st.getAttribute("data-industry"), "tune");
         };
@@ -700,10 +706,154 @@
         band.addEventListener("scroll", function () {
           var near = underNeedle();
           [].forEach.call(band.querySelectorAll("[data-industry]"), function (st) { st.classList.toggle("is-near", st === near); });
-          if (performance.now() < autoUntil) return;
+          dialFrame();
+          if (performance.now() < autoUntil || handOn) return;
           clearTimeout(settleT);
           settleT = setTimeout(settle, "onscrollend" in band ? 400 : 160);
         }, { passive: true });
+        // ---- the old radio ------------------------------------------
+        // As the band moves (swiped, dragged, the knob turned or gliding
+        // under its own steam) the dial reads it like a real set: the
+        // frequency sweeps between the stations', the signal meter climbs
+        // as a station comes under the needle and falls between them,
+        // where the signal breaks into static (a grain over the dial, noise
+        // in the waveform, the name scrambling). Settling on a station
+        // tunes it in, the static clears and the name decodes.
+        var stations = [].slice.call(band.querySelectorAll("[data-industry]"));
+        var knob = scan.querySelector("[data-scan-knob]");
+        var handOn = false, tuning = 0, sig = 1, lastNear = null, dialRaf = 0;
+        var centreOf = function (st) { return st.offsetLeft + st.offsetWidth / 2; };
+        var dialFrame = function () {
+          if (dialRaf) return;
+          dialRaf = requestAnimationFrame(function () {
+            dialRaf = 0;
+            var mid = band.scrollLeft + band.clientWidth / 2, a = null, b = null;
+            for (var i = 0; i < stations.length; i++) {
+              if (centreOf(stations[i]) <= mid) a = stations[i];
+              else { b = stations[i]; break; }
+            }
+            a = a || stations[0]; b = b || stations[stations.length - 1];
+            var ca = centreOf(a), cb = centreOf(b), u = cb > ca ? (mid - ca) / (cb - ca) : 0;
+            u = Math.max(0, Math.min(1, u));
+            var fa = parseFloat(a.getAttribute("data-freq")) || 88, fb = parseFloat(b.getAttribute("data-freq")) || fa;
+            // the dial reads between the stations
+            if (freqEl) freqEl.textContent = (fa + (fb - fa) * u).toFixed(1);
+            // the signal: full on a station, gone halfway between
+            var d = Math.min(u, 1 - u) * 2;
+            sig = Math.max(0, 1 - d * 1.35);
+            scan.style.setProperty("--sig", sig.toFixed(3));
+            if (knob) knob.style.setProperty("--turn", (band.scrollLeft * 0.9).toFixed(1) + "deg");
+            // a detent under the thumb as each station passes (phones that can)
+            var near = u < 0.5 ? a : b;
+            if (near !== lastNear) {
+              if (lastNear && tuning && navigator.vibrate) { try { navigator.vibrate(6); } catch (e) {} }
+              lastNear = near;
+            }
+            // tuning by hand: the name breaks into static between stations
+            var byHand = tuning && performance.now() >= autoUntil;
+            if (byHand && nameEl && !reduceMotion) {
+              clearTimeout(nameEl.__dec);
+              var nm = (near.querySelector(".pf-station-name") || near).textContent.trim(), out = "";
+              for (var j = 0; j < nm.length; j++) {
+                var ch = nm.charAt(j);
+                out += ch === " " || Math.random() < sig * 0.9 + 0.08 ? ch : GLYPHS.charAt((Math.random() * GLYPHS.length) | 0);
+              }
+              nameEl.textContent = out;
+            }
+            staticAmt = byHand ? 1 - sig : 0;
+            scan.style.setProperty("--static", staticAmt.toFixed(3));
+            if (tuning) waveKick(0.35);
+          });
+        };
+        // a hand on the dial (a drag, the knob, a swipe): the static shows;
+        // it goes once the band has settled on a station
+        var tuneStart = function () { tuning = 1; scan.classList.add("is-tuning"); };
+        var tuneEnd = function () {
+          tuning = 0; staticAmt = 0;
+          scan.classList.remove("is-tuning");
+          scan.style.setProperty("--static", 0);
+          if (nameEl) decode(nameEl, nameOfKey(current));
+        };
+        // a touch that never scrolls (a tap) was not tuning
+        var tMoved = false;
+        band.addEventListener("touchstart", function () { tMoved = false; tuneStart(); }, { passive: true });
+        band.addEventListener("touchmove", function () { tMoved = true; }, { passive: true });
+        band.addEventListener("touchend", function () { if (!tMoved) tuneEnd(); }, { passive: true });
+        band.addEventListener("wheel", function (e) { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) tuneStart(); }, { passive: true });
+
+        // lands the band on the station nearest the needle and tunes it in
+        var land = function () {
+          handOn = false;
+          band.classList.remove("is-dragging");
+          var st = underNeedle();
+          if (!st) { tuneEnd(); return; }
+          var k = st.getAttribute("data-industry");
+          if (k !== current) pick(k, "chip"); else centre(k, true);
+          setTimeout(function () { band.style.scrollSnapType = ""; tuneEnd(); }, reduceMotion ? 0 : 520);
+        };
+        // momentum after a flick, then land
+        var glide = function (v) {
+          v = Math.max(-2.2, Math.min(2.2, v));   // a flick carries a station or two, not the whole band
+          var last = performance.now();
+          (function step(now) {
+            var dt = Math.min(40, now - last); last = now;
+            v *= Math.pow(0.9, dt / 16);
+            band.scrollLeft -= v * dt;
+            var max = band.scrollWidth - band.clientWidth;
+            if (Math.abs(v) < 0.05 || band.scrollLeft <= 0 || band.scrollLeft >= max) { land(); return; }
+            requestAnimationFrame(step);
+          })(last);
+        };
+        // drag: a mouse (touch keeps the native swipe) on the band, or any
+        // pointer on the knob. A press that barely moves stays a click.
+        var drag = null, eatClick = false;
+        var grab = function (e, el, gain) {
+          if (e.pointerType === "mouse" && e.button !== 0) return;
+          drag = { el: el, id: e.pointerId, x: e.clientX, sl: band.scrollLeft, gain: gain, moved: false, vx: 0, lx: e.clientX, lt: performance.now() };
+        };
+        var move = function (e) {
+          if (!drag || e.pointerId !== drag.id) return;
+          var dx = e.clientX - drag.x;
+          if (!drag.moved) {
+            if (Math.abs(dx) < 6) return;
+            drag.moved = true; handOn = true; tuneStart();
+            band.style.scrollSnapType = "none";
+            band.classList.add("is-dragging");
+            try { drag.el.setPointerCapture(drag.id); } catch (err) {}
+          }
+          e.preventDefault();
+          band.scrollLeft = drag.sl - dx * drag.gain;
+          var now = performance.now(), dt = Math.max(1, now - drag.lt);
+          drag.vx = drag.vx * 0.6 + ((e.clientX - drag.lx) / dt) * drag.gain * 0.4;
+          drag.lx = e.clientX; drag.lt = now;
+        };
+        var release = function (e) {
+          if (!drag || e.pointerId !== drag.id) return;
+          var d = drag; drag = null;
+          if (!d.moved) return;
+          eatClick = true; setTimeout(function () { eatClick = false; }, 0);
+          if (!reduceMotion && Math.abs(d.vx) > 0.15 && performance.now() - d.lt < 90) glide(d.vx);
+          else land();
+        };
+        band.addEventListener("pointerdown", function (e) { if (e.pointerType === "mouse") grab(e, band, 1); });
+        band.addEventListener("pointermove", move);
+        band.addEventListener("pointerup", release);
+        band.addEventListener("pointercancel", release);
+        // a drag is not a click on the station it ends over
+        band.addEventListener("click", function (e) { if (eatClick) { e.stopPropagation(); e.preventDefault(); eatClick = false; } }, true);
+        // the knob: turn it (drag across it) to fine-tune, with anything;
+        if (knob) {
+          // like a set: turning it right tunes up the dial
+          knob.addEventListener("pointerdown", function (e) { grab(e, knob, -2.2); e.preventDefault(); });
+          knob.addEventListener("pointermove", move);
+          knob.addEventListener("pointerup", release);
+          knob.addEventListener("pointercancel", release);
+        }
+        // a swipe (native scroll) settles through settle(): the static clears there
+        var settleBase = settle;
+        settle = function () { settleBase(); if (!handOn && tuning) setTimeout(tuneEnd, 380); };
+        if ("onscrollend" in band) { band.removeEventListener("scrollend", settleBase); band.addEventListener("scrollend", settle); }
+
         // arrows tune station to station
         band.addEventListener("keydown", function (e) {
           var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
@@ -730,6 +880,7 @@
       var wave = scan.querySelector(".pf-tuner-wave"), waveKick = function () {};
       if (wave && wave.getContext && !reduceMotion) {
         var wc = wave.getContext("2d"), wDpr = Math.min(window.devicePixelRatio || 1, 2), energy = 0, wOn = false, wRaf = 0, ph = 0;
+        // static: between stations, the carrier drowns in noise
         var drawWave = function () {
           wRaf = 0;
           var w = wave.clientWidth, h = wave.clientHeight;
@@ -744,7 +895,8 @@
             wc.beginPath();
             for (var x = 0; x <= w; x += 4) {
               var u = x / w, env = Math.sin(Math.PI * u);
-              var y = h / 2 + Math.sin(u * 22 * fq * L[1] + ph * (li ? -1.3 : 1)) * (h * 0.12 + energy * h * 0.26) * env * (li ? 0.6 : 1);
+              var y = h / 2 + Math.sin(u * 22 * fq * L[1] + ph * (li ? -1.3 : 1)) * (h * 0.12 + energy * h * 0.26) * env * (li ? 0.6 : 1) * (1 - staticAmt * 0.7)
+                + (Math.random() * 2 - 1) * staticAmt * h * 0.32 * env;
               if (x) wc.lineTo(x, y); else wc.moveTo(x, y);
             }
             wc.strokeStyle = "rgba(250,167,25," + (L[0] * (0.5 + energy * 0.5)).toFixed(3) + ")";
@@ -753,7 +905,7 @@
           });
           if (wOn) wRaf = requestAnimationFrame(drawWave);
         };
-        waveKick = function () { energy = 1; if (wOn && !wRaf) wRaf = requestAnimationFrame(drawWave); };
+        waveKick = function (lvl) { energy = Math.max(energy, lvl == null ? 1 : lvl); if (wOn && !wRaf) wRaf = requestAnimationFrame(drawWave); };
         if ("IntersectionObserver" in window) new IntersectionObserver(function (en) {
           wOn = en[0].isIntersecting && !document.hidden;
           if (wOn && !wRaf) wRaf = requestAnimationFrame(drawWave);

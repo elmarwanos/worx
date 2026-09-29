@@ -1077,7 +1077,9 @@ body.nav-open .qc-dock {
    its bowl): stroked as-is, the overlaps would draw lines inside the
    letters. So each outline is drawn at twice its width and the page
    colour is filled back over the letters (.footer-mark-knock), leaving
-   only the true outer outline, plus the faintest trace of the glow. */
+   only the true outer outline, plus the faintest trace of the glow. The
+   letters' inner lines are then drawn back on top, in colour
+   (.footer-mark-inner). */
 .footer-mark-base {
   fill: transparent;
   stroke: url(#footer-mark-stroke);
@@ -1096,22 +1098,19 @@ body.nav-open .qc-dock {
   fill-opacity: 0.9;
 }
 
-/* the wireframe on every letter (main.js draws it from the glyphs):
-   as faint as the R's own traced construction lines, brighter when the
-   wordmark is lit */
-.footer-mark-wire {
+/* each letter's construction lines (the path in the SVG), drawn over the
+   knock-out in the outline's colour but finer and fainter, so the letters
+   keep their character without competing with the outline. The slow
+   light and the hover fill stay on the outline only. */
+.footer-mark-inner {
   fill: none;
   stroke: url(#footer-mark-stroke);
   stroke-width: 1;
-  opacity: 0.24;
+  stroke-opacity: 0.26;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   pointer-events: none;
-  transition: opacity 0.5s ease;
 }
-
-.footer-mark-wire * { vector-effect: non-scaling-stroke; }
-.footer-mark-wire .d { stroke-dasharray: 3 6; stroke-opacity: 0.6; }
-.footer-mark-wire .k { stroke-width: 1.4; }
-.footer-mark.is-lit .footer-mark-wire { opacity: 0.45; }
 
 /* the fill that appears under the pointer */
 .footer-mark-fill {
@@ -1576,6 +1575,24 @@ html:not(.js) .mega-client {
 .mega-client--tiara-dream .mega-logo,
 .mega-client--uae-pavilion .mega-logo,
 .mega-client--chaumet .mega-logo { height: 34px; }
+/* the compact marks, set a size up so they read with the wordmarks */
+.mega-client--chaumet .mega-logo { width: 100%; }
+.mega-client--kia .mega-logo { height: 20px; width: 70%; }
+.mega-client--lg .mega-logo { height: 28px; width: 66%; }
+.mega-client--duni .mega-logo { height: 30px; }
+.mega-client--glimpse .mega-logo { height: 28px; }
+/* a logo with its line of text under it (Glimpse) */
+.mega-client.has-cap { grid-template-rows: auto auto; align-content: center; gap: 4px; }
+.mega-client.has-cap .mega-logo { height: 22px; }
+.mega-cap {
+  display: block;
+  max-width: 100%;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
 
 /* Typographic wordmarks for any brand without a logo file */
 .mega-client span { font-size: 0.8rem; line-height: 1.05; }

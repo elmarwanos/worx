@@ -38,6 +38,7 @@
     staticStars();
     // The flight plan still charts its full trajectory, just without the ride
     setupFlight(false);
+    setupBelt(false);
     // SVG (SMIL) loops in the scenes hold still for reduced motion
     if (reduced) $$("svg").forEach(function (s) { if (s.pauseAnimations) s.pauseAnimations(); });
     return;
@@ -567,8 +568,11 @@
   }
 
   // =============================================================
-  // Marquee: endless, speeds up and skews with scroll velocity
+  // The WORX BELT: two arcs of names drifting in opposite directions, the
+  // near one faster. Scrolling lends them a little speed, eased in and
+  // out, never a jolt. The ring of bodies behind them: setupBelt().
   // =============================================================
+  var beltBoost = 0;
   $$("[data-marquee]").forEach(function (row) {
     var dir = parseFloat(row.getAttribute("data-marquee"));
     var inner = $(".cx-marquee-inner", row);
@@ -576,9 +580,8 @@
     var items = $$(".cx-marquee-inner", row);
     var loop = gsap.fromTo(items,
       { xPercent: dir > 0 ? 0 : -100 },
-      { xPercent: dir > 0 ? -100 : 0, duration: 40, ease: "none", repeat: -1, paused: true });
-    var onScreen = false;
-    var skew = 0;
+      { xPercent: dir > 0 ? -100 : 0, duration: dir > 0 ? 70 : 110, ease: "none", repeat: -1, paused: true });
+    var onScreen = false, speed = 1;
 
     // Only run while the band is on screen
     ScrollTrigger.create({
@@ -593,11 +596,13 @@
 
     gsap.ticker.add(function () {
       if (!onScreen) return;
-      loop.timeScale(1 + Math.min(Math.abs(velocity), 40) * 0.25);
-      var k = -Math.max(-12, Math.min(12, velocity * 0.4)) * dir;
-      if (Math.abs(k - skew) > 0.05) { skew = k; gsap.set(items, { skewX: k }); }
+      var target = 1 + Math.min(Math.abs(velocity), 40) * 0.08;
+      speed += (target - speed) * 0.04;
+      loop.timeScale(speed);
+      if (dir > 0) beltBoost = speed - 1;
     });
   });
+  setupBelt(true, function () { return beltBoost; });
 
   // =============================================================
   // Flight plan: the ship flies the trajectory; stages ignite
@@ -612,7 +617,11 @@
     scrollTrigger: { trigger: ".cx-ignite", start: "top 65%" }
   });
 
-  gsap.from([".cx-cta-intro .eyebrow", ".cx-ignite-sub", ".cx-cta-steps", ".cx-cta-contact", ".cx-mission"], {
+  gsap.from(".cx-chip", {
+    opacity: 0, y: 10, scale: 0.94, duration: 0.5, ease: "power3.out", stagger: 0.035, clearProps: "transform,opacity",
+    scrollTrigger: { trigger: ".cx-mission", start: "top 70%" }
+  });
+  gsap.from([".cx-cta-intro .eyebrow", ".cx-ignite-sub", ".cx-path", ".cx-cta-contact", ".cx-mission"], {
     y: 30, opacity: 0, stagger: 0.12, duration: 0.9, ease: "power3.out",
     scrollTrigger: { trigger: ".cx-ignite", start: "top 55%" }
   });
@@ -711,6 +720,339 @@
       });
     }, { rootMargin: "200px 0px" });
     vids.forEach(function (v) { io.observe(v); });
+  }
+
+  // ---- The WORX BELT: the tools we build with, as a Kuiper Belt ----
+  // A tilted ring of dust and rocks. The near arc runs across the top
+  // (the camera sits a little below the plane), sweeping left; the far
+  // arc runs underneath, drifting right: each row of names rides its arc.
+  // Each rock has its own lumpy outline and slow spin, lit from a far
+  // light off to the upper right. Every body keeps its own orbit, the inner edge
+  // moving faster than the outer (as orbits do), so the ring slowly
+  // shears instead of sliding as one sheet; a few tumble, their light
+  // rising and falling. No frame of its own: the canvas bleeds past the
+  // band and fades into the page's sky. Scrolling flies the camera by:
+  // arriving, the ring swells out of the dark and the names condense out
+  // of the dust; leaving, the camera rises through the belt's plane and
+  // the ring thins to a streak of light. Once in a long while a faint
+  // comet drifts through. The flight's progress is --belt-in on the band
+  // (0 far, 1 here), for the CSS. motion false: one still frame, arrived.
+  // boost: extra speed from scrolling (0 at rest).
+  function setupBelt(motion, boost) {
+    var sec = $(".cx-belt");
+    var cvs = sec && $(".cx-belt-sky", sec);
+    if (!cvs || !cvs.getContext) return;
+    var ctx = cvs.getContext("2d");
+    var rows = $$(".cx-marquee-row", sec);
+    var W = 0, H = 0, dpr = 1, bodies = [], running = false, last = 0, t = 0;
+    var cy = 0, arcB = 0, bleed = 0, lastIn = -1;
+    var comet = null, nextComet = 12 + Math.random() * 10;
+    var rnd = function (a, b) { return a + Math.random() * (b - a); };
+    var ease = function (x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
+
+    function build() {
+      var r = cvs.getBoundingClientRect(), sr = sec.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = r.width; H = r.height;
+      if (!W || !H) return;
+      bleed = sr.top - r.top;
+      seps.forEach(function (sp) { sp.px = 0; });
+      cvs.width = Math.round(W * dpr); cvs.height = Math.round(H * dpr);
+      // the ring's centre between the rows; the arcs through their middles
+      var y1 = sr.height * 0.4, y2 = sr.height * 0.62;
+      if (rows.length > 1) {
+        var a1 = rows[0].getBoundingClientRect(), a2 = rows[1].getBoundingClientRect();
+        y1 = a1.top + a1.height / 2 - sr.top; y2 = a2.top + a2.height / 2 - sr.top;
+      }
+      cy = bleed + (y1 + y2) / 2;
+      arcB = (y2 - y1) / 2;
+      var n = Math.round(Math.max(420, Math.min(1500, W * 0.8)));
+      bodies = [];
+      for (var i = 0; i < n; i++) {
+        var ring = Math.pow(Math.random(), 0.8);        // 0 inner edge .. 1 outer
+        bodies.push({
+          th: Math.random() * Math.PI * 2,
+          r: 0.84 + ring * 0.34 + rnd(-0.03, 0.03),
+          z: rnd(-1, 1) * rnd(0.1, 0.45),                 // height off the plane
+          sz: Math.pow(Math.random(), 3.2) * 1.9 + 0.35,
+          red: Math.random(),                              // ice to reddish
+          tumble: Math.random() < 0.18 ? rnd(0.4, 1.6) : 0,
+          ph: Math.random() * 6.28
+        });
+        // about one body in four is an asteroid big enough to see: one of
+        // the ASTEROIDS shapes, tumbling at its own pace (the odd big one
+        // rarer)
+        if (Math.random() < 0.26) {
+          bodies[bodies.length - 1].rock = {
+            mesh: Math.floor(Math.random() * ASTEROIDS), ph: Math.random() * SPIN_FRAMES,
+            spin: rnd(1.2, 4) * (Math.random() < 0.5 ? -1 : 1),
+            sz: Math.random() < 0.1 ? rnd(9, 16) : rnd(3.5, 7.5)
+          };
+        }
+      }
+    }
+
+    // ---- The asteroids: real 3D rocks, rendered once, then tumbled --
+    // Each of the ASTEROIDS shapes starts as a sphere (an icosahedron
+    // split twice, 320 faces), knocked into a rock: stretched into a
+    // potato along its own axes, lumped by a few broad swells, and pitted
+    // with craters (a dent with a raised rim). Every face is lit by the
+    // far light off to the upper right (warm), with a faint cool fill
+    // from the other side, drawn far faces first. Each shape is rendered
+    // at SPIN_FRAMES steps of a turn about its own tilted axis, into small
+    // sprites, a shape per clock tick so nothing stalls; a body then just
+    // shows the step its tumble has reached.
+    function icosphere() {
+      var p = (1 + Math.sqrt(5)) / 2;
+      var V = [[-1, p, 0], [1, p, 0], [-1, -p, 0], [1, -p, 0], [0, -1, p], [0, 1, p], [0, -1, -p], [0, 1, -p], [p, 0, -1], [p, 0, 1], [-p, 0, -1], [-p, 0, 1]];
+      var F = [[0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11], [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8],
+        [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9], [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1]];
+      var norm = function (v) { var l = Math.hypot(v[0], v[1], v[2]); return [v[0] / l, v[1] / l, v[2] / l]; };
+      V = V.map(norm);
+      for (var it = 0; it < 2; it++) {
+        var cache = {}, NF = [];
+        var mid = function (i, j) {
+          var key = i < j ? i + "_" + j : j + "_" + i;
+          if (cache[key] == null) { V.push(norm([(V[i][0] + V[j][0]) / 2, (V[i][1] + V[j][1]) / 2, (V[i][2] + V[j][2]) / 2])); cache[key] = V.length - 1; }
+          return cache[key];
+        };
+        F.forEach(function (t3) {
+          var ab = mid(t3[0], t3[1]), bc = mid(t3[1], t3[2]), ca = mid(t3[2], t3[0]);
+          NF.push([t3[0], ab, ca], [t3[1], bc, ab], [t3[2], ca, bc], [ab, bc, ca]);
+        });
+        F = NF;
+      }
+      return { V: V, F: F };
+    }
+    var dirRnd = function () { var z = rnd(-1, 1), a2 = rnd(0, 6.2832), q = Math.sqrt(1 - z * z); return [q * Math.cos(a2), q * Math.sin(a2), z]; };
+    function asteroidMesh() {
+      var base = icosphere();
+      var swells = [], craters = [];
+      for (var k = 0; k < 5; k++) swells.push({ d: dirRnd(), a: rnd(0.08, 0.22), p: rnd(2, 5) });
+      for (var c2 = 0; c2 < 5 + Math.floor(Math.random() * 4); c2++) craters.push({ d: dirRnd(), r: rnd(0.22, 0.5), h: rnd(0.08, 0.16) });
+      var ax = [rnd(1.25, 1.7), rnd(0.8, 1.05), rnd(0.62, 0.85)];
+      var V = base.V.map(function (v) {
+        var r = 1;
+        swells.forEach(function (w) { var d = v[0] * w.d[0] + v[1] * w.d[1] + v[2] * w.d[2]; if (d > 0) r += w.a * Math.pow(d, w.p); });
+        craters.forEach(function (c3) {
+          var d = v[0] * c3.d[0] + v[1] * c3.d[1] + v[2] * c3.d[2], ang = Math.acos(Math.max(-1, Math.min(1, d)));
+          var u = ang / c3.r;
+          if (u < 1) r -= c3.h * (1 - u * u);                 // the dent
+          else if (u < 1.35) r += c3.h * 0.35 * (1 - (u - 1) / 0.35);   // its rim
+        });
+        r *= 1 + rnd(-0.025, 0.025);                           // grit
+        return [v[0] * r * ax[0], v[1] * r * ax[1], v[2] * r * ax[2]];
+      });
+      var ext = V.reduce(function (m, v) { return Math.max(m, Math.hypot(v[0], v[1], v[2])); }, 0);
+      V = V.map(function (v) { return [v[0] / ext, v[1] / ext, v[2] / ext]; });
+      var tone = base.F.map(function () { return rnd(0.86, 1.08); });   // patchy surface
+      return { V: V, F: base.F, tone: tone, axis: dirRnd(), start: [rnd(0, 6.28), rnd(0, 6.28)], red: Math.random() };
+    }
+    var ASTEROIDS = 8, SPIN_FRAMES = 48, SPR = 80, sprites = [], meshQueue = 0;
+    var LIGHT = (function () { var l = [0.62, -0.5, 0.6], n = Math.hypot(l[0], l[1], l[2]); return [l[0] / n, l[1] / n, l[2] / n]; })();
+    function rotate(v, ax, ang) {          // Rodrigues: v turned ang about the unit axis ax
+      var c = Math.cos(ang), sn = Math.sin(ang), d = v[0] * ax[0] + v[1] * ax[1] + v[2] * ax[2];
+      return [v[0] * c + (ax[1] * v[2] - ax[2] * v[1]) * sn + ax[0] * d * (1 - c),
+        v[1] * c + (ax[2] * v[0] - ax[0] * v[2]) * sn + ax[1] * d * (1 - c),
+        v[2] * c + (ax[0] * v[1] - ax[1] * v[0]) * sn + ax[2] * d * (1 - c)];
+    }
+    function renderAsteroid(m) {
+      var frames = [];
+      for (var fr = 0; fr < SPIN_FRAMES; fr++) {
+        var cv = document.createElement("canvas"); cv.width = cv.height = SPR;
+        var g = cv.getContext("2d"), R = SPR * 0.44, C = SPR / 2, ang = (fr / SPIN_FRAMES) * 6.2832;
+        var P = m.V.map(function (v) {
+          var w = rotate(rotate(v, [1, 0, 0], m.start[0]), [0, 1, 0], m.start[1]);
+          return rotate(w, m.axis, ang);
+        });
+        var faces = [];
+        m.F.forEach(function (t3, fi) {
+          var A = P[t3[0]], B = P[t3[1]], Cc = P[t3[2]];
+          var ux = B[0] - A[0], uy = B[1] - A[1], uz = B[2] - A[2], vx = Cc[0] - A[0], vy = Cc[1] - A[1], vz = Cc[2] - A[2];
+          var nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx, nl = Math.hypot(nx, ny, nz) || 1;
+          nx /= nl; ny /= nl; nz /= nl;
+          if (nz <= 0) return;                                  // facing away
+          var lit = Math.max(0, nx * LIGHT[0] + ny * LIGHT[1] + nz * LIGHT[2]);
+          var fill = Math.max(0, -nx * 0.6 + ny * 0.3 + nz * 0.25) * 0.12;
+          faces.push({ t: t3, z: (A[2] + B[2] + Cc[2]) / 3, lit: lit, fill: fill, tone: m.tone[fi] });
+        });
+        faces.sort(function (p1, p2) { return p1.z - p2.z; });
+        faces.forEach(function (fc) {
+          var k2 = (0.07 + 0.93 * Math.pow(fc.lit, 0.9)) * fc.tone;
+          var r = Math.round(Math.min(255, (150 + 40 * m.red) * k2 + 38 * fc.fill));
+          var gg = Math.round(Math.min(255, (116 + 6 * m.red) * k2 + 34 * fc.fill));
+          var bb = Math.round(Math.min(255, (94 - 18 * m.red) * k2 + 52 * fc.fill));
+          g.fillStyle = g.strokeStyle = "rgb(" + r + "," + gg + "," + bb + ")";
+          g.lineWidth = 0.6;
+          g.beginPath();
+          for (var q = 0; q < 3; q++) { var pt = P[fc.t[q]], px = C + pt[0] * R, py = C + pt[1] * R; if (q) g.lineTo(px, py); else g.moveTo(px, py); }
+          g.closePath(); g.fill(); g.stroke();
+        });
+        frames.push(cv);
+      }
+      return frames;
+    }
+    // one shape per call, until all are made. The separators between the
+    // names (.cx-kbo, data-km naming the shape) each get a small canvas
+    // of their own once their shape exists; tumbleSeparators() shows each
+    // one's turn, at its own pace (--kt, a full turn) and direction (--kd)
+    var seps = [];
+    function growAsteroids() {
+      if (meshQueue >= ASTEROIDS) return;
+      var mi = meshQueue;
+      sprites[mi] = renderAsteroid(asteroidMesh());
+      meshQueue++;
+      $$('.cx-kbo[data-km="' + mi + '"]', sec).forEach(function (el) {
+        var cv = document.createElement("canvas");
+        el.appendChild(cv);
+        el.classList.add("is-rock");
+        var turn = parseFloat(el.style.getPropertyValue("--kt")) || 10;
+        var rev = el.style.getPropertyValue("--kd").trim() === "reverse";
+        seps.push({ el: el, cv: cv, g: cv.getContext("2d"), mesh: mi, fps: (rev ? -1 : 1) * SPIN_FRAMES / turn, ph: Math.random() * SPIN_FRAMES, fi: -1, px: 0 });
+      });
+    }
+    function tumbleSeparators() {
+      for (var i = 0; i < seps.length; i++) {
+        var sp = seps[i];
+        // measured once (and again after a resize, build() clears it)
+        if (!sp.px) {
+          var m = Math.round(sp.el.clientWidth * dpr);
+          if (!m) continue;
+          sp.px = sp.cv.width = sp.cv.height = m; sp.fi = -1;
+        }
+        var px = sp.px;
+        var fi = Math.floor(((sp.ph + t * sp.fps) % SPIN_FRAMES + SPIN_FRAMES) % SPIN_FRAMES);
+        if (fi === sp.fi) continue;
+        sp.fi = fi;
+        sp.g.clearRect(0, 0, px, px);
+        sp.g.drawImage(sprites[sp.mesh][fi], 0, 0, px, px);
+      }
+    }
+
+    // how far the flight is: 0 the band below the view, 1 above it
+    function progress() {
+      var sr = sec.getBoundingClientRect(), vh = window.innerHeight;
+      return Math.max(0, Math.min(1, (vh - sr.top) / (vh + sr.height)));
+    }
+
+    function frame(now) {
+      if (!W) return;
+      var dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+      last = now; t += dt;
+      var p = motion ? progress() : 0.5;
+      // arriving (p 0.1 .. 0.42), here, then rising through the plane
+      var arrive = ease((p - 0.1) / 0.32), leave = ease((p - 0.6) / 0.34);
+      var k = arrive * (1 - leave * 0.85);
+      if (Math.abs(k - lastIn) > 0.004) { lastIn = k; sec.style.setProperty("--belt-in", k.toFixed(3)); }
+      var scale = 0.55 + 0.45 * arrive + 0.35 * leave;    // the ring swells as we close in
+      var flat = 1 - 0.9 * leave;                          // and thins as we rise through it
+      var a = W * 0.44 * scale, b = arcB * scale * flat;
+      var extra = motion && boost ? boost() : 0;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      if (k < 0.01) return;
+      ctx.globalCompositeOperation = "lighter";
+      var farRocks = [], nearRocks = [];
+      for (var i = 0; i < bodies.length; i++) {
+        var o = bodies[i];
+        // Kepler: the inner edge moves faster than the outer
+        if (motion) o.th += dt * (0.02 + extra * 0.05) / Math.pow(o.r, 1.5);
+        var s = Math.sin(o.th), near = (s + 1) / 2, depth = 0.4 + 0.6 * near;
+        var x = W / 2 + a * o.r * Math.cos(o.th);
+        var y = cy - b * o.r * s + o.z * arcB * scale * (0.4 + 0.6 * flat);
+        if (x < -4 || x > W + 4 || y < -4 || y > H + 4) continue;
+        var tum = o.tumble ? 0.55 + 0.45 * Math.sin(t * o.tumble + o.ph) : 1;
+        // the bleed above and below the band fades into the page
+        var edge = Math.min(1, Math.min(y, H - y) / (bleed || 1));
+        var alpha = Math.min(1, (0.14 + 0.62 * depth) * tum * k * edge);
+        if (alpha < 0.02) continue;
+        var size = o.sz * (0.5 + 0.8 * depth) * (0.8 + 0.3 * scale);
+        if (o.rock) {
+          o.px = x; o.py = y; o.pa = alpha; o.pd = depth;
+          o.ps = o.rock.sz * (0.45 + 0.75 * depth) * (0.8 + 0.3 * scale);
+          if (!sprites[o.rock.mesh]) continue;
+          (near < 0.5 ? farRocks : nearRocks).push(o);
+          continue;
+        }
+        var gC = Math.round(238 - o.red * 90), bC = Math.round(207 - o.red * 140);
+        ctx.fillStyle = "rgba(254," + gC + "," + bC + "," + alpha.toFixed(3) + ")";
+        if (size > 1.4) {
+          ctx.beginPath(); ctx.arc(x, y, size * 0.6, 0, 6.2832); ctx.fill();
+          ctx.fillStyle = "rgba(250,167,25," + (alpha * 0.12).toFixed(3) + ")";
+          ctx.beginPath(); ctx.arc(x, y, size * 2.2, 0, 6.2832); ctx.fill();
+        } else {
+          ctx.fillRect(x - size / 2, y - size / 2, size, size);
+        }
+      }
+      ctx.globalCompositeOperation = "source-over";
+      var drawRocks = function (list) {
+        for (var j = 0; j < list.length; j++) {
+          var q = list[j], rk = q.rock, n2 = SPIN_FRAMES;
+          var fi = Math.floor(((rk.ph + t * rk.spin) % n2 + n2) % n2);
+          ctx.globalAlpha = Math.min(1, q.pa * 1.15);
+          ctx.drawImage(sprites[rk.mesh][fi], q.px - q.ps, q.py - q.ps, q.ps * 2, q.ps * 2);
+        }
+        ctx.globalAlpha = 1;
+      };
+      drawRocks(farRocks);
+      drawRocks(nearRocks);
+      ctx.globalCompositeOperation = "lighter";
+      // a comet, once in a long while: slow and faint, its tail pointing
+      // away from the far light
+      if (motion && k > 0.5) {
+        nextComet -= dt;
+        if (!comet && nextComet <= 0) {
+          var fromLeft = Math.random() < 0.5;
+          comet = { x: (fromLeft ? rnd(0.04, 0.2) : rnd(0.8, 0.96)) * W, y: cy - arcB * rnd(1.6, 2.4),
+            vx: (fromLeft ? 1 : -1) * rnd(0.018, 0.03) * W, vy: arcB * rnd(0.12, 0.2), age: 0, life: rnd(6, 9) };
+        }
+        if (comet) {
+          comet.age += dt; comet.x += comet.vx * dt; comet.y += comet.vy * dt;
+          var ca = Math.sin(Math.min(1, comet.age / comet.life) * Math.PI) * 0.5 * k;
+          var dx = -0.83, dy = 0.56, dl = 1;
+          var tx = comet.x + dx / dl * W * 0.06, ty = comet.y + dy / dl * W * 0.06;
+          var cg = ctx.createLinearGradient(comet.x, comet.y, tx, ty);
+          cg.addColorStop(0, "rgba(255,236,200," + ca.toFixed(3) + ")");
+          cg.addColorStop(1, "rgba(255,236,200,0)");
+          ctx.strokeStyle = cg; ctx.lineWidth = 1.2; ctx.lineCap = "round";
+          ctx.beginPath(); ctx.moveTo(comet.x, comet.y); ctx.lineTo(tx, ty); ctx.stroke();
+          ctx.fillStyle = "rgba(255,248,232," + Math.min(1, ca * 1.6).toFixed(3) + ")";
+          ctx.beginPath(); ctx.arc(comet.x, comet.y, 1.3, 0, 6.2832); ctx.fill();
+          if (comet.age > comet.life) { comet = null; nextComet = rnd(22, 38); }
+        }
+      }
+      ctx.globalCompositeOperation = "source-over";
+    }
+
+    build();
+    var rt = 0;
+    window.addEventListener("resize", function () {
+      clearTimeout(rt);
+      rt = setTimeout(function () { build(); lastIn = -1; frame(performance.now()); }, 150);
+    });
+    if (!motion) {
+      while (meshQueue < ASTEROIDS) growAsteroids();
+      sec.style.setProperty("--belt-in", "1"); frame(performance.now()); tumbleSeparators(); return;
+    }
+    // on the page's own clock (gsap's ticker), only while the band is
+    // near the view, as the rows are
+    ScrollTrigger.create({
+      trigger: sec,
+      start: "top bottom",
+      end: "bottom top",
+      onToggle: function (self) {
+        running = self.isActive;
+        sec.classList.toggle("is-offscreen", !running);
+        last = 0;
+      },
+      onRefresh: function () { build(); }
+    });
+    gsap.ticker.add(function () {
+      if (!running) return;
+      growAsteroids();
+      frame(performance.now());
+      tumbleSeparators();
+    });
   }
 
   function staticStars() {
@@ -1185,35 +1527,73 @@
   }
 
   // ---- Mission builder: arm services, carry them to contact ----
+  // The brief builder. Picking services lights the flight path's first
+  // stage, counts them onto the payload bar and arms the ignition, whose
+  // link carries them to the contact page (?services=a,b), where the
+  // planner shows them and sends them with the enquiry. Reaching the
+  // button lights "transmit"; the click lights "launch" as the ignition
+  // (ignite.js) lifts off.
   function setupMission() {
     var chips = $$("[data-mission]");
     var payload = $("[data-payload]");
     var clear = $("[data-mission-clear]");
     var btn = $(".cx-ignite-btn");
     var label = $("[data-cta-label]");
+    var hint = $("[data-cta-hint]");
+    var count = $("[data-mission-count]");
+    var bar = $("[data-mission-bar]");
+    var path = $("[data-path]");
     if (!chips.length || !btn) return;
     var base = btn.getAttribute("href");
 
     function update() {
       var picked = chips.filter(function (c) { return c.getAttribute("aria-pressed") === "true"; })
         .map(function (c) { return c.getAttribute("data-mission"); });
-      payload.textContent = picked.length ? picked.length + " selected" : "Nothing selected yet";
-      if (label) label.textContent = picked.length ? "Send my brief" : "Start a project";
-      payload.parentNode.classList.toggle("is-armed", picked.length > 0);
-      clear.hidden = !picked.length;
-      btn.setAttribute("href", picked.length ? base + "?services=" + encodeURIComponent(picked.join(",")) : base);
-      btn.classList.toggle("is-armed", picked.length > 0);
+      var n = picked.length;
+      payload.textContent = n ? n + (n === 1 ? " service" : " services") + " on board" : "Nothing selected yet";
+      if (label) label.textContent = n ? "Send my brief" : "Start a project";
+      if (hint) {
+        hint.textContent = n ? "Opens the planner with your " + (n === 1 ? "service" : n + " services") : "Pick a service or two, then launch.";
+        hint.classList.toggle("is-armed", n > 0);
+      }
+      if (count && count.textContent !== String(n)) {
+        count.textContent = n;
+        count.classList.remove("is-tick"); void count.offsetWidth; count.classList.add("is-tick");
+      }
+      if (bar) bar.style.setProperty("--fill", (n / chips.length * 100).toFixed(1) + "%");
+      if (path) path.classList.toggle("is-select", n > 0);
+      payload.parentNode.classList.toggle("is-armed", n > 0);
+      clear.hidden = !n;
+      btn.setAttribute("href", n ? base + "?services=" + encodeURIComponent(picked.join(",")) : base);
+      btn.classList.toggle("is-armed", n > 0);
     }
 
     chips.forEach(function (chip) {
       chip.addEventListener("click", function () {
-        chip.setAttribute("aria-pressed", chip.getAttribute("aria-pressed") === "true" ? "false" : "true");
+        var on = chip.getAttribute("aria-pressed") !== "true";
+        chip.setAttribute("aria-pressed", on ? "true" : "false");
+        chip.classList.remove("is-pop");
+        if (on) { void chip.offsetWidth; chip.classList.add("is-pop"); }
         update();
       });
+      chip.addEventListener("animationend", function () { chip.classList.remove("is-pop"); });
     });
     clear.addEventListener("click", function () {
       chips.forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
       update();
     });
+
+    // the path follows the pointer (or keyboard) to the ignition, and the launch
+    if (path) {
+      var near = function (on) { path.classList.toggle("is-transmit", on); };
+      btn.addEventListener("pointerenter", function () { near(true); });
+      btn.addEventListener("pointerleave", function () { near(false); });
+      btn.addEventListener("focus", function () { near(true); });
+      btn.addEventListener("blur", function () { near(false); });
+      btn.addEventListener("click", function () { path.classList.add("is-transmit", "is-launch"); });
+      // coming back to the page (the back button), the launch is over
+      window.addEventListener("pageshow", function () { path.classList.remove("is-launch", "is-transmit"); });
+    }
+    update();
   }
 })();
