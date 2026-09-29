@@ -283,6 +283,9 @@
       client_company: f.companyName,
       services: f.services && f.services.length ? f.services.join(", ") : "-",
       build_type: labelFor(BUILD_OPTIONS, f.buildType) || "-",
+      // the Quick Enquiry widget shares this template: both send the
+      // client's words as {{message}}
+      message: truncate(f.idea.trim(), IDEA_CAP),
       idea: truncate(f.idea.trim(), IDEA_CAP),
       goal: f.goal === "other" ? (f.goalOther.trim() || "Something else") : (labelFor(GOAL_OPTIONS, f.goal) || "-"),
       timeline: labelFor(TIMELINE_OPTIONS, f.timeline) || "-",

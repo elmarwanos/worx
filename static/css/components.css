@@ -1691,6 +1691,8 @@
   box-shadow: 0 14px 30px -14px rgba(229, 125, 35, 0.9);
 }
 
+.qc-send:disabled { opacity: 0.65; cursor: progress; }
+
 .qc-send-wave { display: inline-flex; align-items: center; gap: 3px; height: 16px; }
 
 .qc-send-wave i {

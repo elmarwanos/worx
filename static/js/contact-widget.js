@@ -18,8 +18,18 @@
     title: "Quick Enquiry",
     intro: "Pick a channel or leave a note, we usually reply within a day.",
     recipient: "Hello@worxbyglimpse.com",
-    subjectPrefix: "Project enquiry from ",
+    subjectPrefix: "Quick enquiry from ",
     ctaText: /quick enquiry|get a quote|talk to mission control/i,
+    // the same lead + confirmation pair as the contact page's planner
+    // (static/js/contact.js): Formspree drops the lead in the Worx
+    // inbox, then EmailJS sends the client their confirmation
+    formspree: "https://formspree.io/f/xeaojvzn",
+    emailjs: {
+      sdk: "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js",
+      publicKey: "wm49sHmSgdQ04r0O-",
+      serviceId: "service_5rgzqe1",
+      templateId: "template_j30lcxg"
+    },
     whatsapp: {
       href: "https://wa.me/971555669847",
       greeting: "Hi Worx, I'd like to talk about a project.",
@@ -167,8 +177,9 @@
 
   var submit = el("button", "qc-send");
   submit.type = "submit";
-  submit.innerHTML = '<span class="qc-send-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span>Transmit message</span>';
+  submit.innerHTML = '<span class="qc-send-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span class="qc-send-txt">Transmit message</span>';
   form.appendChild(submit);
+  var submitTxt = submit.querySelector(".qc-send-txt");
 
   var note = el("p", "qc-note");
   note.setAttribute("role", "status");
@@ -364,13 +375,15 @@
   // Triggers: [data-contact-open] and every "Talk to Mission
   // Control" CTA. A service page's CTA carries its service in the
   // link (?services=...), which becomes the note's opening line.
+  var service = "";
   function prefill(trigger) {
     var href = trigger.getAttribute("href") || "";
     var m = href.match(/[?&]services=([^&#]+)/);
-    if (!m || form.message.value.trim()) return;
+    if (!m) return;
     try {
-      form.message.value = "I'm interested in " + decodeURIComponent(m[1].replace(/\+/g, " ")) + ". ";
-    } catch (e) {}
+      service = decodeURIComponent(m[1].replace(/\+/g, " "));
+    } catch (e) { return; }
+    if (!form.message.value.trim()) form.message.value = "I'm interested in " + service + ". ";
   }
 
   Array.prototype.filter.call(
@@ -399,9 +412,62 @@
     });
   });
 
-  // --- Form: hand off to the mail client ----------------------
+  // --- Form: Formspree for the lead, EmailJS for the reply ------
+  // The EmailJS SDK only ships with the contact page, so everywhere
+  // else it's fetched on the first send.
+  var sdkLoading = null;
+  function loadEmailJs() {
+    if (window.emailjs) return Promise.resolve(window.emailjs);
+    if (sdkLoading) return sdkLoading;
+    sdkLoading = new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = CONTACT.emailjs.sdk;
+      s.async = true;
+      s.onload = function () {
+        if (window.emailjs) resolve(window.emailjs);
+        else reject(new Error("EmailJS SDK missing"));
+      };
+      s.onerror = function () {
+        sdkLoading = null;
+        reject(new Error("EmailJS SDK failed to load"));
+      };
+      document.head.appendChild(s);
+    });
+    return sdkLoading;
+  }
+
+  // the same {{variables}} template_j30lcxg reads from the planner;
+  // what the quick form doesn't ask for goes in as "-"
+  function sendConfirmation(data) {
+    var EJ = CONTACT.emailjs;
+    loadEmailJs()
+      .then(function (emailjs) {
+        return emailjs.send(EJ.serviceId, EJ.templateId, {
+          to_name: data.name,
+          to_email: data.email,
+          reply_to: data.email,
+          company_name: "The Worx Team",
+          client_company: "-",
+          services: service || "-",
+          build_type: "-",
+          message: data.message,
+          idea: data.message,
+          goal: "-",
+          timeline: "-",
+          budget: "-"
+        }, { publicKey: EJ.publicKey });
+      })
+      .catch(function (err) {
+        // Best effort: Formspree already has the lead, so a failed
+        // confirmation never turns the send into an error.
+        console.error("EmailJS confirmation failed:", err);
+      });
+  }
+
+  var sending = false;
   form.addEventListener("submit", function (event) {
     event.preventDefault();
+    if (sending) return;
     var data = {
       name: form.name.value.trim(),
       email: form.email.value.trim(),
@@ -411,14 +477,47 @@
       note.textContent = "Please fill in every field.";
       return;
     }
-    var subject = encodeURIComponent(CONTACT.subjectPrefix + data.name);
-    var body = encodeURIComponent(
-      data.message + "\n\n- " + data.name + " (" + data.email + ")"
-    );
-    window.location.href =
-      "mailto:" + CONTACT.recipient + "?subject=" + subject + "&body=" + body;
-    note.textContent = "Opening your mail app…";
-    form.reset();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      note.textContent = "Please check your email address.";
+      form.email.focus();
+      return;
+    }
+
+    sending = true;
+    submit.disabled = true;
+    submitTxt.textContent = "Transmitting…";
+    note.textContent = "";
+    // warm the SDK up while Formspree works
+    loadEmailJs().catch(function () {});
+
+    fetch(CONTACT.formspree, {
+      method: "POST",
+      headers: { "Accept": "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({
+        _subject: CONTACT.subjectPrefix + data.name,
+        _replyto: data.email,
+        source: "Quick Enquiry · " + location.pathname,
+        services: service || "-",
+        name: data.name,
+        email: data.email,
+        message: data.message
+      })
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("Formspree responded with " + res.status);
+        sendConfirmation(data);
+        note.textContent = "Message received. A confirmation is on its way to " + data.email + ".";
+        form.reset();
+        service = "";
+      })
+      .catch(function () {
+        note.textContent = "Something went wrong sending that, please try again or email " + CONTACT.recipient + ".";
+      })
+      .then(function () {
+        sending = false;
+        submit.disabled = false;
+        submitTxt.textContent = "Transmit message";
+      });
   });
 
   // --- Follow the viewport: reveal after the hero, hide at the
