@@ -1,0 +1,132 @@
+/* ============================================================
+   Worx | form-finale.css
+   The send-off after a form goes through (form-finale.js): the stars,
+   the mark, and the homepage's WORX title card. Everything is placed
+   in units of the screen's short side (--sz, set by the script), the
+   same units the stars are drawn in, so the stars land on the mark.
+   ============================================================ */
+
+.wf {
+  --sz: 100vmin;
+  --wf-void: #07050a;
+  --wf-gold-hi: #ffc86a;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--wf-void);
+  color: var(--brand-cream);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  outline: none;
+}
+.wf.is-open { opacity: 1; }
+.wf.is-closing { opacity: 0; transition-duration: 0.4s; }
+
+.wf-sky { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.wf-mark {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - var(--sz) * 0.13);
+  width: calc(var(--sz) * 0.3);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
+.wf-mark svg { display: block; width: 100%; height: 100%; overflow: hidden; border-radius: 12%; }
+
+/* the homepage's title card (home.css .hx-card-word): the Worx gradient
+   laid across the whole word, each letter showing its own slice */
+.wf-word {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + var(--sz) * 0.14);
+  transform: translate(-50%, -50%);
+  display: flex;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: calc(var(--sz) * 0.17);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: 0.08em;
+  padding-left: 0.08em;
+  pointer-events: none;
+}
+/* each letter: the outer span is what the script moves, blurs and lights;
+   the inner <b> carries the gradient. The two are kept apart on purpose:
+   Safari drops text clipped to its background once a filter is on it. */
+.wf-word > span { display: inline-block; opacity: 0; }
+.wf-word b {
+  display: inline-block;
+  font-weight: inherit;
+  color: var(--brand-orange);                 /* if gradient text isn't supported */
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .wf-word b {
+    background: linear-gradient(100deg, var(--brand-ember) 0%, var(--brand-orange) 45%, var(--brand-amber) 82%, var(--wf-gold-hi) 100%);
+    background-size: 400% 100%;
+    background-position: calc(var(--i, 0) * 33.333%) 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+}
+.wf-sweep-clip { position: absolute; inset: -10% -6%; overflow: hidden; mix-blend-mode: overlay; }
+.wf-sweep {
+  position: absolute;
+  inset: 0 -20%;
+  background: linear-gradient(100deg, transparent 38%, rgba(255, 250, 240, 0.55) 50%, transparent 62%);
+  transform: translateX(-120%);
+}
+
+.wf-tag,
+.wf-note,
+.wf-sub,
+.wf-close {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  opacity: 0;
+  text-align: center;
+}
+.wf-tag {
+  top: calc(50% + var(--sz) * 0.245);
+  font: 500 calc(var(--sz) * 0.026)/1 var(--font-display);
+  letter-spacing: 0.5em;
+  padding-left: 0.5em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.wf-note {
+  top: calc(50% + var(--sz) * 0.31);
+  width: min(92vw, 40ch);
+  font: 500 12px/1.4 var(--font-mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--brand-amber);
+}
+.wf-sub {
+  top: calc(50% + var(--sz) * 0.355);
+  width: min(92vw, 44ch);
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(254, 238, 207, 0.7);
+}
+.wf-close {
+  top: calc(50% + var(--sz) * 0.43);
+  /* centred with `translate`, so the site button's hover lift (a transform) adds to it */
+  transform: none;
+  translate: -50% -50%;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.wf.is-done .wf-close { pointer-events: auto; }
+
+/* short, wide screens: tuck the sign-off up so the button stays on screen */
+@media (max-height: 560px) and (orientation: landscape) {
+  .wf-sub { display: none; }
+  .wf-close { top: calc(50% + var(--sz) * 0.39); }
+}

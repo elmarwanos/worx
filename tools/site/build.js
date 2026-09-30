@@ -27,7 +27,9 @@ const FOOTER = strip(read("partials/footer.html"));
 
 function walk(dir, out) {
   for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (["node_modules", ".git", "tools", "static", "partials"].includes(f.name)) continue;
+    // dot-folders (.git, and .claude with its old git worktrees, whose copies
+    // of the pages must not be stamped) are never part of the site
+    if (f.name.startsWith(".") || ["node_modules", "tools", "static", "partials"].includes(f.name)) continue;
     const p = path.join(dir, f.name);
     if (f.isDirectory()) walk(p, out);
     else if (f.name.endsWith(".html")) out.push(p);

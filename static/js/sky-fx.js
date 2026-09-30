@@ -73,6 +73,7 @@
   function MartianSky(opts) {
     opts = opts || {};
     this.reduceMotion = !!opts.reduceMotion;
+    this.warm = !!opts.warm;   // no cool (bluish) stars or Earth: the Book a Demo page keeps to the Worx palette
     this._w = 0; this._h = 0;
     this._far = null;       // layer 1 bitmap
     this._mid = []; this._hero = [];
@@ -128,7 +129,7 @@
     for (i = 0; i < nFar; i++) {
       var p = sample();
       var tint = r();
-      fx.fillStyle = tint < 0.15 ? "rgba(200,215,255," : tint < 0.3 ? "rgba(255,225,190," : "rgba(250,244,232,";
+      fx.fillStyle = tint < 0.15 ? (this.warm ? "rgba(255,232,200," : "rgba(200,215,255,") : tint < 0.3 ? "rgba(255,225,190," : "rgba(250,244,232,";
       fx.fillStyle += (0.3 + r() * 0.45).toFixed(3) + ")";
       var s = (0.45 + r() * 0.6) * dpr;
       fx.fillRect(p[0] * w, p[1] * h, s, s);
@@ -226,7 +227,7 @@
       s = this._mid[i];
       a = s.a * (1 - s.amp + s.amp * breathe(t, s.per, s.ph));    // dims down, shines back up
       x.globalAlpha = Math.min(1, a);
-      x.fillStyle = s.warm ? "#ffe2c0" : s.cool ? "#d8e4ff" : "#fbf5ea";
+      x.fillStyle = s.warm ? "#ffe2c0" : s.cool && !this.warm ? "#d8e4ff" : "#fbf5ea";
       x.fillRect(s.u * cw, s.v * ch, s.r, s.r);
     }
     for (i = 0; i < this._hero.length; i++) {
@@ -235,13 +236,13 @@
       x.globalAlpha = 0.5 * a;
       x.drawImage(this._halo, s.u * cw - s.r * 5, s.v * ch - s.r * 5, s.r * 10, s.r * 10);
       x.globalAlpha = Math.min(1, a);
-      x.fillStyle = s.cool ? "#e4ecff" : "#fff8ec";
+      x.fillStyle = s.cool && !this.warm ? "#e4ecff" : "#fff8ec";
       x.beginPath(); x.arc(s.u * cw, s.v * ch, s.r * 0.6, 0, 6.283); x.fill();
     }
 
     // Planets (effectively infinite distance: fixed in the sky)
     var ey = hzS * (1 - BODIES.earth.alt / ALT_TOP), ex = azToX(BODIES.earth.az) * cw;
-    this._drawBody(x, ex, ey, 1.9 * dpr, 11 * dpr, "225,236,255", 1, 0.42);
+    this._drawBody(x, ex, ey, 1.9 * dpr, 11 * dpr, this.warm ? "255,240,218" : "225,236,255", 1, 0.42);
     this._drawBody(x, ex + 6 * dpr, ey + 2.5 * dpr, 0.75 * dpr, 2.5 * dpr, "235,232,226", 0.55, 0.18); // the Moon
     var sy = hzS * (1 - BODIES.jupiter.alt / ALT_TOP), sx = azToX(BODIES.jupiter.az) * cw;
     this._drawBody(x, sx, sy, 1.35 * dpr, 6 * dpr, "255,228,176", 0.85, 0.22);
@@ -257,7 +258,7 @@
 
     this._points = { earth: { x: ex, y: ey }, jupiter: { x: sx, y: sy }, phobos: { x: px, y: py }, deimos: { x: dx, y: dy } };
     this._labels = [
-      { x: ex, y: ey, text: "EARTH · MOON", color: "216,230,255" },
+      { x: ex, y: ey, text: "EARTH · MOON", color: this.warm ? "242,222,196" : "216,230,255" },
       { x: sx, y: sy, text: "JUPITER", color: "242,207,150" },
       { x: px, y: py - 1.5 * dpr, text: "PHOBOS", color: "228,214,196" },
       { x: dx, y: dy, text: "DEIMOS", color: "228,214,196" }
