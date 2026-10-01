@@ -43,21 +43,6 @@
   // only opacity varies cell to cell.
   var CELL_RGB = [161, 71, 157];
 
-  // The cell's colours. "violet" is the site's storm; "ember" is the same
-  // storm lit as a Mars dust cell in the Worx palette (the Book a Demo page
-  // asks for it: no blue or violet on that page).
-  var PALETTES = {
-    violet: {
-      under: [163, 83, 171], underEdge: [83, 34, 91], cell: CELL_RGB, core: [30, 11, 35],
-      flashA: [227, 176, 215], flashB: [188, 113, 193], flashC: [155, 83, 168], glow: [211, 149, 211], bolt: [250, 244, 251]
-    },
-    ember: {
-      under: [192, 69, 39], underEdge: [66, 29, 15], cell: [196, 86, 40], core: [40, 14, 6],
-      flashA: [255, 214, 160], flashB: [229, 125, 35], flashC: [192, 69, 39], glow: [250, 167, 25], bolt: [255, 249, 234]
-    }
-  };
-  function rgba(c, a) { return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (typeof a === "number" ? a.toFixed(3) : a) + ")"; }
-
   // Five billows, generated once: each has its own size-breathing period/
   // phase/amplitude (two summed sine terms) and its own slow drift, so
   // no two ever swell or move in lockstep, the silhouette is always
@@ -183,13 +168,11 @@
     flash: 0,
 
     // ctx/w/h: canvas + its device-pixel size. opts: { x, y (0..1 of
-    // w/h, cell center), scale (0..1 of min(w,h)), alpha,
-    // palette ("violet" by default, or "ember") }.
+    // w/h, cell center), scale (0..1 of min(w,h)), alpha }.
     draw: function (ctx, w, h, opts) {
       if (!w || !h) return;
       opts = opts || {};
       var alpha = opts.alpha != null ? opts.alpha : 1;
-      var P = PALETTES[opts.palette] || PALETTES.violet;
       var t = performance.now();
       var cx = w * (opts.x != null ? opts.x : 0.86);
       var cy = h * (opts.y != null ? opts.y : 0.16);
@@ -213,7 +196,7 @@
       // brighter base light the billows below would blend straight into
       // it instead of reading as a lit storm cell.
       blob(ctx, cx, cy, es * 1.6, es * 0.95, [
-        [0, rgba(P.under, 0.22 + flash * 0.25)], [1, rgba(P.underEdge, 0)]
+        [0, "rgba(163, 83, 171, " + (0.22 + flash * 0.25).toFixed(3) + ")"], [1, "rgba(83, 34, 91, 0)"]
       ]);
 
       for (var i = 0; i < CELLS.length; i++) {
@@ -221,7 +204,7 @@
         var bx = cx + (c.ux + sh.dx) * es, by = cy + (c.uy + sh.dy) * es * 0.6;
         var rx = c.rx * es * sh.breathe, ry = c.ry * es * sh.breathe;
         var a = Math.min(0.92, c.baseA + flash * 0.35);
-        var rgb = P.cell;
+        var rgb = c.rgb;
         blob(ctx, bx, by, rx, ry, [
           [0, "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + a.toFixed(3) + ")"],
           [1, "rgba(" + Math.round(rgb[0] * 0.5) + "," + Math.round(rgb[1] * 0.5) + "," + Math.round(rgb[2] * 0.5) + ",0)"]
@@ -229,7 +212,7 @@
       }
       // A denser, darker core so it reads as weather, not just a glow.
       blob(ctx, cx, cy + es * 0.06, es * 0.42, es * 0.24, [
-        [0, rgba(P.core, 0.55)], [1, rgba(P.core, 0)]
+        [0, "rgba(30, 11, 35, 0.55)"], [1, "rgba(30, 11, 35, 0)"]
       ]);
 
       // Lightning: lit through the planet's own dust rather than clean
@@ -238,9 +221,9 @@
       // flash bulb.
       if (flash > 0.02) {
         blob(ctx, cx, cy - es * 0.05, es * 0.95, es * 0.5, [
-          [0, rgba(P.flashA, 0.6 * flash)],
-          [0.4, rgba(P.flashB, 0.35 * flash)],
-          [1, rgba(P.flashC, 0)]
+          [0, "rgba(227, 176, 215, " + (0.6 * flash).toFixed(3) + ")"],
+          [0.4, "rgba(188, 113, 193, " + (0.35 * flash).toFixed(3) + ")"],
+          [1, "rgba(155, 83, 168, 0)"]
         ]);
         if (flash > 0.6 && this._strike) {
           var k = (flash - 0.6) * 2.4;
@@ -258,10 +241,10 @@
             ctx.moveTo(cx + pts[0][0] * es, cy + pts[0][1] * es);
             for (var pi = 1; pi < pts.length; pi++) ctx.lineTo(cx + pts[pi][0] * es, cy + pts[pi][1] * es);
             ctx.globalCompositeOperation = "lighter";
-            ctx.strokeStyle = rgba(P.glow, glowA * k);
+            ctx.strokeStyle = "rgba(211, 149, 211, " + (glowA * k).toFixed(3) + ")";
             ctx.lineWidth = glowW;
             ctx.stroke();
-            ctx.strokeStyle = rgba(P.bolt, coreA * k);
+            ctx.strokeStyle = "rgba(250, 244, 251, " + (coreA * k).toFixed(3) + ")";
             ctx.lineWidth = coreW;
             ctx.stroke();
           };
