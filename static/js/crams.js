@@ -2,6 +2,10 @@
    Worx | crams.js
    The CRAMS film (crams/index.html, styles in crams.css).
 
+   Where the page has the dashboard deck ([data-cr-deck], crams-deck.js)
+   the deck plays the story and only the cosmos and the dust below are
+   drawn here; the atom is the fallback for a page without it.
+
    THE SYSTEM: one canvas behind the page, drawn as an atom. CRAMS is
    the nucleus (a cluster of nucleons with a pulsar's beams sweeping out
    of it); the departments are electrons on three crossed shells; leads
@@ -69,6 +73,7 @@
      THE SYSTEM
      --------------------------------------------------------------- */
   var cvs = $("[data-cr-system]");
+  var ATOM = !document.querySelector("[data-cr-deck]");
   var ctx = cvs && cvs.getContext ? cvs.getContext("2d") : null;
   var W = 0, H = 0, dpr = 1;
 
@@ -322,6 +327,10 @@
         ctx.fillStyle = gf; ctx.beginPath(); ctx.arc(pr.x, pr.y, 12, 0, Math.PI * 2); ctx.fill();
       }
     }
+
+    // the atom gives way to the dashboard deck (crams-deck.js) where the
+    // page has one: the cosmos and the dust above still play
+    if (!ATOM) return;
 
     // the electron shells, crossed round the nucleus
     SHELLS.forEach(function (rot, k) {
@@ -651,7 +660,7 @@
      THE HUD: the signal readout names the chapter you are in
      --------------------------------------------------------------- */
   var sigEl = $("[data-cr-signal]");
-  var NAMES = { ignition: "ALL DEPARTMENTS", gap: "FISSION · SIGNAL LOST", connected: "FUSION · CONNECTED", lifecycle: "TRACKING LEAD", truth: "SINGLE SOURCE", crew: "BUILT IN-HOUSE", launch: "READY FOR LAUNCH" };
+  var NAMES = { ignition: "ALL DEPARTMENTS", gap: "SIGNAL LOST · DATA SCATTERED", connected: "SYNCED · ONE DECK", lifecycle: "TRACKING LEAD", truth: "SINGLE SOURCE", crew: "BUILT IN-HOUSE", launch: "READY FOR LAUNCH" };
   if (sigEl && "IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (en) {
       en.forEach(function (e) { if (e.isIntersecting) sigEl.textContent = NAMES[e.target.getAttribute("data-cr-chapter")] || sigEl.textContent; });
