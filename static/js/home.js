@@ -884,173 +884,42 @@
   }
 
   /* ----------------------------------------------------------
-     05 · Telemetry counters
+     05 · Flight plan, the launch deck. Six stage cards and the liftoff
+     card stacked sideways in depth: the card in play faces you, the
+     next wait in the deck to the right, a cleared card launches off to
+     the left onto the pile. Seen once, it counts itself down, fuel
+     burning along the foot of each card; any click, key, swipe or
+     sideways wheel takes over. The board flips through every number on
+     the way. At T-00 the liftoff card ignites. On a mouse, the card in
+     play leans toward the pointer.
      ---------------------------------------------------------- */
-  var tele = q(".hm-telemetry");
-  whenSeen(tele, function () {
-    qa("[data-tele]", tele).forEach(function (el) {
-      var to = +el.dataset.tele, t0 = null, dur = reduced ? 0 : 1800;
-      (function up(now) {
-        if (t0 === null) t0 = now;
-        var k = dur ? clamp01((now - t0) / dur) : 1;
-        el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3)));
-        if (k < 1) requestAnimationFrame(up);
-      })(performance.now());
-    });
-  });
-
-  // The mission odometer: wheels roll from the 2019 launch to this year.
-  var odo = q("[data-odo]");
-  if (tele && odo) {
-    var FROM = "2019", NOW = String(new Date().getFullYear());
-    var strips = [];
-    for (var oi = 0; oi < 4; oi++) {
-      var wheel = document.createElement("span");
-      wheel.className = "hm-odo-wheel";
-      var strip = document.createElement("span");
-      strip.className = "hm-odo-strip";
-      for (var cyc = 0; cyc < 3; cyc++) for (var dg = 0; dg < 10; dg++) {
-        var sp = document.createElement("span"); sp.textContent = dg; strip.appendChild(sp);
-      }
-      var f = +FROM.charAt(oi);
-      strip.style.transform = "translateY(" + (-f / 30 * 100) + "%)";
-      wheel.appendChild(strip); odo.appendChild(wheel);
-      strips.push({ el: strip, from: f, to: +NOW.charAt(oi) });
-    }
-    odo.setAttribute("aria-label", FROM + " to " + NOW);
-    var nowMark = q("[data-tl-now]");
-    if (nowMark) nowMark.textContent = NOW;
-    var elapsedEl = q("[data-odo-elapsed]");
-    var prevView = tele.__onView;
-    tele.__onView = function () {
-      if (prevView) prevView();
-      strips.forEach(function (st, i) {
-        // unchanged digits hold; changing ones spin a full turn past
-        var target = st.to === st.from ? st.from : (st.to > st.from ? st.to + 10 : st.to + 10);
-        st.el.style.transitionDuration = (1.6 + i * 0.45) + "s";
-        st.el.style.transform = "translateY(" + (-target / 30 * 100) + "%)";
-      });
-      var yrs = +NOW - +FROM, e0 = null;
-      (function up(t) {
-        if (e0 === null) e0 = t;
-        var k = reduced ? 1 : clamp01((t - e0) / 2400);
-        if (elapsedEl) elapsedEl.textContent = Math.round(yrs * (1 - Math.pow(1 - k, 3)));
-        if (k < 1) requestAnimationFrame(up);
-      })(performance.now());
-    };
-  }
-
-  // Live gauges: once swept in, each dial breathes around its true
-  // reading like a live sensor, and every few seconds re-samples (the
-  // number flickers through a quick count and settles back on the real
-  // figure). The resting values are always the real ones.
-  var dials = qa(".hm-dial");
-  if (tele && dials.length && !reduced) {
-    var live = dials.map(function (d, i) {
-      var num = q("[data-tele]", d);
-      return {
-        el: d, p: parseFloat(d.style.getPropertyValue("--p")) || 0.5,
-        arc: q(".hm-dial-arc", d), needle: q(".hm-dial-needle", d),
-        num: num, val: +num.dataset.tele, ph: i * 1.7, next: 0,
-      };
-    });
-    var teleOn = true, breatheRaf = 0, breatheFn = null;
-    var goLive = function () {
-      var t0 = performance.now();
-      live.forEach(function (g, i) { g.el.classList.add("is-live"); g.next = t0 + 1800 + i * 900; });
-      (breatheFn = function breathe(now) {
-        breatheRaf = 0;
-        if (!teleOn) return;   // resting off screen (whileVisible restarts it)
-        var ts = (now - t0) / 1000;
-        live.forEach(function (g) {
-          // two slow drifts and a little sensor jitter around the reading
-          var v = g.p + Math.sin(ts * 0.9 + g.ph) * 0.018 + Math.sin(ts * 2.3 + g.ph * 2) * 0.008 + (Math.random() - 0.5) * 0.004;
-          v = Math.max(0.02, Math.min(0.995, v));
-          g.arc.style.strokeDasharray = (v * 100).toFixed(2) + " 100";
-          g.needle.style.transform = "rotate(" + (v * 360).toFixed(2) + "deg)";
-          if (now > g.next && !g.sampling) {
-            // re-sample: flicker through a quick count, settle on the truth
-            g.sampling = true;
-            g.el.classList.add("is-sampling");
-            var s0 = now, span = Math.max(2, Math.round(g.val * 0.06));
-            (function sample(t) {
-              var k = (t - s0) / 650;
-              if (k < 1) {
-                g.num.textContent = Math.max(0, g.val - span + Math.round(Math.random() * span * 1.4));
-                requestAnimationFrame(sample);
-              } else {
-                g.num.textContent = g.val;
-                g.el.classList.remove("is-sampling");
-                g.sampling = false;
-                g.next = t + 3500 + Math.random() * 3000;
-              }
-            })(now);
-          }
-        });
-        breatheRaf = requestAnimationFrame(breathe);
-      })(t0);
-    };
-    whileVisible(tele, function (on) {
-      teleOn = on;
-      if (on && breatheFn && !breatheRaf) breatheRaf = requestAnimationFrame(breatheFn);
-    });
-    var prevTele = tele.__onView;
-    tele.__onView = function () {
-      if (prevTele) prevTele();
-      setTimeout(goLive, 2700);   // after the sweep-in and the count-up
-    };
-  }
-
-  // The comet riding the trajectory from the launch to now, with scroll.
-  var orbitPath = q("#orbit-path"), comet = q(".hm-tl-comet"), orbitSvg = q(".hm-tl-orbit");
-  if (tele && orbitPath && comet && orbitPath.getTotalLength) {
-    var olen = orbitPath.getTotalLength();
-    var teGeo = geoOf(tele), orb = { w: 0, h: 0, x: 0, y: 0 }, cometLast = -1;
-    var measureOrbit = function () { orb.w = orbitSvg.clientWidth; orb.h = orbitSvg.clientHeight; orb.x = orbitSvg.offsetLeft; orb.y = orbitSvg.offsetTop; cometLast = -1; };
-    measureOrbit();
-    if ("ResizeObserver" in window) new ResizeObserver(measureOrbit).observe(tele); else window.addEventListener("resize", measureOrbit);
-    onFrame.push(function (y) {
-      var top = teGeo.top, h = teGeo.h, vh = window.innerHeight;
-      if (y + vh < top - 100 || y > top + h + 100 || !orb.w) return;   // off screen / hidden (phones)
-      var p = clamp01((y + vh - top) / (h + vh * 0.6));
-      if (Math.abs(p - cometLast) < 0.0005) return;
-      cometLast = p;
-      var pt = orbitPath.getPointAtLength(p * olen), pt2 = orbitPath.getPointAtLength(Math.min(olen, p * olen + 2));
-      var bw = orb.w / 1600, bh = orb.h / 600;
-      var ox = orb.x, oy = orb.y;
-      var cx2 = ox + pt.x * bw, cy2 = oy + pt.y * bh;
-      var ang = Math.atan2((pt2.y - pt.y) * bh, (pt2.x - pt.x) * bw) * 180 / Math.PI;
-      comet.style.transform = "translate3d(" + cx2.toFixed(1) + "px," + cy2.toFixed(1) + "px,0)";
-      comet.style.setProperty("--ang", ang.toFixed(1) + "deg");
-    });
-  }
-
-  /* ----------------------------------------------------------
-     06 · Flight plan. The stage cards stack as you scroll; each one the
-     next lands on tips back and sinks into the deck, the live card's
-     edge fills as the next closes in, and the countdown board flips to
-     the live stage, clicking through every number on the way.
-     ---------------------------------------------------------- */
-  var stages = qa(".hm-stage");
+  var fp = q("[data-fp]");
   var fboard = q("[data-fclock]");
-  stages.forEach(function (s, i) { s.style.setProperty("--i", i); });
-  if (stages.length) (function () {
-    var flight = q(".hm-flight");
-    var STEP = 14;                              // how far each stuck card peeks (CSS; read back below)
-    var stuck = [], live = -1;
-    var measure = function () {
-      stuck = stages.map(function (s) { return parseFloat(getComputedStyle(s).top) || 0; });
-      if (stuck.length > 1 && stuck[1] > stuck[0]) STEP = stuck[1] - stuck[0];
-    };
-    measure();
-    window.addEventListener("resize", measure);
+  if (fp) (function () {
+    var view = q("[data-fp-view]", fp);
+    var cps = qa("[data-fp-cp]", fp), keys = cps.map(function (c) { return q(".hm-fp-key", c); });
+    var nextB = q("[data-fp-next]", fp), nextT = q("[data-fp-next-t]", fp), nextN = q("[data-fp-next-n]", fp);
+    var replayB = q("[data-fp-replay]", fp);
+    var N = cps.length, LAST = N - 1, STAGES = N - 1;   // six stages, then liftoff
+    var ST = { standby: fp.dataset.stStandby, live: fp.dataset.stLive, done: fp.dataset.stDone, go: fp.dataset.stGo };
+    var cur = -1;
+    var two = function (n) { return (n < 10 ? "0" : "") + n; };
+    // each card: its patch shows the stages cleared before it; a shade
+    // gives it depth when it waits in the deck
+    cps.forEach(function (c, j) {
+      c.style.setProperty("--k", j);
+      var sh = document.createElement("span");
+      sh.className = "hm-fp-shade";
+      sh.setAttribute("aria-hidden", "true");
+      c.appendChild(sh);
+    });
 
-    // the board
+    // ---- the board (split-flap, one number per click)
     var flaps = fboard ? qa("[data-flap]", fboard) : [];
     var nEl = fboard && q("[data-fclock-n]", fboard), nameEl = fboard && q("[data-fclock-name]", fboard);
     var rungs = fboard ? qa(".hm-fclock-ladder li", fboard) : [];
-    var NAMES = stages.map(function (s, i) {
-      return i === stages.length - 1 ? "LIFTOFF" : q("h3", s).firstChild.textContent.trim().toUpperCase();
+    var NAMES = cps.map(function (c, i) {
+      return i === LAST ? "LIFTOFF" : q(".hm-fp-name", c).firstChild.textContent.trim().toUpperCase();
     });
     var shown = 6, want = 6, flipT = null;
     var setLeaf = function (flap, part, d) { q(".hm-flap-" + part + " i", flap).textContent = d; };
@@ -1067,14 +936,11 @@
       clearTimeout(flap.__t);
       flap.__t = setTimeout(function () { setLeaf(flap, "bot", d); }, dur * 2);
     };
-    var two = function (n) { return (n < 10 ? "0" : "") + n; };
-    // one number per click; a long way to go runs fast, the last one lands
     var tick = function () {
       flipT = null;
       if (shown === want) return;
       shown += want < shown ? -1 : 1;
-      var far = Math.abs(want - shown) > 0;
-      var dur = far ? 90 : 190;
+      var dur = Math.abs(want - shown) > 0 ? 90 : 190;
       var str = two(shown);
       flipTo(flaps[0], str.charAt(0), dur);
       flipTo(flaps[1], str.charAt(1), dur);
@@ -1082,46 +948,144 @@
     };
     var board = function (i) {
       if (!fboard) return;
-      want = stages.length - 1 - i;
+      want = LAST - i;
       if (!flipT) tick();
-      nEl.textContent = "STAGE " + two(i + 1) + " / " + two(stages.length);
+      nEl.textContent = i === LAST ? "ALL STAGES CLEARED" : "STAGE " + two(i + 1) + " / " + two(STAGES);
       if (reduced) nameEl.textContent = NAMES[i]; else scramble(nameEl, NAMES[i], 420);
       rungs.forEach(function (r, j) { r.classList.toggle("is-past", j < i); r.classList.toggle("is-now", j === i); });
-      fboard.classList.toggle("is-go", i === stages.length - 1);
+      fboard.classList.toggle("is-go", i === LAST);
     };
 
-    var last = [], flGeo = geoOf(flight);
-    onFrame.push(function (y) {
-      if (y + window.innerHeight < flGeo.top - 200 || y > flGeo.top + flGeo.h + 200) return;
-      var r = stages.map(function (s) { return s.getBoundingClientRect(); });
-      // how far each card has landed on the one before it (0..1)
-      var land = [0];
-      for (var j = 1; j < stages.length; j++) {
-        var open = r[j - 1].height + 18, d = r[j].top - r[j - 1].top;
-        land.push(Math.max(0, Math.min(1, (open - d) / (open - STEP))));
-      }
-      var cur = 0;
-      for (var i = 0; i < stages.length; i++) if (r[i].top <= stuck[i] + 4) cur = i;
-      for (i = 0; i < stages.length; i++) {
-        var sink = 0;
-        for (j = i + 1; j < stages.length; j++) sink += land[j];
-        var tip = reduced ? 0 : Math.min(1, sink);
-        var fuel = i === cur ? (i === stages.length - 1 ? 1 : land[i + 1]) : i < cur ? 1 : 0;
-        var key = sink.toFixed(3) + "|" + tip.toFixed(3) + "|" + fuel.toFixed(3);
-        if (last[i] !== key) {
-          last[i] = key;
-          stages[i].style.setProperty("--sink", sink.toFixed(3));
-          stages[i].style.setProperty("--tip", tip.toFixed(3));
-          stages[i].style.setProperty("--fuel", fuel.toFixed(3));
+    // ---- going to a card
+    var go = function (i, focus) {
+      i = Math.max(0, Math.min(LAST, i));
+      if (i === cur) return;
+      var was = cur;
+      cur = i;
+      cps.forEach(function (c, j) {
+        var o = j - i;
+        c.style.setProperty("--o", o);
+        c.style.setProperty("--a", Math.abs(o));
+        c.classList.toggle("is-now", o === 0);
+        c.classList.toggle("is-later", o > 0);
+        c.classList.toggle("is-done", o < 0);
+        c.classList.toggle("is-gone", o < -1);
+        c.classList.remove("is-burn");
+        c.style.transform = ""; c.style.transition = "";
+        // the card that just left gets a blur on its way out
+        if (!reduced && was >= 0 && o < 0 && j >= Math.min(was, i) && j < Math.max(was, i)) {
+          c.classList.remove("is-launch"); void c.offsetWidth; c.classList.add("is-launch");
         }
+        q("[data-fp-st]", c).textContent = o === 0 ? (j === LAST ? ST.go : ST.live) : o < 0 ? ST.done : ST.standby;
+        // only the card in play is in the tab order; arrows move between
+        keys[j].tabIndex = o === 0 ? 0 : -1;
+        if (o === 0) keys[j].setAttribute("aria-current", "step"); else keys[j].removeAttribute("aria-current");
+      });
+      fp.classList.toggle("is-go", i === LAST);
+      nextB.hidden = i === LAST;
+      replayB.hidden = i !== LAST;
+      if (i < LAST) {
+        nextT.textContent = q(".hm-fp-t", cps[i + 1]).textContent;
+        nextN.textContent = q(".hm-fp-name", cps[i + 1]).firstChild.textContent.trim();
       }
-      if (cur !== live) {
-        live = cur;
-        stages.forEach(function (s, k) { s.classList.toggle("is-live", k === cur); s.classList.toggle("is-done", k < cur); });
-        board(cur);
+      board(i);
+      if (focus) keys[i].focus({ preventScroll: true });
+    };
+
+    // ---- the countdown runs itself once, while on screen
+    var auto = !reduced, onScreen = false, autoT = null;
+    var BURN = 3200;
+    var burn = function () {
+      clearTimeout(autoT); autoT = null;
+      cps[cur].classList.remove("is-burn");
+      if (!auto || !onScreen || cur >= LAST) return;
+      void cps[cur].offsetWidth;
+      cps[cur].classList.add("is-burn");
+      autoT = setTimeout(function () { autoT = null; go(cur + 1); burn(); }, BURN);
+    };
+    var takeOver = function () { auto = false; clearTimeout(autoT); autoT = null; cps[cur].classList.remove("is-burn"); };
+    fp.style.setProperty("--fp-burn", BURN + "ms");
+
+    // ---- inputs
+    cps.forEach(function (c, i) {
+      c.addEventListener("click", function () { if (i !== cur) { takeOver(); go(i); } });
+    });
+    keys.forEach(function (k) {
+      k.addEventListener("keydown", function (e) {
+        var to = e.key === "ArrowRight" || e.key === "ArrowDown" ? cur + 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? cur - 1 : e.key === "Home" ? 0 : e.key === "End" ? LAST : null;
+        if (to === null) return;
+        e.preventDefault();
+        takeOver();
+        go(to, true);
+      });
+    });
+    nextB.addEventListener("click", function () { takeOver(); go(cur + 1); });
+    replayB.addEventListener("click", function () {
+      auto = !reduced;
+      go(0);
+      if (auto) burn(); else keys[0].focus({ preventScroll: true });
+    });
+    // sideways wheel / trackpad: only when the gesture is clearly sideways
+    var wheelAcc = 0, wheelLock = 0;
+    view.addEventListener("wheel", function (e) {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) * 1.2) return;
+      e.preventDefault();
+      if (Date.now() < wheelLock) return;
+      wheelAcc += e.deltaX;
+      if (Math.abs(wheelAcc) > 40) {
+        takeOver();
+        go(cur + (wheelAcc > 0 ? 1 : -1));
+        wheelAcc = 0;
+        wheelLock = Date.now() + 560;
+      }
+    }, { passive: false });
+    // swipe (vertical scrolling stays with the page: touch-action pan-y);
+    // the card in play follows the finger a little before it goes
+    var sx = null, sy = 0, dragging = false;
+    view.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "mouse") return;
+      sx = e.clientX; sy = e.clientY; dragging = false;
+    });
+    view.addEventListener("pointermove", function (e) {
+      if (sx === null || reduced) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (!dragging && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) dragging = true;
+      if (dragging) {
+        cps[cur].style.transition = "none";
+        cps[cur].style.transform = "translateX(" + dx * 0.4 + "px) rotateY(" + dx * 0.04 + "deg)";
       }
     });
-    request();
+    var release = function (e) {
+      if (sx === null) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      sx = null;
+      cps[cur].style.transition = ""; cps[cur].style.transform = "";
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.3) { takeOver(); go(cur + (dx < 0 ? 1 : -1)); }
+      dragging = false;
+    };
+    view.addEventListener("pointerup", release);
+    view.addEventListener("pointercancel", function () { sx = null; dragging = false; cps[cur].style.transition = ""; cps[cur].style.transform = ""; });
+
+    // a mouse: the card in play leans toward the pointer
+    if (!reduced && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      view.addEventListener("pointermove", function (e) {
+        if (e.pointerType !== "mouse") return;
+        var c = cps[cur], r = c.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
+        if (Math.abs(px) > 0.7 || Math.abs(py) > 0.7) { c.style.transform = ""; return; }
+        c.style.transition = "transform 0.25s ease-out, filter 0.95s ease, border-color 0.5s";
+        c.style.transform = "rotateY(" + (px * 8).toFixed(2) + "deg) rotateX(" + (-py * 6).toFixed(2) + "deg) translateZ(14px)";
+      });
+      view.addEventListener("pointerleave", function () { var c = cps[cur]; c.style.transition = ""; c.style.transform = ""; });
+    }
+
+    // ---- start: T-06 up, the run begins when the deck is seen
+    go(0);
+    whileVisible(view, function (v) {
+      onScreen = v;
+      if (v) { if (!autoT) burn(); } else takeOverPause();
+    }, "0px 0px -25% 0px");
+    function takeOverPause() { clearTimeout(autoT); autoT = null; if (cur >= 0) cps[cur].classList.remove("is-burn"); }
   })();
 
   /* ----------------------------------------------------------
@@ -1383,12 +1347,12 @@
     var dock = (function () {
       var HINT = {
         "launch-pad": "The opening film",
-        partners: "Brands we fly with",
+        partners: "Our brands and the numbers, live",
         archive: "Case studies",
         modules: "13 services, one crew",
         why: "Four reasons",
         telemetry: "The numbers since 2019",
-        flight: "Our seven stages",
+        flight: "Six stages to liftoff",
         comms: "What clients say",
         notes: "Articles from the crew",
         briefing: "Questions, answered",
@@ -1655,11 +1619,10 @@
   // siblings a beat apart. Only with motion welcome, and only once.
   if (!reduced && "IntersectionObserver" in window) (function () {
     var GROUPS = [
-      [".hm-marquee"], [".hm-regions li", 0.05],
+      [".hm-marquee"], [".gs-rack"],
       [".hm-head-aside"],
       [".hm-track-wrap"], [".hm-track-foot"],
       [".hm-mod-list li", 0.06], [".hm-mod-stage"],
-      [".hm-tl-head > p:last-child"], [".hm-odo"], [".hm-dial", 0.1],
       [".hm-flight-lead > p:not(.hm-kicker)"], [".hm-fclock"],
       [".hm-tx-nav"], [".hm-tx-deck"], [".hm-tx-dots"],
       [".hm-note", 0.12],

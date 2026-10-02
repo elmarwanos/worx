@@ -226,6 +226,11 @@
   var tourSec = $("[data-cr-tour-sec]"), dock = $("[data-cr-dock]");
   var heroSec = $(".cr-hero");
   var scene = "", W = 0, H = 0, docked = false, dockT = 0;
+  // phones and tablets: no screen behind the page (a fixed 3D layer fights
+  // a touch scroll); the dashboard lives in the "Inside CRAMS" frame,
+  // moving with the page, and makes its entrance there
+  var compact = !!dock && window.matchMedia("(max-width: 1024px), (hover: none)").matches;
+  var inlineDone = false, inner = null;
 
   // where the screen sits in each chapter: x, y as parts of the view,
   // s as a part of what fits, the angles in degrees, o its opacity
@@ -236,7 +241,8 @@
     lifecycle: { x: 0.24, y: 0.1, s: 0.92, rx: 16, ry: -24, rz: -2, o: 0.34 },
     truth:     { x: 0.08, y: 0.1, s: 0.64, rx: 56, ry: 0, rz: -32, o: 0.36 },
     crew:      { x: 0.26, y: 0.0, s: 0.5, rx: 6, ry: -30, rz: 0, o: 0.14 },
-    launch:    { x: 0.0, y: 0.4, s: 0.96, rx: 38, ry: 0, rz: 0, o: 0.32 }
+    // the launch keeps its stage to itself: the screen has gone
+    launch:    { x: 0.0, y: 0.4, s: 0.96, rx: 38, ry: 0, rz: 0, o: 0 }
   };
   // the panels' own moves: deep space (where they fly in from) and the
   // gap (where they drift apart to)
@@ -270,6 +276,17 @@
     if (name === scene && !force) return;
     var was = scene;
     scene = name;
+    if (compact) {
+      // its entrance, once: the panels fly in out of the depth of the
+      // frame, lock together, and the screen powers on
+      if (name === "tour" && !inlineDone) {
+        inlineDone = true;
+        dock.classList.add("is-flying");
+        place("tour", true);
+        setTimeout(function () { dash.boot(); dock.classList.add("is-live"); if (cur < 0) show(0); }, reduced ? 0 : 1900);
+      }
+      return;
+    }
     var small = W < 760;
     deckEl.setAttribute("data-scene", name);
     clearTimeout(dockT);
@@ -344,10 +361,45 @@
   var comms = $("[data-cr-comms]");
 
   // the size of the view, and the first frame
-  var size = function () { W = window.innerWidth; H = window.innerHeight; apply(scene || "ignition", true); read(); };
+  // the inline screen is scaled to its frame
+  var fitInline = function () { if (inner) inner.style.transform = "scale(" + (dock.clientWidth / DW).toFixed(4) + ")"; };
+  var size = function () {
+    var nw = window.innerWidth, nh = window.innerHeight;
+    // an address bar sliding on a phone is not a new layout
+    var same = nw === W && Math.abs(nh - H) < 160;
+    W = nw; H = nh;
+    if (compact) { fitInline(); return; }
+    if (!same) apply(scene || "ignition", true);
+    read();
+  };
   W = window.innerWidth; H = window.innerHeight;
 
-  if (reduced) { apply("ignition", true); dash.boot(); read(); }
+  if (compact) {
+    // the screen moves into the frame; its panels wait deep inside it
+    deckEl.hidden = true;
+    var wrap = document.createElement("div");
+    wrap.className = "cr-dock-screen";
+    wrap.setAttribute("aria-hidden", "true");
+    inner = document.createElement("div");
+    inner.className = "cr-dock-inner";
+    inner.appendChild(dash.root);
+    wrap.appendChild(inner);
+    dock.insertBefore(wrap, dock.firstChild);
+    dock.classList.add("is-inline");
+    fitInline();
+    if ("ResizeObserver" in window) new ResizeObserver(fitInline).observe(dock);
+    if (!reduced) dash.panels.forEach(function (p, i) { p.style.transform = tf(DEEP[i], 0.35); p.style.opacity = 0; });
+    // tap any part of the screen to hear what it does
+    var TAP = { top: "dates", "c-source": "c-source", "c-product": "c-source", "c-ratio": "c-source", "c-channel": "c-channel", "c-strength": "c-strength", "c-time": "c-time", "c-status": "c-status", "c-branch": "c-branch", filters: "filters", table: "table" };
+    dash.panels.forEach(function (p) {
+      p.addEventListener("click", function (e) {
+        var key = TAP[p.getAttribute("data-region")];
+        if (key === "filters" && e.offsetY > 74) key = "actions";
+        items.forEach(function (it, j) { if (it.getAttribute("data-tour-item") === key) { hold = Date.now() + 12000; show(j); } });
+      });
+    });
+    read();
+  } else if (reduced) { apply("ignition", true); dash.boot(); read(); }
   else {
     // THE ARRIVAL: the panels are out in deep space when the page opens,
     // then fly in and lock together into the screen; it powers on as

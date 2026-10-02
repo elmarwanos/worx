@@ -532,9 +532,16 @@
     }
   }
 
+  // phones resize the view as the address bar slides in and out: only a
+  // real change (a new width, or a big jump in height) repaints the sky,
+  // so it never flashes mid-scroll
+  var lastW = 0, lastH = 0;
   function size() {
+    var nw = window.innerWidth, nh = window.innerHeight;
+    if (lastW && nw === lastW && Math.abs(nh - lastH) < 160) return;
+    lastW = nw; lastH = nh;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth; H = window.innerHeight;
+    W = nw; H = nh;
     cvs.width = Math.round(W * dpr); cvs.height = Math.round(H * dpr);
     sizeCosmos();
   }
@@ -748,6 +755,9 @@
      --------------------------------------------------------------- */
   var qs = $$(".cr-hero-grid, .cr-panel, .cr-depts, .cr-pillars, .cr-crew-grid, .cr-launch-inner");
   qs.forEach(function (el) { el.setAttribute("data-cr-q", ""); });
+  // phones and tablets: the same rise and fade, without the blur (a
+  // blur on every frame of a touch scroll is what makes it stutter)
+  var lite = window.matchMedia("(max-width: 1024px), (hover: none)").matches;
   var quantum = function (vh) {
     if (reduced) return;
     qs.forEach(function (el) {
@@ -764,7 +774,7 @@
       el.style.opacity = (q * q).toFixed(3);
       el.style.translate = "0 " + ((1 - qi) * 60 - (1 - qo) * 40).toFixed(1) + "px";
       el.style.scale = (0.94 + 0.06 * q).toFixed(3);
-      el.style.filter = "blur(" + ((1 - q) * 9).toFixed(1) + "px)";
+      if (!lite) el.style.filter = "blur(" + ((1 - q) * 9).toFixed(1) + "px)";
     });
   };
   // the HUD
