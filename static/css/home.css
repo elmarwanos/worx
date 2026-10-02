@@ -949,6 +949,7 @@
 }
 
 .gs-ltr { direction: ltr; unicode-bidi: isolate; }
+.gs-dots { display: none; }
 
 .gs-bank {
   position: relative;
@@ -1103,182 +1104,349 @@
   white-space: nowrap;
 }
 
-/* the console strip over the bank: three cells of one machined panel,
-   cut into the dark (dark above, a catch of light below), joined by
-   engraved seams and held by four screws. Left: who is reading, with
-   its pilot lamp. Middle: years in orbit, counted up from 2019 to this
-   year. Right: the trend, a bar graph whose bars light in turn, rising */
-.gs-head {
+/* ---- the panel ----------------------------------------------------
+   The four tuners are mounted on one machined panel: dark brushed
+   metal, a bevel catching the light along its top edge, a groove cut
+   round it, a counterbored well under each tuner, and a screw sunk in
+   each corner (each turned its own way, as a fitter leaves them). */
+.gs-board {
   position: relative;
-  display: grid;
-  grid-template-columns: 1.1fr 1fr 1fr;
-  max-width: 880px;
-  margin: 0 auto clamp(30px, 4vw, 56px);
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.34), rgba(255, 255, 255, 0.02));
+  isolation: isolate;
+  padding: clamp(44px, 4.6vw, 68px) clamp(22px, 3.2vw, 54px) clamp(28px, 3vw, 42px);
+  border-radius: 22px;
+  background:
+    radial-gradient(110% 70% at 50% -10%, rgba(255, 214, 160, 0.07), transparent 62%),
+    repeating-linear-gradient(90deg, rgba(255, 236, 205, 0.014) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #231a14 0%, #18120d 55%, #120d0a 100%);
   box-shadow:
-    inset 0 1px 3px rgba(0, 0, 0, 0.7),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
-    0 1px 0 rgba(255, 255, 255, 0.03);
+    inset 0 1px 0 rgba(255, 236, 205, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7),
+    inset 0 0 0 1px rgba(255, 236, 205, 0.03),
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 50px 90px -50px rgba(0, 0, 0, 0.95);
 }
-/* the screws */
-.gs-head::before,
-.gs-head::after {
+/* the groove cut round the face */
+.gs-board::before {
   content: "";
   position: absolute;
-  top: 9px;
-  width: 6px;
-  height: 6px;
+  inset: 12px;
+  z-index: -1;
+  border-radius: 14px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 236, 205, 0.045);
+  pointer-events: none;
+}
+/* grain in the metal */
+.gs-board::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .9 0 0 0 0 .8 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+/* a counterbored well under each tuner */
+.gs-board .gs-unit { position: relative; }
+.gs-board .gs-tuner { position: relative; z-index: 1; }
+.gs-board .gs-unit::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: calc(var(--gs-size) / 2);
+  width: calc(var(--gs-size) + 18px);
+  height: calc(var(--gs-size) + 18px);
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #4a3828, #1a120c 70%);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.06);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.32) 62%, rgba(0, 0, 0, 0.12) 70%, transparent 71%);
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(255, 236, 205, 0.05);
+  pointer-events: none;
 }
-.gs-head::before { left: 9px; }
-.gs-head::after { right: 9px; }
 
-.gs-head-cell {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-  min-width: 0;
-  padding: 16px clamp(16px, 2vw, 26px);
+/* the screws: domed heads in countersinks, a cross cut in each */
+.gs-screw {
+  --r: 0deg;
+  position: absolute;
+  z-index: 2;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #7a6450 0%, #3b2d22 45%, #1a120d 100%);
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.55),
+    0 0 0 3px rgba(255, 236, 205, 0.05),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 236, 205, 0.18);
 }
-/* engraved seams between the cells */
-.gs-head-cell + .gs-head-cell::before {
+.gs-screw::before,
+.gs-screw::after {
   content: "";
   position: absolute;
-  left: 0;
-  top: 14px;
-  bottom: 14px;
-  width: 1px;
-  background: rgba(0, 0, 0, 0.65);
-  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.05);
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 2px;
+  margin: -1px 0 0 -4.5px;
+  border-radius: 1px;
+  background: #0f0a07;
+  box-shadow: 0 1px 0 rgba(255, 236, 205, 0.16);
+  transform: rotate(var(--r));
 }
+.gs-screw::after { transform: rotate(calc(var(--r) + 90deg)); }
+.gs-screw--tl { top: 20px; left: 20px; --r: 14deg; }
+.gs-screw--tr { top: 20px; right: 20px; --r: 61deg; }
+.gs-screw--bl { bottom: 20px; left: 20px; --r: -27deg; }
+.gs-screw--br { bottom: 20px; right: 20px; --r: 37deg; }
 
-.gs-head-k {
+/* ---- the plate ----------------------------------------------------
+   Stamped steel riveted along the foot of the panel. The words and the
+   years are cut into it: dark in the cut, a catch of light on the lower
+   lip. Once the years have counted up, the cuts glow amber from within,
+   like a backlit maker's plate. */
+.gs-plate {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: clamp(18px, 2.4vw, 30px);
+  width: fit-content;
+  max-width: 100%;
+  margin: clamp(34px, 3.8vw, 54px) auto 0;
+  padding: 14px clamp(42px, 4.4vw, 60px);
+  border-radius: 5px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 236, 205, 0.03) 0 1px, transparent 1px 2px),
+    linear-gradient(180deg, #3d3128 0%, #2c231c 48%, #241c16 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 236, 205, 0.16),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 3px 0 rgba(0, 0, 0, 0.45),
+    0 14px 24px -12px rgba(0, 0, 0, 0.9);
+}
+/* a fine engraved border inside the plate */
+.gs-plate::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 236, 205, 0.08);
+  pointer-events: none;
+}
+
+/* engraving: dark cut, light lower lip */
+.gs-plate-since,
+.gs-plate-read {
+  --cut: #120c08;
   margin: 0;
+  color: var(--cut);
+  text-shadow: 0 1px 0 rgba(255, 236, 205, 0.2), 0 -1px 0 rgba(0, 0, 0, 0.35);
+  transition: color 1.4s ease, text-shadow 1.4s ease;
+}
+.gs-plate-since {
+  display: grid;
+  gap: 4px;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--gs-lamp) 55%, #2a1a0c);
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.75), 0 1px 0 rgba(255, 190, 110, 0.12);
-  white-space: nowrap;
-}
-.gs-head-k b { font-weight: inherit; color: var(--gs-lamp); }
-
-.gs-head-lamp {
-  flex: none;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gs-lamp);
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45), 0 0 10px 1px rgba(255, 178, 74, 0.7);
-  animation: gs-head-blink 1.6s steps(1, end) infinite;
-}
-@keyframes gs-head-blink {
-  0%, 62% { opacity: 1; }
-  63%, 100% { opacity: 0.18; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45); }
-}
-
-/* the title: engraved amber, glowing softly in its cut */
-.gs-head-title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(1.35rem, 1.9vw, 1.7rem);
-  font-weight: 600;
   line-height: 1;
-  letter-spacing: 0.02em;
-  color: color-mix(in srgb, var(--gs-lamp) 80%, #3a2412);
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 200, 130, 0.16);
-  animation: gs-head-glow 3.2s ease-in-out infinite;
 }
-@keyframes gs-head-glow {
-  50% { text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 200, 130, 0.16), 0 0 18px rgba(255, 178, 74, 0.4); }
+.gs-plate-since b {
+  font-size: clamp(1.25rem, 1.7vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: inherit;
 }
-
-/* years in orbit: a readout */
-.gs-head-read {
+.gs-plate-seam {
+  align-self: stretch;
+  width: 1px;
+  margin-block: 2px;
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 1px 0 0 rgba(255, 236, 205, 0.1);
+}
+.gs-plate-read {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin: 0;
+  gap: 8px;
   font-family: var(--font-mono);
   line-height: 1;
 }
-.gs-head-read b {
-  font-size: clamp(1.35rem, 1.9vw, 1.7rem);
-  font-weight: 600;
-  color: var(--gs-lock);
-  text-shadow: 0 0 12px rgba(255, 178, 74, 0.35);
+.gs-plate-read b {
+  font-size: clamp(2.3rem, 3.4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
 }
-.gs-head-read span { font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(254, 238, 207, 0.55); }
-.gs-head-read small { margin-left: auto; font-size: 0.56rem; letter-spacing: 0.2em; color: rgba(254, 238, 207, 0.25); }
-
-/* the trend: twelve bars, rising, lit in turn */
-.gs-head-graph {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 26px;
+.gs-plate-read span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
 }
-.gs-head-graph i {
-  flex: 1;
-  max-width: 7px;
-  border-radius: 1px;
-  background: rgba(255, 178, 74, 0.2);
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.4);
-  animation: gs-head-bar 3.6s ease-in-out infinite;
+/* backlit once counted */
+.gs-plate.is-lit .gs-plate-since,
+.gs-plate.is-lit .gs-plate-read {
+  color: #c98a3a;
+  text-shadow: 0 1px 0 rgba(255, 236, 205, 0.22), 0 0 10px rgba(255, 178, 74, 0.35);
 }
-.gs-head-graph i:nth-child(1) { height: 18%; animation-delay: 0s; }
-.gs-head-graph i:nth-child(2) { height: 22%; animation-delay: 0.12s; }
-.gs-head-graph i:nth-child(3) { height: 26%; animation-delay: 0.24s; }
-.gs-head-graph i:nth-child(4) { height: 24%; animation-delay: 0.36s; }
-.gs-head-graph i:nth-child(5) { height: 33%; animation-delay: 0.48s; }
-.gs-head-graph i:nth-child(6) { height: 38%; animation-delay: 0.6s; }
-.gs-head-graph i:nth-child(7) { height: 44%; animation-delay: 0.72s; }
-.gs-head-graph i:nth-child(8) { height: 52%; animation-delay: 0.84s; }
-.gs-head-graph i:nth-child(9) { height: 60%; animation-delay: 0.96s; }
-.gs-head-graph i:nth-child(10) { height: 70%; animation-delay: 1.08s; }
-.gs-head-graph i:nth-child(11) { height: 84%; animation-delay: 1.2s; }
-.gs-head-graph i:nth-child(12) { height: 100%; animation-delay: 1.32s; }
-@keyframes gs-head-bar {
-  0%, 100% { background: rgba(255, 178, 74, 0.2); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.4); }
-  18%, 40% { background: var(--gs-lamp); box-shadow: 0 0 8px rgba(255, 178, 74, 0.55); }
-}
-.gs-head-graph b {
-  margin-left: 6px;
-  align-self: flex-start;
-  font-size: 0.7rem;
+.gs-plate.is-lit .gs-plate-read b {
   color: var(--gs-lamp);
-  text-shadow: 0 0 8px rgba(255, 178, 74, 0.6);
+  text-shadow: 0 1px 0 rgba(255, 236, 205, 0.25), 0 0 14px rgba(255, 178, 74, 0.55), 0 0 32px rgba(255, 140, 40, 0.25);
 }
 
-/* tablets: a little narrower; phones: the name on top, the two
-   readings side by side under it */
+/* rivets either end */
+.gs-rivet {
+  position: absolute;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin-top: -4.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #8a7360, #3a2c21 60%, #1d1510);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 236, 205, 0.2);
+}
+.gs-rivet:first-child { left: 16px; }
+.gs-rivet:last-child { right: 16px; }
+
+
+/* ---- the panel's character ----------------------------------------
+   What makes it read as a real piece of hardware: a chamfered edge
+   like a slab of plate steel, horizontal brushing with uneven streaks,
+   grime gathered toward the edges, a drilled vent grille, engraved channel numbers under the wells, washers under the
+   screws, and a soft reflection that follows the pointer. */
+.gs-board {
+  counter-reset: gs-ch;
+  background:
+    /* light falling from above */
+    radial-gradient(110% 70% at 50% -10%, rgba(255, 214, 160, 0.075), transparent 62%),
+    /* brushing: uneven horizontal streaks */
+    repeating-linear-gradient(0deg, rgba(255, 236, 205, 0.018) 0 1px, transparent 1px 2px, rgba(0, 0, 0, 0.05) 2px 3px, transparent 3px 5px),
+    repeating-linear-gradient(0deg, transparent 0 37px, rgba(255, 236, 205, 0.012) 37px 39px, transparent 39px 71px),
+    linear-gradient(180deg, #241b15 0%, #19130e 55%, #130e0a 100%);
+  box-shadow:
+    /* grime toward the edges */
+    inset 0 0 70px rgba(0, 0, 0, 0.42),
+    /* bevel: light on the top lip, dark under the bottom */
+    inset 0 1px 0 rgba(255, 236, 205, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7),
+    /* the chamfered edge of the slab */
+    0 0 0 1px #0a0705,
+    0 0 0 3px #2a2018,
+    0 0 0 4px rgba(255, 236, 205, 0.07),
+    0 0 0 5px #0a0705,
+    0 50px 90px -46px rgba(0, 0, 0, 0.95);
+}
+.gs-board::after { opacity: 0.1; mix-blend-mode: overlay; }
+
+/* the reflection that follows the pointer (ground-station.js) */
+.gs-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: radial-gradient(520px circle at var(--mx, 30%) var(--my, -20%), rgba(255, 222, 176, 0.07), transparent 60%);
+  pointer-events: none;
+  transition: opacity 0.6s;
+}
+.gs-board > .gs-bank,
+.gs-board > .gs-plate { position: relative; z-index: 1; }
+
+/* the vent grille: two staggered rows of drilled holes in the top edge */
+.gs-vent {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  z-index: 1;
+  width: 150px;
+  height: 14px;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(circle at 5px 3.5px, #050302 2.2px, rgba(255, 236, 205, 0.09) 2.6px, transparent 3px) 0 0 / 10px 7px,
+    radial-gradient(circle at 5px 3.5px, #050302 2.2px, rgba(255, 236, 205, 0.09) 2.6px, transparent 3px) 5px 7px / 10px 7px;
+  background-repeat: repeat-x;
+}
+
+/* engraved channel numbers under the wells */
+.gs-board .gs-unit { counter-increment: gs-ch; }
+.gs-board .gs-unit::after {
+  content: "CH " counter(gs-ch, decimal-leading-zero);
+  position: absolute;
+  left: 50%;
+  top: calc(var(--gs-size) + 16px);
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  white-space: nowrap;
+  color: #070403;
+  text-shadow: 0 1px 0 rgba(255, 236, 205, 0.2), 0 -1px 0 rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+.gs-board .gs-bank { padding-bottom: 26px; }
+
+/* washers under the screws */
+.gs-screw {
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.55),
+    0 0 0 4px #33281f,
+    0 0 0 5px rgba(0, 0, 0, 0.6),
+    0 1px 0 5px rgba(255, 236, 205, 0.05),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 236, 205, 0.2);
+}
+
 @media (max-width: 640px) {
-  .gs-head { grid-template-columns: 1fr 1fr; }
-  .gs-head-id { grid-column: 1 / -1; align-items: center; text-align: center; padding-bottom: 12px; }
-  .gs-head-id::after {
-    content: "";
-    position: absolute;
-    left: 14px;
-    right: 14px;
-    bottom: 0;
-    height: 1px;
-    background: rgba(0, 0, 0, 0.65);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
-  }
-  .gs-head-orbit::before { display: none; }
-  .gs-head-cell { padding: 14px 16px; }
-  .gs-head-k { font-size: 0.56rem; letter-spacing: 0.16em; }
+  .gs-vent { top: 13px; width: 100px; }
+  .gs-board .gs-bank { padding-bottom: 34px; }
+  .gs-board { box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 236, 205, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.7), 0 0 0 1px #0a0705, 0 0 0 3px #2a2018, 0 0 0 4px rgba(255, 236, 205, 0.07), 0 0 0 5px #0a0705, 0 40px 70px -40px rgba(0, 0, 0, 0.95); }
+}
+
+/* the years are engraved straight into the panel, no plate: cut
+   letters (dark in the groove, light catching the lower lip), with an
+   engraved rule running out either side; once counted, the grooves are
+   filled with amber, like paint-filled machine engraving */
+.gs-board > .gs-plate {
+  background: none;
+  box-shadow: none;
+  padding: 4px 0;
+  border-radius: 0;
+}
+.gs-board > .gs-plate::before,
+.gs-board > .gs-plate::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  inset-inline: auto;
+  width: clamp(40px, 9vw, 140px);
+  height: 1px;
+  border-radius: 0;
+  background: #0a0705;
+  box-shadow: 0 1px 0 rgba(255, 236, 205, 0.09);
+}
+.gs-board > .gs-plate::before { right: calc(100% + 22px); left: auto; }
+.gs-board > .gs-plate::after { left: calc(100% + 22px); }
+.gs-board .gs-plate-since,
+.gs-board .gs-plate-read {
+  --cut: #0a0605;
+  text-shadow:
+    0 1px 0 rgba(255, 236, 205, 0.16),
+    0 2px 1px rgba(255, 236, 205, 0.04),
+    0 -1px 0 rgba(0, 0, 0, 0.55);
+}
+.gs-board .gs-plate-seam { background: #0a0705; box-shadow: 1px 0 0 rgba(255, 236, 205, 0.09); }
+.gs-board .gs-plate.is-lit .gs-plate-since,
+.gs-board .gs-plate.is-lit .gs-plate-read { color: #b9772c; text-shadow: 0 1px 0 rgba(255, 236, 205, 0.18), 0 0 8px rgba(255, 160, 60, 0.25); }
+.gs-board .gs-plate.is-lit .gs-plate-read b { color: #e8962e; text-shadow: 0 1px 0 rgba(255, 236, 205, 0.2), 0 0 12px rgba(255, 170, 60, 0.4); }
+@media (max-width: 640px) {
+  .gs-board > .gs-plate { padding: 2px 0; }
+  .gs-board > .gs-plate::before,
+  .gs-board > .gs-plate::after { width: 22px; }
+  .gs-board > .gs-plate::before { right: calc(100% + 12px); }
+  .gs-board > .gs-plate::after { left: calc(100% + 12px); }
 }
 
 /* motion: inertia, a little past, then settled */
@@ -1311,6 +1479,55 @@
   .gs-bank::-webkit-scrollbar { display: none; }
   .gs-unit { flex: 0 0 76vw; scroll-snap-align: center; }
   .gs-label { font-size: 0.72rem; }
+  /* on the panel: the row scrolls inside its face */
+  .gs-board { padding: 40px 0 26px; border-radius: 18px; }
+  .gs-board::before { inset: 9px; border-radius: 12px; }
+  .gs-board .gs-bank { margin-inline: 0; padding: 8px 8vw 16px; scroll-padding-inline: 8vw; }
+  /* where you are in the row: four lamps set into the panel, the lit
+     one stretched; tap one to turn to that tuner */
+  .gs-dots { display: flex; justify-content: center; gap: 2px; margin: -8px 0 2px; }
+  .gs-board .gs-bank { padding-bottom: 30px; }
+  .gs-dot-btn {
+    position: relative;
+    width: 30px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gs-dot-btn::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    transform: translate(-50%, -50%);
+    background: #0b0705;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 236, 205, 0.1);
+    transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s, box-shadow 0.35s;
+  }
+  .gs-dot-btn.is-on::before {
+    width: 22px;
+    background: var(--gs-lamp);
+    box-shadow: 0 0 10px rgba(255, 178, 74, 0.75), 0 0 0 1px rgba(0, 0, 0, 0.5);
+  }
+  .gs-dot-btn:focus { outline: none; }
+  .gs-dot-btn:focus-visible::before { outline: 2px solid var(--gs-lamp); outline-offset: 3px; }
+  .gs-screw { width: 12px; height: 12px; }
+  .gs-screw::before, .gs-screw::after { width: 7px; margin-left: -3.5px; }
+  .gs-screw--tl, .gs-screw--tr { top: 15px; }
+  .gs-screw--bl, .gs-screw--br { bottom: 15px; }
+  .gs-screw--tl, .gs-screw--bl { left: 15px; }
+  .gs-screw--tr, .gs-screw--br { right: 15px; }
+  .gs-plate { margin-top: 20px; padding: 12px 34px; gap: 16px; }
+  .gs-plate-since { font-size: 0.56rem; letter-spacing: 0.24em; }
+  .gs-plate-read b { font-size: 2.1rem; }
+  .gs-rivet:first-child { left: 12px; }
+  .gs-rivet:last-child { right: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1318,7 +1535,7 @@
   .gs-tuner { transform: none; opacity: 1; filter: none; transition: none; }
   .gs-unit.is-rolling .gs-strip { filter: none; }
   .gs.is-live .gs-strip, .gs.is-live .gs-knurl { transition: none; }
-  .gs-head-lamp, .gs-head-title, .gs-head-graph i { animation: none; }
+  .gs-plate-since, .gs-plate-read { transition: none; }
 }
 
 /* ================================================================
@@ -2435,8 +2652,8 @@
    card in play; when it is spent the card goes. At T-00 the liftoff
    card ignites from below. */
 .hm-fp {
-  --fp-w: min(540px, 46vw);
-  --fp-h: 330px;
+  --fp-w: min(780px, 60vw);
+  --fp-h: 340px;
   --fp-step: clamp(34px, 3.4vw, 56px);
   --fp-hot: var(--accent-2);
   --fp-burn: 3.2s;
@@ -2448,21 +2665,22 @@
 
 .hm-fp-view {
   position: relative;
-  height: calc(var(--fp-h) + 60px);
+  /* headroom over the card for the liftoff fan */
+  height: calc(var(--fp-h) + 110px);
   overflow: hidden;
   touch-action: pan-y;
-  perspective: 1600px;
-  perspective-origin: 40% 50%;
+  perspective: 1700px;
+  perspective-origin: 50% 45%;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
 }
 
 .hm-fp-stages {
   position: absolute;
-  top: 30px;
-  /* the card in play sits a little left of centre: the pile on its
-     left, the deck on its right */
-  left: max(4vw, calc(50% - var(--fp-w) * 0.78));
+  top: 70px;
+  /* the card in play dead centre: the pile on its left, the deck on
+     its right */
+  left: calc(50% - var(--fp-w) / 2);
   width: var(--fp-w);
   height: var(--fp-h);
   margin: 0;
@@ -2522,7 +2740,7 @@
 /* cleared: launched off to the left, tilted away, on the pile */
 .hm-fp-cp.is-done {
   transform:
-    translateX(calc(-58% - var(--a) * 16px))
+    translateX(calc(-50% - var(--a) * 18px))
     translateZ(calc(-160px - var(--a) * 50px))
     rotateY(34deg);
   opacity: calc(0.75 - var(--a) * 0.22);
@@ -2656,7 +2874,7 @@
 }
 .hm-fp-name em { font-style: normal; color: var(--fp-hot); }
 
-.hm-fp-copy { position: relative; margin-top: 14px; max-width: 36ch; }
+.hm-fp-copy { position: relative; margin-top: 14px; max-width: 44ch; }
 .hm-fp-copy p { margin: 0; color: var(--muted); line-height: 1.6; }
 
 /* fuel: burns along the foot while the countdown runs itself */
@@ -2703,8 +2921,125 @@
 .hm-fp.is-go .hm-fp-cp--go::before { -webkit-text-stroke-color: rgba(255, 241, 214, 0.4); }
 .hm-fp.is-go .hm-fp-cp--go .hm-fp-fuel i { transform: scaleX(1); }
 @keyframes hm-fp-flame { 50% { opacity: 0.7; transform: scaleY(0.92); } }
-/* liftoff: the pile behind settles and the card lifts a touch */
-.hm-fp.is-go .hm-fp-cp.is-now { transform: translateY(-6px); }
+/* arriving: the words come up out of soft focus, the patch flares */
+.hm-fp-cp.is-arrive .hm-fp-name { animation: hm-fp-arrive 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both; }
+.hm-fp-cp.is-arrive .hm-fp-copy { animation: hm-fp-arrive 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both; }
+.hm-fp-cp.is-arrive .hm-fp-t { animation: hm-fp-flare 1.1s ease-out 0.3s both; }
+@keyframes hm-fp-arrive { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } }
+@keyframes hm-fp-flare {
+  0% { box-shadow: 0 0 0 0 rgba(250, 167, 25, 0); }
+  25% { box-shadow: 0 0 0 6px rgba(250, 167, 25, 0.25), 0 0 34px 6px rgba(250, 167, 25, 0.55); }
+  100% { box-shadow: 0 0 0 14px rgba(250, 167, 25, 0), 0 0 0 0 rgba(250, 167, 25, 0); }
+}
+
+/* ---- LIFTOFF -------------------------------------------------------
+   T-00. The deck rumbles, a flash goes off behind it, sparks pour up
+   inside the liftoff card as it rises toward you, and then all six
+   cleared stages swing back out of the pile and fan up behind it like
+   a hand of cards: every stage, T-06 to T-01, standing behind the
+   launch. Replay folds them away again. */
+.hm-fp-cp.is-done { transform-origin: 50% 240%; }
+.hm-fp.is-go .hm-fp-stages { animation: hm-fp-rumble 0.9s linear; }
+@keyframes hm-fp-rumble {
+  0%, 100% { transform: none; }
+  10% { transform: translate(-2px, 1px); }
+  20% { transform: translate(3px, -1px); }
+  30% { transform: translate(-3px, 2px); }
+  40% { transform: translate(2px, -2px); }
+  55% { transform: translate(-2px, 1px); }
+  70% { transform: translate(1px, -1px); }
+  85% { transform: translate(-1px, 0); }
+}
+/* at liftoff the fan may reach past the frame, so the frame stops
+   cutting: sideways it still clips (the page never scrolls sideways),
+   up and down the cards show whole; the edge fade lifts with it */
+.hm-fp.is-go .hm-fp-view {
+  overflow: hidden;
+  overflow: clip visible;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.hm-fp-controls { position: relative; z-index: 30; }
+/* tablets: the same fan, closed a little to fit the width */
+@media (min-width: 641px) and (max-width: 1100px) {
+  .hm-fp.is-go .hm-fp-cp.is-done,
+  .hm-fp.is-go .hm-fp-cp.is-done.is-gone {
+    transform: rotate(calc((var(--a) - 3.5) * -3.8deg)) translateY(-8px) translateZ(calc(-90px - var(--a) * 12px)) !important;
+  }
+}
+.hm-fp.is-go .hm-fp-cp.is-now { transform: translateY(-10px) translateZ(40px); }
+.hm-fp.is-go .hm-fp-cp.is-done,
+.hm-fp.is-go .hm-fp-cp.is-done.is-gone {
+  transform-origin: 50% 240%;
+  transform:
+    rotate(calc((var(--a) - 3.5) * -7deg))
+    translateY(-8px)
+    translateZ(calc(-90px - var(--a) * 12px));
+  opacity: 0.85;
+  transition:
+    transform 1.3s cubic-bezier(0.2, 1.25, 0.35, 1) calc(0.55s + (6 - var(--a)) * 80ms),
+    opacity 0.6s ease calc(0.55s + (6 - var(--a)) * 80ms),
+    border-color 0.5s;
+}
+.hm-fp.is-go .hm-fp-cp.is-done .hm-fp-shade { opacity: 0.22; }
+.hm-fp.is-go .hm-fp-cp.is-done .hm-fp-row { opacity: 0.75; }
+.hm-fp.is-go .hm-fp-cp.is-done { border-color: rgba(250, 167, 25, 0.32); box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.9), 0 0 24px -8px rgba(250, 167, 25, 0.25); }
+
+/* the flash behind the deck */
+.hm-fp-plot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(1100px, 120vw);
+  height: 520px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 214, 150, 0.4), rgba(250, 167, 25, 0.16) 45%, transparent 75%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+.hm-fp-plot { isolation: isolate; }
+.hm-fp.is-go .hm-fp-plot::after { animation: hm-fp-flash 2.6s ease-out forwards; }
+@keyframes hm-fp-flash {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+  12% { opacity: 1; }
+  100% { opacity: 0.35; transform: translate(-50%, -50%) scale(1.08); }
+}
+
+/* sparks pouring up inside the liftoff card (home.js adds them) */
+.hm-fp-sparks { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; border-radius: inherit; }
+.hm-fp-sparks i {
+  position: absolute;
+  bottom: -6px;
+  left: var(--sx);
+  width: var(--sz, 3px);
+  height: var(--sz, 3px);
+  border-radius: 50%;
+  background: #ffe0a8;
+  box-shadow: 0 0 6px 1px rgba(250, 167, 25, 0.9);
+  opacity: 0;
+}
+.hm-fp.is-go .hm-fp-sparks i { animation: hm-fp-spark var(--t, 2s) cubic-bezier(0.2, 0.6, 0.4, 1) var(--d, 0s) infinite; }
+@keyframes hm-fp-spark {
+  0% { opacity: 0; transform: translate(0, 0) scale(1); }
+  8% { opacity: 1; }
+  70% { opacity: 0.8; }
+  100% { opacity: 0; transform: translate(var(--dx, 0px), calc(var(--rise, 220px) * -1)) scale(0.4); }
+}
+
+@media (max-width: 640px) {
+  /* liftoff on phones: the same fan, narrower */
+  .hm-fp.is-go .hm-fp-cp.is-done,
+  .hm-fp.is-go .hm-fp-cp.is-done.is-gone {
+    transform-origin: 50% 100%;
+    transform: translateY(-96px) rotate(calc((var(--a) - 3.5) * -6.5deg)) scale(0.8) translateZ(calc(-40px - var(--a) * 8px));
+    opacity: 0.85;
+  }
+  .hm-fp.is-go .hm-fp-cp.is-done > :not(.hm-fp-shade) { opacity: 0.22; }
+  .hm-fp.is-go .hm-fp-cp.is-done .hm-fp-row { opacity: 0.75; }
+  .hm-fp.is-go .hm-fp-cp.is-now { transform: translateY(-6px) translateZ(24px); }
+}
 
 /* ---- controls ---------------------------------------------------- */
 .hm-fp-controls {
@@ -2750,21 +3085,41 @@
 
 /* tablets: a bigger card, the deck still fanning right */
 @media (max-width: 1024px) {
-  .hm-fp { --fp-w: min(520px, 64vw); --fp-step: 30px; }
-  .hm-fp-stages { left: max(4vw, calc(50% - var(--fp-w) * 0.62)); }
+  .hm-fp { --fp-w: min(620px, 74vw); --fp-step: 26px; }
 }
 
 /* phones: the card takes the screen, the deck peeks in at the right
    edge, cleared cards fly off the left */
 @media (max-width: 640px) {
-  .hm-fp { --fp-w: calc(100vw - 4vw - 44px); --fp-h: 300px; --fp-step: 12px; margin-top: 18px; }
-  .hm-fp-view { height: calc(var(--fp-h) + 40px); perspective: 1000px; -webkit-mask-image: none; mask-image: none; }
-  .hm-fp-stages { top: 20px; left: 4vw; }
-  .hm-fp-cp { padding: 20px; border-radius: 18px; }
+  /* the card is proportioned off its own width, about 6:5 like a
+     playing card turned on its side; the margin either side lets the
+     deck peek */
+  .hm-fp { --fp-w: min(calc(100vw - 64px), 420px); --fp-h: clamp(262px, calc(var(--fp-w) * 0.82), 330px); --fp-step: 11px; margin-top: 18px; }
+  .hm-fp-view { height: calc(var(--fp-h) + 96px); perspective: 1000px; -webkit-mask-image: none; mask-image: none; }
+  .hm-fp-stages { top: 72px; }
+  .hm-fp-cp { padding: 20px 20px 28px; border-radius: 20px; }
+  .hm-fp-key { gap: 14px; }
+  .hm-fp-copy { margin-top: 12px; }
+  .hm-fp-copy p { font-size: 0.98rem; line-height: 1.58; }
+  .hm-fp-t { width: 52px; height: 52px; font-size: 1.15rem; }
+  .hm-fp-t::before { -webkit-mask: repeating-conic-gradient(#000 0 54deg, transparent 54deg 60deg), radial-gradient(circle, transparent 22px, #000 23px); -webkit-mask-composite: source-in; mask: repeating-conic-gradient(#000 0 54deg, transparent 54deg 60deg) intersect, radial-gradient(circle, transparent 22px, #000 23px); }
+  .hm-fp-t::after { -webkit-mask: radial-gradient(circle, transparent 30px, #000 31px); mask: radial-gradient(circle, transparent 30px, #000 31px); }
+  .hm-fp-fuel { left: 22px; right: 22px; bottom: 20px; }
   .hm-fp-cp.is-later { transform: translateX(calc(var(--o) * var(--fp-step))) translateZ(calc(var(--a) * -60px)) rotateY(calc(var(--a) * -4deg)); }
-  .hm-fp-cp.is-done { transform: translateX(calc(-104% - var(--a) * 10px)) translateZ(-120px) rotateY(30deg); opacity: 0; }
-  .hm-fp-cp::before { font-size: 7.5rem; }
-  .hm-fp-name { font-size: 1.65rem; }
+  /* phones: a cleared card slips back and up behind the next one, so
+     the stages already flown build up as a stack of glowing top edges
+     over the card in play; nothing leaves the frame */
+  .hm-fp-cp.is-done {
+    transform-origin: 50% 0;
+    transform: translateY(calc(var(--a) * -9px)) scale(calc(1 - var(--a) * 0.045));
+    opacity: calc(1 - var(--a) * 0.16);
+  }
+  .hm-fp-cp.is-done.is-gone { opacity: calc(1 - var(--a) * 0.16); }
+  .hm-fp-cp.is-done > :not(.hm-fp-shade) { opacity: 0; }
+  .hm-fp-cp.is-done .hm-fp-shade { opacity: calc(0.3 + var(--a) * 0.06); }
+  .hm-fp-cp.is-done { border-color: rgba(250, 167, 25, calc(0.42 - var(--a) * 0.05)); }
+  .hm-fp-cp::before { font-size: calc(var(--fp-w) * 0.29); bottom: -0.18em; }
+  .hm-fp-name { font-size: clamp(1.75rem, 8.2vw, 2.15rem); }
   .hm-fp-top { grid-template-columns: 1fr; gap: 18px; }
   .hm-fp-top .hm-fclock-row { font-size: 3.4rem; }
   .hm-fp-controls { margin-top: 8px; }
@@ -2773,7 +3128,7 @@
   .hm-fp-replay { flex: 1; justify-content: center; }
 }
 @media (max-width: 359px) {
-  .hm-fp { --fp-h: 320px; }
+  .hm-fp { --fp-w: calc(100vw - 40px); --fp-h: 292px; }
   .hm-fp-name { font-size: 1.45rem; }
 }
 
@@ -3775,7 +4130,7 @@
   .hx-grain { display: none; }
   .hm-arc-trail, .hm-arc-craft { display: none; }
   .hm-fp-cp { transition: none; }
-  .hm-fclock-ladder li.is-now, .hm-fp-cp.is-now .hm-fp-st i, .hm-fp-cp.is-launch, .hm-fp-cp.is-now .hm-fp-t::after, .hm-fp.is-go .hm-fp-cp--go::after, .hm-fclock.is-go .hm-fclock-row::after { animation: none; }
+  .hm-fp.is-go .hm-fp-stages, .hm-fp.is-go .hm-fp-plot::after, .hm-fp.is-go .hm-fp-sparks i, .hm-fp-cp.is-arrive .hm-fp-name, .hm-fp-cp.is-arrive .hm-fp-copy, .hm-fp-cp.is-arrive .hm-fp-t, .hm-fclock-ladder li.is-now, .hm-fp-cp.is-now .hm-fp-st i, .hm-fp-cp.is-launch, .hm-fp-cp.is-now .hm-fp-t::after, .hm-fp.is-go .hm-fp-cp--go::after, .hm-fclock.is-go .hm-fclock-row::after { animation: none; }
   .hx.is-born .hx-card-word span { animation: none; opacity: 1; }
   .hx-line > span,
   .hm-split-line > span { transform: none !important; transition: none !important; }

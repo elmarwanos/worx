@@ -884,8 +884,7 @@
   }
 
   /* ----------------------------------------------------------
-     05 · Flight plan, the launch deck. Six stage cards and the liftoff
-     card stacked sideways in depth: the card in play faces you, the
+     05 · Flight plan, the launch deck. The seven stage cards stacked sideways in depth: the card in play faces you, the
      next wait in the deck to the right, a cleared card launches off to
      the left onto the pile. Seen once, it counts itself down, fuel
      burning along the foot of each card; any click, key, swipe or
@@ -900,7 +899,7 @@
     var cps = qa("[data-fp-cp]", fp), keys = cps.map(function (c) { return q(".hm-fp-key", c); });
     var nextB = q("[data-fp-next]", fp), nextT = q("[data-fp-next-t]", fp), nextN = q("[data-fp-next-n]", fp);
     var replayB = q("[data-fp-replay]", fp);
-    var N = cps.length, LAST = N - 1, STAGES = N - 1;   // six stages, then liftoff
+    var N = cps.length, LAST = N - 1;   // seven stages, the last is liftoff
     var ST = { standby: fp.dataset.stStandby, live: fp.dataset.stLive, done: fp.dataset.stDone, go: fp.dataset.stGo };
     var cur = -1;
     var two = function (n) { return (n < 10 ? "0" : "") + n; };
@@ -913,6 +912,23 @@
       sh.setAttribute("aria-hidden", "true");
       c.appendChild(sh);
     });
+    // the liftoff card carries its sparks, each with its own path
+    if (!reduced) (function () {
+      var sp = document.createElement("span");
+      sp.className = "hm-fp-sparks";
+      sp.setAttribute("aria-hidden", "true");
+      for (var s = 0; s < 22; s++) {
+        var i = document.createElement("i");
+        i.style.setProperty("--sx", (8 + Math.random() * 84).toFixed(1) + "%");
+        i.style.setProperty("--dx", ((Math.random() - 0.5) * 60).toFixed(0) + "px");
+        i.style.setProperty("--rise", (140 + Math.random() * 220).toFixed(0) + "px");
+        i.style.setProperty("--t", (1.4 + Math.random() * 1.6).toFixed(2) + "s");
+        i.style.setProperty("--d", (Math.random() * 1.8).toFixed(2) + "s");
+        i.style.setProperty("--sz", (2 + Math.random() * 2.5).toFixed(1) + "px");
+        sp.appendChild(i);
+      }
+      cps[LAST].appendChild(sp);
+    })();
 
     // ---- the board (split-flap, one number per click)
     var flaps = fboard ? qa("[data-flap]", fboard) : [];
@@ -950,7 +966,7 @@
       if (!fboard) return;
       want = LAST - i;
       if (!flipT) tick();
-      nEl.textContent = i === LAST ? "ALL STAGES CLEARED" : "STAGE " + two(i + 1) + " / " + two(STAGES);
+      nEl.textContent = "STAGE " + two(i + 1) + " / " + two(N);
       if (reduced) nameEl.textContent = NAMES[i]; else scramble(nameEl, NAMES[i], 420);
       rungs.forEach(function (r, j) { r.classList.toggle("is-past", j < i); r.classList.toggle("is-now", j === i); });
       fboard.classList.toggle("is-go", i === LAST);
@@ -972,6 +988,9 @@
         c.classList.toggle("is-gone", o < -1);
         c.classList.remove("is-burn");
         c.style.transform = ""; c.style.transition = "";
+        // the card coming up: its words rise out of soft focus
+        c.classList.remove("is-arrive");
+        if (o === 0 && was >= 0 && !reduced) { void c.offsetWidth; c.classList.add("is-arrive"); }
         // the card that just left gets a blur on its way out
         if (!reduced && was >= 0 && o < 0 && j >= Math.min(was, i) && j < Math.max(was, i)) {
           c.classList.remove("is-launch"); void c.offsetWidth; c.classList.add("is-launch");
@@ -981,6 +1000,10 @@
         keys[j].tabIndex = o === 0 ? 0 : -1;
         if (o === 0) keys[j].setAttribute("aria-current", "step"); else keys[j].removeAttribute("aria-current");
       });
+      // liftoff: on a phone that has been touched, a short rumble in the hand
+      if (i === LAST && was !== LAST && !reduced && navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) {
+        try { navigator.vibrate([18, 40, 26, 40, 60]); } catch (e) {}
+      }
       fp.classList.toggle("is-go", i === LAST);
       nextB.hidden = i === LAST;
       replayB.hidden = i !== LAST;
@@ -993,17 +1016,29 @@
     };
 
     // ---- the countdown runs itself once, while on screen
-    var auto = !reduced, onScreen = false, autoT = null;
-    var BURN = 3200;
+    // phones keep it running: after liftoff the deck holds, folds away and
+    // counts down again; a touch takes over, and it picks up again by
+    // itself once left alone for a while
+    var narrow = window.matchMedia("(max-width: 640px)");
+    var auto = !reduced, onScreen = false, autoT = null, resumeT = null;
+    var BURN = 3200, HOLD = 5200, IDLE = 10000;
     var burn = function () {
       clearTimeout(autoT); autoT = null;
       cps[cur].classList.remove("is-burn");
-      if (!auto || !onScreen || cur >= LAST) return;
+      if (!auto || !onScreen) return;
+      if (cur >= LAST) {
+        if (narrow.matches) autoT = setTimeout(function () { autoT = null; go(0); burn(); }, HOLD);
+        return;
+      }
       void cps[cur].offsetWidth;
       cps[cur].classList.add("is-burn");
       autoT = setTimeout(function () { autoT = null; go(cur + 1); burn(); }, BURN);
     };
-    var takeOver = function () { auto = false; clearTimeout(autoT); autoT = null; cps[cur].classList.remove("is-burn"); };
+    var takeOver = function () {
+      auto = false; clearTimeout(autoT); autoT = null; cps[cur].classList.remove("is-burn");
+      clearTimeout(resumeT);
+      if (narrow.matches && !reduced) resumeT = setTimeout(function () { auto = true; burn(); }, IDLE);
+    };
     fp.style.setProperty("--fp-burn", BURN + "ms");
 
     // ---- inputs
@@ -1021,6 +1056,7 @@
     });
     nextB.addEventListener("click", function () { takeOver(); go(cur + 1); });
     replayB.addEventListener("click", function () {
+      clearTimeout(resumeT);
       auto = !reduced;
       go(0);
       if (auto) burn(); else keys[0].focus({ preventScroll: true });
@@ -1352,7 +1388,7 @@
         modules: "13 services, one crew",
         why: "Four reasons",
         telemetry: "The numbers since 2019",
-        flight: "Six stages to liftoff",
+        flight: "Seven stages to liftoff",
         comms: "What clients say",
         notes: "Articles from the crew",
         briefing: "Questions, answered",

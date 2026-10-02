@@ -17,7 +17,7 @@
    Once locked, the knobs answer the scroll: they turn a few degrees
    with it, with some weight, and spring back.
 
-   Over the bank, the console strip counts the years in orbit.
+   On the plate at the foot of the panel, the years in orbit count up.
    The figures are in the page as text; all of this is decoration.
    Reduced motion: every tuner already locked, nothing moves.
    ============================================================ */
@@ -30,25 +30,104 @@
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var NS = "http://www.w3.org/2000/svg";
 
-  // the console strip: years in orbit, counted up from 2019 to this year
+  // the plate: years in orbit, counted up from 2019 to this year
   // when the strip is first seen
   var yrsEl = $("[data-gs-years]");
   if (yrsEl) {
     var YRS = Math.max(0, new Date().getFullYear() - 2019);
     var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+    var plate = $("[data-gs-plate]");
+    var lit = function () { if (plate) plate.classList.add("is-lit"); };
     var count = function () {
-      if (reduced) { yrsEl.textContent = pad(YRS); return; }
+      if (reduced) { yrsEl.textContent = pad(YRS); lit(); return; }
       var t0 = performance.now();
       (function step(now) {
-        var k = Math.min(1, (now - t0) / 1600), e = 1 - Math.pow(1 - k, 3);
+        var k = Math.min(1, (now - t0) / 1800), e = 1 - Math.pow(1 - k, 3);
         yrsEl.textContent = pad(Math.round(YRS * e));
-        if (k < 1) requestAnimationFrame(step);
+        if (k < 1) requestAnimationFrame(step); else setTimeout(lit, 160);
       })(t0);
     };
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(function (en, o) { if (en[0].isIntersecting) { o.disconnect(); count(); } }, { threshold: 0.6 }).observe(yrsEl);
     } else count();
   }
+  // the panel: the light on the metal follows a mouse across it
+  var board = $(".gs-board");
+  if (board && !reduced && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    var sheenRaf = 0, mx = 0, my = 0;
+    board.addEventListener("pointermove", function (e) {
+      var r = board.getBoundingClientRect();
+      mx = e.clientX - r.left; my = e.clientY - r.top;
+      if (sheenRaf) return;
+      sheenRaf = requestAnimationFrame(function () {
+        sheenRaf = 0;
+        board.style.setProperty("--mx", mx + "px");
+        board.style.setProperty("--my", my + "px");
+      });
+    });
+    board.addEventListener("pointerleave", function () { board.style.removeProperty("--mx"); board.style.removeProperty("--my"); });
+  }
+
+  // phones: the bank is a sideways row, so dots under it show which
+  // tuner is in view and jump to another; while nobody touches it, the
+  // row moves on by itself every few seconds (resting off screen)
+  var dotsEl = $("[data-gs-dots]"), bankEl = $(".gs-bank");
+  if (dotsEl && bankEl) (function () {
+    var cells = $$(".gs-unit", bankEl), narrow = window.matchMedia("(max-width: 640px)");
+    var cur = 0, idleUntil = 0, seen = false, autoT = null, raf = 0;
+    var dots = cells.map(function (u, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "gs-dot-btn";
+      b.setAttribute("aria-label", ($(".gs-label", u).firstChild.textContent || "").trim());
+      b.addEventListener("click", function () { idleUntil = Date.now() + 9000; show(i, true); });
+      dotsEl.appendChild(b);
+      return b;
+    });
+    var mark = function (i) {
+      cur = i;
+      dots.forEach(function (d, j) {
+        d.classList.toggle("is-on", j === i);
+        if (j === i) d.setAttribute("aria-current", "true"); else d.removeAttribute("aria-current");
+      });
+    };
+    var show = function (i, smooth) {
+      var u = cells[i];
+      bankEl.scrollTo({ left: u.offsetLeft - (bankEl.clientWidth - u.offsetWidth) / 2, behavior: smooth && !reduced ? "smooth" : "auto" });
+      mark(i);
+    };
+    // which tuner sits nearest the middle as the row scrolls
+    bankEl.addEventListener("scroll", function () {
+      if (raf) return;
+      raf = requestAnimationFrame(function () {
+        raf = 0;
+        var mid = bankEl.scrollLeft + bankEl.clientWidth / 2, best = 0, bd = Infinity;
+        cells.forEach(function (u, j) {
+          var d = Math.abs(u.offsetLeft + u.offsetWidth / 2 - mid);
+          if (d < bd) { bd = d; best = j; }
+        });
+        if (best !== cur) mark(best);
+      });
+    }, { passive: true });
+    // a finger on the row holds the auto-advance for a while
+    ["pointerdown", "touchstart", "wheel"].forEach(function (ev) {
+      bankEl.addEventListener(ev, function () { idleUntil = Date.now() + 9000; }, { passive: true });
+    });
+    var step = function () {
+      if (!narrow.matches || !seen || document.hidden || Date.now() < idleUntil) return;
+      show((cur + 1) % cells.length, true);
+    };
+    var arm = function () {
+      clearInterval(autoT);
+      autoT = null;
+      if (!reduced && narrow.matches && seen) autoT = setInterval(step, 5000);
+    };
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (en) { seen = en[0].isIntersecting; arm(); }, { threshold: 0.5 }).observe(bankEl);
+    }
+    if (narrow.addEventListener) narrow.addEventListener("change", arm);
+    mark(0);
+  })();
   var later = function (ms, fn) { return setTimeout(fn, reduced ? 0 : ms); };
   var mk = function (tag, attrs, parent) {
     var n = document.createElementNS(NS, tag);

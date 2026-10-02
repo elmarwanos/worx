@@ -79,6 +79,31 @@
   var stars = (function () {
     var canvas = $(".cx-stars");
     var ctx = canvas.getContext("2d");
+    // phones: a still sky, no stars travelling with the scroll or the
+    // intro warp (redrawn only when the width really changes, not when
+    // the address bar slides)
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      var lastW = 0;
+      var still = function () {
+        var cw = canvas.clientWidth, ch = canvas.clientHeight;
+        if (cw === lastW) return;
+        lastW = cw;
+        var r = Math.min(window.devicePixelRatio || 1, 1.5);
+        canvas.width = cw * r;
+        canvas.height = ch * r;
+        ctx.setTransform(r, 0, 0, r, 0, 0);
+        ctx.clearRect(0, 0, cw, ch);
+        for (var n = 0; n < 220; n++) {
+          var amber = Math.random() < 0.15;
+          ctx.fillStyle = (amber ? "rgba(250, 167, 25, " : "rgba(254, 238, 207, ") + (0.2 + Math.random() * 0.6).toFixed(2) + ")";
+          var sz = Math.random() < 0.1 ? 1.8 : 1.1;
+          ctx.fillRect(Math.random() * cw, Math.random() * ch, sz, sz);
+        }
+      };
+      still();
+      window.addEventListener("resize", still);
+      return { warpTo: function () {} };
+    }
     var w, h, cx, cy, dpr;
     var list = [];
     var COUNT = window.innerWidth < 700 ? 260 : 520;

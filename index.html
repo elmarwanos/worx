@@ -263,30 +263,18 @@
       </div>
       <p class="visually-hidden">Clients include Chaumet, Hyundai, Modon, Genesis, Kia, UAE Pavilion, Hudayriyat, Wealthface, Hisense, UNICEF, Universal Pictures, Roxy Cinemas, LG, Tiara Dream, Duni and Glimpse.</p>
       <!-- THE TUNERS: under the partner field, four tuners from a 1960s
-           ground-station receiver, one per real figure, floating in the
-           dark with nothing round them. The partners' signal drops from
-           the field above and runs along one line behind them; each
-           tuner wakes as it arrives, searches, turns to its figure (the
-           drums on its hub roll to it) and locks (ground-station.js).
-           Each label is real text, engraved round its ring by the script. -->
+           ground-station receiver, one per real figure, mounted on one
+           machined panel held by a screw at each corner. Each tuner wakes,
+           searches, turns to its figure (the drums on its hub roll to it)
+           and settles (ground-station.js). Each label is real text,
+           engraved round its ring by the script. Along the foot of the
+           panel a riveted plate is engraved with the years in orbit, which
+           count up from 2019 to this year and then glow in their cut. -->
       <div class="container gs" data-gs>
-        <!-- the console strip over the bank: who is reading, how long in
-             orbit (the years count up from 2019 to this year, ground-station.js)
-             and how it is trending -->
-        <div class="gs-head" data-gs-head>
-          <div class="gs-head-cell gs-head-id">
-            <p class="gs-head-k"><i class="gs-head-lamp" aria-hidden="true"></i>Worx mission control</p>
-            <h3 class="gs-head-title">Telemetry</h3>
-          </div>
-          <div class="gs-head-cell gs-head-orbit">
-            <p class="gs-head-k">In orbit since <b class="gs-ltr">2019</b></p>
-            <p class="gs-head-read gs-ltr" aria-hidden="true"><b data-gs-years>00</b><span>yrs</span><small>MET</small></p>
-          </div>
-          <div class="gs-head-cell gs-head-trend">
-            <p class="gs-head-k">Still accelerating</p>
-            <span class="gs-head-graph" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b>&#9650;</b></span>
-          </div>
-        </div>
+       <div class="gs-board">
+        <i class="gs-screw gs-screw--tl" aria-hidden="true"></i><i class="gs-screw gs-screw--tr" aria-hidden="true"></i><i class="gs-screw gs-screw--bl" aria-hidden="true"></i><i class="gs-screw gs-screw--br" aria-hidden="true"></i>
+        <span class="gs-vent" aria-hidden="true"></span>
+        <span class="gs-sheen" aria-hidden="true"></span>
         <ul class="gs-bank">
           <li class="gs-unit" data-gs-unit data-to="300" data-max="400" data-suffix="+" data-code="WX-300 DX">
             <div class="gs-tuner" aria-hidden="true">
@@ -317,6 +305,15 @@
             <p class="gs-label">Growth, every year<span class="visually-hidden">: 10%+</span></p>
           </li>
         </ul>
+        <!-- phones: one tuner at a time; the dots show where you are and jump (ground-station.js) -->
+        <div class="gs-dots" data-gs-dots role="group" aria-label="Telemetry readings"></div>
+        <!-- engraved into the panel: the years in orbit -->
+        <div class="gs-plate" data-gs-plate>
+          <p class="gs-plate-since">In orbit since <b class="gs-ltr">2019</b></p>
+          <span class="gs-plate-seam" aria-hidden="true"></span>
+          <p class="gs-plate-read gs-ltr" aria-hidden="true"><b data-gs-years>00</b><span>yrs</span></p>
+        </div>
+       </div>
       </div>
     </section>
 
@@ -504,7 +501,7 @@
     </section>
 
     <!-- ====== 05 · Flight plan (process) ======
-         THE LAUNCH DECK: six stage cards and the liftoff card, stacked
+         THE LAUNCH DECK: the seven stage cards, T-06 to liftoff, stacked
          sideways in depth. The card in play faces you, its fuel burning
          along the foot; the next ones wait in the deck to the right; a
          cleared card launches off to the left onto the pile. At T-00 the
@@ -515,12 +512,12 @@
       <div class="container hm-fp-top">
         <div class="hm-flight-lead">
           <p class="hm-kicker"><i class="hm-dot" aria-hidden="true"></i>Flight plan</p>
-          <h2 id="flight-title" class="hm-h2" data-split>Six stages. Zero surprises.</h2>
+          <h2 id="flight-title" class="hm-h2" data-split>Seven stages. Zero surprises.</h2>
           <p>A countdown you can see from day one, so you always know what's next.</p>
         </div>
           <div class="hm-fclock" data-fclock aria-hidden="true">
             <div class="hm-fclock-row"><span class="hm-fclock-t">T</span><span class="hm-fclock-sign">&minus;</span><span class="hm-flap" data-flap><span class="hm-flap-h hm-flap-top"><i>0</i></span><span class="hm-flap-h hm-flap-bot"><i>0</i></span><span class="hm-flap-h hm-flap-fall"><i>0</i></span><span class="hm-flap-h hm-flap-rise"><i>0</i></span></span><span class="hm-flap" data-flap><span class="hm-flap-h hm-flap-top"><i>6</i></span><span class="hm-flap-h hm-flap-bot"><i>6</i></span><span class="hm-flap-h hm-flap-fall"><i>6</i></span><span class="hm-flap-h hm-flap-rise"><i>6</i></span></span></div>
-            <div class="hm-fclock-meta"><span data-fclock-n>STAGE 01 / 06</span><b data-fclock-name>CONSULTATION</b></div>
+            <div class="hm-fclock-meta"><span data-fclock-n>STAGE 01 / 07</span><b data-fclock-name>CONSULTATION</b></div>
             <ol class="hm-fclock-ladder"><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ol>
           </div>
       </div>
@@ -528,7 +525,7 @@
       <div class="hm-fp" data-fp data-st-standby="Standby" data-st-live="In progress" data-st-done="Cleared" data-st-go="Liftoff">
         <div class="hm-fp-plot">
           <div class="hm-fp-view" data-fp-view>
-          <ol class="hm-fp-stages" aria-label="Flight plan, six stages from T-06 to liftoff">
+          <ol class="hm-fp-stages" aria-label="Flight plan, seven stages from T-06 to liftoff">
           <li class="hm-fp-cp" data-fp-cp data-t="T-06">
             <button type="button" class="hm-fp-key" id="fp-key-1" aria-describedby="fp-copy-1" aria-current="step">
               <span class="hm-fp-row"><span class="hm-fp-t" dir="ltr"><small>T&minus;</small>06</span><span class="hm-fp-st" aria-hidden="true"><i></i><b data-fp-st></b></span></span>
@@ -580,7 +577,7 @@
           <li class="hm-fp-cp hm-fp-cp--go" data-fp-cp data-t="T-00">
             <button type="button" class="hm-fp-key" id="fp-key-7" aria-describedby="fp-copy-7">
               <span class="hm-fp-row"><span class="hm-fp-t" dir="ltr"><small>T&minus;</small>00</span><span class="hm-fp-st" aria-hidden="true"><i></i><b data-fp-st></b></span></span>
-              <span class="hm-fp-name">Management <em>· liftoff</em></span>
+              <span class="hm-fp-name">Management <em>· Liftoff</em></span>
             </button>
             <div class="hm-fp-copy" id="fp-copy-7"><p>Support, updates and growth long after launch day. This is where most of our partnerships really begin.</p></div>
             <span class="hm-fp-fuel" aria-hidden="true"><i></i></span>
@@ -847,6 +844,8 @@
         <div class="footer-col">
           <h4>Overview</h4>
           <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about/index.html">About</a></li>
             <li><a href="services/index.html">Services</a></li>
             <li><a class="footer-live" href="crams/index.html">CRAMS<i aria-hidden="true"></i></a></li>
             <li><a href="portfolio/index.html">Portfolio</a></li>
