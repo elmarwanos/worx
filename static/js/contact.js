@@ -138,7 +138,7 @@
   var SERVICE_BUILD = {
     "Web Development": "website", "E-commerce Development": "website", "UI/UX Design": "website",
     "Mobile App Development": "mobile-app",
-    "Custom Platforms": "platform", "ERP & CRM": "platform", "Cloud Transformation": "platform",
+    "Custom Platforms": "platform", "CMS & CRM": "platform", "Cloud Transformation": "platform",
     "Artificial Intelligence": "platform", "IT Resource Outsourcing": "platform",
     "CRAMS": "platform"
   };

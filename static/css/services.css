@@ -5728,3 +5728,25 @@ body {
 .cx-call:focus-visible .cx-call-arrow { background: var(--gradient); box-shadow: none; }
 .cx-call:hover .cx-call-arrow svg,
 .cx-call:focus-visible .cx-call-arrow svg { stroke: var(--on-accent); }
+
+/* ---- Phones: a lighter page --------------------------------------
+   What made the page stutter on phones: a full-screen grain layer,
+   twice the screen in size, moving on top of everything every frame,
+   and live background blur behind the glass panels (re-blurred on every
+   scroll frame). On phones the grain goes and the glass is solid
+   instead. The look stays; the frame rate comes back. */
+@media (max-width: 767px) {
+  .cx-grain { display: none; }
+  .cx-comms-list a,
+  .sw-score,
+  .sp-dash,
+  .sm-toast,
+  .cx-flight-card,
+  .cx-cta,
+  .sa-chat p,
+  .cx-map-card {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .cx-flight-card { background: rgba(33, 16, 9, 0.94); }
+}

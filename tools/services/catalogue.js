@@ -128,7 +128,7 @@ module.exports = [
       {
         slug: "erp-crm",
         page: "erp-crm.html",
-        name: "ERP & CRM",
+        name: "CMS & CRM",
         short: "One connected system for finance, people, supply and sales.",
         subs: ["NetSuite", "SAP", "Microsoft Dynamics 365", "Oracle Cloud", "Odoo", "CRM development"]
       },
