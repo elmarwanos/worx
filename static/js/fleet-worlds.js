@@ -638,7 +638,7 @@
     var ptr = { x: 0, y: 0, tx: 0, ty: 0 };
     var resize = function () {
       var r = canvas.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+      dpr = Math.min(window.devicePixelRatio || 1, (window.innerWidth < 768 ? 1.25 : 1.75));   // phones: lighter canvases
       W = Math.max(1, r.width); H = Math.max(1, r.height);
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       if (!running) frame(performance.now());

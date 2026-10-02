@@ -51,7 +51,7 @@
     return s;
   });
 
-  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var dpr = Math.min(window.devicePixelRatio || 1, (window.innerWidth < 768 ? 1.25 : 2));   // phones: lighter canvas
   var U = 100, JH = 66, W = 0, H = 0;
 
   function resize() {

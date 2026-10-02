@@ -76,7 +76,7 @@
               <div class="mega-group">
                 <p class="mega-group-title"><span>06</span>IT &amp; Enterprise</p>
                 <ul>
-                <li><a href="../services/erp-crm.html" data-mega-item data-division="IT &amp; Enterprise" data-short="One connected system for finance, people, supply and sales." data-subs="NetSuite|SAP|Microsoft Dynamics 365|Oracle Cloud|Odoo|CRM development" data-more="0"><i aria-hidden="true"></i><span>ERP &amp; CRM</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a href="../services/erp-crm.html" data-mega-item data-division="IT &amp; Enterprise" data-short="One connected system for finance, people, supply and sales." data-subs="NetSuite|SAP|Microsoft Dynamics 365|Oracle Cloud|Odoo|CRM development" data-more="0"><i aria-hidden="true"></i><span>CMS &amp; CRM</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 <li><a href="../services/it-outsourcing.html" data-mega-item data-division="IT &amp; Enterprise" data-short="Vetted specialists who join your team in days." data-subs="Hire scrum masters|Hire project managers|Hire SQA engineers|Hire ReactJS developers|Hire NodeJS developers|Hire .NET developers|Hire React Native developers|Hire mobile app developers|Hire SharePoint developers" data-more="3"><i aria-hidden="true"></i><span>IT Resource Outsourcing</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 <li><a href="../services/cloud-transformation.html" data-mega-item data-division="IT &amp; Enterprise" data-short="Move to the cloud and keep it secure, fast and affordable." data-subs="Digital cloud transformation|Cloud migration|AWS|Microsoft Azure|Security &amp; compliance" data-more="0"><i aria-hidden="true"></i><span>Cloud Transformation</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
                 </ul>
@@ -151,18 +151,34 @@
   <!--/WORX:HEADER-->
 
   <!-- CRAMS, the software Worx builds and sells: its own film.
-       One canvas behind the whole page (crams.js, "the system") holds a
-       core star, CRAMS, and the departments in orbit round it; leads are
-       signals travelling between them. As you scroll the system acts the
-       story out: the departments drift apart and leads fall between them
-       (the gap), the core lights and draws them into orbit (connected),
-       then one lead is followed through its whole life (the lifecycle),
-       and the system settles behind the rest of the page. -->
+       Behind the whole page the CRAMS dashboard floats as a hologram over
+       the site's cosmos (crams-deck.js, "the deck"; crams.js the sky and
+       the HUD). It arrives from deep space and assembles in the hero,
+       breaks apart in the gap, syncs back together, docks into "Inside
+       CRAMS" for its tour, follows one lead through the lifecycle, then
+       opens into its layers and lies under the launch. -->
   <main id="main" class="cr" data-cr>
     <!-- the cosmos behind it all, as on the rest of the site: deep space,
          a starfield at three depths and an ember nebula (crams.js) -->
     <canvas class="cr-cosmos" aria-hidden="true" data-cr-cosmos></canvas>
     <canvas class="cr-system" aria-hidden="true" data-cr-system></canvas>
+    <!-- THE DECK: the CRAMS dashboard as a hologram, one screen that plays
+         the whole film (crams-deck.js). Sample data only. -->
+    <div class="cr-deck" aria-hidden="true" data-cr-deck><div class="cr-deck-stage"><div class="cr-deck-dash"></div></div></div>
+    <!-- the comms rail: the footer's social links, on the right once the hero is behind -->
+    <aside class="cr-comms" aria-label="Worx on social media" data-cr-comms>
+      <span class="cr-comms-tag" aria-hidden="true">COMMS</span>
+      <span class="cr-comms-signal" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="cr-comms-line" aria-hidden="true"></span>
+      <ul class="cr-comms-list">
+        <li><a href="https://www.linkedin.com/company/worxbyglimpse" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.06c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-4z"/></svg></a></li>
+        <li><a href="https://www.instagram.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.2 12 2.2zm0 4.66a5.14 5.14 0 1 0 0 10.28 5.14 5.14 0 0 0 0-10.28zm0 8.48a3.34 3.34 0 1 1 0-6.68 3.34 3.34 0 0 1 0 6.68zm5.34-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg></a></li>
+        <li><a href="https://www.facebook.com/worxbyglimpse" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-7.6h2.56l.38-2.97H13.5V8.53c0-.86.24-1.45 1.47-1.45h1.57V4.43a21 21 0 0 0-2.29-.12c-2.27 0-3.82 1.39-3.82 3.93v2.19H7.87v2.97h2.56V21z"/></svg></a></li>
+        <li><a href="mailto:Hello@worxbyglimpse.com" aria-label="Email Hello@worxbyglimpse.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1.3 2L12 12.4 19.7 7H4.3zM20 8.6l-7.43 5.2a1 1 0 0 1-1.14 0L4 8.6V17h16V8.6z"/></svg></a></li>
+      </ul>
+      <span class="cr-comms-line" aria-hidden="true"></span>
+      <span class="cr-comms-status" aria-hidden="true"><i></i>OPEN CHANNEL</span>
+    </aside>
     <span class="cr-grain" aria-hidden="true"></span>
     <span class="cr-vignette" aria-hidden="true"></span>
 
@@ -255,6 +271,35 @@
       </ol>
     </section>
 
+    <!-- ====== Inside CRAMS: the command deck ======
+         The dashboard up close in a monitor: a guided tour spotlights
+         each feature in turn; pick one in the list to jump to it
+         (crams-deck.js). An illustration with sample data. -->
+    <section class="cr-tour" id="inside" data-cr-tour-sec aria-labelledby="cr-tour-title">
+      <div class="cr-panel container">
+        <p class="cr-kicker"><i aria-hidden="true"></i>Inside CRAMS</p>
+        <h2 class="cr-h2" id="cr-tour-title" data-cr-split>Mission control <span class="gradient-text">for every lead.</span></h2>
+        <p class="cr-body">This is the deck your teams work from. Every source, channel, branch and status, live on one screen, with the records underneath.</p>
+      </div>
+      <div class="container cr-tour-grid">
+        <!-- the deck flies into this frame and lies flat in it (crams-deck.js) -->
+        <div class="cr-tour-dock" data-cr-dock role="img" aria-label="The CRAMS dashboard: date filters, eight live charts, record filters and the lead table, shown with sample data."><span class="cr-tour-vf" aria-hidden="true"></span></div>
+        <ol class="cr-tour-list" aria-label="What the deck shows">
+          <li data-tour-item="dates"><button type="button"><span class="cr-tour-n" aria-hidden="true">01</span><b>Filter by date</b><span>All dates, last month, two weeks or one week, in one click.</span></button></li>
+          <li data-tour-item="c-source"><button type="button"><span class="cr-tour-n" aria-hidden="true">02</span><b>Every source, every day</b><span>Which channels bring leads in, day by day.</span></button></li>
+          <li data-tour-item="c-channel"><button type="button"><span class="cr-tour-n" aria-hidden="true">03</span><b>How they want to talk</b><span>Each lead's preferred channel, so the first reply lands in the right app.</span></button></li>
+          <li data-tour-item="c-strength"><button type="button"><span class="cr-tour-n" aria-hidden="true">04</span><b>Hot, mild or low</b><span>Lead strength at a glance, so the team chases the right ones first.</span></button></li>
+          <li data-tour-item="c-time"><button type="button"><span class="cr-tour-n" aria-hidden="true">05</span><b>When to call</b><span>Morning, afternoon or evening, as each lead asked.</span></button></li>
+          <li data-tour-item="c-status"><button type="button"><span class="cr-tour-n" aria-hidden="true">06</span><b>Where every lead stands</b><span>From waiting to be contacted to invoiced, in one ratio.</span></button></li>
+          <li data-tour-item="c-branch"><button type="button"><span class="cr-tour-n" aria-hidden="true">07</span><b>Every branch in view</b><span>Leads by branch and day, side by side.</span></button></li>
+          <li data-tour-item="filters"><button type="button"><span class="cr-tour-n" aria-hidden="true">08</span><b>Filter anything</b><span>By campaign, branch, product or source, newest first.</span></button></li>
+          <li data-tour-item="actions"><button type="button"><span class="cr-tour-n" aria-hidden="true">09</span><b>Export and focus</b><span>Generate a CSV, or show only the leads assigned to you.</span></button></li>
+          <li data-tour-item="table"><button type="button"><span class="cr-tour-n" aria-hidden="true">10</span><b>One record per lead</b><span>Contact, channel, time and status in one shared table.</span></button></li>
+        </ol>
+      </div>
+      <p class="container cr-tour-note">An illustration with sample data: every name, number and contact here is made up, and contact details are masked.</p>
+    </section>
+
     <!-- ====== 03 · The lifecycle (pinned) ====== -->
     <!-- One lead, followed from first contact to performance: a signal
          runs down the flight path, and the ticket beside it (an
@@ -334,10 +379,14 @@
         <figure class="cr-crew-shot">
           <div class="cr-crew-frame">
             <img src="../static/assets/crams/marwan.webp" alt="Marwan Bassam, Founder and Managing Director of Worx" width="900" height="900" loading="lazy" decoding="async">
-            <span class="cr-crew-scan" aria-hidden="true"></span>
             <span class="cr-crew-vf" aria-hidden="true"></span>
             <span class="cr-crew-rec" aria-hidden="true"><i></i>REC · CREW 01</span>
             <span class="cr-crew-id" aria-hidden="true">ID · WX-001</span>
+            <!-- his LinkedIn, on the viewfinder's own angle -->
+            <a class="cr-crew-in" href="https://www.linkedin.com/in/marwan-bassam-12516b1b5/" target="_blank" rel="noopener" aria-label="Marwan Bassam on LinkedIn" data-cursor="Connect">
+              <span class="cr-crew-in-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.06c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-4z"/></svg></span>
+              <span class="cr-crew-in-txt" aria-hidden="true">CH-01 · LINKEDIN</span>
+            </a>
           </div>
           <figcaption class="visually-hidden">Marwan Bassam</figcaption>
         </figure>
@@ -356,12 +405,6 @@
             <li><span>Discipline</span><b>Full-stack developer</b></li>
             <li><span>Mission</span><b class="is-on">Built CRAMS</b></li>
           </ul>
-          <!-- Marwan's LinkedIn: paste his profile's address into href and
-               remove "hidden" to show the button -->
-          <a class="cr-linkedin" href="" target="_blank" rel="noopener" data-cursor="Connect" hidden>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.06c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-4z"/></svg>
-            <span>Connect with Marwan on LinkedIn</span>
-          </a>
         </div>
       </div>
     </section>
@@ -411,12 +454,12 @@
           <h4>Overview</h4>
           <ul>
             <li><a href="../index.html">Home</a></li>
-            <li><a href="../about/index.html">About us</a></li>
+            <li><a href="../about/index.html">About</a></li>
             <li><a href="../services/index.html">Services</a></li>
-            <li><a href="../crams/index.html">CRAMS</a></li>
+            <li><a class="footer-live" href="../crams/index.html">CRAMS<i aria-hidden="true"></i></a></li>
             <li><a href="../portfolio/index.html">Portfolio</a></li>
             <li><a href="../blogs/index.html">Blog</a></li>
-            <li><a href="../contact/index.html">Contact</a></li>
+            <li><a href="../faq/index.html">FAQ</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -443,7 +486,7 @@
           <ul>
             <li><a href="../services/artificial-intelligence.html">Artificial Intelligence</a></li>
             <li><a href="../services/ar-vr.html">AR / VR &amp; Mixed Reality</a></li>
-            <li><a href="../services/erp-crm.html">ERP &amp; CRM</a></li>
+            <li><a href="../services/erp-crm.html">CMS &amp; CRM</a></li>
             <li><a href="../services/cloud-transformation.html">Cloud Transformation</a></li>
             <li><a href="../services/it-outsourcing.html">IT Resource Outsourcing</a></li>
           </ul>
@@ -488,9 +531,15 @@
 
     <div class="container">
       <div class="footer-bottom">
-        <span>© <span id="footer-year">2026</span> Worx. All rights reserved.</span>
-        <span class="footer-where">Dubai, UAE <span aria-hidden="true">·</span> <time class="footer-clock" data-tz="Asia/Dubai">--:--</time> GST</span>
-        <a class="footer-top" href="#main">Back to top <span aria-hidden="true">↑</span></a>
+        <nav class="footer-legal" aria-label="Legal">
+          <a href="../privacy-policy/index.html">Privacy Policy</a>
+          <span class="footer-legal-sep" aria-hidden="true"></span>
+          <a href="../terms-of-use/index.html">Terms of Use</a>
+        </nav>
+        <div class="footer-meta">
+          <span class="footer-copy">© <span id="footer-year">2026</span> Worx. All rights reserved.</span>
+          <a class="footer-top" href="#main">Back to top <span aria-hidden="true">↑</span></a>
+        </div>
       </div>
     </div>
   </footer>
@@ -506,5 +555,6 @@
   <script src="../static/js/contact-widget.js"></script>
   <script src="../static/js/ignite.js"></script>
   <script src="../static/js/crams.js"></script>
+  <script src="../static/js/crams-deck.js"></script>
 </body>
 </html>

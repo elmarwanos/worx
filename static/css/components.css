@@ -1742,6 +1742,10 @@
     width: 100%;
   }
 
+  /* 16px or iOS zooms the page when a field is tapped */
+  .qc-form input,
+  .qc-form textarea { font-size: 16px; }
+
   .qc-wa-wrap {
     align-self: flex-end;
   }

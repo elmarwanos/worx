@@ -1301,29 +1301,14 @@
 
 .cr-crew-shot:hover .cr-crew-frame img { transform: scale(1.08); }
 
-/* scan lines and a light passing down the frame */
+/* a soft vignette round the portrait */
 .cr-crew-frame::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px),
-    radial-gradient(ellipse 90% 80% at 50% 45%, transparent 55%, rgba(8, 3, 1, 0.6) 100%);
+  background: radial-gradient(ellipse 90% 80% at 50% 45%, transparent 55%, rgba(8, 3, 1, 0.6) 100%);
 }
-
-.cr-crew-scan {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -30%;
-  height: 30%;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgba(255, 226, 170, 0.18), transparent);
-  animation: cr-crew-scan 5s linear infinite;
-}
-
-@keyframes cr-crew-scan { to { top: 100%; } }
 
 .cr-crew-vf {
   --c: rgba(254, 238, 207, 0.85);
@@ -1363,30 +1348,29 @@
 .cr-log--crew { margin-top: 22px; }
 .cr-log--crew li { opacity: 1; transform: none; }
 
-/* his LinkedIn */
-.cr-linkedin {
+/* his LinkedIn: the comms rail's own icon (styled with .cr-comms-list a
+   in THE DECK) and its channel name, in the viewfinder's bottom left,
+   opposite the ID readout, on the frame's own angle */
+.cr-crew-in {
+  position: absolute;
+  left: 22px;
+  bottom: 16px;
+  z-index: 4;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 24px;
-  padding: 11px 18px 11px 14px;
-  border-radius: 999px;
-  background: rgba(10, 102, 194, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(120, 180, 255, 0.35);
-  color: var(--text);
-  font-size: 0.92rem;
-  font-weight: 500;
-  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.35s var(--cr-ease);
+  gap: 10px;
+  min-height: 44px;
+  color: #fff6e4;
 }
 
-.cr-linkedin svg { width: 18px; height: 18px; fill: #6aa8ff; }
-.cr-linkedin[hidden] { display: none; }
+.cr-crew-in-ico svg { width: 16px; height: 16px; fill: currentColor; }
+.cr-crew-in-txt { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.2em; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7); }
 
 @media (hover: hover) {
-  .cr-linkedin:hover { background: rgba(10, 102, 194, 0.3); box-shadow: inset 0 0 0 1px rgba(120, 180, 255, 0.6), 0 12px 30px -12px rgba(10, 102, 194, 0.6); transform: translateY(-2px); }
+  .cr-crew-in:hover .cr-crew-in-ico { border-color: var(--accent-2); background: rgba(250, 167, 25, 0.12); color: var(--accent-2); }
 }
 
-.cr-linkedin:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+.cr-crew-in:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; border-radius: 10px; }
 
 /* ---- 06 launch -------------------------------------------------- */
 .cr-launch {
@@ -1468,4 +1452,350 @@
   .cr-dept { opacity: 1; transform: none; transition: none; }
   .cr-hud { opacity: 1; }
   [data-cr-q] { opacity: 1 !important; translate: none !important; scale: none !important; filter: none !important; }
+}
+
+/* ================================================================
+   THE DECK: the CRAMS dashboard as a hologram (crams-deck.js), one
+   screen that plays the whole film behind the words. .dk is the
+   dashboard itself, drawn at its own 1280 x 1200 pixels; the stage
+   scales and turns it for each chapter. Sample data only.
+   ================================================================ */
+.dk {
+  --dk-line: rgba(250, 167, 25, 0.22);
+  position: relative;
+  width: 1280px;
+  height: 1200px;
+  transform-style: preserve-3d;
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+.dk-p {
+  position: absolute;
+  border: 1px solid var(--dk-line);
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(40, 18, 9, 0.92), rgba(14, 6, 3, 0.94));
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 0 30px 60px -30px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(254, 238, 207, 0.06), 0 0 26px -10px rgba(250, 167, 25, 0.35);
+  transition: transform 1.6s var(--cr-ease), opacity 1s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  transition-delay: calc(var(--d) * 40ms);
+}
+
+.dk-in { position: absolute; inset: 0; padding: 14px 16px; overflow: hidden; border-radius: inherit; }
+
+/* powering on: each panel's content wakes in turn, the charts draw */
+.dk-in { opacity: 0; transition: opacity 0.8s ease; }
+.dk.is-on .dk-in { opacity: 1; transition-delay: calc(var(--d) * 110ms); }
+
+.dk-h { margin: 0 0 4px; font-family: var(--font-display); font-size: 15px; font-weight: 600; text-align: center; color: var(--text); }
+.dk-chart { display: block; width: 100%; height: auto; overflow: visible; }
+.dk-chart--round { width: 72%; margin: 0 auto; }
+.dk-grid { stroke: rgba(254, 238, 207, 0.08); stroke-width: 1; }
+.dk-ax { font: 500 8.5px var(--font-mono); fill: rgba(254, 238, 207, 0.5); }
+.dk-pct { font: 600 10px var(--font-mono); fill: #1a0a04; }
+.dk-bar { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); transition: transform 0.9s var(--cr-ease); transition-delay: calc(0.6s + var(--i) * 30ms); }
+.dk.is-on .dk-bar { transform: scaleY(1); }
+.dk-arc { fill: none; stroke-dasharray: 0 100; stroke-dashoffset: var(--o); transition: stroke-dasharray 1.4s var(--cr-ease) 0.7s; }
+.dk.is-on .dk-arc { stroke-dasharray: var(--p) 100; }
+.dk-leg { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; margin: 6px 0 0; font: 500 10px/1.3 var(--font-body); color: rgba(254, 238, 207, 0.65); }
+.dk-leg span { display: inline-flex; align-items: center; gap: 5px; }
+.dk-leg i { width: 14px; height: 6px; border-radius: 2px; }
+
+/* the top bar */
+.dk-p--top .dk-in { display: flex; align-items: center; gap: 28px; }
+.dk-brand { display: grid; gap: 2px; min-width: 150px; }
+.dk-brand b { font: 700 26px/1 var(--font-display); letter-spacing: 0.08em; background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.dk-brand span { font: 500 10px var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: rgba(254, 238, 207, 0.5); }
+.dk-dates { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex: 1; }
+.dk-dates small, .dk-sel small, .dk-tog small { display: block; width: 100%; font: 500 10px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(254, 238, 207, 0.55); }
+.dk-btn { padding: 7px 12px; border-radius: 6px; border: 1px solid rgba(254, 238, 207, 0.14); font-size: 12px; color: rgba(254, 238, 207, 0.75); }
+.dk-btn.is-on { border-color: transparent; background: linear-gradient(100deg, rgba(192, 69, 39, 0.9), rgba(229, 125, 35, 0.9)); color: #fff3dc; }
+.dk-me { display: grid; justify-items: end; gap: 6px; }
+.dk-out { padding: 5px 14px; border: 1px solid rgba(250, 167, 25, 0.5); border-radius: 6px; font-size: 12px; color: var(--accent-2); }
+.dk-date { font: 600 14px var(--font-display); }
+.dk-live { display: inline-flex; align-items: center; gap: 6px; font: 500 10px var(--font-mono); letter-spacing: 0.12em; color: rgba(254, 238, 207, 0.6); }
+.dk-live b { color: var(--accent-2); font-weight: 500; }
+.dk-live i { width: 6px; height: 6px; border-radius: 50%; background: #ff4a32; box-shadow: 0 0 8px rgba(255, 74, 50, 0.8); animation: dk-blink 1.2s steps(2, jump-none) infinite; }
+@keyframes dk-blink { 50% { opacity: 0.2; } }
+.dk-toast { position: absolute; right: 200px; top: 50%; translate: 0 -50%; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: rgba(250, 167, 25, 0.14); border: 1px solid rgba(250, 167, 25, 0.5); font: 500 10px var(--font-mono); letter-spacing: 0.12em; color: var(--accent-2); opacity: 0; }
+.dk-toast i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); }
+.dk-toast.is-on { animation: dk-toast 2.8s var(--cr-ease) both; }
+@keyframes dk-toast { 0% { opacity: 0; translate: 0 -30%; } 12%, 78% { opacity: 1; translate: 0 -50%; } 100% { opacity: 0; translate: 0 -50%; } }
+
+/* the filters */
+.dk-p--filters .dk-in { display: grid; align-content: center; gap: 14px; }
+.dk-frow { display: grid; grid-template-columns: 150px repeat(5, minmax(0, 1fr)); gap: 14px; align-items: end; }
+.dk-frow--b { grid-template-columns: 180px 1fr 180px; align-items: center; justify-items: center; }
+.dk-sel span { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding: 8px 10px; border: 1px solid rgba(254, 238, 207, 0.16); border-radius: 6px; font-size: 12px; color: rgba(254, 238, 207, 0.6); }
+.dk-sel svg { width: 12px; height: 12px; fill: none; stroke: var(--accent-2); stroke-width: 1.6; }
+.dk-tog span { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 12px; color: rgba(254, 238, 207, 0.75); }
+.dk-tog i { position: relative; width: 34px; height: 18px; border-radius: 999px; background: rgba(254, 238, 207, 0.16); }
+.dk-tog i::after { content: ""; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--text); }
+.dk-tog--c { text-align: center; }
+.dk-act { justify-self: stretch; text-align: center; padding: 9px 12px; border-radius: 6px; background: linear-gradient(100deg, rgba(192, 69, 39, 0.85), rgba(229, 125, 35, 0.85)); font: 600 12px var(--font-display); color: #fff3dc; }
+
+/* the records */
+.dk-p--table .dk-in { padding: 0; }
+.dk-th, .dk-tr { display: grid; grid-template-columns: 1.25fr 0.8fr 1.6fr 0.8fr 0.95fr 1.25fr 1.2fr 0.85fr 0.8fr; gap: 10px; align-items: center; padding: 0 18px; }
+.dk-th { height: 50px; background: linear-gradient(100deg, rgba(192, 69, 39, 0.75), rgba(120, 42, 18, 0.75)); font: 600 12px var(--font-display); color: #fff3dc; }
+.dk-tr { height: 42px; border-bottom: 1px solid rgba(254, 238, 207, 0.06); font-size: 11.5px; color: rgba(254, 238, 207, 0.78); white-space: nowrap; }
+.dk-tr span { overflow: hidden; text-overflow: ellipsis; }
+.dk-tr:nth-child(even) { background: rgba(254, 238, 207, 0.025); }
+.dk-st { color: var(--text); }
+.dk-st[data-st^="Waiting"] { color: rgba(254, 238, 207, 0.78); }
+.dk-st[data-st^="Contacted"] { color: var(--accent-2); }
+.dk-st[data-st^="Qualified"] { color: #ffd27a; }
+.dk-tr.is-new { animation: dk-row 1.6s var(--cr-ease) both; }
+@keyframes dk-row { 0% { opacity: 0; transform: translateY(-14px); background: rgba(250, 167, 25, 0.3); } 30% { opacity: 1; transform: none; } 100% { background: transparent; } }
+.dk-tr.is-tracked { position: relative; background: rgba(250, 167, 25, 0.1); box-shadow: inset 3px 0 0 var(--accent-2); color: var(--text); }
+.dk-tr.is-tracked .dk-st { color: var(--accent-2); font-weight: 600; }
+.dk-tr.is-flash { animation: dk-flash 1s ease; }
+@keyframes dk-flash { 30% { background: rgba(250, 167, 25, 0.35); } }
+.dk-ltr { direction: ltr; unicode-bidi: isolate; }
+
+/* lit by a department card */
+.dk-p.is-hot { border-color: rgba(250, 167, 25, 0.85); box-shadow: 0 0 0 1px rgba(250, 167, 25, 0.5), 0 0 40px rgba(250, 167, 25, 0.45); }
+
+/* ---- the stage behind the film ----------------------------------- */
+.cr-deck {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  perspective: 1900px;
+  perspective-origin: 50% 45%;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  -webkit-mask-image: radial-gradient(ellipse 85% 80% at 60% 50%, #000 55%, transparent 100%);
+  mask-image: radial-gradient(ellipse 85% 80% at 60% 50%, #000 55%, transparent 100%);
+}
+
+.cr-deck-stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1280px;
+  height: 1200px;
+  margin: -600px 0 0 -640px;
+  transform-style: preserve-3d;
+  transition: transform 1.8s var(--cr-ease);
+  will-change: transform;
+}
+
+.cr-deck-dash { transform-style: preserve-3d; animation: dk-float 16s ease-in-out infinite; }
+@keyframes dk-float { 50% { transform: translate3d(0, -12px, 24px); } }
+
+/* the arrival: a long flight in from deep space, each panel on its beat */
+.cr-deck.is-flying .dk-p { transition: transform 2.6s cubic-bezier(0.16, 0.84, 0.24, 1), opacity 1.4s ease; transition-delay: calc(var(--d) * 120ms); }
+.cr-deck.is-arriving .cr-deck-dash { animation: none; }
+
+/* the hero: a touch out of focus behind the wordmark */
+.cr-deck[data-scene="ignition"] .dk-p { filter: blur(0.6px); }
+
+/* the gap: each panel a silo, its signal lost */
+.cr-deck[data-scene="gap"] .dk-p { border-color: rgba(229, 72, 60, 0.45); filter: saturate(0.45) brightness(0.85); }
+.cr-deck[data-scene="gap"] .dk-p::after {
+  content: "SIGNAL LOST";
+  position: absolute;
+  left: 12px;
+  top: -24px;
+  font: 500 12px var(--font-mono);
+  letter-spacing: 0.18em;
+  color: #ff6b5b;
+  animation: dk-blink 1.4s steps(2, jump-none) infinite;
+  animation-delay: calc(var(--d) * -130ms);
+}
+
+/* connected: the pieces glow as they sync, one after another */
+.cr-deck.is-sync .dk-p { animation: dk-synced 1.6s ease both; animation-delay: calc(1s + var(--d) * 70ms); }
+@keyframes dk-synced { 40% { border-color: rgba(250, 167, 25, 0.9); box-shadow: 0 0 0 1px rgba(250, 167, 25, 0.5), 0 0 40px rgba(250, 167, 25, 0.45); } }
+
+/* docked in "Inside CRAMS": flat, in full, riding with the page */
+.cr-deck[data-scene="tour"] { -webkit-mask-image: none; mask-image: none; }
+.cr-deck[data-scene="tour"] .cr-deck-dash { animation: none; }
+.cr-deck.is-docked .cr-deck-stage { transition: none; }
+
+/* the feature being shown: a frame of light and its name on a HUD tag */
+.dk-spot {
+  position: absolute;
+  z-index: 8;
+  border: 2px solid var(--accent-2);
+  border-radius: 16px;
+  box-shadow: 0 0 0 4000px rgba(8, 3, 1, 0.5), 0 0 40px rgba(250, 167, 25, 0.45), inset 0 0 26px rgba(250, 167, 25, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: left 0.8s var(--cr-ease), top 0.8s var(--cr-ease), width 0.8s var(--cr-ease), height 0.8s var(--cr-ease), opacity 0.6s ease;
+}
+.cr-deck[data-scene="tour"] .dk-spot { opacity: 1; transition-delay: 0s, 0s, 0s, 0s, 1.2s; }
+.dk-tag {
+  position: absolute;
+  left: -2px;
+  bottom: calc(100% + 10px);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border: 1px solid rgba(250, 167, 25, 0.6);
+  border-radius: 8px;
+  background: rgba(21, 9, 5, 0.92);
+  white-space: nowrap;
+  font: 500 15px var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
+}
+.dk-tag i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 10px var(--accent-2); }
+.dk-spot.is-low .dk-tag { bottom: auto; top: calc(100% + 10px); }
+.dk-spot.is-new .dk-tag { animation: dk-tag 0.7s var(--cr-ease) both; }
+@keyframes dk-tag { from { opacity: 0; translate: 0 8px; } }
+
+/* ---- Inside CRAMS: the frame the deck docks into ------------------- */
+.cr-tour { padding: clamp(70px, 11vh, 130px) 0 clamp(50px, 8vh, 90px); }
+.cr-tour-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  gap: clamp(24px, 3vw, 44px);
+  align-items: center;
+  margin-top: clamp(28px, 4vw, 48px);
+}
+
+.cr-tour-dock { position: relative; min-width: 0; aspect-ratio: 1280 / 1200; }
+
+/* viewfinder corners round the frame, waiting for the screen */
+.cr-tour-vf {
+  --c: rgba(250, 167, 25, 0.6);
+  position: absolute;
+  inset: -12px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--c), var(--c)) 0 0 / 24px 1.5px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 0 / 1.5px 24px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 24px 1.5px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 1.5px 24px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 100% / 24px 1.5px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 100% / 1.5px 24px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 24px 1.5px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 1.5px 24px no-repeat;
+}
+
+.cr-tour-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.cr-tour-list button {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 2px 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+.cr-tour-list .cr-tour-n { grid-row: span 2; font: 500 0.72rem/1.9 var(--font-mono); color: rgba(254, 238, 207, 0.4); }
+.cr-tour-list b { font-family: var(--font-display); font-weight: 600; color: var(--text); }
+.cr-tour-list button > span:last-child { display: none; font-size: 0.86rem; line-height: 1.45; }
+.cr-tour-list li.is-on button { border-color: rgba(250, 167, 25, 0.45); background: rgba(250, 167, 25, 0.08); }
+.cr-tour-list li.is-on .cr-tour-n { color: var(--accent-2); }
+.cr-tour-list li.is-on button > span:last-child { display: block; }
+.cr-tour-list button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+@media (hover: hover) { .cr-tour-list button:hover { border-color: rgba(254, 238, 207, 0.16); } }
+.cr-tour-note { margin-top: 16px; font: 500 0.66rem var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: rgba(254, 238, 207, 0.42); }
+
+/* ---- the comms rail, on the right ------------------------------- */
+.cr-comms {
+  position: fixed;
+  right: clamp(12px, 1.6vw, 26px);
+  top: 50%;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: rgba(254, 238, 207, 0.55);
+  transform: translate(calc(100% + 40px), -50%);
+  transition: transform 0.9s var(--cr-ease);
+}
+.cr-comms.is-on { transform: translate(0, -50%); }
+.cr-comms-tag { writing-mode: vertical-rl; color: var(--accent-2); }
+.cr-comms-signal { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+.cr-comms-signal i { width: 3px; background: var(--accent-2); animation: dk-blink 1.6s ease-in-out infinite; }
+.cr-comms-signal i:nth-child(1) { height: 30%; }
+.cr-comms-signal i:nth-child(2) { height: 50%; animation-delay: 0.15s; }
+.cr-comms-signal i:nth-child(3) { height: 70%; animation-delay: 0.3s; }
+.cr-comms-signal i:nth-child(4) { height: 85%; animation-delay: 0.45s; }
+.cr-comms-signal i:nth-child(5) { height: 100%; animation-delay: 0.6s; }
+.cr-comms-line { width: 1px; height: clamp(40px, 8vh, 80px); background: linear-gradient(transparent, rgba(254, 238, 207, 0.25), transparent); }
+.cr-comms-list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.cr-comms-list a,
+.cr-crew-in-ico {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(254, 238, 207, 0.2);
+  border-radius: 10px;
+  background: rgba(21, 9, 5, 0.6);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+.cr-comms-list a:hover,
+.cr-comms-list a:focus-visible { border-color: var(--accent-2); background: rgba(250, 167, 25, 0.12); color: var(--accent-2); transform: translateX(-3px); }
+.cr-comms-list svg { width: 16px; height: 16px; fill: currentColor; }
+.cr-comms-status { display: flex; flex-direction: column; align-items: center; gap: 8px; writing-mode: vertical-rl; }
+.cr-comms-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 8px rgba(250, 167, 25, 0.8); animation: dk-blink 1.4s ease-in-out infinite; }
+
+/* room for the rail; it rests on narrow and touch screens */
+@media (min-width: 1101px) and (hover: hover) {
+  .cr .container { width: min(var(--container), 100% - 180px); }
+}
+@media (max-width: 1100px), (hover: none) {
+  .cr-comms { display: none; }
+}
+
+
+/* ---- phones and tablets: the screen in its frame -------------------
+   No layer behind the page; the dashboard sits in the Inside CRAMS frame
+   and moves with the page. As it comes into view its panels fly in out
+   of the depth of the frame, lock together and power on; tapping any
+   part of it names it, and the list below says what it does. */
+.cr-tour-dock.is-inline {
+  border: 1px solid rgba(250, 167, 25, 0.28);
+  border-radius: 14px;
+  background: radial-gradient(ellipse 80% 70% at 50% 40%, rgba(229, 125, 35, 0.14), transparent 70%), rgba(14, 6, 3, 0.7);
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.9), 0 0 50px -20px rgba(250, 167, 25, 0.4);
+}
+.cr-dock-screen { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; perspective: 900px; perspective-origin: 50% 40%; }
+.cr-dock-inner { position: absolute; left: 0; top: 0; width: 1280px; height: 1200px; transform-origin: 0 0; transform-style: preserve-3d; }
+.cr-tour-dock.is-inline .cr-deck-dash { animation: none; transform-style: preserve-3d; }
+.cr-tour-dock.is-inline .dk-p { cursor: pointer; transition: none; -webkit-tap-highlight-color: transparent; }
+.cr-tour-dock.is-flying .dk-p { transition: transform 2.2s cubic-bezier(0.16, 0.84, 0.24, 1), opacity 1.1s ease, border-color 0.4s ease; transition-delay: calc(var(--d) * 110ms); }
+.cr-tour-dock.is-live .dk-spot { opacity: 1; }
+.cr-tour-dock.is-inline .dk-tag { padding: 14px 26px; font-size: 34px; border-radius: 14px; gap: 16px; }
+.cr-tour-dock.is-inline .dk-tag i { width: 14px; height: 14px; }
+.cr-tour-dock.is-inline .dk-spot { border-width: 4px; border-radius: 22px; }
+
+@media (max-width: 1000px) {
+  .cr-tour-grid { grid-template-columns: minmax(0, 1fr); }
+  .cr-tour-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .cr-tour-list { grid-template-columns: minmax(0, 1fr); }
+  .cr-deck:not([data-scene="tour"]) { -webkit-mask-image: linear-gradient(180deg, transparent, #000 30%, #000 80%, transparent); mask-image: linear-gradient(180deg, transparent, #000 30%, #000 80%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dk-in { opacity: 1; transition: none; }
+  .dk .dk-bar { transform: scaleY(1); transition: none; }
+  .dk .dk-arc { stroke-dasharray: var(--p) 100; transition: none; }
+  .dk-p, .cr-deck-stage { transition: none; }
 }

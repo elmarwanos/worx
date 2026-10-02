@@ -2,6 +2,10 @@
    Worx | crams.js
    The CRAMS film (crams/index.html, styles in crams.css).
 
+   Where the page has the dashboard deck ([data-cr-deck], crams-deck.js)
+   the deck plays the story and only the cosmos and the dust below are
+   drawn here; the atom is the fallback for a page without it.
+
    THE SYSTEM: one canvas behind the page, drawn as an atom. CRAMS is
    the nucleus (a cluster of nucleons with a pulsar's beams sweeping out
    of it); the departments are electrons on three crossed shells; leads
@@ -69,6 +73,7 @@
      THE SYSTEM
      --------------------------------------------------------------- */
   var cvs = $("[data-cr-system]");
+  var ATOM = !document.querySelector("[data-cr-deck]");
   var ctx = cvs && cvs.getContext ? cvs.getContext("2d") : null;
   var W = 0, H = 0, dpr = 1;
 
@@ -323,6 +328,10 @@
       }
     }
 
+    // the atom gives way to the dashboard deck (crams-deck.js) where the
+    // page has one: the cosmos and the dust above still play
+    if (!ATOM) return;
+
     // the electron shells, crossed round the nucleus
     SHELLS.forEach(function (rot, k) {
       var rr = [0.8, 1.0, 0.9][k];
@@ -523,9 +532,16 @@
     }
   }
 
+  // phones resize the view as the address bar slides in and out: only a
+  // real change (a new width, or a big jump in height) repaints the sky,
+  // so it never flashes mid-scroll
+  var lastW = 0, lastH = 0;
   function size() {
+    var nw = window.innerWidth, nh = window.innerHeight;
+    if (lastW && nw === lastW && Math.abs(nh - lastH) < 160) return;
+    lastW = nw; lastH = nh;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth; H = window.innerHeight;
+    W = nw; H = nh;
     cvs.width = Math.round(W * dpr); cvs.height = Math.round(H * dpr);
     sizeCosmos();
   }
@@ -651,7 +667,7 @@
      THE HUD: the signal readout names the chapter you are in
      --------------------------------------------------------------- */
   var sigEl = $("[data-cr-signal]");
-  var NAMES = { ignition: "ALL DEPARTMENTS", gap: "FISSION · SIGNAL LOST", connected: "FUSION · CONNECTED", lifecycle: "TRACKING LEAD", truth: "SINGLE SOURCE", crew: "BUILT IN-HOUSE", launch: "READY FOR LAUNCH" };
+  var NAMES = { ignition: "ALL DEPARTMENTS", gap: "SIGNAL LOST · DATA SCATTERED", connected: "SYNCED · ONE DECK", lifecycle: "TRACKING LEAD", truth: "SINGLE SOURCE", crew: "BUILT IN-HOUSE", launch: "READY FOR LAUNCH" };
   if (sigEl && "IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (en) {
       en.forEach(function (e) { if (e.isIntersecting) sigEl.textContent = NAMES[e.target.getAttribute("data-cr-chapter")] || sigEl.textContent; });
@@ -739,6 +755,9 @@
      --------------------------------------------------------------- */
   var qs = $$(".cr-hero-grid, .cr-panel, .cr-depts, .cr-pillars, .cr-crew-grid, .cr-launch-inner");
   qs.forEach(function (el) { el.setAttribute("data-cr-q", ""); });
+  // phones and tablets: the same rise and fade, without the blur (a
+  // blur on every frame of a touch scroll is what makes it stutter)
+  var lite = window.matchMedia("(max-width: 1024px), (hover: none)").matches;
   var quantum = function (vh) {
     if (reduced) return;
     qs.forEach(function (el) {
@@ -755,7 +774,7 @@
       el.style.opacity = (q * q).toFixed(3);
       el.style.translate = "0 " + ((1 - qi) * 60 - (1 - qo) * 40).toFixed(1) + "px";
       el.style.scale = (0.94 + 0.06 * q).toFixed(3);
-      el.style.filter = "blur(" + ((1 - q) * 9).toFixed(1) + "px)";
+      if (!lite) el.style.filter = "blur(" + ((1 - q) * 9).toFixed(1) + "px)";
     });
   };
   // the HUD

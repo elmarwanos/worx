@@ -11,6 +11,18 @@
    file restyles them from inside .ct-console.
    ============================================================ */
 
+/* nothing sideways: the reactor's debris canvas and cracks reach well
+   past the gauge and must never widen the page on a phone (clip, not
+   hidden, so position: sticky still works inside) */
+main#main { overflow-x: clip; }
+
+/* phones: the WhatsApp beacon steps aside while the planner is on
+   screen, so it never covers Back / Next (contact.js sets the class) */
+@media (max-width: 640px) {
+  body > .qc-dock .qc-wa-wrap { transition: opacity 0.3s ease, transform 0.3s ease; }
+  body.ct-planner-in > .qc-dock .qc-wa-wrap { opacity: 0; transform: translateY(24px) scale(0.8); pointer-events: none; }
+}
+
 /* ---- 1. Hero ----------------------------------------------- */
 
 .ct-hero {
@@ -1040,6 +1052,9 @@
   transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease, transform 0.3s ease;
 }
 
+.cw-pick small,
+.cw-pick b { font: inherit; }
+
 .cw-pick:hover { color: var(--text); border-color: rgba(250, 167, 25, 0.5); transform: translateY(-2px); }
 .cw-pick.is-on { color: var(--on-accent); background: var(--gradient); border-color: transparent; }
 .cw-pick:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
@@ -1235,9 +1250,73 @@
 @media (max-width: 640px) {
   .cw-reactor-core { grid-template-columns: minmax(0, 1fr); gap: 6px; text-align: center; }
   .cw-gauge { width: min(100%, 260px); margin: 0 auto; }
-  .cw-picks { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -4px; padding: 2px 4px; }
-  .cw-picks::-webkit-scrollbar { display: none; }
-  .cw-pick { flex: none; }
+  /* the picks as a row of thumb-sized tiles, every one on screen: the
+     figure big, "AED" small above it, a thrust bar filling to its level;
+     Full mission access gets the whole row under them */
+  .cw-picks {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 22px;
+  }
+  .cw-pick {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 0;
+    min-height: 64px;
+    padding: 6px 2px 10px;
+    border-radius: 14px;
+    letter-spacing: 0;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+  }
+  .cw-pick small { font-size: 0.52rem; letter-spacing: 0.18em; opacity: 0.7; }
+  .cw-pick b { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text); }
+  .cw-pick::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 6px;
+    height: 3px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--brand-amber) calc(var(--lv, 0) * 100%), rgba(254, 238, 207, 0.12) 0);
+    opacity: 0.75;
+  }
+  .cw-pick:hover { transform: none; }
+  .cw-pick:active { transform: scale(0.93); }
+  .cw-pick.is-on { box-shadow: 0 8px 22px -8px rgba(250, 140, 30, 0.8); }
+  .cw-pick.is-on b,
+  .cw-pick.is-on small { color: var(--on-accent); opacity: 1; }
+  .cw-pick.is-on::after { background: linear-gradient(90deg, var(--on-accent) calc(var(--lv, 0) * 100%), rgba(26, 10, 4, 0.2) 0); }
+  .cw-pick--full {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    gap: 10px;
+    min-height: 54px;
+    padding: 0 16px;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    white-space: nowrap;
+  }
+  .cw-pick--full::after { content: none; }
+  /* a bigger thumb to grab */
+  .ct-console .cw-range { height: 48px; }
+  .ct-console .cw-range::-webkit-slider-thumb { width: 30px; height: 30px; margin-top: -12px; }
+  .ct-console .cw-range::-moz-range-thumb { width: 24px; height: 24px; }
+}
+
+@media (max-width: 360px) {
+  .cw-picks { gap: 4px; }
+  .cw-pick { min-height: 58px; border-radius: 12px; }
+  .cw-pick b { font-size: 0.92rem; }
+  .cw-pick--full { font-size: 0.64rem; letter-spacing: 0.12em; }
 }
 
 /* ---- the last question: the manifest and the ticket -------------- */
@@ -1485,7 +1564,7 @@
 
 .cw-svc-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
   column-gap: 26px;
 }
 

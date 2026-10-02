@@ -138,7 +138,7 @@
   var SERVICE_BUILD = {
     "Web Development": "website", "E-commerce Development": "website", "UI/UX Design": "website",
     "Mobile App Development": "mobile-app",
-    "Custom Platforms": "platform", "ERP & CRM": "platform", "Cloud Transformation": "platform",
+    "Custom Platforms": "platform", "CMS & CRM": "platform", "Cloud Transformation": "platform",
     "Artificial Intelligence": "platform", "IT Resource Outsourcing": "platform",
     "CRAMS": "platform"
   };
@@ -487,6 +487,8 @@
   var BUILD_CODE = { "website": "WEB", "web-app": "APP", "mobile-app": "MOB", "platform": "SYS", "unsure": "IDEA" };
   var fineHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // a short haptic tick on phones that have one
+  function buzz(p) { if (!reducedMotion && navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} }
   // art: value -> blueprint; code(i, value): the card's module code
   function dressCards(group, art, code, rowLayout) {
     group.classList.add("cw-modules");
@@ -1202,8 +1204,13 @@
       saveState();
     }
     var picks = BUDGET_PICKS.map(function (a) {
-      var b = h("button", { type: "button", "class": "cw-pick", "data-amount": String(a) }, ["AED " + shortAED(a) + (a >= BUDGET_MAX ? "+" : "")]);
-      b.addEventListener("click", function () { set(a, true); });
+      // "AED" and the figure as two parts, so a phone can stack them into
+      // a tile; --lv fills the tile's little thrust bar
+      var b = h("button", { type: "button", "class": "cw-pick", "data-amount": String(a), "aria-label": formatAED(a) + (a >= BUDGET_MAX ? " or more" : ""),
+        style: "--lv:" + ((a - BUDGET_MIN) / (BUDGET_MAX - BUDGET_MIN)).toFixed(3) }, [
+        h("small", null, ["AED"]), " ", h("b", null, [shortAED(a) + (a >= BUDGET_MAX ? "+" : "")])
+      ]);
+      b.addEventListener("click", function () { buzz(8); set(a, true); });
       return b;
     });
     range.addEventListener("input", function () { set(parseInt(range.value, 10) || DEFAULT_BUDGET_AMOUNT, false); });
@@ -1333,6 +1340,7 @@
     }
     function overload() {
       if (wrap.classList.contains("is-full")) return;
+      buzz([20, 40, 20, 40, 60]);
       repair();
       applyFullBudget();
       range.value = String(BUDGET_MAX);
@@ -1797,4 +1805,14 @@
   }
 
   init();
+
+  // on a phone the floating WhatsApp beacon would sit over the planner's
+  // Back / Next buttons: it steps aside while the planner is on screen
+  // (WhatsApp is in the hero and the channels either side of it)
+  var planner = document.getElementById("contact-planner");
+  if (planner && "IntersectionObserver" in window) {
+    new IntersectionObserver(function (en) {
+      document.body.classList.toggle("ct-planner-in", en[0].isIntersecting);
+    }, { rootMargin: "-25% 0px -25% 0px" }).observe(planner);
+  }
 })();

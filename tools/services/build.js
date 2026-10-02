@@ -319,7 +319,7 @@ const BELT_FAR = [
   "Python", "PHP",                   // more of the languages
   "Figma",                           // UI/UX Design
   "After Effects", "Blender",        // 2D/3D Video Animation
-  "SAP", "Odoo",                     // ERP & CRM
+  "SAP", "Odoo",                     // CMS & CRM
   "Jira", "GitHub",                  // IT Resource Outsourcing
   "AWS", "Azure"                     // Cloud Transformation
 ];

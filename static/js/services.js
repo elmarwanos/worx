@@ -45,6 +45,9 @@
   }
 
   gsap.registerPlugin(ScrollTrigger);
+  // phones: the address bar sliding in and out changes the height only;
+  // don't re-measure every pin for it (that was the jump mid-scroll)
+  ScrollTrigger.config({ ignoreMobileResize: true });
   root.classList.add("cx-ready");
 
   // ---- Smooth scroll (Lenis) + scroll velocity --------------
@@ -52,6 +55,7 @@
   var lenis = null;
   if (typeof Lenis !== "undefined") {
     lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
+    window.wxLenis = lenis; // main.js "Back to top" scrolls through it
     lenis.on("scroll", function (e) {
       velocity = e.velocity || 0;
       ScrollTrigger.update();
@@ -78,16 +82,20 @@
   var stars = (function () {
     var canvas = $(".cx-stars");
     var ctx = canvas.getContext("2d");
+    // phones: the stars keep their slow resting drift toward you, but
+    // nothing speeds them up: not the scroll, not the intro warp, not the
+    // Ignite button (calm)
+    var calm = window.matchMedia("(max-width: 767px)").matches;
     var w, h, cx, cy, dpr;
     var list = [];
-    var COUNT = window.innerWidth < 700 ? 260 : 520;
+    var COUNT = window.innerWidth < 700 ? 150 : 520;
     var speed = 0.4;
     var state = { warp: 0 };
     var running = true;
     var mouseX = 0, mouseY = 0, driftX = 0, driftY = 0;
 
     function resize() {
-      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      dpr = Math.min(window.devicePixelRatio || 1, calm ? 1 : 1.5);   // phones: a full-screen sky at 1x
       w = canvas.clientWidth;
       h = canvas.clientHeight;
       canvas.width = w * dpr;
@@ -108,7 +116,12 @@
 
     resize();
     for (var i = 0; i < COUNT; i++) list.push(spawn({}, false));
-    window.addEventListener("resize", resize);
+    var lastW = w;
+    window.addEventListener("resize", function () {
+      if (calm && canvas.clientWidth === lastW) return;   // just the address bar
+      lastW = canvas.clientWidth;
+      resize();
+    });
 
     window.addEventListener("pointermove", function (e) {
       mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -127,7 +140,7 @@
 
     gsap.ticker.add(function () {
       if (!running) return;
-      var target = 0.4 + Math.min(Math.abs(velocity) * 0.6, 26) + state.warp;
+      var target = calm ? 0.4 : 0.4 + Math.min(Math.abs(velocity) * 0.6, 26) + state.warp;
       speed += (target - speed) * 0.08;
       driftX += (mouseX * 30 - driftX) * 0.04;
       driftY += (mouseY * 20 - driftY) * 0.04;
@@ -157,6 +170,7 @@
 
     return {
       warpTo: function (v, dur) {
+        if (calm) return;
         gsap.to(state, { warp: v, duration: dur || 1, ease: "power2.out", overwrite: true });
       }
     };
@@ -342,6 +356,7 @@
         start: "top top",
         end: "+=130%",
         pin: ".cx-manifesto-pin",
+        anticipatePin: 1,
         scrub: true,
         onUpdate: function (self) { if (self.progress > 0.8) countUp(); },
         onLeave: countUp
@@ -410,6 +425,7 @@
         start: "top top",
         end: function () { return "+=" + distance(); },
         pin: ".cx-fleet-pin",
+        anticipatePin: 1,
         scrub: 1,
         invalidateOnRefresh: true,
         // Settle on whole panels so a division is never left half on screen
@@ -755,7 +771,7 @@
 
     function build() {
       var r = cvs.getBoundingClientRect(), sr = sec.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, (window.innerWidth < 768 ? 1.25 : 2));
       W = r.width; H = r.height;
       if (!W || !H) return;
       bleed = sr.top - r.top;
@@ -1464,6 +1480,7 @@
       start: "top top",
       end: "+=260%",
       pin: ".cx-flight-pin",
+      anticipatePin: 1,
       scrub: 0.6,
       onUpdate: function (self) { render(self.progress); },
       onRefresh: function () { requestAnimationFrame(buildPath); }

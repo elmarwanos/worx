@@ -109,7 +109,7 @@
     for (var i = 0; i < 170; i++) stars.push({ x: rnd(), y: rnd(), r: rnd() * 1.1 + 0.2, d: rnd() * 0.8 + 0.2, p: rnd() * 6.28 });
     var SERVICES = ["WEB DEVELOPMENT", "E-COMMERCE", "CUSTOM PLATFORMS", "MOBILE APPS",
       "ARTIFICIAL INTELLIGENCE", "AR / VR", "UI / UX DESIGN", "BRANDING", "2D / 3D ANIMATION",
-      "SEO & SEM", "ERP & CRM", "CLOUD", "COPYWRITING", "IT OUTSOURCING"];
+      "SEO & SEM", "CMS & CRM", "CLOUD", "COPYWRITING", "IT OUTSOURCING"];
     // each contact: a bearing, a range (fraction of the disc) and an
     // altitude; seeded, so the picture is the same every visit
     var s2 = 11, r2 = function () { s2 = (s2 * 16807) % 2147483647; return (s2 - 1) / 2147483646; };

@@ -1145,25 +1145,75 @@ body.nav-open .qc-dock {
   color: var(--muted);
 }
 
-.footer-where {
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+/* the legal line: Privacy | Terms on the left, the studio's sign-off
+   (copyright, Dubai's clock, Back to top) on the right */
+.footer-legal {
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
 
-.footer-clock {
-  color: var(--accent-2);
-  font-variant-numeric: tabular-nums;
+.footer-legal a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--muted);
+  transition: color 0.25s ease;
+}
+
+.footer-legal a:focus-visible { color: var(--text); }
+
+@media (hover: hover) {
+  .footer-legal a:hover { color: var(--text); }
+}
+
+.footer-legal-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--line-strong);
+}
+
+.footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 28px;
+}
+
+/* CRAMS in the Overview column: the live dot, as in the mega menu */
+.footer-col a.footer-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.footer-live i {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gradient);
+  box-shadow: 0 0 10px rgba(229, 125, 35, 0.6);
+  animation: mega-live 1.6s ease-in-out infinite;
 }
 
 .footer-top {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-height: 44px; /* a full thumb-sized target on touch screens */
+  padding: 0 2px;
   color: var(--muted);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: color 0.25s ease;
 }
+
+.footer-top:active span { border-color: var(--accent-2); transform: translateY(-3px); }
+
+/* main.js focuses the page after Back to top: no ring round all of it */
+main[tabindex="-1"]:focus { outline: none; }
 
 .footer-top span {
   display: inline-grid;
@@ -1237,12 +1287,51 @@ body.nav-open .qc-dock {
   }
 }
 
+/* in a row, Back to top sits bottom right: keep it clear of the
+   WhatsApp beacon parked in that corner */
+/* in a row: Privacy | Terms left, the copyright dead centre, Back to
+   top right (two equal side columns keep the middle truly centred;
+   the room for the beacon is Back to top's own margin, so it doesn't
+   pull the centre off) */
+/* tablets: too narrow for three across, so Privacy | Terms and Back to
+   top share the first row and the copyright is centred under them */
+@media (min-width: 561px) and (max-width: 899px) {
+  .footer-bottom {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "legal top" "copy copy";
+    gap: 4px 24px;
+    padding-right: 92px;
+  }
+  .footer-meta { display: contents; }
+  .footer-legal { grid-area: legal; }
+  .footer-top { grid-area: top; }
+  .footer-copy { grid-area: copy; justify-self: center; margin-right: -92px; }
+}
+
+@media (min-width: 900px) {
+  .footer-bottom {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+  .footer-meta { display: contents; }
+  .footer-copy { grid-column: 2; text-align: center; }
+  .footer-top { grid-column: 3; justify-self: end; margin-right: 92px; }
+}
+
+/* phones: one centred column, the legal links first */
 @media (max-width: 560px) {
   .footer-bottom {
     flex-direction: column;
     align-items: center;
+    gap: 6px;
     text-align: center;
   }
+  .footer-meta {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .footer-legal { gap: 16px; }
 }
 
 @media (max-width: 340px) {
@@ -1253,6 +1342,7 @@ body.nav-open .qc-dock {
 
 @media (prefers-reduced-motion: reduce) {
   .footer-mark-shine { display: none; }
+  .footer-live i { animation: none; }
   .footer-mark-fill,
   .footer-social a,
   .footer-col a::after,
@@ -1872,6 +1962,14 @@ body > .qc-dock {
   right: calc(clamp(16px, 4vw, 32px) + env(safe-area-inset-right, 0px));
   bottom: calc(clamp(16px, 4vw, 32px) + env(safe-area-inset-bottom, 0px));
 }
+
+/* the dock's box (full width on phones) is see-through to taps: only
+   the beacon and the open console catch them, so the footer's Back to
+   top and anything else under the empty part stays tappable */
+body > .qc-dock,
+body > .qc-dock .qc-wa-wrap { pointer-events: none; }
+body > .qc-dock .qc-wa,
+body > .qc-dock .qc-panel { pointer-events: auto; }
 
 @media (max-width: 480px) {
   body > .qc-dock {
