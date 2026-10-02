@@ -1,7 +1,7 @@
 /* ============================================================
    Worx | main.js
    Page behaviours that aren't navigation or animation:
-   FAQ accordion, footer year, footer clock + wordmark.
+   FAQ accordion, footer year, footer wordmark, Back to top.
    (The /contact page has its own planner, static/js/contact.js.)
    ============================================================ */
 
@@ -37,18 +37,6 @@
   var year = document.querySelector("#footer-year");
   if (year) year.textContent = new Date().getFullYear();
 
-  // --- Footer clock: the studio's local time in Dubai --------------
-  var clock = document.querySelector(".footer-clock");
-  if (clock) {
-    var fmt = null;
-    try {
-      fmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: clock.dataset.tz || "Asia/Dubai" });
-    } catch (e) { /* very old browser: leave the placeholder */ }
-    var tick = function () { if (fmt) clock.textContent = fmt.format(new Date()); };
-    tick();
-    setInterval(tick, 15000);
-  }
-
   // --- Footer wordmark: the outline letters fill in under the pointer --
   var mark = document.querySelector(".footer-mark");
   if (mark && window.matchMedia("(hover: hover)").matches) {
@@ -67,4 +55,24 @@
     mark.addEventListener("pointerenter", function () { mark.classList.add("is-lit"); });
     mark.addEventListener("pointerleave", function () { mark.classList.remove("is-lit"); });
   }
+
+  // --- Back to top ----------------------------------------------
+  // The link's #main jump works with no JS. With it: glide to the very
+  // top (through Lenis where a page runs it, or Lenis snaps the page
+  // back), keep #main out of the address bar, and hand focus to the
+  // page so the next Tab starts from the top.
+  document.querySelectorAll(".footer-top").forEach(function (link) {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      var instant = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (window.wxLenis) window.wxLenis.scrollTo(0, { immediate: instant, force: true });
+      else if (!instant && "scrollBehavior" in document.documentElement.style) window.scrollTo({ top: 0, behavior: "smooth" });
+      else window.scrollTo(0, 0);
+      var main = document.getElementById("main");
+      if (main) {
+        if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
+        try { main.focus({ preventScroll: true }); } catch (err) {}
+      }
+    });
+  });
 })();

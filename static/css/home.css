@@ -3090,6 +3090,15 @@
 
 .brf-item { display: contents; }
 
+/* under the index: the way to every question (faq/) */
+.hm-faq-all {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: 6px;
+}
+
+.hm-faq-all span { background-size: 100% 1px; }
+
 /* ---- the index --------------------------------------------------- */
 .brf-q {
   grid-column: 1;
@@ -4830,33 +4839,155 @@ html.hm-sheet-lock body { overflow: hidden; }
 .hm-crams-ring--a { inset: 20%; }
 .hm-crams-ring--b { inset: 5%; border-style: dashed; border-color: rgba(254, 238, 207, 0.14); }
 
+/* the core is a pulsar: a white-hot neutron star whose beams sweep
+   round its spin axis (tilted toward the viewer), wrapped in dipole
+   field lines and a turning accretion disk; a pulse wave rings out
+   each time a beam passes. One 3D frame, so the disk and the beams
+   pass in front of and behind the star. */
+.hm-crams-orbit { perspective: 1100px; }
+
+.hm-crams-ns {
+  --spin: 6s;
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateZ(-16deg) rotateX(14deg);
+  pointer-events: none;
+}
+
 .hm-crams-core {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 22%;
+  width: 12%;
   aspect-ratio: 1;
-  margin: -11% 0 0 -11%;
-  display: grid;
-  place-items: center;
+  margin: -6% 0 0 -6%;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff6e4 0 14%, #faa719 36%, rgba(229, 125, 35, 0.5) 58%, rgba(192, 69, 39, 0) 72%);
-  animation: hm-crams-pulse 3.2s ease-in-out infinite;
+  background: radial-gradient(circle at 42% 40%, #fff 0 34%, #fff3dc 52%, #ffd27a 72%, #faa719);
+  box-shadow:
+    0 0 12px 4px rgba(255, 246, 228, 0.9),
+    0 0 40px 14px rgba(250, 167, 25, 0.55),
+    0 0 110px 36px rgba(229, 125, 35, 0.3),
+    0 0 220px 70px rgba(192, 69, 39, 0.18);
+  animation: hm-crams-pulse calc(var(--spin) / 2) ease-in-out infinite;
 }
 
 .hm-crams-core b {
   position: absolute;
+  left: 50%;
   top: 100%;
-  margin-top: 6px;
+  margin-top: 26px;
+  transform: translateX(-50%) rotateX(-14deg) rotateZ(16deg); /* undo the .hm-crams-ns tilt */
   font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 500;
   letter-spacing: 0.26em;
   color: var(--accent-2);
+  text-shadow: 0 0 10px rgba(21, 9, 5, 0.9);
 }
 
 @keyframes hm-crams-pulse {
-  50% { transform: scale(1.08); filter: brightness(1.12); }
+  0%, 100% { filter: brightness(1); }
+  8% { filter: brightness(1.35) saturate(0.85); }
+  40% { filter: brightness(0.95); }
+}
+
+/* the accretion disk, seen almost edge-on, turning */
+.hm-crams-disk {
+  position: absolute;
+  inset: 24%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+    rgba(255, 243, 220, 0.85), rgba(250, 167, 25, 0.55) 18%, rgba(192, 69, 39, 0.15) 40%,
+    rgba(229, 125, 35, 0.5) 58%, rgba(255, 236, 200, 0.7) 76%, rgba(250, 167, 25, 0.25) 90%, rgba(255, 243, 220, 0.85));
+  -webkit-mask: radial-gradient(closest-side, transparent 30%, #000 38%, #000 58%, rgba(0, 0, 0, 0.4) 74%, transparent 100%);
+  mask: radial-gradient(closest-side, transparent 30%, #000 38%, #000 58%, rgba(0, 0, 0, 0.4) 74%, transparent 100%);
+  transform: rotateX(90deg);
+  animation: hm-crams-disk 9s linear infinite;
+}
+
+@keyframes hm-crams-disk { to { transform: rotateX(90deg) rotateZ(360deg); } }
+
+/* the spin axis, then the magnetic axis tilted off it: the beams sweep a cone */
+.hm-crams-axis,
+.hm-crams-mag {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.hm-crams-axis { animation: hm-crams-axis var(--spin) linear infinite; }
+.hm-crams-mag { transform: rotateZ(26deg); }
+
+@keyframes hm-crams-axis { to { transform: rotateY(360deg); } }
+
+.hm-crams-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: rgba(250, 167, 25, 0.4);
+  stroke-dasharray: 2 5;
+  animation: hm-crams-flow 2.4s linear infinite;
+}
+
+.hm-crams-field path { stroke-width: 1px; vector-effect: non-scaling-stroke; }
+
+@keyframes hm-crams-flow { to { stroke-dashoffset: -14; } }
+
+/* each beam is two crossed planes, so it keeps a body when edge-on */
+.hm-crams-beam {
+  position: absolute;
+  inset: 0;
+  filter: blur(2.5px);
+}
+
+.hm-crams-beam--x { transform: rotateY(90deg); }
+
+.hm-crams-beam::before,
+.hm-crams-beam::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 24%;
+  height: 60%;
+  margin-left: -12%;
+}
+
+.hm-crams-beam::before {
+  bottom: 50%;
+  clip-path: polygon(0 0, 100% 0, 53% 100%, 47% 100%);
+  background: linear-gradient(to top, rgba(255, 252, 240, 0.9), rgba(255, 220, 150, 0.5) 22%, rgba(250, 167, 25, 0.22) 55%, transparent);
+}
+
+.hm-crams-beam::after {
+  top: 50%;
+  clip-path: polygon(47% 0, 53% 0, 100% 100%, 0 100%);
+  background: linear-gradient(to bottom, rgba(255, 252, 240, 0.9), rgba(255, 220, 150, 0.5) 22%, rgba(250, 167, 25, 0.22) 55%, transparent);
+}
+
+/* a pulse rings out each time a beam crosses the line of sight */
+.hm-crams-wave {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14%;
+  aspect-ratio: 1;
+  margin: -7% 0 0 -7%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 220, 150, 0.6);
+  box-shadow: 0 0 18px rgba(250, 167, 25, 0.35), inset 0 0 18px rgba(250, 167, 25, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  animation: hm-crams-wave 6s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+  animation-delay: calc(var(--w) * 3s);
+}
+
+@keyframes hm-crams-wave {
+  0% { transform: scale(1); opacity: 0.85; }
+  100% { transform: scale(7); opacity: 0; }
 }
 
 /* two rings of departments, turning opposite ways */
@@ -4953,6 +5084,10 @@ html.hm-sheet-lock body { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .hm-crams-core,
+  .hm-crams-disk,
+  .hm-crams-axis,
+  .hm-crams-field,
+  .hm-crams-wave,
   .hm-crams-spin,
   .hm-crams-spin b,
   .hm-crams-signal::after { animation: none; }

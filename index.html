@@ -413,8 +413,9 @@
 
     <!-- ====== 04 · CRAMS, the software Worx sells ======
          A teaser for crams/index.html: the product's promise beside a
-         small live orbit of the departments round the CRAMS core (CSS
-         only, home.css "CRAMS"). -->
+         small live orbit of the departments round the CRAMS core, a
+         pulsar with sweeping beams, field lines and an accretion disk
+         (CSS only, home.css "CRAMS"). -->
     <section class="hm-crams section" id="crams" data-stage="04" data-stage-name="CRAMS" aria-labelledby="crams-title">
       <div class="container">
         <div class="hm-crams-card">
@@ -431,7 +432,19 @@
           <a class="hm-crams-orbit" href="crams/index.html" tabindex="-1" aria-hidden="true">
             <span class="hm-crams-ring hm-crams-ring--a"></span>
             <span class="hm-crams-ring hm-crams-ring--b"></span>
-            <span class="hm-crams-core"><b>CRAMS</b></span>
+            <span class="hm-crams-wave" style="--w:0"></span>
+            <span class="hm-crams-wave" style="--w:1"></span>
+            <span class="hm-crams-ns">
+              <span class="hm-crams-disk"></span>
+              <span class="hm-crams-axis">
+                <span class="hm-crams-mag">
+                  <svg class="hm-crams-field" viewBox="-100 -100 200 200"><path d="M2 -7 C33 -38 33 38 2 7 M-2 -7 C-33 -38 -33 38 -2 7 M3 -8 C53 -60 53 60 3 8 M-3 -8 C-53 -60 -53 60 -3 8 M4 -9 C77 -86 77 86 4 9 M-4 -9 C-77 -86 -77 86 -4 9"/></svg>
+                  <span class="hm-crams-beam"></span>
+                  <span class="hm-crams-beam hm-crams-beam--x"></span>
+                </span>
+              </span>
+              <span class="hm-crams-core"><b>CRAMS</b></span>
+            </span>
             <span class="hm-crams-spin hm-crams-spin--a"><i style="--k:0"><b>Sales</b></i><i style="--k:1"><b>Service</b></i><i style="--k:2"><b>Management</b></i></span>
             <span class="hm-crams-spin hm-crams-spin--b"><i style="--k:0"><b>Marketing</b></i><i style="--k:1"><b>Operations</b></i><i style="--k:2"><b>Every team</b></i></span>
             <span class="hm-crams-signal" style="--s:0"></span>
@@ -683,7 +696,7 @@
         <!-- the briefing terminal: an index of questions, and one screen the
              chosen answer decrypts onto (home.js). Narrow screens: the same
              items fold into an accordion. All answers stay in the page. -->
-        <div class="brf" data-brf style="--n:11">
+        <div class="brf" data-brf style="--n:6">
           <div class="brf-screen" aria-hidden="true">
             <div class="brf-bar"><span><i class="brf-rec"></i>SECURE CHANNEL · WX-09</span><span data-brf-status>DECRYPTED</span></div>
             <span class="brf-scan"></span>
@@ -691,7 +704,7 @@
             <div class="brf-foot">
               <span class="brf-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
               <span class="brf-prog"><i data-brf-prog></i></span>
-              <span data-brf-count>BRIEFING 01 / 11</span>
+              <span data-brf-count>BRIEFING 01 / 06</span>
             </div>
           </div>
           <div class="brf-item is-open">
@@ -731,69 +744,26 @@
             </div>
           </div>
           <div class="brf-item">
-            <button type="button" class="brf-q" id="brf-q5" aria-expanded="false" aria-controls="brf-a5"><span class="brf-id">BRF-05</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>What are the stages of a Worx project?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <button type="button" class="brf-q" id="brf-q5" aria-expanded="false" aria-controls="brf-a5"><span class="brf-id">BRF-05</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>Do you handle SEO, or is that separate?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
             <div class="brf-a" id="brf-a5" role="region" aria-labelledby="brf-q5" hidden>
-              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">What are the stages of a Worx project?</span></h3>
-              <p class="brf-a-p visually-hidden">Seven: Consultation, Deliberation, Solutions, Evaluation, Finalisation, Execution and Management. You click through designs before development starts, and every stage ends with your sign-off.</p>
-              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 05 · process</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">stages</span><span class="t-p">: </span><span class="t-p">[</span><span class="t-s">"Consultation"</span><span class="t-p">, </span><span class="t-s">"Deliberation"</span><span class="t-p">, </span><span class="t-s">"Solutions"</span><span class="t-p">, </span><span class="t-s">"Evaluation"</span><span class="t-p">, </span><span class="t-s">"Finalisation"</span><span class="t-p">, </span><span class="t-s">"Execution"</span><span class="t-p">, </span><span class="t-s">"Management"</span><span class="t-p">]</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">beforeCode</span><span class="t-p">: </span><span class="t-s">"You click through the designs first."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">signOff</span><span class="t-p">: </span><span class="t-s">"Yours, at the end of every stage."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
-              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
-            </div>
-          </div>
-          <div class="brf-item">
-            <button type="button" class="brf-q" id="brf-q6" aria-expanded="false" aria-controls="brf-a6"><span class="brf-id">BRF-06</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>Do you handle SEO, or is that separate?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
-            <div class="brf-a" id="brf-a6" role="region" aria-labelledby="brf-q6" hidden>
               <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">Do you handle SEO, or is that separate?</span></h3>
               <p class="brf-a-p visually-hidden">Both. Clean structure, speed and technical SEO are part of every build we ship. If you want to keep climbing after launch, SEO &amp; SEM runs as its own ongoing service with the same team.</p>
-              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 06 · seo</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">inEveryBuild</span><span class="t-p">: </span><span class="t-s">"Clean structure, speed and technical SEO."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">afterLaunch</span><span class="t-p">: </span><span class="t-s">"SEO &amp; SEM as its own ongoing service, with the same team."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 05 · seo</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">inEveryBuild</span><span class="t-p">: </span><span class="t-s">"Clean structure, speed and technical SEO."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">afterLaunch</span><span class="t-p">: </span><span class="t-s">"SEO &amp; SEM as its own ongoing service, with the same team."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
               <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
             </div>
           </div>
           <div class="brf-item">
-            <button type="button" class="brf-q" id="brf-q7" aria-expanded="false" aria-controls="brf-a7"><span class="brf-id">BRF-07</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>Can you redesign my site without losing Google rankings?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
-            <div class="brf-a" id="brf-a7" role="region" aria-labelledby="brf-q7" hidden>
-              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">Can you redesign my site without losing Google rankings?</span></h3>
-              <p class="brf-a-p visually-hidden">That's the plan for every redesign: we map your existing pages, carry over what's ranking, redirect every old address to its new home and watch Search Console closely after launch.</p>
-              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 07 · redesign</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">keepRankings</span><span class="t-p">: </span><span class="t-b">true</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">plan</span><span class="t-p">: </span><span class="t-p">[</span><span class="t-s">"Map your existing pages"</span><span class="t-p">, </span><span class="t-s">"Carry over what ranks"</span><span class="t-p">, </span><span class="t-s">"Redirect every old address"</span><span class="t-p">, </span><span class="t-s">"Watch Search Console after launch"</span><span class="t-p">]</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
-              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
-            </div>
-          </div>
-          <div class="brf-item">
-            <button type="button" class="brf-q" id="brf-q8" aria-expanded="false" aria-controls="brf-a8"><span class="brf-id">BRF-08</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>Do you build bilingual Arabic and English websites?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
-            <div class="brf-a" id="brf-a8" role="region" aria-labelledby="brf-q8" hidden>
-              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">Do you build bilingual Arabic and English websites?</span></h3>
-              <p class="brf-a-p visually-hidden">Yes. Right-to-left layouts, Arabic typography and copy that's written, not just translated, in English and Arabic.</p>
-              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 08 · language</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">bilingual</span><span class="t-p">: </span><span class="t-b">true</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">layouts</span><span class="t-p">: </span><span class="t-s">"Right-to-left, with proper Arabic typography."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">copy</span><span class="t-p">: </span><span class="t-s">"Written in English and Arabic, not just translated."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
-              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
-            </div>
-          </div>
-          <div class="brf-item">
-            <button type="button" class="brf-q" id="brf-q9" aria-expanded="false" aria-controls="brf-a9"><span class="brf-id">BRF-09</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>Do you work with businesses outside Dubai?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
-            <div class="brf-a" id="brf-a9" role="region" aria-labelledby="brf-q9" hidden>
-              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">Do you work with businesses outside Dubai?</span></h3>
-              <p class="brf-a-p visually-hidden">Yes. We're headquartered in Dubai and deliver across the UAE, Saudi Arabia and Lebanon, as well as for clients in South Korea and the USA.</p>
-              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 09 · regions</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">headquarters</span><span class="t-p">: </span><span class="t-s">"Dubai"</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">deliver</span><span class="t-p">: </span><span class="t-p">[</span><span class="t-s">"UAE"</span><span class="t-p">, </span><span class="t-s">"Saudi Arabia"</span><span class="t-p">, </span><span class="t-s">"Lebanon"</span><span class="t-p">, </span><span class="t-s">"South Korea"</span><span class="t-p">, </span><span class="t-s">"USA"</span><span class="t-p">]</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
-              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
-            </div>
-          </div>
-          <div class="brf-item">
-            <button type="button" class="brf-q" id="brf-q10" aria-expanded="false" aria-controls="brf-a10"><span class="brf-id">BRF-10</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>What happens after launch?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
-            <div class="brf-a" id="brf-a10" role="region" aria-labelledby="brf-q10" hidden>
+            <button type="button" class="brf-q" id="brf-q6" aria-expanded="false" aria-controls="brf-a6"><span class="brf-id">BRF-06</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>What happens after launch?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
+            <div class="brf-a" id="brf-a6" role="region" aria-labelledby="brf-q6" hidden>
               <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">What happens after launch?</span></h3>
               <p class="brf-a-p visually-hidden">Most of our partnerships really begin there. We handle updates, security patches, on-page SEO and new features for brands like Modon, Genesis and Hudayriyat, years after the original launch.</p>
-              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 10 · support</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">launchDay</span><span class="t-p">: </span><span class="t-s">"Where most of our partnerships really begin."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">weHandle</span><span class="t-p">: </span><span class="t-p">[</span><span class="t-s">"Updates"</span><span class="t-p">, </span><span class="t-s">"Security patches"</span><span class="t-p">, </span><span class="t-s">"On-page SEO"</span><span class="t-p">, </span><span class="t-s">"New features"</span><span class="t-p">]</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">forYears</span><span class="t-p">: </span><span class="t-s">"For brands like Modon, Genesis and Hudayriyat."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
-              <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
-            </div>
-          </div>
-          <div class="brf-item">
-            <button type="button" class="brf-q" id="brf-q11" aria-expanded="false" aria-controls="brf-a11"><span class="brf-id">BRF-11</span><span class="brf-qt"><span class="brf-qt-fn" aria-hidden="true">ask("</span>How is Worx different from Glimpse?<span class="brf-qt-fn" aria-hidden="true">")</span></span><span class="brf-sig" aria-hidden="true"><i></i><i></i><i></i></span></button>
-            <div class="brf-a" id="brf-a11" role="region" aria-labelledby="brf-q11" hidden>
-              <h3 class="brf-a-h" aria-hidden="true"><span class="brf-prompt">&gt;</span> <span class="brf-a-ht">How is Worx different from Glimpse?</span></h3>
-              <p class="brf-a-p visually-hidden">Glimpse is the award-winning marketing agency; Worx is its sister company focused on engineering. Glimpse prepares the platforms and social networks, Worx writes the clean, maintainable code. One team, from idea to launch.</p>
-              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 11 · crew</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">glimpse</span><span class="t-p">: </span><span class="t-s">"The award-winning marketing agency."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">worx</span><span class="t-p">: </span><span class="t-s">"Its sister company, focused on engineering."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">together</span><span class="t-p">: </span><span class="t-s">"One team, from idea to launch."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
+              <pre class="brf-code" aria-hidden="true"><code><span class="ln"><span class="t-c">// briefing 06 · support</span></span><span class="ln"><span class="t-k">const</span> <span class="t-v">answer</span> <span class="t-p">= {</span></span><span class="ln ln--in"><span class="t-key">launchDay</span><span class="t-p">: </span><span class="t-s">"Where most of our partnerships really begin."</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">weHandle</span><span class="t-p">: </span><span class="t-p">[</span><span class="t-s">"Updates"</span><span class="t-p">, </span><span class="t-s">"Security patches"</span><span class="t-p">, </span><span class="t-s">"On-page SEO"</span><span class="t-p">, </span><span class="t-s">"New features"</span><span class="t-p">]</span><span class="t-p">,</span></span><span class="ln ln--in"><span class="t-key">forYears</span><span class="t-p">: </span><span class="t-s">"For brands like Modon, Genesis and Hudayriyat."</span><span class="t-p">,</span></span><span class="ln"><span class="t-p">};</span><i class="brf-caret"></i></span></code></pre>
               <a class="brf-a-link" href="contact/index.html"><span class="brf-qt-fn" aria-hidden="true">crew.</span>Ask the crew directly<span class="brf-qt-fn" aria-hidden="true">()</span> <span aria-hidden="true">&rarr;</span></a>
             </div>
           </div>
         </div>
+        <!-- the six above are the short list; every question lives on faq/ -->
+        <a class="hm-ghost hm-faq-all" href="faq/index.html"><span>See all FAQs</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
     </section>
 
@@ -894,13 +864,11 @@
         <div class="footer-col">
           <h4>Overview</h4>
           <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about/index.html">About us</a></li>
             <li><a href="services/index.html">Services</a></li>
-            <li><a href="crams/index.html">CRAMS</a></li>
+            <li><a class="footer-live" href="crams/index.html">CRAMS<i aria-hidden="true"></i></a></li>
             <li><a href="portfolio/index.html">Portfolio</a></li>
             <li><a href="blogs/index.html">Blog</a></li>
-            <li><a href="contact/index.html">Contact</a></li>
+            <li><a href="faq/index.html">FAQ</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -972,9 +940,15 @@
 
     <div class="container">
       <div class="footer-bottom">
-        <span>© <span id="footer-year">2026</span> Worx. All rights reserved.</span>
-        <span class="footer-where">Dubai, UAE <span aria-hidden="true">·</span> <time class="footer-clock" data-tz="Asia/Dubai">--:--</time> GST</span>
-        <a class="footer-top" href="#main">Back to top <span aria-hidden="true">↑</span></a>
+        <nav class="footer-legal" aria-label="Legal">
+          <a href="privacy-policy/index.html">Privacy Policy</a>
+          <span class="footer-legal-sep" aria-hidden="true"></span>
+          <a href="terms-of-use/index.html">Terms of Use</a>
+        </nav>
+        <div class="footer-meta">
+          <span class="footer-copy">© <span id="footer-year">2026</span> Worx. All rights reserved.</span>
+          <a class="footer-top" href="#main">Back to top <span aria-hidden="true">↑</span></a>
+        </div>
       </div>
     </div>
   </footer>

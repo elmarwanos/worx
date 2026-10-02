@@ -52,6 +52,7 @@
   var lenis = null;
   if (typeof Lenis !== "undefined") {
     lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
+    window.wxLenis = lenis; // main.js "Back to top" scrolls through it
     lenis.on("scroll", function (e) {
       velocity = e.velocity || 0;
       ScrollTrigger.update();
