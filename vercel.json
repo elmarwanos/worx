@@ -1,0 +1,6 @@
+{
+  "redirects": [
+    { "source": "/services/erp-crm.html", "destination": "/services/cms-crm.html", "permanent": true },
+    { "source": "/services/erp-crm", "destination": "/services/cms-crm.html", "permanent": true }
+  ]
+}

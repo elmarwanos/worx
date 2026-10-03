@@ -422,6 +422,66 @@
       setTimeout(function () { hdash.boot(); }, 2500);
       stream(hdash, function () { return seen && hdash.root.classList.contains("is-on"); });
     })();
+    // phones and tablets: between the chapters, where on a desktop the
+    // floating screen tells the story, three interludes tell it in the
+    // page itself (each plays as it comes into view, and again on return):
+    //   after the hero    THE BREAK: the live screen drifts apart, its
+    //                     panels scattering and dimming red (the gap)
+    //   after the gap     THE SYNC: the scattered panels fly back, lock
+    //                     into one screen and pulse as they sync
+    //   after connected   EVERY TEAM: the live screen, leads landing, the
+    //                     panels each department works from lighting in turn
+    var DEPT = $$(".cr-dept b").map(function (e) { return e.textContent; });
+    var LIGHT = [["table", "c-status", "filters"], ["c-source", "c-ratio", "c-product"], ["c-channel", "c-time", "table"], ["filters", "top", "table"],
+      ["c-source", "c-product", "c-channel", "c-branch", "c-ratio", "c-strength", "c-time", "c-status"], null];
+    var inter = function (after, mode) {
+      if (!after) return;
+      var box = document.createElement("div"), hin = document.createElement("div"), root = document.createElement("div");
+      box.className = "cr-inter cr-inter--" + mode; box.setAttribute("aria-hidden", "true");
+      hin.className = "cr-inter-in"; root.className = "cr-deck-dash";
+      var d = build(root);
+      hin.appendChild(root); box.appendChild(hin);
+      var tag = null;
+      if (mode === "teams") { tag = document.createElement("span"); tag.className = "cr-inter-tag"; box.appendChild(tag); }
+      after.parentNode.insertBefore(box, after.nextSibling);
+      var fit = function () { hin.style.setProperty("--k", Math.min(box.clientWidth * 1.08 / DW, box.clientHeight * 1.0 / DH).toFixed(4)); };
+      fit();
+      if ("ResizeObserver" in window) new ResizeObserver(fit).observe(box);
+      var lock = function () { d.panels.forEach(function (p) { p.style.transform = "translate3d(0,0," + [46, 74, 30, 0][+p.getAttribute("data-layer")] + "px)"; p.style.opacity = 1; }); };
+      var scatter = function () { d.panels.forEach(function (p, i) { p.style.transform = tf(SCATTER[i], 0.42); p.style.opacity = 0.85; }); };
+      var seen = false, timers = [], cycle = null, k = 0;
+      var later = function (fn, ms) { timers.push(setTimeout(fn, reduced ? 0 : ms)); };
+      var rest = function () {                      // as it waits, out of view
+        timers.forEach(clearTimeout); timers = []; clearInterval(cycle); cycle = null;
+        box.classList.remove("is-moving", "is-sync");
+        if (mode === "sync") { scatter(); box.classList.add("is-broken"); } else { lock(); box.classList.remove("is-broken"); }
+        d.panels.forEach(function (p) { p.classList.remove("is-hot"); });
+      };
+      var play = function () {
+        d.boot();
+        if (mode === "break") { later(function () { box.classList.add("is-moving", "is-broken"); scatter(); }, 500); }
+        else if (mode === "sync") { later(function () { box.classList.add("is-moving"); box.classList.remove("is-broken"); lock(); }, 300); later(function () { box.classList.add("is-sync"); }, 2300); }
+        else {
+          var light = function () {
+            var on = LIGHT[k % LIGHT.length];
+            d.panels.forEach(function (p) { p.classList.toggle("is-hot", !on || on.indexOf(p.getAttribute("data-region")) >= 0); });
+            if (tag) tag.textContent = (DEPT[k % LIGHT.length] || "").toUpperCase();
+            k++;
+          };
+          light(); cycle = setInterval(light, reduced ? 4000 : 2200);
+        }
+      };
+      rest();
+      if ("IntersectionObserver" in window) new IntersectionObserver(function (en) {
+        var v = en[0].isIntersecting;
+        if (v && !seen) { seen = true; play(); } else if (!v && seen) { seen = false; rest(); }
+      }, { threshold: 0.35 }).observe(box);
+      else play();
+      if (mode === "teams") stream(d, function () { return seen; });
+    };
+    inter(heroSec, "break");
+    inter($(".cr-gap"), "sync");
+    inter($(".cr-orbit"), "teams");
   } else if (reduced) { apply("ignition", true); dash.boot(); read(); }
   else {
     // THE ARRIVAL: the panels are out in deep space when the page opens,

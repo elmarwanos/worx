@@ -1808,6 +1808,55 @@
 }
 .cr-hero-holo.is-flying .dk-p { transition: transform 2.4s cubic-bezier(0.16, 0.84, 0.24, 1), opacity 1.3s ease; transition-delay: calc(var(--d) * 110ms); }
 .cr-hero:has(.cr-hero-holo) { position: relative; }
+
+/* phones and tablets: the chapters' interludes (crams-deck.js), the story
+   the desktop's floating screen tells, told in the page between them */
+.cr-inter {
+  position: relative;
+  height: clamp(230px, 66vw, 420px);
+  overflow: hidden;
+  pointer-events: none;
+  perspective: 900px;
+  perspective-origin: 50% 40%;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+}
+.cr-inter-in {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1280px;
+  height: 1200px;
+  transform-style: preserve-3d;
+  transform: translate(-50%, -50%) scale(var(--k, 0.28)) rotateX(var(--rx, 10deg)) rotateY(var(--ry, -16deg));
+  opacity: 0.8;
+}
+.cr-inter--sync .cr-inter-in { --rx: 8deg; --ry: 16deg; }
+.cr-inter--teams .cr-inter-in { --rx: 14deg; --ry: 0deg; opacity: 0.9; }
+.cr-inter.is-moving .dk-p { transition: transform 2.4s cubic-bezier(0.16, 0.84, 0.24, 1), opacity 1.2s ease, filter 1.2s ease, border-color 0.6s ease; transition-delay: calc(var(--d) * 90ms); }
+.cr-inter.is-broken .dk-p { border-color: rgba(229, 72, 60, 0.45); filter: saturate(0.45) brightness(0.8); }
+.cr-inter.is-sync .dk-p { animation: dk-synced 1.6s ease both; animation-delay: calc(var(--d) * 70ms); }
+.cr-inter--teams .dk-p { transition: border-color 0.5s ease, box-shadow 0.5s ease; }
+.cr-inter-tag {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  translate: -50% 0;
+  padding: 6px 14px;
+  border: 1px solid rgba(250, 167, 25, 0.5);
+  border-radius: 999px;
+  background: rgba(14, 6, 3, 0.75);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  color: var(--accent-2);
+  white-space: nowrap;
+}
+/* the gap no longer needs a screen's height of its own: the interludes
+   carry the space */
+@media (max-width: 1024px), (hover: none) {
+  .cr-gap:has(+ .cr-inter) { min-height: 0; padding-block: clamp(36px, 8vw, 70px); }
+}
 .cr-hero:has(.cr-hero-holo) .cr-hero-grid { z-index: 1; }
 
 @media (max-width: 1000px) {

@@ -51,7 +51,11 @@
   A.bed({ url: "static/assets/home/home-soundscape.mp3", level: 0.15 });
 
   /* ---- HERO ------------------------------------------------------- */
-  var SRC = "static/assets/home/hero-ambience.m4a";
+  // the original soundtrack with cinematic layers over it (mids, highs and
+  // width only, on the film's own beats: the supernova, the nebula, the
+  // disk, the gap before the collision, the impact, the fireball, the black
+  // hole); same loudness as the original (hero-ambience.m4a, kept)
+  var SRC = "static/assets/home/hero-ambience-v2.m4a";
   var FILM_END = 8.5;               // home.js cuts the film here...
   var CUT = FILM_END - 0.04;        // ...on the frame before it (its t >= d - 0.04)
   var TAIL = 0.32;                  // seconds: the soundtrack's fade into the cut

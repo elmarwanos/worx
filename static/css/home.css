@@ -2217,14 +2217,15 @@
   .hm-mod-visual { aspect-ratio: 16 / 9; }
 }
 
-/* ---- phones: the module carousel ------------------------------------
-   On phones the five divisions ride a carousel under the world: one at
-   a time, each under its own module head, moving on by itself every 7 s
-   while on screen (home.js) and swiped at will (a touch pauses it; left
-   alone it moves on again). The world, the counter and its five ticks
-   follow the division in view; the pills above jump to one. Desktop is
-   untouched: there the track is not a box at all. */
-.hm-mod-track { display: contents; }
+/* ---- phones: the flight through the modules ----------------------
+   One division at a time hid the other twelve services behind a pill
+   row that only showed two of its five stops. On phones every division
+   is written out in the page instead, each under its own module head,
+   and the world docks under the header while the page flies through
+   them: it switches as each division passes (home.js), a counter and
+   five ticks on it say where the flight is, and each service fades as
+   it slides under the plate. The pills stay above as the manifest:
+   tap one and the page flies to that module. */
 .hm-mod-panel-head,
 .hm-mod-flight { display: none; }
 
@@ -2232,27 +2233,14 @@
   .hm-mod-stage { display: block; }
 
   .hm-mod-visual {
-    position: relative;
-    z-index: 1;
+    position: sticky;
+    top: 72px;
+    z-index: 4;
     aspect-ratio: auto;
-    height: min(62vw, 36svh);
-    min-height: 160px;
+    height: min(60vw, 34svh);
+    min-height: 150px;
     box-shadow: 0 16px 28px -14px #000;
   }
-
-  .hm-mod-track {
-    display: flex;
-    gap: 16px;
-    margin-top: 18px;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    overflow-y: hidden;              /* sideways only: a vertical swipe here scrolls the page (iOS) */
-    touch-action: pan-x pan-y;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .hm-mod-track::-webkit-scrollbar { display: none; }
 
   .hm-mod-flight {
     position: absolute;
@@ -2287,7 +2275,7 @@
   .hm-mod-panel,
   .hm-mod-panel[hidden] { display: grid; }
 
-  .hm-mod-panel { flex: 0 0 100%; min-width: 0; margin-top: 0; scroll-snap-align: start; scroll-snap-stop: always; }
+  .hm-mod-panel { margin-top: 30px; }
 
   .hm-mod-panel-head {
     display: flex;
@@ -2318,11 +2306,14 @@
   .hm-mod-panel a { transition: opacity 0.35s ease, translate 0.45s var(--hm-ease), border-color 0.35s ease; }
   .hm-mod-panel.is-current a { border-left-color: rgba(250, 167, 25, 0.35); }
 
+  /* a service passing under the plate docks: it fades out of the way */
+  .hm-mod-panel .is-docked { opacity: 0; translate: 0 -10px; }
 }
 
-/* phones on their side: a shorter plate */
+/* phones on their side: too short to pin the plate, so it stays in the
+   flow; the module heads still spell out every division */
 @media (max-width: 700px) and (max-height: 500px) {
-  .hm-mod-visual { height: 60vh; }
+  .hm-mod-visual { position: relative; top: auto; height: 60vh; }
 }
 
 /* ================================================================
