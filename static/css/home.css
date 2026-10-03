@@ -1540,6 +1540,8 @@
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 12vw;
     overscroll-behavior-x: contain;
+    overflow-y: hidden;              /* sideways only: a vertical swipe here scrolls the page (iOS) */
+    touch-action: pan-x pan-y;
     scrollbar-width: none;
   }
   .gs-bank::-webkit-scrollbar { display: none; }
@@ -2215,15 +2217,14 @@
   .hm-mod-visual { aspect-ratio: 16 / 9; }
 }
 
-/* ---- phones: the flight through the modules ----------------------
-   One division at a time hid the other twelve services behind a pill
-   row that only showed two of its five stops. On phones every division
-   is written out in the page instead, each under its own module head,
-   and the world docks under the header while the page flies through
-   them: it switches as each division passes (home.js), a counter and
-   five ticks on it say where the flight is, and each service fades as
-   it slides under the plate. The pills stay above as the manifest:
-   tap one and the page flies to that module. */
+/* ---- phones: the module carousel ------------------------------------
+   On phones the five divisions ride a carousel under the world: one at
+   a time, each under its own module head, moving on by itself every 7 s
+   while on screen (home.js) and swiped at will (a touch pauses it; left
+   alone it moves on again). The world, the counter and its five ticks
+   follow the division in view; the pills above jump to one. Desktop is
+   untouched: there the track is not a box at all. */
+.hm-mod-track { display: contents; }
 .hm-mod-panel-head,
 .hm-mod-flight { display: none; }
 
@@ -2231,14 +2232,27 @@
   .hm-mod-stage { display: block; }
 
   .hm-mod-visual {
-    position: sticky;
-    top: 72px;
-    z-index: 4;
+    position: relative;
+    z-index: 1;
     aspect-ratio: auto;
-    height: min(60vw, 34svh);
-    min-height: 150px;
+    height: min(62vw, 36svh);
+    min-height: 160px;
     box-shadow: 0 16px 28px -14px #000;
   }
+
+  .hm-mod-track {
+    display: flex;
+    gap: 16px;
+    margin-top: 18px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    overflow-y: hidden;              /* sideways only: a vertical swipe here scrolls the page (iOS) */
+    touch-action: pan-x pan-y;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hm-mod-track::-webkit-scrollbar { display: none; }
 
   .hm-mod-flight {
     position: absolute;
@@ -2273,7 +2287,7 @@
   .hm-mod-panel,
   .hm-mod-panel[hidden] { display: grid; }
 
-  .hm-mod-panel { margin-top: 30px; }
+  .hm-mod-panel { flex: 0 0 100%; min-width: 0; margin-top: 0; scroll-snap-align: start; scroll-snap-stop: always; }
 
   .hm-mod-panel-head {
     display: flex;
@@ -2304,14 +2318,11 @@
   .hm-mod-panel a { transition: opacity 0.35s ease, translate 0.45s var(--hm-ease), border-color 0.35s ease; }
   .hm-mod-panel.is-current a { border-left-color: rgba(250, 167, 25, 0.35); }
 
-  /* a service passing under the plate docks: it fades out of the way */
-  .hm-mod-panel .is-docked { opacity: 0; translate: 0 -10px; }
 }
 
-/* phones on their side: too short to pin the plate, so it stays in the
-   flow; the module heads still spell out every division */
+/* phones on their side: a shorter plate */
 @media (max-width: 700px) and (max-height: 500px) {
-  .hm-mod-visual { position: relative; top: auto; height: 60vh; }
+  .hm-mod-visual { height: 60vh; }
 }
 
 /* ================================================================
@@ -2803,6 +2814,18 @@
   .hm-fp-cp.is-launch { animation: hm-fp-whoosh 0.9s ease-out; }
 }
 @keyframes hm-fp-whoosh { 22% { filter: blur(4px); } }
+/* phones: a stage separating (the ignition flash, the burn away) and the
+   next locking in */
+@keyframes hm-fp-sep {
+  0% { filter: none; box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9); }
+  14% { filter: brightness(1.55); box-shadow: 0 34px 46px -10px rgba(250, 167, 25, 0.75); }
+  100% { filter: brightness(1.1) blur(2px); box-shadow: 0 60px 70px -14px rgba(229, 125, 35, 0.5); }
+}
+@keyframes hm-fp-dock {
+  0% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 0 0 rgba(250, 167, 25, 0); }
+  35% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 0 2px rgba(250, 167, 25, 0.55), 0 0 34px rgba(250, 167, 25, 0.35); }
+  100% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 0 0 rgba(250, 167, 25, 0); }
+}
 
 /* the huge stencilled countdown number behind the words */
 .hm-fp-cp::before {
@@ -3167,6 +3190,26 @@
   .hm-fp-cp.is-done > :not(.hm-fp-shade) { opacity: 0; }
   .hm-fp-cp.is-done .hm-fp-shade { opacity: calc(0.3 + var(--a) * 0.06); }
   .hm-fp-cp.is-done { border-color: rgba(250, 167, 25, calc(0.42 - var(--a) * 0.05)); }
+
+  /* phones: STAGE SEPARATION. The stages still to fly wait stacked under
+     the card in play, their edges peeking below it; a cleared card fires
+     off upward and out of the frame like a jettisoned stage (an ignition
+     flash, then accelerating away), and the next rises out of the stack
+     and locks in with a glow. Liftoff (is-go) keeps its own stack. */
+  .hm-fp-cp { transition: transform 0.85s cubic-bezier(0.62, 0, 0.22, 1), opacity 0.6s ease, border-color 0.5s; }
+  .hm-fp-cp.is-later {
+    transform-origin: 50% 100%;
+    transform: translateY(calc(var(--a) * 11px)) scale(calc(1 - var(--a) * 0.05));
+    opacity: calc(1 - var(--a) * 0.24);
+  }
+  .hm-fp-cp.is-done {
+    transform-origin: 50% 50%;
+    transform: translateY(-122%) scale(0.86);
+    opacity: 0;
+  }
+  .hm-fp-cp.is-done.is-gone { opacity: 0; }
+  .hm-fp-cp.is-launch { animation: hm-fp-sep 0.85s ease-in both; }
+  .hm-fp-cp.is-arrive { animation: hm-fp-dock 0.9s ease-out 0.15s both; }
   .hm-fp-cp::before { font-size: calc(var(--fp-w) * 0.29); bottom: -0.18em; }
   .hm-fp-name { font-size: clamp(1.75rem, 8.2vw, 2.15rem); }
   .hm-fp-top { grid-template-columns: 1fr; gap: 18px; }
@@ -3407,6 +3450,8 @@
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 4vw;
     overscroll-behavior-x: contain;
+    overflow-y: hidden;              /* sideways only: a vertical swipe here scrolls the page (iOS) */
+    touch-action: pan-x pan-y;
     scrollbar-width: none;
   }
   .hm-notes-grid::-webkit-scrollbar { display: none; }
@@ -4199,7 +4244,7 @@
   .hx-grain { display: none; }
   .hm-arc-trail, .hm-arc-craft { display: none; }
   .hm-fp-cp { transition: none; }
-  .hm-fp.is-go .hm-fp-stages, .hm-fp.is-go .hm-fp-plot::after, .hm-fp.is-go .hm-fp-sparks i, .hm-fp-cp.is-arrive .hm-fp-name, .hm-fp-cp.is-arrive .hm-fp-copy, .hm-fp-cp.is-arrive .hm-fp-t, .hm-fclock-ladder li.is-now, .hm-fp-cp.is-now .hm-fp-st i, .hm-fp-cp.is-launch, .hm-fp-cp.is-now .hm-fp-t::after, .hm-fp.is-go .hm-fp-cp--go::after, .hm-fclock.is-go .hm-fclock-row::after { animation: none; }
+  .hm-fp.is-go .hm-fp-stages, .hm-fp.is-go .hm-fp-plot::after, .hm-fp.is-go .hm-fp-sparks i, .hm-fp-cp.is-arrive .hm-fp-name, .hm-fp-cp.is-arrive .hm-fp-copy, .hm-fp-cp.is-arrive .hm-fp-t, .hm-fclock-ladder li.is-now, .hm-fp-cp.is-now .hm-fp-st i, .hm-fp-cp.is-launch, .hm-fp-cp.is-arrive, .hm-fp-cp.is-now .hm-fp-t::after, .hm-fp.is-go .hm-fp-cp--go::after, .hm-fclock.is-go .hm-fclock-row::after { animation: none; }
   .hx.is-born .hx-card-word span { animation: none; opacity: 1; }
   .hx-line > span,
   .hm-split-line > span { transform: none !important; transition: none !important; }

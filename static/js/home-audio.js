@@ -2583,6 +2583,22 @@
         setTimeout(function () { window.location.href = href; }, 170);
       });
     });
+    // phones: the notes are a row to swipe; each one coming to rest in
+    // view is pulled from the logbook, as a hover is on a desktop
+    var grid = notes[0].parentNode, seenAt = 0, swipeT = 0;
+    grid.addEventListener("scroll", function () {
+      if (!ready() || grid.scrollWidth <= grid.clientWidth + 4) return;
+      clearTimeout(swipeT);
+      swipeT = setTimeout(function () {                     // once the snap has settled
+        var r = grid.getBoundingClientRect(), best = 0, bd = 1e9;
+        notes.forEach(function (el, i) { var c = el.getBoundingClientRect(), d = Math.abs(c.left - (r.left + 4)); if (d < bd) { bd = d; best = i; } });
+        if (grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 4) best = notes.length - 1;   // the end of the row
+        if (best === seenAt) return;
+        seenAt = best;
+        last = { i: best, t: performance.now() };
+        pull(best, notes[best]);
+      }, 90);
+    }, { passive: true });
     // for offline renders (levels): the voices on a given context and channel
     A._notesProbe = function (c, o) { sc = c; out = o; live = true; return { pull: pull, open: open, settle: settle, notes: notes }; };
     // first view: once the section has the sound and the cards are in sight

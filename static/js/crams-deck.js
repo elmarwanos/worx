@@ -399,6 +399,29 @@
       });
     });
     read();
+    // phones and tablets: the hologram in the hero as well, carried by the
+    // page (not fixed behind it, so nothing fights a touch scroll): tilted
+    // in its own depth, its panels fly in from deep space, lock together
+    // and the screen powers on; new leads keep landing while it is in view
+    if (heroSec) (function () {
+      var holo = document.createElement("div"), hin = document.createElement("div"), root = document.createElement("div");
+      holo.className = "cr-hero-holo"; holo.setAttribute("aria-hidden", "true");
+      hin.className = "cr-hero-holo-in"; root.className = "cr-deck-dash";
+      var hdash = build(root);
+      hin.appendChild(root); holo.appendChild(hin);
+      heroSec.insertBefore(holo, heroSec.firstChild);
+      var fit = function () { hin.style.setProperty("--k", Math.min(holo.clientWidth * 1.2 / DW, holo.clientHeight * 0.85 / DH).toFixed(4)); };
+      fit();
+      if ("ResizeObserver" in window) new ResizeObserver(fit).observe(holo);
+      var lock = function () { hdash.panels.forEach(function (p) { p.style.transform = "translate3d(0,0," + [46, 74, 30, 0][+p.getAttribute("data-layer")] + "px)"; p.style.opacity = 1; }); };
+      var seen = true;
+      if ("IntersectionObserver" in window) new IntersectionObserver(function (en) { seen = en[0].isIntersecting; }).observe(heroSec);
+      if (reduced) { lock(); hdash.boot(); return; }
+      hdash.panels.forEach(function (p, i) { p.style.transform = tf(DEEP[i], 0.5); p.style.opacity = 0; });
+      setTimeout(function () { holo.classList.add("is-flying"); lock(); }, 500);
+      setTimeout(function () { hdash.boot(); }, 2500);
+      stream(hdash, function () { return seen && hdash.root.classList.contains("is-on"); });
+    })();
   } else if (reduced) { apply("ignition", true); dash.boot(); read(); }
   else {
     // THE ARRIVAL: the panels are out in deep space when the page opens,
