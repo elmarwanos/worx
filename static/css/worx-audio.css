@@ -1,0 +1,569 @@
+/* ================================================================
+   Worx | worx-audio.css
+   THE PULSAR: the mission's master sound switch (worx-audio.js builds
+   it). A glass puck in the lower-left corner, mirroring the contact
+   beacon in the lower-right: same size, same baseline, same margin.
+
+     the glyph   a speaker whose sound waves are orbits, a satellite
+                 parked on the outermost one
+     off         a comet streak strikes the speaker through; the orbits
+                 lie dark, the satellite rests
+     on          the streak withdraws, the orbits light in the brand
+                 gradient one after another and swell with the real
+                 output (worx-audio.js sets each orbit's opacity from the meter), the
+                 satellite rides its orbit, a signal arc sweeps the rim
+     standby     chosen earlier, waiting for a tap: lit, held low
+     no signal   the sound failed to load: the streak returns, ember
+     arriving    it falls in from the dark (the beacon's dock, mirrored)
+                 while HUD brackets close in on it: a target lock
+     the cue     while the hero film rolls with sound off, a soft ping
+                 goes out now and then: the film has a soundtrack
+     hover       a pill slides out to the right with the status and a
+                 four-band level meter (the beacon's opens to the left)
+
+   Home lifts it (--sx-lift, home-audio.js) over the flight recorder
+   while the film plays and above the footer's last line; on touch it
+   stacks over the mission dock, sharing its edge.
+   ================================================================ */
+
+.wx-sound-dock {
+  --sx-h: 70px;                              /* the beacon's --wa-h */
+  --sx-stack: 0px;
+  --sx-ease: cubic-bezier(0.2, 0.9, 0.2, 1); /* the beacon's --wa-ease */
+  position: fixed;
+  left: max(clamp(16px, 4vw, 32px), calc(env(safe-area-inset-left, 0px) + 12px));
+  bottom: calc(clamp(16px, 4vw, 32px) + env(safe-area-inset-bottom, 0px));
+  z-index: 119;
+  width: var(--sx-h);
+  height: var(--sx-h);
+  translate: 0 calc(var(--sx-lift, 0px) * -1);
+  transform: translateY(calc(var(--sx-stack) * -1));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  contain: layout style;
+  transition: opacity 0.5s ease, transform 0.6s var(--sx-ease), visibility 0s linear 0.5s;
+}
+
+.wx-sound-dock.is-ready {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.4s ease, transform 0.6s var(--sx-ease), visibility 0s;
+}
+
+/* ---- the switch ------------------------------------------------------ */
+.wx-sound {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--brand-cream);
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.wx-sound:focus-visible { outline: none; }
+
+/* arriving: falls in from the dark, overshoots, settles (the beacon's
+   dock, turning the other way) */
+.wx-sound-dock.is-ready .wx-sound { animation: wx-sound-dock 1.1s var(--sx-ease) both; }
+
+@keyframes wx-sound-dock {
+  0% { transform: translateY(46px) scale(0.3) rotate(35deg); opacity: 0; }
+  55% { transform: translateY(-6px) scale(1.08) rotate(-6deg); opacity: 1; }
+  75% { transform: translateY(2px) scale(0.97) rotate(2deg); }
+  100% { transform: none; opacity: 1; }
+}
+
+/* the bloom behind the puck: the arrival flare, steady while hovered */
+.wx-sound::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: -2;
+  width: 160px;
+  height: 160px;
+  margin: -80px 0 0 -80px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(250, 167, 25, 0.42), rgba(229, 125, 35, 0.12) 35%, transparent 65%);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.5s ease, transform 0.6s var(--sx-ease);
+}
+
+.wx-sound-dock.is-ready .wx-sound::after { animation: wx-sound-flare 1.3s ease-out 0.35s; }
+
+@keyframes wx-sound-flare {
+  0% { opacity: 0; transform: scale(0.2); }
+  30% { opacity: 1; transform: scale(1.3); }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+
+/* ---- the lock: four HUD brackets closing in on the puck --------------- */
+.wx-sound-lock {
+  position: absolute;
+  inset: -7px;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1.12);
+  transition: opacity 0.3s ease, transform 0.45s var(--sx-ease);
+}
+
+.wx-sound-lock i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 0 solid rgba(250, 167, 25, 0.85);
+}
+
+.wx-sound-lock i:nth-child(1) { left: 0; top: 0; border-left-width: 1px; border-top-width: 1px; }
+.wx-sound-lock i:nth-child(2) { right: 0; top: 0; border-right-width: 1px; border-top-width: 1px; }
+.wx-sound-lock i:nth-child(3) { left: 0; bottom: 0; border-left-width: 1px; border-bottom-width: 1px; }
+.wx-sound-lock i:nth-child(4) { right: 0; bottom: 0; border-right-width: 1px; border-bottom-width: 1px; }
+
+/* on arrival: wide and faint, closing to a lock, then gone */
+.wx-sound-dock.is-ready .wx-sound-lock { animation: wx-sound-lock 1.5s var(--sx-ease) 0.45s both; }
+
+@keyframes wx-sound-lock {
+  0% { transform: scale(1.8); opacity: 0; }
+  35% { opacity: 1; }
+  55% { transform: scale(1); opacity: 1; }
+  62% { opacity: 0.35; }
+  68% { opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* ---- the pill: slides out to the right (hover, focus) ------------------ */
+.wx-sound-shell {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 24px 0 calc(var(--sx-h) + 4px);
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse 60% 140% at 0% 50%, rgba(229, 125, 35, 0.2), transparent 70%),
+    repeating-linear-gradient(0deg, rgba(254, 238, 207, 0.025) 0 1px, transparent 1px 3px),
+    rgba(14, 6, 3, 0.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(250, 167, 25, 0.26),
+    inset 0 1px 0 rgba(254, 238, 207, 0.08);
+  clip-path: inset(0 calc(100% - var(--sx-h)) 0 0 round calc(var(--sx-h) / 2));
+  opacity: 0;
+  transition: clip-path 0.55s var(--sx-ease), opacity 0.3s ease 0.25s;
+  will-change: clip-path;
+}
+
+.wx-sound-txt {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1;
+  white-space: nowrap;
+  text-align: left;
+  opacity: 0;
+  transform: translateX(-14px);
+  transition: opacity 0.2s ease, transform 0.45s var(--sx-ease);
+}
+
+.wx-sound-txt > b {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.wx-sound-txt small {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+@media (hover: hover) {
+  .wx-sound:hover .wx-sound-shell { clip-path: inset(0 0 0 0 round calc(var(--sx-h) / 2)); opacity: 1; transition: clip-path 0.55s var(--sx-ease), opacity 0.15s ease; }
+  .wx-sound:hover .wx-sound-txt { opacity: 1; transform: none; transition-delay: 0.1s, 0.06s; }
+  .wx-sound:hover .wx-sound-lock { opacity: 1; transform: scale(0.96); }
+  .wx-sound:hover::after { opacity: 0.55; transform: scale(1); }
+}
+
+.wx-sound:focus-visible .wx-sound-shell { clip-path: inset(0 0 0 0 round calc(var(--sx-h) / 2)); opacity: 1; }
+.wx-sound:focus-visible .wx-sound-txt { opacity: 1; transform: none; }
+.wx-sound:focus-visible .wx-sound-lock { opacity: 1; transform: scale(0.96); }
+
+/* the shortcut: M, on a tiny keycap */
+.wx-sound-key {
+  display: inline-grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  margin-left: 2px;
+  border-radius: 4px;
+  border: 1px solid rgba(254, 238, 207, 0.22);
+  border-bottom-width: 2px;
+  color: rgba(254, 238, 207, 0.6);
+  font-size: 0.5rem;
+  letter-spacing: 0;
+}
+
+@media (hover: none) { .wx-sound-key { display: none; } }
+
+/* three cards on one spindle: OFF / ON / NO SIGNAL */
+.wx-sound-flap {
+  position: relative;
+  display: grid;
+  height: 1.2em;
+  overflow: hidden;
+}
+
+.wx-sound-flap b {
+  grid-area: 1 / 1;
+  align-self: center;
+  font-weight: 500;
+  transform: translateY(110%);
+  opacity: 0;
+  transition: transform 0.34s cubic-bezier(0.3, 1.3, 0.5, 1), opacity 0.2s ease, color 0.3s ease;
+}
+
+.wx-sound-off { color: rgba(254, 238, 207, 0.6); }
+.wx-sound-on { color: var(--brand-amber); }
+.wx-sound-nos { color: #e0674a; }
+
+.wx-sound[data-state="off"] .wx-sound-off,
+.wx-sound[data-state="on"] .wx-sound-on,
+.wx-sound[data-state="standby"] .wx-sound-on,
+.wx-sound[data-state="nosignal"] .wx-sound-nos { transform: none; opacity: 1; }
+
+.wx-sound[data-state="standby"] .wx-sound-on { color: rgba(250, 167, 25, 0.65); }
+.wx-sound:not([data-state="off"]) .wx-sound-off,
+.wx-sound[data-state="off"] .wx-sound-nos { transform: translateY(-110%); }
+
+/* the meter: four bands, low to high, reading the real output */
+.wx-sound-meter {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 10px;
+}
+
+.wx-sound-meter i {
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background: rgba(254, 238, 207, 0.22);
+  transform: scaleY(0.2);
+  transform-origin: 50% 100%;
+  transition: background 0.6s ease, transform 0.7s var(--sx-ease);
+}
+
+.wx-sound[data-state="on"] .wx-sound-meter i {
+  background: linear-gradient(to top, var(--brand-orange), var(--brand-amber));
+  transition: background 0.6s ease;
+}
+
+/* ---- the orb: rings, halo, core --------------------------------------- */
+.wx-sound-orb {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+/* the core: smoked glass, a hairline lit with the gradient */
+.wx-sound-core {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(254, 238, 207, 0.14), transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(229, 125, 35, 0), rgba(229, 125, 35, 0) 70%),
+    rgba(16, 7, 3, 0.9);
+  box-shadow:
+    0 12px 28px -12px rgba(0, 0, 0, 0.9),
+    inset 0 -6px 14px -6px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(254, 238, 207, 0.08);
+  transform: translate(calc(var(--mx, 0) * 5px), calc(var(--my, 0) * 5px));
+  transition: box-shadow 0.8s ease, background 0.8s ease, transform 0.35s var(--sx-ease);
+}
+
+.wx-sound-core::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: 50%;
+  background: linear-gradient(140deg, rgba(254, 238, 207, 0.28), rgba(254, 238, 207, 0.06) 45%, rgba(250, 167, 25, 0.22));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+  transition: background 0.5s ease;
+}
+
+.wx-sound[data-state="on"] .wx-sound-core {
+  background:
+    radial-gradient(circle at 32% 26%, rgba(254, 238, 207, 0.16), transparent 40%),
+    radial-gradient(circle at 62% 50%, rgba(229, 125, 35, 0.3), rgba(192, 69, 39, 0.08) 55%, transparent 72%),
+    rgba(22, 9, 4, 0.86);
+  box-shadow:
+    0 12px 30px -10px rgba(229, 125, 35, 0.55),
+    inset 0 -6px 14px -6px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(254, 238, 207, 0.12);
+}
+
+.wx-sound[data-state="on"] .wx-sound-core::before,
+.wx-sound:focus-visible .wx-sound-core::before { background: var(--gradient); }
+
+@media (hover: hover) {
+  .wx-sound:hover .wx-sound-core::before { background: var(--gradient); }
+}
+
+/* the press: the puck gives a millimetre */
+.wx-sound:active .wx-sound-core { transform: translate(calc(var(--mx, 0) * 5px), calc(var(--my, 0) * 5px)) scale(0.9); transition-duration: 0.8s, 0.8s, 0.12s; }
+
+/* the orbit around the puck: dashed, still while off, turning while on */
+.wx-sound-ring {
+  position: absolute;
+  inset: -6px;
+  z-index: 1;
+  border-radius: 50%;
+  border: 1px dashed rgba(254, 238, 207, 0.14);
+  transition: border-color 0.6s ease;
+  will-change: transform;
+  animation: wx-sound-turn 24s linear infinite paused;
+}
+
+.wx-sound[data-state="on"] .wx-sound-ring {
+  border-color: rgba(250, 167, 25, 0.3);
+  animation-play-state: running;
+}
+
+@keyframes wx-sound-turn { to { transform: rotate(360deg); } }
+
+/* the halo: a signal arc sweeping the rim while the sound is live */
+.wx-sound-halo {
+  position: absolute;
+  inset: -3px;
+  z-index: 2;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 58%, rgba(250, 167, 25, 0.12) 72%, rgba(254, 238, 207, 0.9) 88%, transparent 90%);
+  -webkit-mask: radial-gradient(circle, transparent calc(50% - 2.5px), #000 calc(50% - 1.5px));
+  mask: radial-gradient(circle, transparent calc(50% - 2.5px), #000 calc(50% - 1.5px));
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  will-change: transform;
+  animation: wx-sound-turn 3.6s linear infinite paused;
+}
+
+.wx-sound[data-state="on"] .wx-sound-halo { opacity: 0.7; animation-play-state: running; }
+
+/* the cue: pings while the film rolls with the sound off */
+.wx-sound-ping {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(229, 125, 35, 0.65);
+  opacity: 0;
+}
+
+.wx-sound-dock.is-cue .wx-sound[data-state="off"] .wx-sound-ping { animation: wx-sound-ping 2.8s cubic-bezier(0.2, 0.6, 0.3, 1) 0.4s infinite; }
+.wx-sound-dock.is-cue .wx-sound[data-state="off"] .wx-sound-ping + .wx-sound-ping { animation-delay: 1.3s; }
+
+@keyframes wx-sound-ping {
+  0% { transform: scale(1); opacity: 0.8; }
+  60%, 100% { transform: scale(1.9); opacity: 0; }
+}
+
+/* the press: one shockwave out of the puck as the sound comes on */
+.wx-sound.is-waking .wx-sound-ping:first-child { animation: wx-sound-warm 0.9s cubic-bezier(0.2, 0.6, 0.3, 1); }
+
+@keyframes wx-sound-warm {
+  0% { transform: scale(0.9); opacity: 0; border-color: rgba(254, 238, 207, 0.9); }
+  15% { opacity: 1; }
+  100% { transform: scale(2.3); opacity: 0; }
+}
+
+/* ---- the glyph ---------------------------------------------------------- */
+.wx-sound-glyph {
+  position: relative;
+  width: 46%;
+  height: 46%;
+  overflow: visible;
+  transform: translate(calc(var(--mx, 0) * 2px), calc(var(--my, 0) * 2px));   /* parallax over the leaning core */
+  transition: transform 0.35s var(--sx-ease);
+}
+
+.wx-g-spk {
+  fill: rgba(254, 238, 207, 0.72);
+  transition: fill 0.5s ease;
+}
+
+.wx-sound[data-state="on"] .wx-g-spk,
+.wx-sound[data-state="standby"] .wx-g-spk { fill: var(--brand-cream); }
+
+/* the orbits: dark while off; lit one after another, then breathing
+   with the output (the meter sets each orbit's opacity, inner = low band) */
+.wx-g-w {
+  fill: none;
+  stroke: rgba(254, 238, 207, 0.2);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  transform-box: view-box;
+  transform-origin: 15px 16px;
+  transition: stroke 0.5s ease;
+}
+
+.wx-g-w3 { stroke-dasharray: 0.035 0.07; stroke-width: 1.5; }
+
+.wx-sound[data-state="on"] .wx-g-w { stroke: url(#wx-sound-grad); }
+/* off, under the pointer: the orbits glimmer in turn, a preview of on */
+@media (hover: hover) {
+  .wx-sound[data-state="off"]:hover .wx-g-w { stroke: rgba(250, 167, 25, 0.55); }
+  .wx-sound[data-state="off"]:hover .wx-g-w2 { transition-delay: 0.08s; }
+  .wx-sound[data-state="off"]:hover .wx-g-w3 { transition-delay: 0.16s; }
+  .wx-sound[data-state="off"]:hover .wx-g-slash { stroke-dashoffset: 0.35; }
+}
+.wx-sound[data-state="standby"] .wx-g-w { stroke: rgba(250, 167, 25, 0.45); }
+
+/* the orbits ignite in sequence as it comes on */
+.wx-sound.is-waking .wx-g-w { animation: wx-g-draw 0.6s var(--sx-ease) both; }
+.wx-sound.is-waking .wx-g-w2 { animation-delay: 0.12s; }
+.wx-sound.is-waking .wx-g-w3 { animation-name: wx-g-fade; animation-delay: 0.24s; }
+
+@keyframes wx-g-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes wx-g-fade { from { opacity: 0; } }
+
+/* the satellite: parked at the top of its orbit, riding it while on.
+   An HTML layer over the glyph, so its flight is a composited rotation */
+.wx-sound-sat {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  /* the glyph's speaker centre (15,16 of 32) at 46% of the puck */
+  margin: calc(var(--sx-h) * 0.46 * (16 / 32 - 0.5)) 0 0 calc(var(--sx-h) * 0.46 * (15 / 32 - 0.5));
+  transform: rotate(-48deg);
+  will-change: transform;
+  pointer-events: none;
+}
+
+.wx-sound-sat b {
+  position: absolute;
+  left: calc(var(--sx-h) * 0.46 * 13 / 32 - 2px);
+  top: -2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(254, 238, 207, 0.35);
+  transition: background 0.5s ease, box-shadow 0.5s ease;
+}
+
+.wx-sound[data-state="on"] .wx-sound-sat { animation: wx-g-orbit 3.2s ease-in-out infinite alternate; }
+.wx-sound[data-state="on"] .wx-sound-sat b { background: #fff3d6; box-shadow: 0 0 5px 1px rgba(250, 167, 25, 0.9); }
+
+@keyframes wx-g-orbit {
+  from { transform: rotate(-48deg); }
+  to { transform: rotate(48deg); }
+}
+
+/* the comet streak: across the glyph while off, withdrawn while on.
+   Under it a cut in the glass colour, so it reads as a strike-through */
+.wx-g-slash,
+.wx-g-cut {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.5s var(--sx-ease), stroke 0.4s ease;
+}
+
+.wx-g-cut { stroke: rgb(18, 8, 4); stroke-width: 4.4; }
+.wx-g-slash { stroke: url(#wx-sound-grad); stroke-width: 1.8; }
+
+.wx-sound[data-state="on"] .wx-g-slash,
+.wx-sound[data-state="on"] .wx-g-cut,
+.wx-sound[data-state="standby"] .wx-g-slash,
+.wx-sound[data-state="standby"] .wx-g-cut { stroke-dashoffset: -1; }
+
+.wx-sound[data-state="nosignal"] .wx-g-slash { stroke: #e0674a; }
+.wx-sound[data-state="nosignal"] .wx-sound-glyph { animation: wx-g-los 0.5s steps(2) 2; }
+
+@keyframes wx-g-los {
+  50% { transform: translateX(1px); opacity: 0.55; }
+}
+
+/* ---- touch + narrow (the mission dock's screens) ----------------------- */
+@media (max-width: 1100px), (hover: none) {
+  .wx-sound-dock {
+    --sx-h: 64px;
+    left: max(clamp(14px, 4vw, 32px), calc(env(safe-area-inset-left, 0px) + 12px));   /* the dock's edge */
+  }
+
+  /* the dock aboard: the switch rides on top of it, one cluster */
+  body:has(.hm-dock.is-on:not(.is-tucked)) .wx-sound-dock { --sx-stack: 64px; }
+
+  /* the menu, the stage sheet and the contact console own the screen */
+  .nav-open .wx-sound-dock,
+  html.hm-sheet-lock .wx-sound-dock,
+  body:has(.qc-dock.is-open) .wx-sound-dock {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.6s var(--sx-ease), visibility 0s linear 0.3s;
+  }
+}
+
+/* phones: the beacon's phone size would sit on the hero's buttons;
+   46px fits the slot between them and the flight recorder */
+@media (max-width: 480px) {
+  .wx-sound-dock { --sx-h: 46px; }
+  body:has(.hm-dock.is-on:not(.is-tucked)) .wx-sound-dock { --sx-stack: 58px; }
+  .wx-sound-glyph { width: 54%; height: 54%; }
+  .wx-sound-sat { margin: calc(var(--sx-h) * 0.54 * (16 / 32 - 0.5)) 0 0 calc(var(--sx-h) * 0.54 * (15 / 32 - 0.5)); }
+  .wx-sound-sat b { left: calc(var(--sx-h) * 0.54 * 13 / 32 - 2px); }
+  .wx-sound-ring { inset: -4px; }
+  .wx-sound-lock { inset: -5px; }
+}
+
+/* ---- reduced motion: the same states, no choreography ------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .wx-sound-dock,
+  .wx-sound-dock.is-ready { transition: opacity 0.3s ease, visibility 0s; }
+  .wx-sound-dock.is-ready .wx-sound,
+  .wx-sound-dock.is-ready .wx-sound::after,
+  .wx-sound-dock.is-ready .wx-sound-lock,
+  .wx-sound.is-waking .wx-g-w,
+  .wx-sound.is-waking .wx-sound-ping:first-child,
+  .wx-sound-dock.is-cue .wx-sound .wx-sound-ping,
+  .wx-sound[data-state="nosignal"] .wx-sound-glyph { animation: none !important; }
+  .wx-sound-ring,
+  .wx-sound-halo,
+  .wx-sound[data-state="on"] .wx-sound-sat { animation: none; transform: rotate(0deg); }
+  .wx-sound:active .wx-sound-core { transform: none; }
+  .wx-sound-core, .wx-sound-glyph { transform: none !important; }
+}

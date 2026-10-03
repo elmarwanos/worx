@@ -764,7 +764,7 @@
         CE.forEach(function (e) { ctx.moveTo(cp[e[0]][0], cp[e[0]][1]); ctx.lineTo(cp[e[1]][0], cp[e[1]][1]); });
         ctx.stroke(); ctx.lineWidth = 1;
         // the scan that places it
-        var sc = (t * 0.7) % 1, sp = acam.p(0, 0.08, 0);
+        var sc = ((t * 0.7) % 1 + 1) % 1, sp = acam.p(0, 0.08, 0);   // t can open a hair below 0: wrap, never a negative radius
         ctx.strokeStyle = rgba(LILAC, 0.5 * (1 - sc));
         ctx.beginPath(); ctx.ellipse(sp[0], sp[1], E.S * 0.5 * sc, E.S * 0.5 * sc * Math.sin(0.9), 0, 0, TAU); ctx.stroke();
 
@@ -813,7 +813,7 @@
 
         // the logs, scrolling on the floor in front: they light it
         var lp = cam.p(0.15, FL, -0.75);
-        var fs = 0.046 * E.S * lp[2], scroll = (t * 0.6) % LOG.length;
+        var fs = 0.046 * E.S * lp[2], scroll = ((t * 0.6) % LOG.length + LOG.length) % LOG.length;   // never a negative line
         ctx.save();
         ctx.setTransform(E.dpr * 0.85, E.dpr * 0.32, -E.dpr * 0.62, E.dpr * 0.5, lp[0] * E.dpr, lp[1] * E.dpr);
         ctx.font = "500 " + fs.toFixed(1) + "px " + MONO;
@@ -983,7 +983,9 @@
 
     var frame = function (now) {
       if (!W) return;
-      var t = (now - t0) / 1000;
+      // a frame's timestamp can precede a t0 just taken (a scene switched
+      // mid-frame): never a negative time, so no negative index or radius
+      var t = Math.max(0, (now - t0) / 1000);
       if (reduced) t = STILL[idx];
       ptr.x += (ptr.tx - ptr.x) * 0.06; ptr.y += (ptr.ty - ptr.y) * 0.06;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1043,6 +1045,10 @@
       // switch world: it assembles from the start
       set: function (i) { idx = clamp(i, 0, SCENES.length - 1); t0 = performance.now(); if (!running) frame(t0); },
       hot: function (i) { hot = i; if (!running) frame(performance.now()); },
+      // the world's own clock, for its sound (home-audio.js plays each
+      // world's events on the moments they are drawn): which world, how
+      // far into it, which service is hot; still under reduced motion
+      clock: function () { return { idx: idx, t: Math.max(0, (performance.now() - t0) / 1000), hot: hot, still: reduced }; },
       anchors: anchors,
       radius: function () { return geom().S; },
     };
