@@ -398,6 +398,21 @@
         items.forEach(function (it, j) { if (it.getAttribute("data-tour-item") === key) { hold = Date.now() + 12000; show(j); } });
       });
     });
+    // stacked (phones): the screen holds at the top, under the header, and
+    // the list slides up behind it, so every tap is seen lighting its part
+    var bar = $(".site-header .nav-bar"), pin = 0, stacked = window.matchMedia("(max-width: 1000px)"), pinTick = false;
+    var stick = function () {
+      pinTick = false;
+      if (!stacked.matches) { dock.classList.remove("is-stuck"); return; }
+      var t = Math.round((bar ? bar.getBoundingClientRect().bottom : 60) + 10);
+      if (Math.abs(t - pin) > 2) { pin = t; dock.style.setProperty("--pin", t + "px"); }
+      var on = Math.abs(dock.getBoundingClientRect().top - pin) < 2;
+      dock.classList.toggle("is-stuck", on);
+      if (main) main.classList.toggle("is-pinned", on);     // the camera's HUD steps aside
+    };
+    window.addEventListener("scroll", function () { if (!pinTick) { pinTick = true; requestAnimationFrame(stick); } }, { passive: true });
+    window.addEventListener("resize", stick);
+    stick();
     read();
     // phones and tablets: the hologram in the hero as well, carried by the
     // page (not fixed behind it, so nothing fights a touch scroll): tilted

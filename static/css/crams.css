@@ -151,7 +151,8 @@
 }
 
 .cr.is-lit .cr-hud { opacity: 1; }
-.cr.is-past .cr-hud { opacity: 0; }
+.cr.is-past .cr-hud,
+.cr.is-pinned .cr-hud { opacity: 0; }       /* phones: the tour's screen holds the top */
 
 .cr-hud-c {
   position: absolute;
@@ -1849,6 +1850,40 @@
 @media (max-width: 1000px) {
   .cr-tour-grid { grid-template-columns: minmax(0, 1fr); }
   .cr-tour-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* stacked: the screen holds at the top, under the header, and the list
+   slides up behind it (crams-deck.js sets --pin and .is-stuck); kept short
+   enough to leave the list room below it */
+@media (max-width: 1000px) {
+  .cr-tour-dock.is-inline {
+    position: sticky;
+    top: var(--pin, 72px);
+    z-index: 2;
+    width: min(100%, calc((100svh - var(--pin, 72px)) * 0.56 * 1280 / 1200));
+    margin-inline: auto;
+    background-color: var(--ink);
+  }
+  /* once it holds: the page behind the header is covered, and the list
+     fades as it goes under the screen */
+  .cr-tour-dock.is-inline::before,
+  .cr-tour-dock.is-inline::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    width: 100vw;
+    translate: -50% 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .cr-tour-dock.is-inline::before { bottom: calc(100% + 1px); height: calc(var(--pin, 72px) + 2px); background: var(--ink); }
+  .cr-tour-dock.is-inline::after { top: calc(100% + 1px); height: 34px; background: linear-gradient(var(--ink), transparent); }
+  .cr-tour-dock.is-stuck::before,
+  .cr-tour-dock.is-stuck::after { opacity: 1; }
+  .cr-tour-vf { transition: opacity 0.3s ease; }
+  .cr-tour-dock.is-stuck .cr-tour-vf { opacity: 0; }
+  .cr-tour-list { margin-top: 18px; }
 }
 
 @media (max-width: 640px) {
