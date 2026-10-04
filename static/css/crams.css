@@ -1783,81 +1783,68 @@
 .cr-tour-dock.is-inline .dk-tag i { width: 14px; height: 14px; }
 .cr-tour-dock.is-inline .dk-spot { border-width: 4px; border-radius: 22px; }
 
-/* phones and tablets: the hologram in the hero (crams-deck.js), carried by
-   the page behind the hero's words, fading in from the top and out below */
-.cr-hero-holo {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-  perspective: 900px;
-  perspective-origin: 50% 30%;
-  -webkit-mask-image: linear-gradient(180deg, transparent 4%, #000 18%, #000 46%, transparent 72%);
-  mask-image: linear-gradient(180deg, transparent 4%, #000 18%, #000 46%, transparent 72%);
-}
-.cr-hero-holo-in {
-  position: absolute;
-  left: 50%;
-  top: 34%;
-  width: 1280px;
-  height: 1200px;
-  transform-style: preserve-3d;
-  transform: translate(-50%, -50%) scale(var(--k, 0.3)) rotateX(10deg) rotateY(-22deg) rotateZ(-2deg);
-  opacity: 0.32;                   /* the desktop hero's own strength: the words come first */
-}
-.cr-hero-holo.is-flying .dk-p { transition: transform 2.4s cubic-bezier(0.16, 0.84, 0.24, 1), opacity 1.3s ease; transition-delay: calc(var(--d) * 110ms); }
-.cr-hero:has(.cr-hero-holo) { position: relative; }
-
-/* phones and tablets: the chapters' interludes (crams-deck.js), the story
-   the desktop's floating screen tells, told in the page between them */
+/* phones and tablets: the dashboard in the hero and between the chapters
+   (crams-deck.js), carried by the page. Kept light for a phone: flat 2D
+   (a slight angle, no 3D, no perspective), no floating loop, and the
+   edges faded by a mask */
+.cr-hero-holo,
+.cr-inter { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; contain: layout paint; }
+.cr-inter { position: relative; inset: auto; height: clamp(250px, 70vw, 440px); }
+/* the edges fade to nothing (a mask: the page's own glows show through,
+   no band, no edge); cheap here, the content is flat and mostly still */
 .cr-inter {
-  position: relative;
-  height: clamp(230px, 66vw, 420px);
-  overflow: hidden;
-  pointer-events: none;
-  perspective: 900px;
-  perspective-origin: 50% 40%;
-  -webkit-mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
-  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+  -webkit-mask-image: radial-gradient(ellipse 62% 50% at 50% 50%, #000 55%, transparent 100%);
+  mask-image: radial-gradient(ellipse 62% 50% at 50% 50%, #000 55%, transparent 100%);
 }
+.cr-hero-holo {
+  -webkit-mask-image: linear-gradient(180deg, transparent 6%, #000 20%, #000 34%, transparent 58%);
+  mask-image: linear-gradient(180deg, transparent 6%, #000 20%, #000 34%, transparent 58%);
+}
+.cr-hero-holo-in,
 .cr-inter-in {
   position: absolute;
   left: 50%;
   top: 50%;
   width: 1280px;
   height: 1200px;
-  transform-style: preserve-3d;
-  transform: translate(-50%, -50%) scale(var(--k, 0.28)) rotateX(var(--rx, 10deg)) rotateY(var(--ry, -16deg));
-  opacity: 0.8;
+  transform: translate(-50%, -50%) scale(var(--k, 0.28)) rotate(var(--rz, -4deg)) skewX(var(--sk, -5deg));
 }
-.cr-inter--sync .cr-inter-in { --rx: 8deg; --ry: 16deg; }
-.cr-inter--teams .cr-inter-in { --rx: 14deg; --ry: 0deg; opacity: 0.9; }
-.cr-inter.is-moving .dk-p { transition: transform 2.4s cubic-bezier(0.16, 0.84, 0.24, 1), opacity 1.2s ease, filter 1.2s ease, border-color 0.6s ease; transition-delay: calc(var(--d) * 90ms); }
+.cr-hero-holo-in { top: 28%; opacity: 0.26; }       /* the words come first */
+.cr-inter-in { opacity: 0.85; }
+.cr-inter--sync .cr-inter-in { --rz: 3deg; --sk: 5deg; }
+.cr-inter--teams .cr-inter-in { --rz: 0deg; --sk: 0deg; opacity: 0.92; }
+.cr-hero-holo .cr-deck-dash,
+.cr-inter .cr-deck-dash { animation: none; transform-style: flat; }
+.cr-hero-holo .dk-p,
+.cr-inter .dk-p { transition: none; }
+.cr-hero-holo.is-flying .dk-p,
+.cr-inter.is-moving .dk-p { transition: transform 1.8s cubic-bezier(0.16, 0.84, 0.24, 1), opacity 1s ease, filter 1s ease, border-color 0.6s ease; transition-delay: calc(var(--d) * 70ms); }
 .cr-inter.is-broken .dk-p { border-color: rgba(229, 72, 60, 0.45); filter: saturate(0.45) brightness(0.8); }
-.cr-inter.is-sync .dk-p { animation: dk-synced 1.6s ease both; animation-delay: calc(var(--d) * 70ms); }
+.cr-inter.is-sync .dk-p { animation: dk-synced 1.6s ease both; animation-delay: calc(var(--d) * 60ms); }
 .cr-inter--teams .dk-p { transition: border-color 0.5s ease, box-shadow 0.5s ease; }
 .cr-inter-tag {
   position: absolute;
   left: 50%;
   bottom: 12%;
+  z-index: 1;
   translate: -50% 0;
   padding: 6px 14px;
   border: 1px solid rgba(250, 167, 25, 0.5);
   border-radius: 999px;
-  background: rgba(14, 6, 3, 0.75);
+  background: rgba(14, 6, 3, 0.8);
   font-family: var(--font-mono);
   font-size: 0.66rem;
   letter-spacing: 0.2em;
   color: var(--accent-2);
   white-space: nowrap;
 }
+.cr-hero:has(.cr-hero-holo) { position: relative; }
+.cr-hero:has(.cr-hero-holo) .cr-hero-grid { z-index: 1; }
 /* the gap no longer needs a screen's height of its own: the interludes
    carry the space */
 @media (max-width: 1024px), (hover: none) {
   .cr-gap:has(+ .cr-inter) { min-height: 0; padding-block: clamp(36px, 8vw, 70px); }
 }
-.cr-hero:has(.cr-hero-holo) .cr-hero-grid { z-index: 1; }
 
 @media (max-width: 1000px) {
   .cr-tour-grid { grid-template-columns: minmax(0, 1fr); }

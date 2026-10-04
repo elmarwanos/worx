@@ -403,6 +403,7 @@
     // page (not fixed behind it, so nothing fights a touch scroll): tilted
     // in its own depth, its panels fly in from deep space, lock together
     // and the screen powers on; new leads keep landing while it is in view
+    var flat = function (q, k, sc) { return "translate(" + (q.x * k).toFixed(0) + "px," + (q.y * k).toFixed(0) + "px) rotate(" + (q.rz * k * 1.2).toFixed(1) + "deg) scale(" + sc + ")"; };
     if (heroSec) (function () {
       var holo = document.createElement("div"), hin = document.createElement("div"), root = document.createElement("div");
       holo.className = "cr-hero-holo"; holo.setAttribute("aria-hidden", "true");
@@ -413,11 +414,11 @@
       var fit = function () { hin.style.setProperty("--k", Math.min(holo.clientWidth * 1.2 / DW, holo.clientHeight * 0.85 / DH).toFixed(4)); };
       fit();
       if ("ResizeObserver" in window) new ResizeObserver(fit).observe(holo);
-      var lock = function () { hdash.panels.forEach(function (p) { p.style.transform = "translate3d(0,0," + [46, 74, 30, 0][+p.getAttribute("data-layer")] + "px)"; p.style.opacity = 1; }); };
+      var lock = function () { hdash.panels.forEach(function (p) { p.style.transform = "none"; p.style.opacity = 1; }); };
       var seen = true;
       if ("IntersectionObserver" in window) new IntersectionObserver(function (en) { seen = en[0].isIntersecting; }).observe(heroSec);
       if (reduced) { lock(); hdash.boot(); return; }
-      hdash.panels.forEach(function (p, i) { p.style.transform = tf(DEEP[i], 0.5); p.style.opacity = 0; });
+      hdash.panels.forEach(function (p, i) { p.style.transform = flat(SCATTER[i], 0.5, 0.7); p.style.opacity = 0; });
       setTimeout(function () { holo.classList.add("is-flying"); lock(); }, 500);
       setTimeout(function () { hdash.boot(); }, 2500);
       stream(hdash, function () { return seen && hdash.root.classList.contains("is-on"); });
@@ -447,8 +448,8 @@
       var fit = function () { hin.style.setProperty("--k", Math.min(box.clientWidth * 1.08 / DW, box.clientHeight * 1.0 / DH).toFixed(4)); };
       fit();
       if ("ResizeObserver" in window) new ResizeObserver(fit).observe(box);
-      var lock = function () { d.panels.forEach(function (p) { p.style.transform = "translate3d(0,0," + [46, 74, 30, 0][+p.getAttribute("data-layer")] + "px)"; p.style.opacity = 1; }); };
-      var scatter = function () { d.panels.forEach(function (p, i) { p.style.transform = tf(SCATTER[i], 0.42); p.style.opacity = 0.85; }); };
+      var lock = function () { d.panels.forEach(function (p) { p.style.transform = "none"; p.style.opacity = 1; }); };
+      var scatter = function () { d.panels.forEach(function (p, i) { p.style.transform = flat(SCATTER[i], 0.32, 0.92); p.style.opacity = 0.85; }); };
       var seen = false, timers = [], cycle = null, k = 0;
       var later = function (fn, ms) { timers.push(setTimeout(fn, reduced ? 0 : ms)); };
       var rest = function () {                      // as it waits, out of view
@@ -472,10 +473,15 @@
         }
       };
       rest();
+      // it plays once, when well in view, and then stays as it ended (no
+      // snapping back while half on screen); only the teams' lights pause
+      // out of view
+      var played = false;
       if ("IntersectionObserver" in window) new IntersectionObserver(function (en) {
-        var v = en[0].isIntersecting;
-        if (v && !seen) { seen = true; play(); } else if (!v && seen) { seen = false; rest(); }
-      }, { threshold: 0.35 }).observe(box);
+        seen = en[0].isIntersecting;
+        if (seen && !played) { played = true; play(); }
+        else if (mode === "teams" && played) { clearInterval(cycle); cycle = null; if (seen) play(); }
+      }, { threshold: 0.5 }).observe(box);
       else play();
       if (mode === "teams") stream(d, function () { return seen; });
     };
