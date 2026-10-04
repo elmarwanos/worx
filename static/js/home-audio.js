@@ -2,7 +2,7 @@
    Worx | home-audio.js
    The home page's sound, on the master channel (worx-audio.js):
 
-     BED    the home soundscape (static/assets/home/home-soundscape.mp3),
+     BED    "Mothership", the home soundscape (static/assets/home/home-mothership.mp3),
             continuous under everything, ducked while the film speaks
      HERO   "Redshift", the film's score (static/assets/home/hero-score.m4a),
             scored frame by frame to the film and the WORX title card,
@@ -50,9 +50,13 @@
      under everything that matters (worx-audio.js, bed()).
      Levels (set by Worx): the bed at 15%, every section at 20%, on every
      device; each source loudness-matched first (worx-audio.js). This
-     drone (energy below 400 Hz, -19.2 LUFS, true peak -3.5 dBFS) sits at
+     bed (hum below 250 Hz, hull and air to 2 kHz, -19.2 LUFS) sits at
      about -34.5 LUFS: felt more than heard, under sections at about -32. */
-  A.bed({ url: "static/assets/home/home-soundscape.mp3", level: 0.15 });
+  // "Mothership" (tools/home-bed/bed.py): a craft the size of a city over
+  // the Earth: its hum on D and A, its hull groaning in the sky, at one
+  // steady level. Matched to the old bed's -19.2 LUFS, so 15% still holds.
+  // The old drone (home-soundscape.mp3) is kept: point url back to revert.
+  A.bed({ url: "static/assets/home/home-mothership.mp3?v=1", level: 0.15 });
 
   /* ---- HERO ------------------------------------------------------- */
   // REDSHIFT: one 12.7 s score on the film's frames. 0 -> 8.46 is the film
@@ -64,12 +68,16 @@
   // the first seconds of a sci-fi ident, the collision a real implosion,
   // the title card opens on a sci-fi door (unlock on the cut).
   // The old tracks (hero-ambience*.m4a) are kept for reference.
-  var SRC = "static/assets/home/hero-score.m4a?v=4";
+  // two masters of one mix: phones get theirs (mono, the sub carried as
+  // harmonics a phone speaker can play); laptops, desktops, tablets the full one
+  var PHONE = !!(window.matchMedia && matchMedia("(pointer: coarse)").matches) && Math.min(screen.width, screen.height) < 600;
+  var SRC = PHONE ? "static/assets/home/hero-score-mobile.m4a?v=5" : "static/assets/home/hero-score.m4a?v=5";
   var FILM_END = 8.5;               // home.js cuts the film here...
   var CUT = FILM_END - 0.04;        // ...on the frame before it (its t >= d - 0.04)
-  // 20% like every section, after loudness-matching: the film part of the
-  // score measures -16.1 LUFS, so 0.804 brings it to the -18 LUFS reference
-  var LEVEL = 0.2 * 0.804;
+  // loudness-matched to the -18 LUFS reference (the film part measures
+  // -13.4 LUFS desktop, -15.1 phone), then 28%, not 20%: the first
+  // impression stands a step (+3 dB) above the sections
+  var LEVEL = 0.28 * (PHONE ? 0.716 : 0.589);
   var NUDGE = 0.04;                 // the most the track's speed is eased to follow the film
   var NUDGE_HARD = 0.07;            // ...and when it is well behind or ahead (> 60ms)
   var JUMP = 0.15;                  // seconds apart: a real jump, re-lock with a crossfade

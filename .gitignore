@@ -11,3 +11,5 @@ tools/blog-covers/out/
 tools/hero-audio/src/
 tools/hero-audio/*.wav
 tools/hero-audio/*.npy
+tools/home-bed/src/
+tools/home-bed/*.wav

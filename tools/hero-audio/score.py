@@ -162,7 +162,7 @@ def onset_slice(x, t, pre=0.004, post=0.25):
     return fade(s, 0.002, post * 0.6)
 
 # ------------------------------------------------------------- the buses
-BUS = {k: np.zeros((N + SR * 6, 2)) for k in ["amb", "tone", "cosmic", "matter", "impact", "bh", "void", "worx", "fx"]}
+BUS = {k: np.zeros((N + SR * 6, 2)) for k in ["amb", "tone", "cosmic", "matter", "impact", "bh", "void", "worx", "fx", "pulse"]}
 def put(bus, t, x, g=0.0):
     x = st(x) * dbg(g); a = T(t)
     if a < 0: x = x[-a:]; a = 0
@@ -494,7 +494,7 @@ for h, a in PART:
 flick = 1 - 0.35 * (1 - lock) * (np.sin(2 * np.pi * 31 * t) > 0.6)
 tone *= amp * flick
 tone2 = np.stack([tone, np.roll(tone, 37)], 1)
-put("worx", c0 + 0.08, verb(width(tone2, 0.45), H_MED, wet=0.22), -7)
+put("worx", c0 + 0.08, verb(width(tone2, 0.45), H_MED, wet=0.22), -12)   # v5: under the sonic logo
 # the shimmer riding the sweep (0.55 -> 1.95, its ease), left to right
 n = T(1.6); t = tt(n)
 def ease(x):  # cubic-bezier(0.135, 0.9, 0.15, 1), approximated
@@ -630,6 +630,95 @@ for side in (-1, 1):
 sw = whoosh(1.5, peak=0.3, f0=500, f1=5500, p0=-0.6, p1=0.6, q=1.0, body=0.3)
 put("worx", c0 + 0.55, verb(sw, H_MED, wet=0.4)[:T(2.2)], -22)
 
+
+# ============================================================ V5: THE WOW
+# v4 lived below 80 Hz (phones and laptops lost it), sat near mono, sagged
+# 2.4-4.6 and ended on a mechanism. v5 adds: an orchestra that is heard on
+# any speaker (strings swelling into the ignition, a spiccato ostinato
+# driving the approach, a D-major sonic logo on WORX that answers the
+# ident's D), a mid-range slam on the first frame, and width.
+def semi(f, s): return f * 2 ** (s / 12)
+D1 = D2 / 2                                   # 36.8 Hz: the ident's D
+def ensemble(notes, dur, fc_pts, attack=0.02, decay=None, voices=5, cents=14, spread=0.8):
+    """a string/brass section: detuned saws per note, spread across the
+    stereo field, through a lowpass that follows fc_pts [(t, Hz)]"""
+    n = T(dur); out = np.zeros((n, 2)); t = tt(n)
+    for i, (f, a) in enumerate(notes):
+        for v in range(voices):
+            dv = (v / (voices - 1) - 0.5) * 2
+            vib = 1 + 0.0025 * np.sin(2 * np.pi * (4.6 + 0.4 * v) * t + v)
+            ph = 2 * np.pi * np.cumsum(f * 2 ** (dv * cents / 1200) * vib) / SR + rng.uniform(0, 6.28)
+            y = np.zeros(n); k = 1
+            while f * k < 7000:
+                y += np.sin(k * ph) / k; k += 1
+            p = np.clip(dv * spread + (i % 2 - 0.5) * 0.2, -1, 1)
+            out += pan(y, p) * a / voices
+    out = tv(tv(out, "low", np.interp(t, *zip(*fc_pts)), q=0.8), "low", np.interp(t, *zip(*fc_pts)) * 1.3, q=0.6)
+    e = np.minimum(1, t / attack)
+    if decay: e = e * np.exp(-t / decay)
+    out = np.tanh(out / (np.abs(out).max() + 1e-9) * 1.6) * e[:, None]
+    return fade(out / (np.abs(out).max() + 1e-9) * 0.5, 0.002, 0.08)
+def bow(n):
+    """rosin: the bow noise that makes a synth section read as strings"""
+    return filt(noise(n, "pink"), "bp", [1800, 6500]) * 0.035
+
+# 0.00 the first frame, told in the mids: a trailer slam with grit
+slam = hit_body(1.1, 3000)
+slam = filt(np.tanh(slam * 7) / 7, "bp", [140, 4200])
+slam[:T(0.03)] += filt(crack(2, 900), "low", 6000)[:T(0.03)] * 0.8
+put("fx", 0.0, verb(width(slam, 1.4), H_BIG, wet=0.45)[:T(2.2)], -10)
+# 0.00-1.00 the low strings swell into the ignition and stop dead on it
+n = T(1.0)
+sw1 = ensemble([(D1 * 2, 1.0), (D1 * 3, 0.6), (D1 * 4, 0.7), (semi(D1 * 8, 7), 0.25)], 1.0,
+               [(0, 180), (0.6, 900), (0.98, 3200)], attack=0.6)
+sw1 = (sw1 + bow(n)) * env([(0, -40), (0.5, -16), (0.97, -3), (0.998, 0)], n)[:, None]
+put("fx", 0.0, fade(sw1, 0.2, 0.004), -12)
+# 1.77 the reveal: the strings answer the braam, a sixth higher, and breathe out
+n = T(1.3)
+sw2 = ensemble([(semi(D1 * 2, -2), 1.0), (semi(D1 * 4, -2), 0.7), (D1 * 4, 0.5), (semi(D1 * 8, 2), 0.3)], 1.3,
+               [(0, 3600), (0.3, 2200), (1.3, 500)], attack=0.01, decay=0.5)
+put("fx", 1.77, verb(sw2, H_BIG, wet=0.4)[:T(2.4)], -15)
+
+# 2.95-4.955 THE APPROACH: a spiccato ostinato on D that never lets go. It
+# lands with the dive, quickens with the heartbeat, brightens and climbs a
+# half step at a time, and stops dead before contact (the silence is the hit's)
+def spicc(f, dur, bright):
+    n = T(dur); t = tt(n)
+    y = ensemble([(f, 1.0), (f * 2, 0.45)], dur, [(0, bright), (0.05, bright * 0.4), (dur, 200)],
+                 attack=0.004, decay=0.07, voices=3, cents=10, spread=0.5)
+    return y + bow(n) * np.exp(-t / 0.05)[:, None] * 3
+PAT = [0, 0, 12, 0, 0, 7, 0, 12]               # D D d' D D A D d'
+tq = 2.98; k = 0
+while tq < 4.94:
+    u = (tq - 2.98) / (4.94 - 2.98)
+    step = 0.17 - 0.085 * u ** 1.4              # 16ths that quicken with the film
+    lift = [0, 0, 1, 1, 3][min(4, int(u * 5))]  # the floor rises under it
+    f = semi(D1 * 2, PAT[k % 8] + lift)
+    g = -13 + 10 * u ** 1.2 + (2 if k % 4 == 0 else 0)
+    put("pulse", tq, pan(spicc(f, 0.2, 900 + 3600 * u), 0.35 * (1 if k % 2 else -1)), g)
+    k += 1; tq += step
+# a held cello line rising under it, cut on the same instant
+n = T(1.98)
+cel = ensemble([(D1 * 2, 1.0), (D1 * 3, 0.5)], 1.98, [(0, 300), (1.98, 2400)], attack=0.4, voices=4)
+cel = vari(cel, np.interp(tt(n), [0, 1.98], [1.0, 2 ** (3 / 12)]), n)   # bending up a minor third
+put("pulse", 2.975, fade((cel + bow(n)) * env([(0, -30), (1.0, -16), (1.96, -6)], n)[:, None], 0.3, 0.004), -7)
+
+# WORX (8.46): THE SONIC LOGO. The cut hits a Bb chord with the door (the
+# flat sixth: the last of the dark); on the light sweep (+0.55) it opens to
+# D major, the key the ident began in; the bed's A sits inside it; it
+# breathes out under the headline. Strings and brass, no bells.
+n = T(0.9)
+bb = ensemble([(semi(D1, -4), 0.8), (semi(D1 * 2, -4), 1.0), (semi(D1 * 3, -4), 0.7), (semi(D1 * 4, -4), 0.6), (semi(D1 * 5, -4), 0.35)],
+              0.9, [(0, 2600), (0.15, 1400), (0.6, 700), (0.9, 400)], attack=0.006, voices=6, cents=16)
+put("worx", c0, verb(bb * env([(0, 0), (0.45, -4), (0.62, -14), (0.9, -40)], n)[:, None], H_BIG, wet=0.35)[:T(2.0)], -9)
+n = T(4.2)
+dmaj = ensemble([(D1, 0.9), (D1 * 2, 1.0), (D1 * 3, 0.8), (D1 * 4, 0.7), (D1 * 5, 0.5), (D1 * 6, 0.45), (D1 * 8, 0.35), (D1 * 10, 0.22), (D1 * 12, 0.18)],
+                4.2, [(0, 600), (0.5, 4800), (1.4, 3000), (4.2, 700)], attack=0.12, voices=7, cents=18, spread=1.0)
+dmaj = (dmaj + bow(n) * 0.6) * env([(0, -18), (0.42, -1), (0.6, 0), (1.5, -3), (2.6, -11), (4.2, -50)], n)[:, None]
+put_before("worx", c0 + 0.55, rev_swell(dmaj[:T(0.8)], 0.42), -12)
+put("worx", c0 + 0.13, verb(dmaj, H_BIG, wet=0.45)[:T(5.4)], -7)
+t0, s = sub(c0 + 0.55, 2.6, D1 * 1.5, D1, a_ms=60, tau=0.9, gain=-15); put("worx", t0, s)
+
 # ================================================================ the mix
 def bus(k): return BUS[k][:N].copy()
 mixed = {k: bus(k) for k in BUS}
@@ -646,7 +735,7 @@ def bend(x, t_from, t_to, oct_total):
 cons = env([(0, 0), (6.62, 0), (7.0, -3), (7.5, -9), (7.92, -16)], N)[:, None]
 for k in ["impact", "matter", "cosmic"]:
     mixed[k] = bend(mixed[k], 6.62, 7.92, 1.0) * cons
-phys = mixed["amb"] + mixed["tone"] + mixed["cosmic"] + mixed["matter"] + mixed["impact"] + mixed["bh"] + mixed["fx"]
+phys = mixed["amb"] + mixed["tone"] + mixed["cosmic"] + mixed["matter"] + mixed["impact"] + mixed["bh"] + mixed["fx"] + mixed["pulse"]
 t_all = tt(N)
 # black hole: narrow to the centre, take the highs then the mids
 w = np.interp(t_all, [0, 6.9, 7.4, 7.75, 7.88, 7.92], [1, 1, 0.5, 0.15, 0.0, 0.0])
@@ -667,37 +756,10 @@ suck[-T(0.006):] *= np.linspace(1, 0, T(0.006))[:, None]
 phys[T(7.92) - len(suck):T(7.92)] += mono(suck)[:, None] * dbg(-20)
 
 out = phys + mixed["void"] + mixed["worx"]
-# phones: the low end is told again an octave up, as harmonics
-low = filt(out, "low", 110, 4)
-harm = filt(np.tanh(low * 6) / 6, "bp", [120, 420], 2)
-out = out + harm * dbg(float(sys.argv[2]) if len(sys.argv) > 2 else -2.0)
-out = filt(out, "high", 22, 2)
-out[T(7.92):T(CUT)] = filt(mixed["void"] + mixed["worx"], "high", 18, 2)[T(7.92):T(CUT)]   # the void: only the door's pressure
-
-# headroom: a look-ahead peak limiter at -1.2 dBTP (4x oversampled peaks)
-TRIM = float(sys.argv[1]) if len(sys.argv) > 1 else 0.0
-out *= dbg(TRIM)
-from scipy.ndimage import minimum_filter1d
-la = T(0.003)
-pk = np.abs(resample_poly(out, 4, 1, axis=0)).max(1)[:4 * len(out)].reshape(-1, 4).max(1)
-need = np.minimum(1, dbg(-1.2) / np.maximum(pk, 1e-9))
-gmin = minimum_filter1d(need, size=2 * la + 1)
-gr = np.empty_like(gmin); a_rel = np.exp(-1 / (0.06 * SR)); cur = 1.0
-for i in range(len(gmin)):
-    cur = gmin[i] if gmin[i] < cur else gmin[i] + (cur - gmin[i]) * a_rel
-    gr[i] = cur
-out = out * gr[:, None]
-print("limiter max reduction %.1f dB" % (20 * np.log10(gr.min())))
-grd = 20 * np.log10(gr); ev = []
-i = 0
-while i < len(grd):
-    if grd[i] < -2:
-        j = i
-        while j < len(grd) and grd[j] < -0.5: j += 1
-        ev.append((i / SR, (j - i) / SR, grd[i:j].min())); i = j
-    else: i += 1
-print("GR events:", ", ".join("%.3f(%dms,%.1fdB)" % (a, b * 1000, c) for a, b, c in ev))
-out = fade(out, 0.015, 0.4)
-wavfile.write(os.path.join(HERE, "hero-score.wav"), SR, out.astype(np.float32))
+voidpart = mixed["void"] + mixed["worx"]
 np.save(os.path.join(HERE, "stems.npy"), np.stack([mixed[k][:N].mean(1) for k in ["amb", "tone", "cosmic", "matter", "impact", "bh", "worx"]]))
-print("rendered", out.shape[0] / SR, "s")
+np.save(os.path.join(HERE, "premix.npy"), np.stack([out, voidpart]))
+np.save(os.path.join(HERE, "pulse.npy"), mixed["pulse"])
+# the masters (desktop + phone) live in master.py, so they can be re-run alone
+import master
+master.render(out, voidpart)
