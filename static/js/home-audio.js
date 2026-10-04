@@ -4,18 +4,22 @@
 
      BED    the home soundscape (static/assets/home/home-soundscape.mp3),
             continuous under everything, ducked while the film speaks
-     HERO   the film's soundtrack (static/assets/home/hero-ambience.m4a),
+     HERO   "Redshift", the film's score (static/assets/home/hero-score.m4a),
+            scored frame by frame to the film and the WORX title card,
             locked to the film's own clock, video.currentTime:
-              - it sounds only while the film is rolling; switched on
-                mid-film it joins at the frame on screen
+              - switched on mid-film it joins at the frame on screen
               - every frame it checks its position against the picture
                 (output latency allowed for); a slip is closed by easing
                 the track's speed a few percent, a real jump (a stall, a
                 seek) re-locks it with a short crossfade
               - the film pauses (scrolled away, buffering, another tab):
                 it stops with it, and picks up at the same frame
-              - the film reaches its cut: it fades to nothing on the
-                cut itself. The title card is silent. No loop.
+              - at the cut the score carries on, on the title card's
+                clock (the card's letters, lock and light sweep are
+                scored too), then hands the page back to the bed
+              - the bed follows the film: it carries the opening, steps
+                back under the big moments, is swallowed by the black
+                hole (silence before WORX) and returns with WORX
               - switched on over the title card (the film already over),
                 the film rolls again from its first frame, with sound
      next   services, crams, flight (mission control), comms (the clients
@@ -51,83 +55,123 @@
   A.bed({ url: "static/assets/home/home-soundscape.mp3", level: 0.15 });
 
   /* ---- HERO ------------------------------------------------------- */
-  // the original soundtrack with cinematic layers over it (mids, highs and
-  // width only, on the film's own beats: the supernova, the nebula, the
-  // disk, the gap before the collision, the impact, the fireball, the black
-  // hole); same loudness as the original (hero-ambience.m4a, kept)
-  var SRC = "static/assets/home/hero-ambience-v2.m4a";
+  // REDSHIFT: one 12.7 s score on the film's frames. 0 -> 8.46 is the film
+  // (sun, expansion, nebula, disk, accretion, collision, black hole, the
+  // swallow at 7.92, then true silence); from the cut it scores the title
+  // card on the card's own clock (ignition, the letters landing, the lock,
+  // the tone on A that locks as the light sweeps, the release). Rendered
+  // offline from licensed effects (tools/hero-audio/score.py): the opening is
+  // the first seconds of a sci-fi ident, the collision a real implosion,
+  // the title card opens on a sci-fi door (unlock on the cut).
+  // The old tracks (hero-ambience*.m4a) are kept for reference.
+  var SRC = "static/assets/home/hero-score.m4a?v=4";
   var FILM_END = 8.5;               // home.js cuts the film here...
   var CUT = FILM_END - 0.04;        // ...on the frame before it (its t >= d - 0.04)
-  var TAIL = 0.32;                  // seconds: the soundtrack's fade into the cut
-  // 20% like every section, after loudness-matching: the track measures
-  // -13.4 LUFS, so 0.59 brings it to the -18 LUFS reference first
-  var LEVEL = 0.2 * 0.59;
+  // 20% like every section, after loudness-matching: the film part of the
+  // score measures -16.1 LUFS, so 0.804 brings it to the -18 LUFS reference
+  var LEVEL = 0.2 * 0.804;
   var NUDGE = 0.04;                 // the most the track's speed is eased to follow the film
   var NUDGE_HARD = 0.07;            // ...and when it is well behind or ahead (> 60ms)
   var JUMP = 0.15;                  // seconds apart: a real jump, re-lock with a crossfade
+  var ENTER = 0.3;                  // switched on mid-film: the score fades in this long
+  // the bed through the film (score time -> gain): it is the universe at the
+  // opening (under the ident), steps back under the big moments, is pulled
+  // into the black hole and is gone by the swallow (7.92); it returns as WORX settles
+  var BED = [[0, 0.7], [0.95, 0.7], [1.1, 0.5], [2.1, 0.5], [2.4, 0.75], [2.8, 0.75], [3.0, 0.6], [4.6, 0.6],
+             [4.9, 0.4], [6.4, 0.32], [6.9, 0.3], [7.5, 0.12], [7.85, 0], [CUT + 1.2, 0], [CUT + 1.21, 1]];
+  var bedAt = function (t) {
+    if (t <= BED[0][0]) return BED[0][1];
+    for (var i = 1; i < BED.length; i++) if (t < BED[i][0]) {
+      var a = BED[i - 1], b = BED[i];
+      return a[1] + (b[1] - a[1]) * (t - a[0]) / (b[0] - a[0]);
+    }
+    return 1;
+  };
   var video = hx && q(".hx-video", hx);
 
   if (hx && video) {
     A.prefetch(SRC);
 
-    var ctx = null, out = null, buf = null, live = false;
-    var take = null;                 // { src, g, t0, off }: the one take on the film's clock
-    var drift = 0, raf = 0, lastT = null;
+    var ctx = null, out = null, buf = null, live = false, hp = null;
+    var take = null;                 // { src, g, pos, last, rate }: the one take on the film's clock
+    var drift = 0, raf = 0, lastT = null, bedG = -1;
+    var cardT0 = null;               // performance.now() when the title card took over
 
-    // where the film is while it rolls (null: not rolling)
+    // where the score should be (null: nothing to say). While the film
+    // rolls: its own clock. On the title card: the cut plus the card's age.
     var filmAt = function () {
       if (video.paused || video.seeking || video.readyState < 3 || hx.classList.contains("is-card")) return null;
-      var t = video.currentTime;
-      return t < CUT - 0.02 ? t : null;
+      return Math.min(video.currentTime, CUT);   // the last frames before the card: still the film
     };
+    var cardAt = function () {
+      if (cardT0 == null || !hx.classList.contains("is-card") || !buf) return null;
+      var t = CUT + (performance.now() - cardT0) / 1000;
+      return t < buf.duration - 0.05 ? t : null;
+    };
+    var at = function () { var t = filmAt(); return t != null ? t : cardAt(); };
     // the delay between scheduling a sample and hearing it
     var latency = A.latency;
+    var presence = function () {
+      var r = hx.getBoundingClientRect(), vh = window.innerHeight || 1;
+      var span = Math.max(1, r.height - vh);
+      return 1 - smooth(clamp01((-r.top - span) / (vh * 0.85)));
+    };
 
-    // a take starting at film time t: buffer position (t + latency) now,
+    // a take starting at score time t: buffer position (t + latency) now,
     // so what reaches the ear lands on the frame on screen
     var startTake = function (t, fade) {
       var now = ctx.currentTime, off = Math.min(buf.duration - 0.01, t + latency());
       var src = ctx.createBufferSource(), g = ctx.createGain();
       src.buffer = buf;
-      src.connect(g); g.connect(out);
+      src.connect(g); g.connect(hp || out);
       g.gain.setValueAtTime(0, now);
       g.gain.linearRampToValueAtTime(1, now + fade);
       src.start(now, off);
       // pos: where in the track it is (integrated: the rate is nudged)
-      var tk = { src: src, g: g, pos: off, last: now, rate: 1, tail: false };
-      src.onended = function () { g.disconnect(); if (take === tk) take = null; };
-      if (take) dropTake(fade);
+      var tk = { src: src, g: g, pos: off, last: now, rate: 1 };
+      src.onended = function () {
+        g.disconnect();
+        if (take === tk) { take = null; bedG = -1; A.unduck("hero", 2.5); }
+      };
+      if (take) dropTake(fade, true);
       take = tk;
       drift = 0;
-      // the film speaks: the bed steps back 6 dB beneath it
-      A.duck("hero", 0.5, 0.35, 2.4);
     };
-    var dropTake = function (fade) {
+    var dropTake = function (fade, keepBed) {
       if (!take) return;
       var tk = take, now = ctx.currentTime;
       take = null;
-      A.unduck("hero");
+      if (!keepBed) { bedG = -1; A.unduck("hero", 2.4); }
       tk.g.gain.cancelScheduledValues(now);
       tk.g.gain.setValueAtTime(tk.g.gain.value, now);
       tk.g.gain.linearRampToValueAtTime(0, now + fade);
       try { tk.src.stop(now + fade + 0.02); } catch (e) {}
     };
+    // the bed follows the score, as much as the hero is still near
+    var bedFollow = function (t) {
+      var p = presence(), g = 1 - (1 - bedAt(t)) * p;
+      if (Math.abs(g - bedG) < 0.015) return;
+      var rising = g > bedG;
+      bedG = g;
+      A.duck("hero", g, 0.12, rising ? 2.5 : null);
+    };
 
     // every frame while live: follow the picture. Small drift (the film's
     // clock slips under load) is closed by nudging the track's speed, a
     // few percent at most, never heard as a jump; a real jump (a stall,
-    // a seek) re-locks with a short crossfade.
+    // a seek, the film rolled again) re-locks with a short crossfade.
     var follow = function () {
       raf = 0;
       if (!live) return;
       if (buf) {
-        var t = filmAt(), moving = t != null && t !== lastT;
+        var t = at(), moving = t != null && t !== lastT;
         lastT = t;
         if (t == null) { if (take) dropTake(0.12); }
-        // enter only once the film's clock is actually running (just after
-        // "playing" it can still be held on the resumed frame)
-        else if (!take) { if (moving && t + latency() < CUT - TAIL) startTake(t, 0.06); }
-        else if (!take.tail) {
+        // enter only once the clock is actually running (just after
+        // "playing" the film can still be held on the resumed frame)
+        // (from the first frame: no fade, the ident's hit lands on it)
+        else if (!take) { if (moving) startTake(t, t < 0.08 ? 0.004 : ENTER); }
+        else {
           var now = ctx.currentTime;
           take.pos += (now - take.last) * take.rate;
           take.last = now;
@@ -135,42 +179,30 @@
           // heard now = track position minus what is still in flight
           drift += (take.pos - lat - t - drift) * 0.25;   // both clocks tick coarsely: smooth first
           if (Math.abs(drift) > JUMP) startTake(t, 0.06);
-          else if (t + lat >= CUT - TAIL) {
-            // into the cut: fade so the silence lands on the cut's frame
-            var left = Math.max(0.04, CUT - t - lat);
-            take.tail = true;
-            A.unduck("hero", 2.4);   // the bed rises as the film fades into the cut: it carries the title card
-            take.g.gain.cancelScheduledValues(now);
-            take.g.gain.setValueAtTime(take.g.gain.value, now);
-            take.g.gain.linearRampToValueAtTime(0, now + left);
-            take.src.stop(now + left + 0.03);
-          } else {
+          else {
             // gentle for a slip; firmer after a stutter (the film froze a few frames)
             var lim = Math.abs(drift) > 0.06 ? NUDGE_HARD : NUDGE;
             var rate = Math.abs(drift) < 0.008 ? 1 : 1 - Math.max(-lim, Math.min(lim, drift * 2.5));
             if (Math.abs(rate - take.rate) > 0.002) { take.rate = rate; take.src.playbackRate.setValueAtTime(rate, now); }
           }
         }
+        if (take && t != null) bedFollow(t);
       }
       raf = requestAnimationFrame(follow);
     };
 
     A.scene("hero", {
       level: LEVEL,
-      duckBed: 1,                    // it ducks the bed itself, only while the film speaks
-      // it only claims its share of a crossfade while the film speaks
+      duckBed: 1,                    // it moves the bed itself, on the score's curve
+      // it only claims its share of a crossfade while the score speaks
       sounding: function () { return !!take || filmAt() != null; },
-      // and only competes for the sound while the film is speaking
       claim: function () { return !!take || filmAt() != null; },
-      // the bus is open while the hero is on screen; the take itself
-      // only exists while the film rolls
-      presence: function () {
-        var r = hx.getBoundingClientRect(), vh = window.innerHeight || 1;
-        var span = Math.max(1, r.height - vh);
-        return 1 - smooth(clamp01((-r.top - span) / (vh * 0.85)));
-      },
+      presence: presence,
       start: function (c, o) {
         ctx = c; out = o; live = true;
+        // phones: below 80 Hz a phone speaker only distorts; the score
+        // carries its weight in harmonics above it
+        if (A.lowPower && !hp) { hp = c.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 80; hp.Q.value = 0.6; hp.connect(o); }
         A.load(SRC).then(function (b) {
           if (!live) return;
           buf = b;
@@ -180,6 +212,7 @@
       },
       stop: function () {
         A.unduck("hero");
+        bedG = -1;
         live = false;
         cancelAnimationFrame(raf); raf = 0;
         if (take) { try { take.src.stop(); } catch (e) {} take.g.disconnect(); take = null; }
@@ -187,16 +220,24 @@
     });
 
     // the film stops: so does its sound, at once (follow() also sees it,
-    // a frame later; these make it immediate)
+    // a frame later; these make it immediate). Not at the cut: there the
+    // title card takes the score on.
     // the control's cue: it pings while the film rolls (worx-audio.css
     // shows it only with the sound off)
     var cue = function () { if (dock) dock.classList.toggle("is-cue", !video.paused && !hx.classList.contains("is-card")); };
     ["pause", "waiting", "seeking", "ended"].forEach(function (ev) {
-      video.addEventListener(ev, function () { if (take) dropTake(ev === "ended" ? 0.05 : 0.1); cue(); });
+      video.addEventListener(ev, function () {
+        if (take && !hx.classList.contains("is-card")) dropTake(ev === "ended" ? 0.05 : 0.1);
+        cue();
+      });
     });
     video.addEventListener("playing", function () { A.refresh(); cue(); });
+    var wasCard = hx.classList.contains("is-card");
     if ("MutationObserver" in window) new MutationObserver(function () {
-      if (take && hx.classList.contains("is-card")) dropTake(0.05);
+      var isCard = hx.classList.contains("is-card");
+      if (isCard && !wasCard) cardT0 = performance.now();      // the card's clock starts on the cut
+      if (!isCard) cardT0 = null;
+      wasCard = isCard;
       cue();
     }).observe(hx, { attributes: true, attributeFilter: ["class"] });
 
@@ -2896,12 +2937,17 @@
     var arm = function (t, on) {
       if (on) {
         if (charge) return;
+        // phones: the hover is the tap itself, the lift follows it within a
+        // tenth of a second, and a phone speaker loses the low start; so
+        // there the charge starts higher, swells at once and is louder (+7 dB)
+        var mob = !!(window.matchMedia && window.matchMedia("(hover: none), (max-width: 700px)").matches);
+        var k = mob ? 2.25 : 1, up = mob ? 0.14 : 0.65, f0 = mob ? 120 : 70;
         var o = c.createOscillator(), lp = bq("lowpass", 400, 4), g = gain(0);
         o.type = "sawtooth";
-        o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(330, t + 0.7);
-        lp.frequency.setValueAtTime(300, t); lp.frequency.exponentialRampToValueAtTime(2200, t + 0.7);
-        lp.frequency.setTargetAtTime(900, t + 0.75, 0.3);
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.07, t + 0.65); g.gain.setTargetAtTime(0.022, t + 0.75, 0.25);
+        o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(330, t + up + 0.05);
+        lp.frequency.setValueAtTime(mob ? 700 : 300, t); lp.frequency.exponentialRampToValueAtTime(2200, t + up + 0.05);
+        lp.frequency.setTargetAtTime(900, t + up + 0.1, 0.3);
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.07 * k, t + up); g.gain.setTargetAtTime(0.022 * k, t + up + 0.1, 0.25);
         chain([o, lp, g, bus]); o.start(t);
         charge = { o: o, g: g, nodes: [lp, g] };
       } else if (charge) {

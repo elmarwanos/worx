@@ -6,3 +6,8 @@ static/assets/portfolio/WORX_animation_assets/
 tools/rover-scene/node_modules/
 tools/blog-covers/node_modules/
 tools/blog-covers/out/
+
+# Hero score: source WAVs (converted from the licensed downloads) and render outputs
+tools/hero-audio/src/
+tools/hero-audio/*.wav
+tools/hero-audio/*.npy

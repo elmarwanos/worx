@@ -2283,7 +2283,7 @@
     gap: 6px;
     margin: 0 0 6px;
     font-family: var(--font-display);
-    font-size: 1.45rem;
+    font-size: 1.8rem;
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.1;
@@ -2302,6 +2302,9 @@
 
   .hm-mod-panel.is-current .hm-mod-panel-head { color: var(--text); }
   .hm-mod-panel.is-current .hm-mod-panel-head span { color: var(--accent-2); }
+
+  /* the division heads lead; the service names sit under them */
+  .hm-mod-panel a b { font-size: 1.3rem; }
 
   .hm-mod-panel a { transition: opacity 0.35s ease, translate 0.45s var(--hm-ease), border-color 0.35s ease; }
   .hm-mod-panel.is-current a { border-left-color: rgba(250, 167, 25, 0.35); }
