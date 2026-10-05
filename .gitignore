@@ -13,3 +13,15 @@ tools/hero-audio/*.wav
 tools/hero-audio/*.npy
 tools/home-bed/src/
 tools/home-bed/*.wav
+
+# Partners chains: the source download (converted) and render outputs
+tools/partners-chains/src/
+tools/partners-chains/*.wav
+
+# Launch hover: the source download (converted) and render outputs
+tools/launch-hover/src/
+tools/launch-hover/*.wav
+
+# Comms voices: the actors' takes and render outputs
+tools/comms-voices/src/
+tools/comms-voices/*.wav

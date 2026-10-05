@@ -1,6 +1,25 @@
 {
   "redirects": [
-    { "source": "/services/erp-crm.html", "destination": "/services/cms-crm.html", "permanent": true },
-    { "source": "/services/erp-crm", "destination": "/services/cms-crm.html", "permanent": true }
+    {
+      "source": "/services/erp-crm.html",
+      "destination": "/services/cms-crm.html",
+      "permanent": true
+    },
+    {
+      "source": "/services/erp-crm",
+      "destination": "/services/cms-crm.html",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=604800"
+        }
+      ]
+    }
   ]
 }

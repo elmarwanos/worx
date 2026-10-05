@@ -266,11 +266,11 @@
     };
 
     if (video && !reduced && freeze == null) {
-      // one HQ file for every screen; the per-resolution pick is parked
-      // until the other qualities are re-encoded from the new film
-      // var wpx = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2);
-      // video.src = video.getAttribute(wpx > 2200 ? "data-src-1440" : wpx > 1100 ? "data-src-1080" : "data-src-720");
-      video.src = video.getAttribute("data-src");
+      // the HQ film, the same frames everywhere: portrait screens (which
+      // only ever show its centre, the film covering the screen's height)
+      // get the centre square of it, a fraction of the download
+      var portrait = window.innerWidth < window.innerHeight;
+      video.src = video.getAttribute(portrait && video.hasAttribute("data-src-sq") ? "data-src-sq" : "data-src");
       video.load();
       var state = "wait", stateT0 = 0, inView = true;
       var setState = function (st) { state = st; stateT0 = performance.now(); };
@@ -609,7 +609,7 @@
         entries.forEach(function (e) {
           var v = e.target;
           if (e.isIntersecting) {
-            if (!v.src) { v.src = v.dataset.src; v.load(); }
+            if (!v.src) { v.src = (window.innerWidth < 700 && v.dataset.srcSm) || v.dataset.src; v.load(); }   // phones: the films at their card size
             var pr = v.play();
             if (pr && pr.catch) pr.catch(function () {});
           } else if (!v.paused) v.pause();

@@ -257,61 +257,78 @@
     });
   }
 
-  /* ---- MISSION PARTNERS: passing monoliths ----------------------------
+  /* ---- MISSION PARTNERS: hauled on chains ------------------------------
      The logos glide on, smooth and endless (home.js; its real motion is
-     published on marquee.worxMotion). The sound does not grind under
-     them: each logo is a monolith with a moment of its own. As a logo
-     glides toward the middle of the band, a heavy stone slide swells
-     with it, travelling across the stereo field with the logo's real
-     position on screen; as it reaches the middle a low settling mass
-     lands on the very frame; then it slides on and away. Two rows, two
-     directions, two slightly different stones: a slow cadence of
-     monoliths passing, call and answer, with stillness between.
-     The sound (static/assets/home/partners-stone.mp3, untouched):
+     published on marquee.worxMotion). Each logo is a monolith dragged
+     across the band on chains by something far bigger than the screen.
+     As a logo is hauled toward the middle the drag swells with it, its
+     pitch climbing as the chain takes the strain, travelling across the
+     stereo field with the logo's real position; as it reaches the middle
+     the chain snaps taut on the very frame (the hit, with the weight of
+     the pull an octave under it); then the slack runs out behind it, a
+     few links rattling over the ground in the logo's direction, and the
+     drag eases away. Two rows, two directions, two chains (the second
+     heavier): call and answer, the passes running into one another so
+     the haul never quite stops, with breath between.
+     The sound (static/assets/home/partners-chains.mp3, from a royalty-free
+     chains recording, built by tools/partners-chains/chains.py):
 
-       slide    the recording's strongest unbroken passage, swelling as
-                the logo approaches (its pitch sinking as the mass draws
-                near), easing away after it passes; panned with the logo
-       settle   the same recording an octave down and darkened: the mass
-                at the centre
+       0 - 8 s  the drag: the recording with its clanks taken out of the
+                top, the heavy haul left
+       then     its chain hits, each on its own between silences, the big
+                ones (taut) before the small ones (links); found here by
+                their silences, so no table of offsets
      Timing is predicted from the logo's true position and the marquee's
      true speed every frame, and scheduled on the audio clock (output
-     latency allowed for), so the settle lands as the logo crosses.
+     latency allowed for), so the chain snaps as the logo crosses.
 
      Only with the band of logos fully on screen: nothing on the way in.
      A pass still sounding as the visitor leaves recedes with the section
      (darker, narrower, quieter). The pointer changes nothing: the logos
-     keep their pace and the stones keep sounding. Reduced motion: no
-     motion, no stones.
-     Level: the recording is quiet (-32.8 LUFS, peak -10.7 dBFS); staged
-     so a pass peaks near -16 dBFS pre-master: above the bed, below the
-     Hero, physical but never shrill. */
+     keep their pace and the chains keep hauling. Reduced motion: no
+     motion, no chains.
+     Level: the drag sits at -24.4 LUFS in the file, the hits louder;
+     trimmed so a pass sits where the stones did (the snap at most ~2 dB
+     over their loudest moment): physical, never shrill. */
   var partners = q("#partners"), marqueeEl = q(".hm-marquee");
   var motion = marqueeEl && marqueeEl.worxMotion;
   if (partners && motion && !A.reduced) (function () {   // its own scope: names here are reused by the Hero and the control
-    var STONE = "static/assets/home/partners-stone.mp3";
-    // loudness-matched to the reference (the recording is quiet, -32.8
-    // LUFS, and plays in short passes): a pass then sits at the section's 20%
-    var TRIM = 4;
-    var PRE = 1.15;                 // seconds of slide before a logo reaches the middle
-    var POST = 0.75;                // ...and after
-    A.prefetch(STONE, true);
+    var CHAINS = "static/assets/home/partners-chains.mp3";
+    var DRAG = 8;                   // seconds of drag at the head of the file
+    // matched to the stones it replaces (simulated offline, BS.1770): the
+    // haul's loudest 400 ms ~2 dB over theirs, the snap carrying it
+    var TRIM = 0.55;
+    var PRE = 1.6;                  // seconds of haul before a logo reaches the middle
+    var POST = 1.3;                 // ...and after
+    A.prefetch(CHAINS, true);
 
     var sc = null, sBuf = null, sLive = false, sOut = null, live = [], sRaf = 0;
-    var frames = null;              // per 20 ms of the recording: its level in dB
+    var frames = null;              // per 20 ms of the drag: its level in dB
+    var big = [], links = [];       // the hits: [start, length] in seconds
     var K = 64;
     var curve = function (fn) { var c = new Float32Array(K); for (var i = 0; i < K; i++) c[i] = fn(i / (K - 1)); return c; };
 
     var analyse = function (b) {
       var d = b.getChannelData(0), hop = Math.round(b.sampleRate * 0.02), out = [];
-      for (var i = 0; i + hop <= d.length; i += hop) {
+      var end = Math.min(d.length, Math.round(b.sampleRate * DRAG));
+      for (var i = 0; i + hop <= end; i += hop) {
         var e = 0;
         for (var j = i; j < i + hop; j += 2) e += d[j] * d[j];
         out.push(10 * Math.log10(e / (hop / 2) + 1e-12));
       }
+      // the hits: whatever sounds after the drag, split at its silences
+      var sr = b.sampleRate, w = Math.round(sr * 0.005), hits = [], on = -1, quiet = 0;
+      for (i = Math.round(sr * (DRAG + 0.2)); i + w <= d.length; i += w) {
+        var pk = 0;
+        for (j = i; j < i + w; j++) pk = Math.max(pk, Math.abs(d[j]));
+        if (pk > 0.003) { if (on < 0) on = i; quiet = 0; }
+        else if (on >= 0 && ++quiet > 30) { hits.push([on / sr, (i - on) / sr]); on = -1; }   // 150 ms of silence ends a hit
+      }
+      if (on >= 0) hits.push([on / sr, (d.length - on) / sr]);
+      big = hits.slice(0, 6); links = hits.slice(6);
       return out;
     };
-    // a strong stretch of `len` seconds that never drops out, not `avoid`
+    // a strong stretch of `len` seconds of drag that never drops out, not `avoid`
     var best = function (len, avoid) {
       var need = Math.max(1, Math.round(len / 0.02)), top = [], i, j;
       for (i = 0; i + need <= frames.length; i += 2) {
@@ -319,19 +336,25 @@
         for (j = i; j < i + need; j++) { if (frames[j] < -50) { ok = false; break; } sum += frames[j]; }
         if (ok) top.push([sum / need, i]);
       }
-      if (!top.length) return 0.3;
+      if (!top.length) return 0.1;
       top.sort(function (a, b) { return b[0] - a[0]; });
-      var pool = top.slice(0, Math.max(1, Math.ceil(top.length * 0.35)));
+      var pool = top.slice(0, Math.max(1, Math.ceil(top.length * 0.5)));
       for (var tries = 0; tries < 6; tries++) {
         var c = pool[Math.floor(Math.random() * pool.length)][1] * 0.02;
         if (avoid == null || Math.abs(c - avoid) > 0.8) return c;
       }
       return pool[0][1] * 0.02;
     };
+    var pick = function (list, avoid) {
+      if (!list.length) return null;
+      var i = Math.floor(Math.random() * list.length);
+      if (list.length > 1 && list[i] === avoid) i = (i + 1) % list.length;
+      return list[i];
+    };
 
     // every pass the same loudness: a passage's mean level (dB, from the
-    // analysis) against the recording's typical one, compensated within
-    // +-6 dB, so no stone arrives louder than the last
+    // analysis) against the drag's typical one, compensated within
+    // +-6 dB, so no haul arrives louder than the last
     var REF = null;
     var match = function (off, len) {
       var a = Math.floor(off / 0.02), z = Math.min(frames.length, a + Math.max(1, Math.round(len / 0.02))), e = 0, n = 0;
@@ -343,19 +366,18 @@
       }
       return Math.pow(10, Math.max(-6, Math.min(6, REF - db)) / 20);
     };
-    var voice = function (T, dur, off, rate, gain, pan, dest) {
-      var mg = match(off, dur * 0.8);
-      gain = gain.map(function (g) { return g * mg; });
+    var voice = function (T, dur, off, rate, gain, pan, dest, keep) {
+      if (!keep) { var mg = match(off, dur * 0.8); gain = gain.map(function (g) { return g * mg; }); }
       var src = sc.createBufferSource(), env = sc.createGain();
       src.buffer = sBuf;
-      src.playbackRate.setValueCurveAtTime(rate, T, dur);
+      if (rate.length) src.playbackRate.setValueCurveAtTime(rate, T, dur); else src.playbackRate.value = rate;
       env.gain.value = 0;
       env.gain.setValueCurveAtTime(gain, T, dur);
       src.connect(env);
       var tail = env;
       if (sc.createStereoPanner) {
         var pn = sc.createStereoPanner();
-        pn.pan.setValueCurveAtTime(pan, T, dur);
+        if (pan.length) pn.pan.setValueCurveAtTime(pan, T, dur); else pn.pan.value = pan;
         env.connect(pn); tail = pn;
       }
       tail.connect(dest);
@@ -368,32 +390,47 @@
         var k = live.indexOf(v); if (k >= 0) live.splice(k, 1);
       };
     };
+    // a hit played whole: [start, length] at `rate`
+    var hit = function (T, h, rate, g, pan, dest) {
+      var dur = h[1] / rate;
+      voice(T, dur, h[0], rate, curve(function (x) { return g * (x > 0.85 ? (1 - x) / 0.15 : 1); }), pan, dest, true);
+    };
 
-    // one monolith passing: `at` = audio time it crosses the middle;
-    // p0 -> p1 its pan from the start of the slide to its end
+    // one logo hauled past: `at` = audio time it crosses the middle;
+    // p0 -> p1 its pan from the start of the haul to its end
     var lastOff = null;
     var pass = function (at, row, p0, p1, speedN) {
-      var heavy = row ? 0.88 : 1;                                // the second stone, lower
+      var heavy = row ? 0.86 : 1;                                // the second chain, heavier
       var T = at - PRE, dur = PRE + POST, k = PRE / dur;
-      var off = best(dur * 0.8 * heavy, lastOff); lastOff = off;
-      var lift = Math.min(1, Math.max(0.35, speedN));            // slower stones, softer
+      var off = best(dur * heavy, lastOff); lastOff = off;
+      var lift = Math.min(1, Math.max(0.35, speedN));            // slower hauls, softer
       if (narrow) lift *= 0.7;                                   // phones: the logos sit closer, the passes overlap more: -3 dB
-      // the slide: swells to the middle, eases away after
+      // the drag: strains toward the middle (its pitch climbing with the
+      // tension), goes slack after and eases away
       voice(T, dur, off,
-        curve(function (x) { var near = x < k ? x / k : 1 - (x - k) / (1 - k); return heavy * (0.7 + 0.12 * (1 - near)); }),
-        curve(function (x) { return lift * (x < k ? Math.pow(x / k, 1.8) : Math.pow(1 - (x - k) / (1 - k), 1.4)); }),
+        curve(function (x) { return heavy * (x < k ? 0.9 + 0.12 * Math.pow(x / k, 2) : 0.94 - 0.06 * (x - k) / (1 - k)); }),
+        curve(function (x) { return lift * (x < k ? Math.pow(x / k, 1.6) : 0.55 + 0.45 * Math.pow(1 - (x - k) / (1 - k), 1.3)) * (x > 0.94 ? (1 - x) / 0.06 : 1); }),
         curve(function (x) { return p0 + (p1 - p0) * x; }),
-        sOut.slide);
-      return { heavy: heavy, lift: lift, off: off, pan: p0 + (p1 - p0) * k };
+        sOut.drag);
+      return { heavy: heavy, lift: lift, pan: p0 + (p1 - p0) * k, dir: p1 >= p0 ? 1 : -1 };
     };
-    // the settle: the mass at the middle, scheduled moments before the
-    // crossing from a fresh prediction, so it lands on the frame
-    var settle = function (at, s) {
-      voice(at - 0.03, 0.6, best(0.32, s.off),
-        curve(function () { return 0.5 * s.heavy; }),
-        curve(function (x) { return s.lift * (x < 0.07 ? x / 0.07 : Math.pow(1 - (x - 0.07) / 0.93, 2.4)); }),
-        curve(function () { return s.pan; }),
-        sOut.settle);
+    // the snap: the chain taut at the middle, scheduled moments before the
+    // crossing from a fresh prediction, so it lands on the frame; then the
+    // slack running out behind the logo, link by link
+    var lastBig = null;
+    var snap = function (at, s) {
+      var h = pick(big, lastBig); lastBig = h;
+      if (!h) return;
+      var r = s.heavy * (0.94 + Math.random() * 0.1);
+      hit(at - 0.012, h, r, s.lift, s.pan, sOut.snap);
+      hit(at - 0.012, h, r * 0.5, s.lift * 0.9, s.pan, sOut.weight);   // the pull itself, an octave down
+      var t = at + 0.22 + Math.random() * 0.08, l = null;
+      for (var i = 0; i < 3 && links.length; i++) {
+        l = pick(links, l);
+        hit(t, l, s.heavy * (0.9 + Math.random() * 0.15), s.lift * 0.55 * Math.pow(0.62, i),
+          Math.max(-0.35, Math.min(0.35, s.pan + s.dir * 0.07 * (i + 1))), sOut.snap);
+        t += 0.2 + Math.random() * 0.22;
+      }
     };
 
     // where each logo is: measured when the scene wakes and on resize;
@@ -444,8 +481,8 @@
       trail.push([nowMs, motion.pos]);
       while (trail.length > 2 && nowMs - trail[0][0] > 1000) trail.shift();
       if (trail.length > 10 && nowMs - trail[0][0] > 500) vEff = (motion.pos - trail[0][1]) / ((nowMs - trail[0][0]) / 1000);
-      // the console has taken the stage: any stone in flight is released
-      // at once, no new one starts; given back, the stones return
+      // the console has taken the stage: any chain in flight is released
+      // at once, no new one starts; given back, the chains return
       var st = stage(), mine = !st || st.owner !== "console";
       if (mine !== owned && sOut) {
         owned = mine;
@@ -467,9 +504,9 @@
             if (ahead <= 0) continue;
             var tc = timeTo(ahead);                               // seconds to the middle
             var id = r + ":" + j, cycle = Math.floor(motion.pos / g.half);
-            // phase two: the settle, from a fresh prediction
+            // phase two: the snap, from a fresh prediction
             var pend = pending[id];
-            if (pend && pend.cycle === cycle && tc < 0.22) { delete pending[id]; settle(now + tc - lat, pend.s); continue; }
+            if (pend && pend.cycle === cycle && tc < 0.22) { delete pending[id]; snap(now + tc - lat, pend.s); continue; }
             if (tc > PRE + 0.12 || tc < PRE - 0.25) continue;
             if (fired[id] === cycle) continue;
             fired[id] = cycle;
@@ -495,33 +532,37 @@
         return x * x * (3 - 2 * x) * (1 - (st ? st.focus : 0));   // giving way as the console becomes the subject
       },
       weight: 3,                   // dB of body as it is fully present
-      duckBed: 0.8,                // the bed to 12% while the stones hold the scene
-      // it claims a share of a crossfade only while a stone is passing
+      duckBed: 0.8,                // the bed to 12% while the chains hold the scene
+      // it claims a share of a crossfade only while a chain is sounding
       sounding: function () { return live.length > 0; },
       start: function (c, input) {
         sc = c; sLive = true;
         if (!sOut) {
           var trim = c.createGain(); trim.gain.value = TRIM;
-          var slide = c.createGain(), settle = c.createGain();
-          // the slide: mass under it, the recording's brittle top tamed
-          var mass = c.createBiquadFilter(); mass.type = "lowshelf"; mass.frequency.value = 150; mass.gain.value = 4;
-          var tame = c.createBiquadFilter(); tame.type = "highshelf"; tame.frequency.value = 6500; tame.gain.value = -6;
-          slide.connect(mass); mass.connect(tame); tame.connect(trim);
-          // the settle: dark and heavy
-          var dark = c.createBiquadFilter(); dark.type = "lowpass"; dark.frequency.value = 700; dark.Q.value = 0.6;
-          var thump = c.createBiquadFilter(); thump.type = "lowshelf"; thump.frequency.value = 120; thump.gain.value = 6;
-          settle.gain.value = 1.2;
-          settle.connect(dark); dark.connect(thump); thump.connect(trim);
-          sOut = { slide: slide, settle: settle, trim: trim };
+          var drag = c.createGain(), snapG = c.createGain(), weight = c.createGain();
+          // the drag: mass under it, the scrape kept, the very top tamed
+          var mass = c.createBiquadFilter(); mass.type = "lowshelf"; mass.frequency.value = 140; mass.gain.value = 3;
+          var tame = c.createBiquadFilter(); tame.type = "highshelf"; tame.frequency.value = 7000; tame.gain.value = -5;
+          drag.connect(mass); mass.connect(tame); tame.connect(trim);
+          // the snap: the steel as recorded, its harshest edge (2.5-4 kHz) eased
+          var edge = c.createBiquadFilter(); edge.type = "peaking"; edge.frequency.value = 3200; edge.Q.value = 0.9; edge.gain.value = -3;
+          snapG.gain.value = 0.9;
+          snapG.connect(edge); edge.connect(trim);
+          // the weight: the same hit an octave down, only its body
+          var dark = c.createBiquadFilter(); dark.type = "lowpass"; dark.frequency.value = 480; dark.Q.value = 0.6;
+          var thump = c.createBiquadFilter(); thump.type = "lowshelf"; thump.frequency.value = 110; thump.gain.value = 5;
+          weight.gain.value = 0.8;
+          weight.connect(dark); dark.connect(thump); thump.connect(trim);
+          sOut = { drag: drag, snap: snapG, weight: weight, trim: trim };
         }
         sOut.trim.disconnect();
         sOut.trim.connect(input);
         var st0 = stage();
         owned = !st0 || st0.owner !== "console";
         sOut.trim.gain.value = owned ? TRIM : 0;
-        A.load(STONE).then(function (b) {
+        A.load(CHAINS).then(function (b) {
           if (!sLive) return;
-          if (!sBuf) { sBuf = b; frames = analyse(b); }
+          if (!sBuf) { sBuf = b; frames = analyse(b); marqueeEl.worxChains = { buf: b, big: big }; }
           measure();
           if (!sRaf) sRaf = requestAnimationFrame(watch);
         }, function () { if (sLive) A.fail(); });
@@ -733,26 +774,27 @@
       var target = !gsBus.live ? 0.55 : busy ? 1 : 0.4;
       envG.gain.setTargetAtTime(EK * target, sc.currentTime, 1.2);
     };
-    // THE RELAY: mass hands over to signal. The stones' last settle lands
+    // THE RELAY: mass hands over to signal. The chains' last pull lands
     // as the pulse leaves the logos; a thread of static rides down the
     // feed with it, rising as it travels; on arrival the console takes
     // power (onPower, below)
-    var STONE = "static/assets/home/partners-stone.mp3";
+    var CHAINS = "static/assets/home/partners-chains.mp3";
     gsBus.onRelay = function () {
       if (!live || !buf || !A.isOn()) return;
-      A.load(STONE).then(function (stone) {
+      A.load(CHAINS).then(function (chain) {
         if (!live) return;
+        var ch = q(".hm-marquee"), h = ch && ch.worxChains && ch.worxChains.big[0];
         var c = sc, now = c.currentTime + 0.02, fx = A.bus("sfx");
         // the relay is the bridge between the two acts, so it plays on the
-        // effects bus: heard while the stones fade out and before the
+        // effects bus: heard while the chains fade out and before the
         // console fades in (sections hand over one at a time)
-        // the settle: an octave down, dark
+        // the last pull: a chain hit an octave down, dark
         var s1 = c.createBufferSource(), lp = c.createBiquadFilter(), g1 = c.createGain();
-        s1.buffer = stone; s1.playbackRate.value = 0.5;
+        s1.buffer = chain; s1.playbackRate.value = 0.5;
         lp.type = "lowpass"; lp.frequency.value = 650; lp.Q.value = 0.6;
         g1.gain.setValueAtTime(0, now); g1.gain.linearRampToValueAtTime(0.45, now + 0.04); g1.gain.setTargetAtTime(0, now + 0.06, 0.22);
         s1.connect(lp); lp.connect(g1); g1.connect(fx);
-        s1.start(now, 1.4); s1.stop(now + 1.2);
+        s1.start(now, h ? h[0] : 0.7); s1.stop(now + 1.2);
         s1.onended = function () { lp.disconnect(); g1.disconnect(); };
         // the thread of static down the feed
         var s2 = c.createBufferSource(), bp = c.createBiquadFilter(), g2 = c.createGain();
@@ -2151,6 +2193,10 @@
      Every testimonial is a transmission from the field to Worx Mission
      Control, read out by its client's own voice (a man's for Simon and
      Mohammed, a woman's for Monique) and answered by Mission Control:
+       acquisition  the receiver hunts the band for the client's carrier
+                    (static through a sweeping filter, the heterodyne
+                    whistle falling to zero beat) and locks: two soft notes;
+                    the header reads ACQUIRING SIGNAL · CH 0n
        the call     the client keys the mic (squelch) and calls in, "Worx
                     Mission Control, this is Hyundai. Do you copy?",
                     through a narrow space-to-ground channel: band-limited,
@@ -2162,17 +2208,24 @@
        the message  the client reads the testimonial and every word lights
                     on the card as it is said; then signs off, "Simon,
                     out", the squelch tail closing the channel
+       copied       Mission Control acknowledges with the short Quindar
+                    pair, no words (COPIED); the deck turns, the next
+                    acquisition begins
+     The field voices are heard from inside a helmet (a few reflections
+     off the visor), Mission Control from its room. After the last client
+     Mission Control closes, and the link stands down: the carrier drops
+     under a long squelch tail, three falling notes, CHANNEL CLOSED.
      The card's waveform is the voice itself (an analyser on the channel);
      its header says who has the channel. The transmission ends, the deck
      turns to the next client (home.js worxTx.advance), who calls in;
      after the last, Mission Control closes: "All transmissions received.
      Worx Mission Control, standing by." A turn by the visitor cuts the
      channel and switches to that client.
-     The voices: synthesised offline with Kokoro (open model, Apache 2.0;
-     voices puck for Simon, heart for Monique, fenrir for Mohammed, michael
-     for Mission Control) into static/assets/home/comms-voices.m4a, the
-     names and acronyms given their pronunciation, each word's timing
-     (WORDS) from the model itself. The radio, the static and the tones are
+     The voices: the voice actors' takes (the stronger of each ALT pair),
+     cut, tightened and loudness-matched by tools/comms-voices/build.py
+     into static/assets/home/comms-cast.m4a; each word's timing (WORDS)
+     transcribed from the final audio, so the highlight follows the voice
+     (a spoken word the card doesn't have holds the word before it). The radio, the static and the tones are
      made here: the voices stay whole (nothing chops or wobbles them), the
      static and the crackle live around them and in the gaps.
      Loudness-matched (K), then the section's 20%; the bed steps back
@@ -2207,6 +2260,20 @@
     spPk.gain.value = 3;
     var spDrive = shaper(1.7), spOut = gain(1.05);
     chain([spIn, spHP, spPk, spLP, spDrive, spOut, bus]);
+    // the helmet: the client's voice inside a visor, a handful of reflections
+    // 3-12 ms off the glass (a little different each ear), so the field
+    // voices are heard from inside the suit, Mission Control from a room
+    var helmet = c.createConvolver(), helmetG = gain(0.24);
+    helmet.buffer = (function () {
+      var len = Math.round(c.sampleRate * 0.016), b = c.createBuffer(2, len, c.sampleRate);
+      var taps = [[0.0031, 0.7], [0.0057, -0.5], [0.0083, 0.38], [0.0119, -0.24], [0.0142, 0.14]];
+      for (var ch = 0; ch < 2; ch++) {
+        var d = b.getChannelData(ch);
+        taps.forEach(function (tp) { var i = Math.min(len - 1, Math.round((tp[0] + ch * 0.0007) * c.sampleRate)); d[i] += tp[1]; });
+      }
+      return b;
+    })();
+    spLP.connect(helmet); helmet.connect(helmetG); helmetG.connect(spDrive);
     // the ground: the room at Mission Control, clean but on the loop
     var gdIn = gain(1), gdHP = bq("highpass", 280, 0.7), gdLP = bq("lowpass", 3600, 0.8), gdDrive = shaper(1.5), gdOut = gain(0.95);
     chain([gdIn, gdHP, gdLP, gdDrive, gdOut, bus]);
@@ -2247,14 +2314,56 @@
       chain([s, bp, g, bus]); s.start(t, rnd() * 2);
       keep([s], [bp, g], t + (len || 0.05) + 0.3);
     };
-    var quindar = function (t, f) {
+    var quindar = function (t, f, len) {
+      len = len || 0.25;
       var o = c.createOscillator(), g = gain(0);
       o.frequency.value = f;
       g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.09, t + 0.008);
-      g.gain.setValueAtTime(0.09, t + 0.242); g.gain.linearRampToValueAtTime(0, t + 0.25);
+      g.gain.setValueAtTime(0.09, t + len - 0.008); g.gain.linearRampToValueAtTime(0, t + len);
       o.connect(g); g.connect(gdIn); o.start(t);
-      keep([o], [g], t + 0.3);
-      return t + 0.25;
+      keep([o], [g], t + len + 0.05);
+      return t + len;
+    };
+    // a soft tone on the receiver (a lock, an end of transmission)
+    var blip = function (t, f, len, v) {
+      var o = c.createOscillator(), g = gain(0);
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v || 0.045, t + 0.006); g.gain.setTargetAtTime(0, t + len, 0.012);
+      o.connect(g); g.connect(bus); o.start(t);
+      keep([o], [g], t + len + 0.1);
+    };
+    // ACQUISITION: before a client calls, the receiver hunts the band for
+    // their carrier: the static through a narrow filter sweeping up and
+    // settling, the carrier's heterodyne whistle falling to zero beat as
+    // the dial closes on it, the odd crackle; then LOCK, two soft notes,
+    // and the channel quiet for the call. Returns the moment of lock
+    var acquire = function (t) {
+      var D = 1.05;
+      hG.gain.setTargetAtTime(KEYED * 0.6, t, 0.1);
+      var s = c.createBufferSource(), bp = bq("bandpass", 420, 5), g = gain(0);
+      s.buffer = noise;
+      bp.frequency.setValueAtTime(420, t); bp.frequency.exponentialRampToValueAtTime(2700, t + D * 0.55); bp.frequency.exponentialRampToValueAtTime(1500, t + D);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.11, t + 0.14); g.gain.setTargetAtTime(0, t + D - 0.1, 0.03);
+      chain([s, bp, g, bus]); s.start(t, rnd() * 2);
+      keep([s], [bp, g], t + D + 0.2);
+      var o = c.createOscillator(), og = gain(0);
+      o.frequency.setValueAtTime(2300, t + 0.12); o.frequency.exponentialRampToValueAtTime(45, t + D - 0.04);
+      og.gain.setValueAtTime(0, t + 0.12); og.gain.linearRampToValueAtTime(0.02, t + 0.35); og.gain.setTargetAtTime(0, t + D - 0.12, 0.03);
+      o.connect(og); og.connect(spIn); o.start(t + 0.12);
+      keep([o], [og], t + D + 0.1);
+      crackle(t + 0.12, t + D - 0.1, 4);
+      blip(t + D, 1320, 0.035); blip(t + D + 0.065, 1760, 0.06);
+      hG.gain.setTargetAtTime(IDLE, t + D, 0.08);
+      return t + D + 0.2;
+    };
+    // ROGER: Mission Control acknowledges a sign-off, the Quindar pair
+    // short, the way the ground closed the loop without a word
+    var roger = function (t) {
+      gkey(t, true);
+      var e = quindar(t, 2525, 0.12);
+      quindar(e + 0.09, 2475, 0.12);
+      gkey(e + 0.3, false);
+      return e + 0.3;
     };
     // the push-to-talk switch, the channel opening (or closing) with it
     var key = function (t, on) {
@@ -2299,7 +2408,9 @@
       // Returns its timeline: when the message (q) starts and ends, and
       // when the whole is done
       transmit: function (i, t) {
-        var T = {};
+        var T = { acq: t };
+        // the receiver finds the client's carrier and locks
+        t = acquire(t);
         // the client keys the mic and calls in
         squelch(t, 0.22, 0.06); key(t, true);
         crackle(t + 0.05, t + 0.16, 2);
@@ -2318,8 +2429,10 @@
         T.qEnd = e;
         crackle(e + 0.04, e + 0.2, 1);
         T.s = e + 0.28; e = line("s" + i, T.s, "space");
+        T.sEnd = e;
         squelch(e + 0.06, 0.18, 0.14); key(e + 0.06, false);
-        T.end = e + 0.3;
+        // Mission Control: copied
+        T.r = e + 0.42; T.end = roger(T.r) + 0.1;
         return T;
       },
       // the close, after the last client
@@ -2328,7 +2441,22 @@
         var q1 = quindar(t, 2525), T = { c: q1 + 0.08 };
         var e = line("end", T.c, "ground");
         quindar(e + 0.06, 2475); gkey(e + 0.32, false);
-        T.end = e + 0.5;
+        // the link stands down: the carrier drops away under a long squelch
+        // tail, three falling notes for end of transmission, then quiet
+        T.cEnd = e;
+        var t2 = e + 0.7;
+        squelch(t2, 0.14, 0.35);
+        var s = c.createBufferSource(), bp = bq("bandpass", 1800, 4), g = gain(0);
+        s.buffer = noise;
+        bp.frequency.setValueAtTime(1800, t2); bp.frequency.exponentialRampToValueAtTime(260, t2 + 1.1);
+        g.gain.setValueAtTime(0.07, t2); g.gain.setTargetAtTime(0, t2 + 0.2, 0.3);
+        chain([s, bp, g, bus]); s.start(t2, rnd() * 2);
+        keep([s], [bp, g], t2 + 1.6);
+        blip(t2 + 0.45, 1760, 0.07, 0.035); blip(t2 + 0.6, 1320, 0.07, 0.03); blip(t2 + 0.75, 880, 0.16, 0.028);
+        hG.gain.setTargetAtTime(0.004, t2 + 0.9, 0.5);
+        hG.gain.setTargetAtTime(IDLE, t2 + 3.2, 1.2);
+        T.los = t2 + 0.45;
+        T.end = t2 + 1.4;
         return T;
       },
       // the visitor turned the deck: the channel is cut, mid-word if need be
@@ -2352,13 +2480,13 @@
   var txDeck = q("[data-tx]"), commsSec = q("#comms");
   if (txDeck && commsSec && txDeck.worxTx) (function () {
     var ts = txDeck.worxTx, cards = Array.prototype.slice.call(txDeck.querySelectorAll(".hm-tx-card"));
-    var VOICE = "static/assets/home/comms-voices.m4a";
-    var CUES = { a0: [0.0, 2.868], c0: [3.168, 4.398], q0: [7.866, 5.417], s0: [13.583, 0.744], a1: [14.627, 3.65], c1: [18.577, 4.086], q1: [22.963, 9.859], s1: [33.122, 0.823], a2: [34.245, 3.987], c2: [38.532, 4.197], q2: [43.029, 8.391], s2: [51.72, 0.909], end: [52.929, 5.152] };
+    var VOICE = "static/assets/home/comms-cast.m4a";
+    var CUES = { a0: [0.0, 3.784], c0: [4.135, 4.791], q0: [9.275, 5.176], s0: [14.801, 1.082], a1: [16.233, 5.225], c1: [21.808, 4.892], q1: [27.05, 11.047], s1: [38.447, 1.595], a2: [40.392, 4.479], c2: [45.22, 4.586], q2: [50.156, 7.514], s2: [58.02, 0.84], end: [59.211, 5.008] };   // [start, length] s in the file (tools/comms-voices/cues.json)
     var WORDS = {
-      q0: [[-0.031,0.119],[0.119,0.319],[0.319,0.657],[0.657,0.782],[0.782,0.869],[0.869,1.194],[1.194,1.494],[1.494,1.619],[1.619,1.881],[1.881,2.094],[2.094,2.519],[2.594,2.707],[2.707,2.869],[2.869,3.169],[3.169,3.319],[3.319,4.044],[4.094,4.294],[4.294,4.831],[4.831,5.869]],
-      q1: [[-0.027,0.086],[0.086,0.448],[0.448,1.061],[1.061,1.148],[1.148,1.873],[1.873,1.961],[1.961,2.098],[2.098,2.935],[2.935,3.111],[3.111,3.773],[3.773,4.523],[4.623,4.823],[4.823,5.01],[5.01,5.11],[5.11,5.573],[5.573,6.235],[6.235,6.661],[6.661,6.735],[6.735,7.073],[7.073,7.973],[8.161,8.648],[8.648,8.786],[8.786,9.248],[9.248,9.348],[9.348,9.998]],
-      q2: [[-0.006,0.131],[0.131,0.319],[0.319,0.644],[0.644,0.831],[0.831,1.244],[1.244,1.457],[1.457,2.044],[2.044,2.444],[2.444,2.894],[2.894,3.519],[3.569,3.682],[3.682,3.819],[3.819,4.394],[4.394,4.556],[4.556,5.069],[5.069,6.344],[6.482,6.969],[6.969,7.119],[7.119,7.331],[7.331,7.794],[7.794,8.669]]
-    };   // each word on the card: [start, end] s into its message
+      q0: [[0.04,0.241],[0.221,0.421],[0.401,0.722],[0.702,0.863],[0.843,0.983],[0.963,1.244],[1.224,1.485],[1.465,1.665],[1.645,1.886],[1.866,2.107],[2.087,2.588],[2.568,2.688],[2.668,2.869],[2.849,3.09],[3.07,3.23],[3.21,4.133],[4.113,4.313],[4.293,4.735],[4.715,5.016]],
+      q1: [[0.3,0.48],[0.46,0.841],[0.821,1.541],[1.521,1.741],[1.721,2.422],[2.402,2.482],[2.462,2.742],[2.722,3.242],[3.222,3.382],[3.362,3.942],[3.922,4.343],[4.823,5.123],[5.103,5.323],[5.303,5.524],[5.504,6.104],[6.084,6.764],[6.744,7.245],[7.225,7.405],[7.385,7.705],[7.685,8.145],[8.866,9.346],[9.326,9.526],[9.506,10.086],[10.066,10.246],[10.226,10.587]],
+      q2: [[0.1,0.22],[0.2,0.441],[0.421,0.761],[0.741,0.962],[0.942,1.523],[1.503,1.703],[1.683,2.224],[2.204,2.425],[2.405,2.765],[2.745,3.326],[3.306,3.446],[3.426,3.627],[3.607,4.048],[4.028,4.188],[4.168,4.669],[4.649,5.37],[5.851,6.312],[6.292,6.452],[6.432,6.632],[6.612,7.053],[7.033,7.414]]
+    };   // each word on the card: [start, end] s into its message (forced-aligned, tools/comms-voices/align.py)
     var WHO = [["SIMON", "HYUNDAI"], ["MONIQUE", "CHAUMET"], ["MOHAMMED", "MODON"]];
     A.prefetch(VOICE, true);
 
@@ -2387,7 +2515,12 @@
     var setMeta = function (i, who) {
       var m = metas[i];
       if (!m) return;
-      m.el.textContent = who === "space" ? "RECEIVING · " + WHO[i][0] + ", " + WHO[i][1] : who === "ground" ? "WORX MISSION CONTROL · TRANSMITTING" : m.text;
+      m.el.textContent = who === "space" ? "RECEIVING · " + WHO[i][0] + ", " + WHO[i][1]
+        : who === "ground" ? "WORX MISSION CONTROL · TRANSMITTING"
+        : who === "acq" ? "ACQUIRING SIGNAL · CH 0" + (i + 1)
+        : who === "roger" ? "WORX MISSION CONTROL · COPIED"
+        : who === "los" ? "CHANNEL CLOSED · STANDING BY"
+        : m.text;
     };
     var clearCard = function (i) {
       if (i < 0 || !cards[i]) return;
@@ -2404,13 +2537,18 @@
       raf = 0;
       if (!plan || !eng) return;
       var i = plan.i, P = plan.T, now = sc.currentTime - lat(), card = cards[i];
-      var space = (now >= P.a - 0.1 && now < P.aEnd + 0.1) || (now >= P.q - 0.16 && now < P.end - 0.25);
+      var acq = now >= P.acq && now < P.a - 0.1;
+      var space = (now >= P.a - 0.1 && now < P.aEnd + 0.1) || (now >= P.q - 0.16 && now < P.sEnd + 0.15);
       var ground = now >= P.c0 && now < P.cEnd + 0.35;
+      var copied = now >= P.r;
       card.classList.toggle("is-rx", space && !ground);
-      card.classList.toggle("is-tx", ground);
-      setMeta(i, ground ? "ground" : space ? "space" : null);
+      card.classList.toggle("is-tx", ground || copied);
+      var st = acq ? "acq" : ground ? "ground" : space ? "space" : copied ? "roger" : null;
+      if (st) setMeta(i, st);   // in the breaths between speakers the header holds its last state
       // the words
-      var w = WORDS["q" + i] || [], t = now - P.q, list = spans[i];
+      // each word lights a hair before it is heard (40 ms): the eye reads a
+      // highlight that leads the voice as in sync, one that trails as late
+      var w = WORDS["q" + i] || [], t = now - P.q + 0.04, list = spans[i];
       for (var k = 0; k < list.length && k < w.length; k++) {
         list[k].classList.toggle("is-said", t >= w[k][1] - 0.02);
         list[k].classList.toggle("is-now", t >= w[k][0] - 0.03 && t < w[k][1] - 0.02);
@@ -2456,12 +2594,16 @@
         if (played >= ts.count && !closed) {
           closed = true;
           var C = eng.close(sc.currentTime + 0.5);
-          setMeta(i, "ground");
-          nextT = setTimeout(function () { setMeta(i, null); A.unduck("comms-voice"); ts.setVoiced(false); }, (C.end - sc.currentTime) * 1000);
+          setMeta(i, "ground"); cards[i].classList.add("is-tx");
+          var ms = function (t) { return Math.max(0, (t - sc.currentTime + lat()) * 1000); };
+          nextT = setTimeout(function () {
+            cards[i].classList.remove("is-tx"); setMeta(i, "los");
+            nextT = setTimeout(function () { setMeta(i, null); A.unduck("comms-voice"); ts.setVoiced(false); }, ms(C.end) + 2200);
+          }, ms(C.los));
           return;
         }
         if (closed) { A.unduck("comms-voice"); ts.setVoiced(false); return; }
-        nextT = setTimeout(function () { if (ready() && on) ts.advance(); }, 1400);
+        nextT = setTimeout(function () { if (ready() && on) ts.advance(); }, 450);   // the next card turns; its acquisition covers the hand-over
       }, wait);
     };
     // the deck turned: by us (the next client), or by the visitor (cut to them)
@@ -2865,8 +3007,10 @@
                     the board as it is answered (home.css is-polling), then
                     "And, your project?" ... and the board waits: AWAITING
        the answer   the visitor arms the ignition (home.js worxLaunch): the
-                    button charges with a rising whine, the line flips to
-                    GO, and the Flight Director: "We are go for launch."
+                    hover lands the SINGULARITY hit (the client's pick:
+                    the first 2 s of FILM CRUX's "SINGULARITY", static/
+                    assets/home/launch-hover.m4a), the line flips to GO,
+                    and the Flight Director: "We are go for launch."
        liftoff      the click: the ignition's crack and the REAL Falcon 9
                     (the pad microphone of the Flight Plan's launch, static/
                     assets/home/flight-countdown.m4a) surging through the
@@ -2883,7 +3027,7 @@
   var launchSynth = function (c, out, opts) {
     opts = opts || {};
     var K = 0.58;                          // to the -18 LUFS reference (the poll and its answer measure -13.3 at 1)
-    var buf = opts.voice || null, roarBuf = opts.roar || null, CUE = opts.cues || {}, ROAR = opts.roarCue || null;
+    var buf = opts.voice || null, roarBuf = opts.roar || null, hoverBuf = opts.hover || null, CUE = opts.cues || {}, ROAR = opts.roarCue || null;
     var rnd = Math.random, still = opts.reduced || A.reduced;
     var bus = c.createGain(), comp = c.createDynamicsCompressor(), outG = c.createGain();
     comp.threshold.value = -18; comp.knee.value = 8; comp.ratio.value = 3.5; comp.attack.value = 0.004; comp.release.value = 0.2;
@@ -2940,29 +3084,39 @@
     vent.start(0, 1); hum.start(0, 2); vL.start();
     vG.gain.setTargetAtTime(0.012, c.currentTime, 1.5); humG.gain.setTargetAtTime(0.09, c.currentTime, 1.5);
 
-    /* the charge: the ignition armed */
-    var charge = null;
+    /* the charge: the ignition armed. The SINGULARITY hit, whole and as
+       recorded: it plays from its first frame on every hover, past the
+       compressor (its punch is the point) and level with the voices; a
+       hover that ends lets it sink away rather than stop; a new hover
+       while one still sounds hands over in a few ms, never stacks; a
+       re-arm within 0.3 s (a flicker, or a phone's tap: enter, leave,
+       click) brings the same hit back up instead of starting it twice.
+       The lift leaves it ringing under the roar. */
+    var HOVER = 1.0;                       // the hit's first 2 s are -14.6 LUFS: x K = the voices' level
+    var charge = null, last = null;
     var arm = function (t, on) {
       if (on) {
-        if (charge) return;
-        // phones: the hover is the tap itself, the lift follows it within a
-        // tenth of a second, and a phone speaker loses the low start; so
-        // there the charge starts higher, swells at once and is louder (+7 dB)
+        if (!hoverBuf) return;
+        // phones: a phone speaker loses most of the hit's low end: +3 dB
         var mob = !!(window.matchMedia && window.matchMedia("(hover: none), (max-width: 700px)").matches);
-        var k = mob ? 2.25 : 1, up = mob ? 0.14 : 0.65, f0 = mob ? 120 : 70;
-        var o = c.createOscillator(), lp = bq("lowpass", 400, 4), g = gain(0);
-        o.type = "sawtooth";
-        o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(330, t + up + 0.05);
-        lp.frequency.setValueAtTime(mob ? 700 : 300, t); lp.frequency.exponentialRampToValueAtTime(2200, t + up + 0.05);
-        lp.frequency.setTargetAtTime(900, t + up + 0.1, 0.3);
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.07 * k, t + up); g.gain.setTargetAtTime(0.022 * k, t + up + 0.1, 0.25);
-        chain([o, lp, g, bus]); o.start(t);
-        charge = { o: o, g: g, nodes: [lp, g] };
+        var lv = HOVER * (mob ? 1.4 : 1);
+        if (last && !last.done && t - last.at < 0.3) {
+          if (charge === last) return;
+          last.g.gain.cancelScheduledValues(t); last.g.gain.setValueAtTime(last.g.gain.value, t); last.g.gain.linearRampToValueAtTime(lv, t + 0.012);
+          charge = last; return;
+        }
+        if (last && !last.done) { last.g.gain.cancelScheduledValues(t); last.g.gain.setValueAtTime(last.g.gain.value, t); last.g.gain.setTargetAtTime(0, t, 0.02); try { last.s.stop(t + 0.15); } catch (e) {} }
+        var src = c.createBufferSource(), g = gain(0);
+        src.buffer = hoverBuf;
+        g.gain.setValueAtTime(lv, t);
+        src.connect(g); g.connect(outG);
+        src.start(t);
+        var ch = { s: src, g: g, at: t, done: false };
+        src.onended = function () { ch.done = true; try { g.disconnect(); } catch (e) {} if (charge === ch) charge = null; };
+        charge = last = ch;
       } else if (charge) {
-        var ch = charge; charge = null;
-        ch.g.gain.cancelScheduledValues(t); ch.g.gain.setValueAtTime(ch.g.gain.value, t); ch.g.gain.setTargetAtTime(0, t, 0.08);
-        ch.o.frequency.setTargetAtTime(60, t, 0.15);
-        keep([ch.o], ch.nodes, t + 0.8);
+        var cg = charge.g.gain; charge = null;
+        cg.cancelScheduledValues(t); cg.setValueAtTime(cg.value, t); cg.setTargetAtTime(0, t, 0.16);   // sinks away; the 2 s buffer ends on its own
       }
     };
 
@@ -3005,6 +3159,7 @@
     return {
       setVoice: function (b) { buf = b; },
       setRoar: function (b) { roarBuf = b; },
+      setHover: function (b) { hoverBuf = b; },
       ready: function () { return !!buf; },
       // the poll: returns when each station is called and answers, and the end
       poll: function (t) {
@@ -3030,7 +3185,7 @@
       stop: function () {
         var t = c.currentTime;
         live.slice().forEach(function (v) { v.srcs.forEach(function (s) { try { s.stop(t + 0.02); } catch (e) {} }); });
-        if (charge) { try { charge.o.stop(t + 0.02); } catch (e) {} charge = null; }
+        if (last && !last.done) { try { last.s.stop(t + 0.02); } catch (e) {} } charge = last = null;
         outG.gain.setValueAtTime(0, t + 0.03);
         try { hiss.stop(t + 0.1); vent.stop(t + 0.1); hum.stop(t + 0.1); vL.stop(t + 0.1); } catch (e) {}
         setTimeout(function () { [bus, comp, outG, fdIn, fdHP, fdLP, fdDr, fdOut, stIn, stHP, stLP, stDr, stOut, room, roomG, hBP, hG, vBP, vG, vLG, hLP, humG].forEach(function (x) { try { x.disconnect(); } catch (e) {} }); }, 300);
@@ -3042,13 +3197,13 @@
   var liftSec = q("#liftoff"), liftRoot = q("[data-launch]");
   if (liftSec && liftRoot && liftRoot.worxLaunch) (function () {
     var ls = liftRoot.worxLaunch;
-    var VOICE = "static/assets/home/launch-poll.m4a", ROARF = "static/assets/home/flight-countdown.m4a";
+    var VOICE = "static/assets/home/launch-poll.m4a", ROARF = "static/assets/home/flight-countdown.m4a", HOVERF = "static/assets/home/launch-hover.m4a";
     var CUES = { intro: [0.0, 3.185], q_strat: [3.435, 0.82], a_strat: [4.504, 0.442], q_design: [5.196, 0.748], a_design: [6.194, 1.083], q_eng: [7.527, 0.915], a_eng: [8.692, 0.462], q_supp: [9.404, 0.788], a_supp: [10.443, 0.986], q_you: [11.679, 1.334], go: [13.263, 1.403] };
     var ROAR = [12.53, 19.8];      // the roar in the countdown file (FLIGHT PLAN's CUES.roar)
-    A.prefetch(VOICE, true);
+    A.prefetch(VOICE, true); A.prefetch(HOVERF, true);
     var rows = Array.prototype.slice.call(liftRoot.querySelectorAll(".hm-poll li"));
     var arcSvg = liftRoot.querySelector(".hm-launch-arc");
-    var sc = null, eng = null, voice = null, roar = null, polled = false, pollT = null, plan = null, timers = [], wantGo = false, lastGo = 0, watchT = null, lastPass = -1;
+    var sc = null, eng = null, voice = null, roar = null, hover = null, polled = false, pollT = null, plan = null, timers = [], wantGo = false, lastGo = 0, watchT = null, lastPass = -1;
     var ready = function () { return eng && voice && A.isOn() && scene.p > 0.3; };
     var at = function (t, fn) { timers.push(setTimeout(fn, Math.max(0, (t - sc.currentTime + A.latency()) * 1000))); };
     var reset = function () {
@@ -3090,7 +3245,7 @@
     ls.onLift = function () {
       if (!eng || !A.isOn()) return;
       var t = sc.currentTime + 0.005;
-      eng.cut(t); eng.arm(t, false);
+      eng.cut(t);                 // the hover's hit rings on under the roar
       eng.lift(t);
       A.duck("launch-lift", 0.4, 0.05, 2);
     };
@@ -3115,9 +3270,10 @@
       start: function (c, input) {
         sc = c;
         if (eng) eng.stop();
-        eng = launchSynth(c, input, { voice: voice, roar: roar, cues: CUES, roarCue: ROAR });
+        eng = launchSynth(c, input, { voice: voice, roar: roar, hover: hover, cues: CUES, roarCue: ROAR });
         if (!voice) A.load(VOICE).then(function (b) { voice = b; if (eng) eng.setVoice(b); }, function () {});
         if (!roar) A.load(ROARF).then(function (b) { roar = b; if (eng) eng.setRoar(b); }, function () {});
+        if (!hover) A.load(HOVERF).then(function (b) { hover = b; if (eng) eng.setHover(b); }, function () {});
         clearInterval(watchT); watchT = setInterval(watch, 200);
       },
       stop: function () {

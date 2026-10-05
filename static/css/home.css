@@ -944,8 +944,9 @@
   --gs-lock: #fff1d6;
   --gs-ease: cubic-bezier(0.22, 1.2, 0.36, 1);   /* lands a hair past, settles */
   --gs-size: clamp(200px, 17vw, 250px);
+  --gs-gap: clamp(56px, 6.5vw, 96px);             /* breathing room under the logos */
   position: relative;
-  margin-top: clamp(40px, 5vw, 72px);
+  margin-top: var(--gs-gap);
 }
 
 /* THE RELAY: one still hairline joins the partner field to the panel's
@@ -955,10 +956,10 @@
 .gs-feed {
   position: absolute;
   left: 50%;
-  top: calc(-1 * clamp(40px, 5vw, 72px));
+  top: calc(-1 * var(--gs-gap));
   z-index: 2;
   width: 1px;
-  height: calc(clamp(40px, 5vw, 72px) + 23px);
+  height: calc(var(--gs-gap) + 23px);
   margin-left: -0.5px;
   background: linear-gradient(to bottom, transparent, rgba(254, 238, 207, 0.08) 30%, rgba(250, 167, 25, 0.16));
   pointer-events: none;
