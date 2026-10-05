@@ -1239,7 +1239,7 @@
       ["Imagine", "It starts as a spark. We dream it up with you: the idea, the audience and what success looks like.", "Ignition",
         ["branding", "ui-ux-design", "artificial-intelligence"]],
       ["Think", "We pressure-test the idea: research, users, market and risk, so every decision has a reason.", "Climbing",
-        ["ui-ux-design", "copywriting", "erp-crm"]],
+        ["ui-ux-design", "copywriting", "cms-crm"]],
       ["Plan", "Scope, stack, timeline and budget, laid out as one clear flight plan you sign off.", "Course set",
         ["custom-platforms", "cloud", "it-outsourcing"]],
       ["Create", "Brand, interface, words and motion take shape. You see it, feel it and shape it with us.", "Taking shape",

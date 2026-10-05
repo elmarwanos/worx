@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "pages": "node tools/services/build.js",
+    "pages:site": "node tools/site/build.js"
+  },
   "dependencies": {
     "better-sqlite3": "^13.0.3"
   }

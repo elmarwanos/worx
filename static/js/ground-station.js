@@ -17,6 +17,31 @@
    Once locked, the knobs answer the scroll: they turn a few degrees
    with it, with some weight, and spring back.
 
+   Every move is also published as a PHASE on gs.worxTelemetry (its
+   name, the knob's from/to on the band, its duration, when it began),
+   from the very calls that move the knob: the sound of the receivers
+   (home-audio.js) follows these, so picture and sound share one clock
+   and can never drift; it can also join a search already under way.
+     search    the sweep up the band, past the figure
+     slip      the fall back, across the figure and away
+     approach  the turn to the figure, a hair past and back
+     release   (a retune) easing back down the band
+     hold      (a retune) the beat at the bottom
+     lock      on the figure
+   With the lock, the engraved name round the dial lights amber: dark
+   while it searches, a flicker as the signal comes near (.is-near), a
+   flare as it locks, then a steady glow.
+
+   ONE SECTION, TWO ACTS. The partner logos above and this console share
+   the section, and never at once: a FOCUS (0 the logos, 1 the console)
+   is read from where the eye is between the logo band and the panel,
+   and published (bus.focus, bus.owner) for the sound. The console only
+   wakes when it becomes the subject, so its search is never missed
+   behind the logos. The handoff is THE RELAY: the logo nearest the
+   middle warms, a pulse of power drops down a hairline feed into the
+   panel's vent, and the console takes power. Ownership turns at set
+   points apart (hysteresis), so lingering on the line never flickers.
+
    On the plate at the foot of the panel, the years in orbit count up.
    The figures are in the page as text; all of this is decoration.
    Reduced motion: every tuner already locked, nothing moves.
@@ -72,6 +97,7 @@
   // tuner is in view and jump to another; while nobody touches it, the
   // row moves on by itself every few seconds (resting off screen)
   var dotsEl = $("[data-gs-dots]"), bankEl = $(".gs-bank");
+  var onUnitShown = null;      // set below: a tuner the phone row brings into view runs its cycle
   if (dotsEl && bankEl) (function () {
     var cells = $$(".gs-unit", bankEl), narrow = window.matchMedia("(max-width: 640px)");
     var cur = 0, idleUntil = 0, seen = false, autoT = null, raf = 0;
@@ -84,7 +110,11 @@
       dotsEl.appendChild(b);
       return b;
     });
+    var shownT = null;
     var mark = function (i) {
+      // the tuner the row comes to REST on runs its cycle (a wrap from the
+      // last back to the first slides past the others: they stay still)
+      if (i !== cur && onUnitShown) { clearTimeout(shownT); shownT = setTimeout(function () { onUnitShown(cur); }, 450); }
       cur = i;
       dots.forEach(function (d, j) {
         d.classList.toggle("is-on", j === i);
@@ -190,6 +220,14 @@
     });
   };
 
+  // the phases, published for the sound (see the header)
+  var bus = gs.worxTelemetry = { units: [], onPhase: null, onPower: null, onRelay: null, live: false, focus: 0, owner: "logos" };
+  var phase = function (u, name, from, to, dur) {
+    u.phase = { name: name, from: from, to: to, dur: dur, t0: performance.now() };
+    if (bus.onPhase) { try { bus.onPhase(u, u.phase); } catch (e) {} }
+  };
+  var near = function (u, on) { u.el.classList.toggle("is-near", on); };
+
   var units = $$("[data-gs-unit]").map(function (li) {
     var label = $(".gs-label", li).firstChild.textContent.trim();
     var u = {
@@ -201,6 +239,8 @@
     u.wheels = drums($("[data-gs-drums]", li), String(u.to).length);
     showDigits(u.wheels, 0);
     status(u, "standby");
+    u.index = bus.units.length;
+    bus.units.push(u);
     return u;
   });
   function status(u, s) {
@@ -233,25 +273,29 @@
     u.done = true;
     u.el.classList.add("is-woken");
     var p = u.to / u.max;
-    if (reduced) { turn(u, p, 0); lightTo(u, p); showDigits(u.wheels, u.to); status(u, "lock"); if (done) done(); return; }
+    if (reduced) { turn(u, p, 0); lightTo(u, p); showDigits(u.wheels, u.to); status(u, "lock"); u.phase = { name: "lock", from: p, to: p, dur: 0, t0: 0 }; if (done) done(); return; }
     status(u, "acquire");
     // searching: a sweep up the band, a fall back, a hunt near the mark
-    turn(u, Math.min(0.9, p + 0.35), 700); chase(u, 0, Math.min(0.9, p + 0.35), 700);
-    later(760, function () { turn(u, p * 0.4, 520); chase(u, Math.min(0.9, p + 0.35), p * 0.4, 520); });
+    var hi = Math.min(0.9, p + 0.35);
+    turn(u, hi, 700); chase(u, 0, hi, 700); phase(u, "search", 0, hi, 700);
+    later(760, function () { turn(u, p * 0.4, 520); chase(u, hi, p * 0.4, 520); phase(u, "slip", hi, p * 0.4, 520); });
     later(1320, function () {
       // and on to the figure, the drums rolling up with it
-      turn(u, p, 1700); chase(u, p * 0.4, p, 1500);
+      turn(u, p, 1700); chase(u, p * 0.4, p, 1500); phase(u, "approach", p * 0.4, p, 1700);
       u.el.classList.add("is-rolling");
       showDigits(u.wheels, u.to, true, 1500);
     });
+    later(1320 + 520, function () { near(u, true); });
     later(2900, function () { u.el.classList.remove("is-rolling"); });
-    later(3150, function () { status(u, "lock"); lightTo(u, p); u.ready = true; u.restUntil = Date.now() + 12000; if (done) done(); });
+    later(3150, function () { near(u, false); status(u, "lock"); lightTo(u, p); phase(u, "lock", p, p, 0); u.ready = true; u.restUntil = Date.now() + 12000; if (done) done(); });
   };
 
   var powered = false;
   var power = function () {
     if (powered) return;
     powered = true;
+    bus.live = true;
+    if (bus.onPower) { try { bus.onPower(); } catch (e) {} }
     gs.classList.add("is-live");
     later(200, function () { gs.classList.add("is-signal"); });
   };
@@ -263,37 +307,98 @@
   }
 
   var phone = window.matchMedia("(max-width: 640px)");
-  // the station wakes as it comes into view, the tuners one after
-  // another, left to right
-  new IntersectionObserver(function (en, o) {
-    if (!en[0].isIntersecting) return;
-    o.disconnect();
-    power();
-    if (phone.matches) return;
-    units.forEach(function (u, i) { later(700 + i * 1000, function () { wake(u); }); });
-  }, { threshold: 0.35 }).observe($(".gs-bank"));
+  var woken = false, waiting = [];
 
-  // phones: closer in, so each tuner wakes as it is seen
+  // the console's first wake: on desktop the tuners one after another,
+  // left to right; on phones (one tuner at a time) each as it is seen
+  var start = function () {
+    if (woken) return;
+    woken = true;
+    power();
+    if (!phone.matches) { units.forEach(function (u, i) { later(700 + i * 1000, function () { wake(u); }); }); return; }
+    waiting.forEach(function (u) { later(300, function () { wake(u); }); });
+    waiting = [];
+  };
   if (phone.matches) {
     var io = new IntersectionObserver(function (en) {
       en.forEach(function (e) {
         if (!e.isIntersecting) return;
+        var u = units.filter(function (x) { return x.el === e.target; })[0];
+        if (bus.owner !== "console") { if (waiting.indexOf(u) < 0) waiting.push(u); return; }
         io.unobserve(e.target);
         power();
-        var u = units.filter(function (x) { return x.el === e.target; })[0];
         later(300, function () { wake(u); });
       });
     }, { threshold: 0.6 });
     units.forEach(function (u) { io.observe(u.el); });
   }
 
-  /* then they keep playing, one at a time, never all at once: a tuner
-     eases back down its band (its drums spinning down), holds a beat,
-     and climbs back to its figure with weight, a little past and back;
-     its ring breathes out as it settles, and it rests there at least 20 s
-     before it moves again (one tuner every 9 s at most). Only on screen, and only one
-     moving at any moment, so it reads as a live instrument, not noise. */
-  var turnN = 0, busy = false;
+  /* the focus: 0 the logos, 1 this console; geometry read on layout
+     changes, the eye (the middle of the viewport) on scroll */
+  var bandEl = document.querySelector(".hm-marquee"), boardEl = $(".gs-board") || gs;
+  var geo = { band: 0, board: 0 };
+  var measureFocus = function () {
+    var y = window.scrollY;
+    var b = boardEl.getBoundingClientRect();
+    geo.board = b.top + y + b.height / 2;
+    if (bandEl) { var r = bandEl.getBoundingClientRect(); geo.band = r.top + y + r.height / 2; }
+    else geo.band = geo.board - window.innerHeight;
+  };
+  // the feed: a hairline from the logo band down into the panel's vent
+  var feed = document.createElement("span");
+  feed.className = "gs-feed";
+  feed.setAttribute("aria-hidden", "true");
+  feed.appendChild(document.createElement("i"));
+  gs.insertBefore(feed, gs.firstChild);
+  var relay = function () {
+    gs.classList.remove("is-relay"); void gs.offsetWidth; gs.classList.add("is-relay");
+    if (warmPartner) warmPartner();      // defined further down; absent on a load already at the console
+    if (bus.onRelay) { try { bus.onRelay(); } catch (e) {} }
+  };
+  var lastEye = 0, fRaf = 0;
+  var readFocus = function () {
+    fRaf = 0;
+    var eye = window.scrollY + window.innerHeight / 2, span = geo.board - geo.band || 1;
+    var raw = (eye - geo.band) / span;
+    var k = Math.max(0, Math.min(1, (raw - 0.45) / 0.25));
+    bus.focus = k * k * (3 - 2 * k);
+    var down = eye >= lastEye;
+    lastEye = eye;
+    // ownership turns at points apart: no flicker on the line
+    if (bus.owner !== "console" && raw > 0.62) {
+      bus.owner = "console";
+      if (!woken) { relay(); later(620, start); }
+      else if (down) relay();
+      else if (phone.matches) start();
+    } else if (bus.owner === "console" && raw < 0.38) {
+      bus.owner = "logos";
+    }
+  };
+  var focusSoon = function () { if (!fRaf) fRaf = requestAnimationFrame(readFocus); };
+  window.addEventListener("scroll", focusSoon, { passive: true });
+  window.addEventListener("resize", function () { measureFocus(); focusSoon(); });
+  window.addEventListener("load", function () { measureFocus(); focusSoon(); });
+  if (window.ResizeObserver) new ResizeObserver(function () { measureFocus(); focusSoon(); }).observe(document.documentElement);
+  measureFocus(); readFocus();
+  // a screen that cannot bring the console to the middle: it wakes once
+  // it has been in full view a while
+  new IntersectionObserver(function (en) {
+    if (!en[0].isIntersecting || woken) return;
+    setTimeout(function () {
+      var r = boardEl.getBoundingClientRect();
+      if (!woken && r.top >= 0 && r.bottom <= window.innerHeight) { bus.owner = "console"; start(); }
+    }, 2600);
+  }, { threshold: 0.98 }).observe(boardEl);
+
+  /* then they keep playing: every 5 s after a round has settled, the
+     tuners run their cycle again one by one, left to right a second
+     apart, as at the first wake (the user, 2026-10-05): each eases back
+     down its band (its drums spinning down) almost to nothing, holds a
+     beat, and climbs back to its figure with weight, a little past and
+     back, its ring breathing out as it settles. Phones show one tuner at
+     a time (the row moves on every 5 s): each runs its cycle as it slides
+     into view. Only on screen, and only while the console holds the stage. */
+  var ROUND_GAP = 5000, STAGGER = 1000, CYCLE = 3500;
   var visible = function (u) {
     var r = u.el.getBoundingClientRect();
     return r.bottom > 0 && r.top < window.innerHeight;
@@ -307,29 +412,43 @@
     setTimeout(function () { best.classList.remove("is-tuned"); }, 2600);
   };
   var retune = function (u) {
-    busy = true;
+    if (u.rolling) return;
+    u.rolling = true;
     var p = u.to / u.max;
-    var low = p * (0.22 + Math.random() * 0.2), lowN = Math.max(1, Math.round(u.to * low / p));
+    var low = p * (0.04 + Math.random() * 0.1), lowN = Math.max(0, Math.round(u.to * low / p));   // down almost to nothing, so the climb reads
     status(u, "acquire");
     u.el.classList.add("is-rolling");
-    turn(u, low, 900); chase(u, p, low, 900);
+    turn(u, low, 900); chase(u, p, low, 900); phase(u, "release", p, low, 900);
     showDigits(u.wheels, lowN, false, 700);
+    setTimeout(function () { phase(u, "hold", low, low, 450); }, 900);
     setTimeout(function () {
       warmPartner();
-      turn(u, p, 1900); chase(u, low, p, 1700);
+      turn(u, p, 1900); chase(u, low, p, 1700); phase(u, "approach", low, p, 1900);
       showDigits(u.wheels, u.to, true, 1600);
     }, 1350);
+    setTimeout(function () { near(u, true); }, 1350 + 600);
     setTimeout(function () { u.el.classList.remove("is-rolling"); }, 3200);
-    // settled on its figure, it rests there a good while before it moves again
-    setTimeout(function () { status(u, "lock"); lightTo(u, p); busy = false; u.restUntil = Date.now() + 20000; }, 3500);
+    setTimeout(function () { near(u, false); status(u, "lock"); lightTo(u, p); phase(u, "lock", p, p, 0); u.rolling = false; }, CYCLE);
   };
-  setInterval(function () {
-    if (busy || document.hidden || !onScreen) return;
-    var now = Date.now();
-    var ready = units.filter(function (u) { return u.ready && visible(u) && now > (u.restUntil || 0); });
-    if (!ready.length) return;
-    retune(ready[turnN++ % ready.length]);
-  }, 9000);
+  var live = function () { return !document.hidden && onScreen && bus.owner === "console"; };
+  // desktop and tablets: a round, then 5 s of rest, then the next
+  var roundT = null;
+  var round = function () {
+    roundT = null;
+    if (phone.matches) return;
+    if (!live() || units.some(function (u) { return !u.ready; })) { roundT = setTimeout(round, 1000); return; }
+    var order = units.filter(visible);
+    order.forEach(function (u, i) { setTimeout(function () { if (live()) retune(u); }, i * STAGGER); });
+    roundT = setTimeout(round, Math.max(0, order.length - 1) * STAGGER + CYCLE + ROUND_GAP);
+  };
+  // the first round waits for the wake to finish (its last tuner locking)
+  var kickRounds = function () { if (!roundT && !phone.matches) roundT = setTimeout(round, ROUND_GAP); };
+  setInterval(function () { if (!roundT && !phone.matches && units.every(function (u) { return u.ready; })) kickRounds(); }, 1000);
+  // phones: the tuner the row brings into view runs its cycle
+  onUnitShown = function (i) {
+    var u = units[i];
+    if (u && u.ready && phone.matches && live()) retune(u);
+  };
 
   /* the scroll turns the locked knobs a little, with weight */
   var spin = 0, lastY = window.scrollY, raf = 0, onScreen = false;

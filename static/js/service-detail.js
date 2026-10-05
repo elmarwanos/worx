@@ -221,11 +221,11 @@
     return { start: r.start, stop: r.stop, still: still };
   };
 
-  // PLATFORM / ERP: a core, its satellites, data flowing between them
+  // PLATFORM / CMS: a core, its satellites, data flowing between them
   function network(stage, kind) {
     stage.classList.add("sc-net");
-    var LAB = kind === "erp" ? ["FINANCE", "CRM", "SUPPLY", "HR", "SALES", "DATA"] : ["CRM", "ERP", "PAY", "PORTAL", "DATA", "AUTH"];
-    var CORE = kind === "erp" ? "ERP" : "CORE";
+    var LAB = kind === "cms" ? ["PAGES", "CRM", "LEADS", "FORMS", "EMAIL", "DATA"] : ["CRM", "CMS", "PAY", "PORTAL", "DATA", "AUTH"];
+    var CORE = kind === "cms" ? "CMS" : "CORE";
     var cx = 200, cy = 128, rx = 150, ry = 92;
     var nodes = LAB.map(function (l, i) {
       var a = -Math.PI / 2 + (i / LAB.length) * Math.PI * 2;
@@ -237,11 +237,11 @@
       '<g class="sc-core"><circle class="o" cx="' + cx + '" cy="' + cy + '" r="26"/><circle class="c" cx="' + cx + '" cy="' + cy + '" r="24"/><text x="' + cx + '" y="' + (cy + 1) + '">' + CORE + "</text></g>" +
       nodes.map(function (n, i) { return '<g class="sc-node" data-i="' + i + '"><circle cx="' + n.x.toFixed(1) + '" cy="' + n.y.toFixed(1) + '" r="25"/><text x="' + n.x.toFixed(1) + '" y="' + (n.y + 1).toFixed(1) + '">' + n.l + "</text></g>"; }).join("") +
       '<g class="sc-pks"></g></svg>';
-    var K = kind === "erp" ? [["Records synced", "k1"], ["Invoices today", "k2"], ["Stock accuracy", "k3"]] : [["Events / s", "k1"], ["Uptime", "k2"], ["Systems in sync", "k3"]];
+    var K = kind === "cms" ? [["Records synced", "k1"], ["Leads today", "k2"], ["Pages live", "k3"]] : [["Events / s", "k1"], ["Uptime", "k2"], ["Systems in sync", "k3"]];
     stage.innerHTML = svg + '<div class="sc-panel sc-kpi">' + K.map(function (k) { return '<div><span class="sc-label">' + k[0] + '</span><b data-' + k[1] + '>0</b><span class="sc-bar"><span class="sc-fill"></span></span></div>'; }).join("") + "</div>";
     var g = q(".sc-pks", stage), els = qa(".sc-node", stage), fills = qa(".sc-fill", stage);
     var k1 = q("[data-k1]", stage), k2 = q("[data-k2]", stage), k3 = q("[data-k3]", stage);
-    var NS = "http://www.w3.org/2000/svg", pks = [], acc = 0, count = kind === "erp" ? 18420 : 0;
+    var NS = "http://www.w3.org/2000/svg", pks = [], acc = 0, count = kind === "cms" ? 18420 : 0;
     var spawn = function () {
       var c = document.createElementNS(NS, "circle");
       c.setAttribute("r", "3");
@@ -251,11 +251,11 @@
       pks.push({ el: c, n: (Math.random() * nodes.length) | 0, t: 0, out: out, v: 0.6 + Math.random() * 0.5 });
     };
     var settle = function () {
-      if (kind === "erp") { k1.textContent = count.toLocaleString("en-US"); k2.textContent = "1,284"; k3.textContent = "99.9%"; }
+      if (kind === "cms") { k1.textContent = count.toLocaleString("en-US"); k2.textContent = "128"; k3.textContent = "342"; }
       else { k1.textContent = "1,2" + (((Math.random() * 90) | 0) + 10); k2.textContent = "99.98%"; k3.textContent = "6 / 6"; }
       fills[0].style.setProperty("--p", 0.62 + Math.random() * 0.3);
       fills[1].style.setProperty("--p", 0.97);
-      fills[2].style.setProperty("--p", kind === "erp" ? 0.94 : 1);
+      fills[2].style.setProperty("--p", kind === "cms" ? 0.94 : 1);
     };
     var lp = Loop(function (now, dt) {
       acc += dt;
@@ -278,7 +278,7 @@
     return { start: s.start, stop: s.stop, still: still };
   }
   SCENES.platform = function (stage) { return network(stage, "platform"); };
-  SCENES.erp = function (stage) { return network(stage, "erp"); };
+  SCENES.cms = function (stage) { return network(stage, "cms"); };
 
   // MOBILE: the phone turns, the app flips screens, a notification lands
   SCENES.mobile = function (stage) {
@@ -792,8 +792,8 @@
     };
   };
 
-  // ERP: data lanes, records streaming between departments in sync
-  BACKDROPS.erp = function (ctx, W, H) {
+  // CMS & CRM: data lanes, content and customer records streaming between systems in sync
+  BACKDROPS.cms = function (ctx, W, H) {
     var L = [], gap = 26;
     for (var y = gap; y < H; y += gap) L.push({ y: y, v: rnd(40, 140) * (Math.random() < 0.5 ? 1 : -1), o: rnd(0, 400), rec: [] });
     return function (t, dt) {

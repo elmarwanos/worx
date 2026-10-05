@@ -944,8 +944,49 @@
   --gs-lock: #fff1d6;
   --gs-ease: cubic-bezier(0.22, 1.2, 0.36, 1);   /* lands a hair past, settles */
   --gs-size: clamp(200px, 17vw, 250px);
+  --gs-gap: clamp(56px, 6.5vw, 96px);             /* breathing room under the logos */
   position: relative;
-  margin-top: clamp(40px, 5vw, 72px);
+  margin-top: var(--gs-gap);
+}
+
+/* THE RELAY: one still hairline joins the partner field to the panel's
+   vent; as the console becomes the subject a pulse of power drops down
+   it, and the vent glows as it arrives (ground-station.js adds
+   .is-relay; the sound hands over on the same call) */
+.gs-feed {
+  position: absolute;
+  left: 50%;
+  top: calc(-1 * var(--gs-gap));
+  z-index: 2;
+  width: 1px;
+  height: calc(var(--gs-gap) + 23px);
+  margin-left: -0.5px;
+  background: linear-gradient(to bottom, transparent, rgba(254, 238, 207, 0.08) 30%, rgba(250, 167, 25, 0.16));
+  pointer-events: none;
+}
+.gs-feed i {
+  position: absolute;
+  left: -1px;
+  top: 0;
+  width: 3px;
+  height: 34px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(250, 167, 25, 0.75), #fff1d6);
+  box-shadow: 0 0 10px 2px rgba(250, 167, 25, 0.55);
+  opacity: 0;
+}
+.gs.is-relay .gs-feed i { animation: gs-relay 0.6s cubic-bezier(0.55, 0, 0.8, 0.4) both; }
+@keyframes gs-relay {
+  0% { transform: translateY(-34px); opacity: 0; }
+  15% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(calc(clamp(40px, 5vw, 72px) + 4px)); opacity: 0; }
+}
+.gs.is-relay .gs-vent { animation: gs-vent-hit 1.4s ease-out; }
+@keyframes gs-vent-hit {
+  0%, 40% { filter: none; }
+  48% { filter: brightness(2.6) drop-shadow(0 0 7px rgba(250, 167, 25, 0.9)); }
+  100% { filter: none; }
 }
 
 .gs-ltr { direction: ltr; unicode-bidi: isolate; }
@@ -984,6 +1025,32 @@
 .gs-num { font: 500 9px var(--font-mono); fill: rgba(254, 238, 207, 0.5); text-anchor: middle; }
 .gs-arc { font: 600 9.5px var(--font-mono); letter-spacing: 2.6px; fill: rgba(254, 238, 207, 0.62); text-transform: uppercase; }
 .gs-arc--code { font-size: 8px; letter-spacing: 3px; fill: rgba(254, 238, 207, 0.38); }
+
+/* the engraved name, an identification plate lit from behind: dark
+   while the receiver searches, a flicker of current as the signal comes
+   near, an amber flare on the lock, then a steady glow. Never blinking
+   once locked. (ground-station.js sets the states; the sound locks on
+   the same call) */
+.gs-unit.is-woken .gs-arc:not(.gs-arc--code) { transition: fill 0.5s ease, filter 0.8s ease; }
+.gs-unit.is-acquire .gs-arc:not(.gs-arc--code) { fill: rgba(254, 238, 207, 0.3); }
+.gs-unit.is-near .gs-arc:not(.gs-arc--code) { animation: gs-plate-flicker 0.62s steps(1, end) both; }
+.gs-unit.is-woken.is-lock .gs-arc:not(.gs-arc--code) {
+  fill: #ffc766;
+  filter: drop-shadow(0 0 2.5px rgba(250, 167, 25, 0.55));
+  animation: gs-plate-flare 0.9s ease-out;
+}
+@keyframes gs-plate-flicker {
+  0% { fill: rgba(254, 238, 207, 0.3); }
+  14% { fill: rgba(255, 199, 102, 0.55); }
+  22% { fill: rgba(254, 238, 207, 0.32); }
+  48% { fill: rgba(255, 199, 102, 0.42); }
+  56% { fill: rgba(254, 238, 207, 0.34); }
+  100% { fill: rgba(255, 199, 102, 0.4); }
+}
+@keyframes gs-plate-flare {
+  0% { fill: #fff1d2; filter: drop-shadow(0 0 6px rgba(250, 167, 25, 0.95)); }
+  100% { fill: #ffc766; filter: drop-shadow(0 0 2.5px rgba(250, 167, 25, 0.55)); }
+}
 
 /* the knob: a knurled skirt that turns, a hub with the drums that does not */
 .gs-knob {
@@ -1474,6 +1541,8 @@
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 12vw;
     overscroll-behavior-x: contain;
+    overflow-y: hidden;              /* sideways only: a vertical swipe here scrolls the page (iOS) */
+    touch-action: pan-x pan-y;
     scrollbar-width: none;
   }
   .gs-bank::-webkit-scrollbar { display: none; }
@@ -1532,6 +1601,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .gs-unit.is-lock .gs-tuner::after, .gs-dot.is-rest { animation: none !important; }
+  .gs-unit .gs-arc { animation: none !important; }
+  .gs-feed i, .gs.is-relay .gs-vent { animation: none !important; }
   .gs-tuner { transform: none; opacity: 1; filter: none; transition: none; }
   .gs-unit.is-rolling .gs-strip { filter: none; }
   .gs.is-live .gs-strip, .gs.is-live .gs-knurl { transition: none; }
@@ -2213,7 +2284,7 @@
     gap: 6px;
     margin: 0 0 6px;
     font-family: var(--font-display);
-    font-size: 1.45rem;
+    font-size: 1.8rem;
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.1;
@@ -2232,6 +2303,9 @@
 
   .hm-mod-panel.is-current .hm-mod-panel-head { color: var(--text); }
   .hm-mod-panel.is-current .hm-mod-panel-head span { color: var(--accent-2); }
+
+  /* the division heads lead; the service names sit under them */
+  .hm-mod-panel a b { font-size: 1.3rem; }
 
   .hm-mod-panel a { transition: opacity 0.35s ease, translate 0.45s var(--hm-ease), border-color 0.35s ease; }
   .hm-mod-panel.is-current a { border-left-color: rgba(250, 167, 25, 0.35); }
@@ -2402,25 +2476,6 @@
 .hm-comms-list a:focus-visible .hm-comms-tip {
   opacity: 1;
   transform: translate(0, -50%);
-}
-
-.hm-comms-status {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  color: rgba(254, 238, 207, 0.35);
-}
-
-.hm-comms-status i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent-2);
-  box-shadow: 0 0 10px rgba(250, 167, 25, 0.8);
-  animation: hx-blink 1.4s ease-in-out infinite;
 }
 
 @media (max-width: 1100px), (hover: none) {
@@ -2754,6 +2809,18 @@
   .hm-fp-cp.is-launch { animation: hm-fp-whoosh 0.9s ease-out; }
 }
 @keyframes hm-fp-whoosh { 22% { filter: blur(4px); } }
+/* phones: a stage separating (the ignition flash, the burn away) and the
+   next locking in */
+@keyframes hm-fp-sep {
+  0% { filter: none; box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9); }
+  14% { filter: brightness(1.55); box-shadow: 0 34px 46px -10px rgba(250, 167, 25, 0.75); }
+  100% { filter: brightness(1.1) blur(2px); box-shadow: 0 60px 70px -14px rgba(229, 125, 35, 0.5); }
+}
+@keyframes hm-fp-dock {
+  0% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 0 0 rgba(250, 167, 25, 0); }
+  35% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 0 2px rgba(250, 167, 25, 0.55), 0 0 34px rgba(250, 167, 25, 0.35); }
+  100% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 0 0 rgba(250, 167, 25, 0); }
+}
 
 /* the huge stencilled countdown number behind the words */
 .hm-fp-cp::before {
@@ -3118,6 +3185,26 @@
   .hm-fp-cp.is-done > :not(.hm-fp-shade) { opacity: 0; }
   .hm-fp-cp.is-done .hm-fp-shade { opacity: calc(0.3 + var(--a) * 0.06); }
   .hm-fp-cp.is-done { border-color: rgba(250, 167, 25, calc(0.42 - var(--a) * 0.05)); }
+
+  /* phones: STAGE SEPARATION. The stages still to fly wait stacked under
+     the card in play, their edges peeking below it; a cleared card fires
+     off upward and out of the frame like a jettisoned stage (an ignition
+     flash, then accelerating away), and the next rises out of the stack
+     and locks in with a glow. Liftoff (is-go) keeps its own stack. */
+  .hm-fp-cp { transition: transform 0.85s cubic-bezier(0.62, 0, 0.22, 1), opacity 0.6s ease, border-color 0.5s; }
+  .hm-fp-cp.is-later {
+    transform-origin: 50% 100%;
+    transform: translateY(calc(var(--a) * 11px)) scale(calc(1 - var(--a) * 0.05));
+    opacity: calc(1 - var(--a) * 0.24);
+  }
+  .hm-fp-cp.is-done {
+    transform-origin: 50% 50%;
+    transform: translateY(-122%) scale(0.86);
+    opacity: 0;
+  }
+  .hm-fp-cp.is-done.is-gone { opacity: 0; }
+  .hm-fp-cp.is-launch { animation: hm-fp-sep 0.85s ease-in both; }
+  .hm-fp-cp.is-arrive { animation: hm-fp-dock 0.9s ease-out 0.15s both; }
   .hm-fp-cp::before { font-size: calc(var(--fp-w) * 0.29); bottom: -0.18em; }
   .hm-fp-name { font-size: clamp(1.75rem, 8.2vw, 2.15rem); }
   .hm-fp-top { grid-template-columns: 1fr; gap: 18px; }
@@ -3265,6 +3352,19 @@
   background: var(--gradient);
 }
 
+/* the message read out over the radio (home-audio.js, the transmissions):
+   while a client is on the channel the words still to come wait dimmed and
+   each lights as it is said; the waveform follows the voice; the header
+   says who holds the channel */
+.hm-tx-w { transition: opacity 0.35s ease, color 0.3s ease, text-shadow 0.4s ease; }
+.hm-tx-card.is-voiced .hm-tx-w { opacity: 0.32; }
+.hm-tx-card.is-voiced .hm-tx-w.is-said { opacity: 1; }
+.hm-tx-card.is-voiced .hm-tx-w.is-now { opacity: 1; color: var(--accent-2); text-shadow: 0 0 18px rgba(250, 167, 25, 0.45); }
+.hm-tx-card.is-voiced .hm-tx-wave i { animation: none; transition: height 0.08s linear; }
+.hm-tx-card.is-rx .hm-tx-meta span,
+.hm-tx-card.is-tx .hm-tx-meta span { color: var(--accent-2); }
+.hm-tx-card.is-rx .hm-avatar { box-shadow: 0 0 0 4px rgba(229, 125, 35, 0.15), 0 0 26px rgba(250, 167, 25, 0.55); }
+
 @media (max-width: 700px) {
   .hm-tx-card { grid-template-columns: 1fr; }
   .hm-tx-wave { grid-row: auto; height: 40px; }
@@ -3345,6 +3445,8 @@
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 4vw;
     overscroll-behavior-x: contain;
+    overflow-y: hidden;              /* sideways only: a vertical swipe here scrolls the page (iOS) */
+    touch-action: pan-x pan-y;
     scrollbar-width: none;
   }
   .hm-notes-grid::-webkit-scrollbar { display: none; }
@@ -3921,6 +4023,13 @@
 .hm-launch.is-inview .hm-poll li:nth-child(4) b { transition-delay: 1.55s; }
 .hm-launch.is-inview .hm-poll li:nth-child(5) b { transition-delay: 1.95s; }
 
+/* the poll taken aloud (home-audio.js, sound on): the board waits, and each
+   station's GO lights as it answers; the station being called brightens */
+.hm-launch.is-polling .hm-poll li:not(.hm-poll-you) b { opacity: 0; transform: translateX(6px); transition: opacity 0.2s ease, transform 0.3s var(--hm-ease), color 0.3s ease; transition-delay: 0s; }
+.hm-launch.is-polling .hm-poll li.is-go b { opacity: 1; transform: none; }
+.hm-launch.is-polling .hm-poll li > span { transition: color 0.3s ease; }
+.hm-launch.is-polling .hm-poll li.is-called > span { color: var(--text); }
+
 .hm-poll-you { color: var(--text) !important; }
 .hm-poll-you b { color: rgba(254, 238, 207, 0.5); animation: hm-rung 1.2s ease-in-out infinite; }
 .hm-launch.is-armed .hm-poll-you b { color: var(--accent-2); animation: none; transition-delay: 0s; }
@@ -4130,7 +4239,7 @@
   .hx-grain { display: none; }
   .hm-arc-trail, .hm-arc-craft { display: none; }
   .hm-fp-cp { transition: none; }
-  .hm-fp.is-go .hm-fp-stages, .hm-fp.is-go .hm-fp-plot::after, .hm-fp.is-go .hm-fp-sparks i, .hm-fp-cp.is-arrive .hm-fp-name, .hm-fp-cp.is-arrive .hm-fp-copy, .hm-fp-cp.is-arrive .hm-fp-t, .hm-fclock-ladder li.is-now, .hm-fp-cp.is-now .hm-fp-st i, .hm-fp-cp.is-launch, .hm-fp-cp.is-now .hm-fp-t::after, .hm-fp.is-go .hm-fp-cp--go::after, .hm-fclock.is-go .hm-fclock-row::after { animation: none; }
+  .hm-fp.is-go .hm-fp-stages, .hm-fp.is-go .hm-fp-plot::after, .hm-fp.is-go .hm-fp-sparks i, .hm-fp-cp.is-arrive .hm-fp-name, .hm-fp-cp.is-arrive .hm-fp-copy, .hm-fp-cp.is-arrive .hm-fp-t, .hm-fclock-ladder li.is-now, .hm-fp-cp.is-now .hm-fp-st i, .hm-fp-cp.is-launch, .hm-fp-cp.is-arrive, .hm-fp-cp.is-now .hm-fp-t::after, .hm-fp.is-go .hm-fp-cp--go::after, .hm-fclock.is-go .hm-fclock-row::after { animation: none; }
   .hx.is-born .hx-card-word span { animation: none; opacity: 1; }
   .hx-line > span,
   .hm-split-line > span { transform: none !important; transition: none !important; }
@@ -4248,11 +4357,19 @@
   pointer-events: none;
 }
 
+/* the arc sweeps in left to right by a clip on the whole drawing (not a
+   stroke dash: with non-scaling strokes Safari ignores pathLength in the
+   dash, which left the line drawn part-way); the clip reaches well past
+   the box so the glow's blur is never cut, and it always ends full */
 .hm-limb svg {
   width: 100%;
   height: 100%;
   overflow: visible;
+  clip-path: inset(-80px 100% -80px -80px);
+  transition: clip-path 2.4s var(--hm-ease);
 }
+
+.hm-limb.is-inview svg { clip-path: inset(-80px -80px -80px -80px); }
 
 .hm-limb path {
   fill: none;
@@ -4261,9 +4378,6 @@
 
 .hm-limb-line {
   stroke-width: 1.2;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  transition: stroke-dashoffset 2.4s var(--hm-ease);
 }
 
 .hm-limb-glow {
@@ -4273,7 +4387,6 @@
   transition: opacity 2.4s ease 0.6s;
 }
 
-.hm-limb.is-inview .hm-limb-line { stroke-dashoffset: 0; }
 .hm-limb.is-inview .hm-limb-glow { opacity: 0.22; }
 
 .hm-limb-tag {
@@ -5003,7 +5116,7 @@ html.hm-sheet-lock body { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .hm-dust { display: none; }
-  .hm-limb-line { stroke-dashoffset: 0; transition: none; }
+  .hm-limb svg { clip-path: none; transition: none; }
   .hm-ruler { transform: none; transition: none; }
   .hm-case-media::before { display: none; }
 }

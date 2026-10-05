@@ -880,7 +880,7 @@
 .sc-metrics { flex: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
 .sc-metrics div { display: grid; gap: 4px; }
 
-/* ---- platform / erp: a core and its satellites -------------------- */
+/* ---- platform / cms: a core and its satellites -------------------- */
 .sc-net .sc-node circle { fill: rgba(21, 9, 5, 0.95); stroke: rgba(254, 238, 207, 0.25); stroke-width: 1; transition: stroke 0.3s ease; }
 .sc-net .sc-node.is-hot circle { stroke: var(--accent-2); }
 .sc-net .sc-node text { font-family: var(--font-mono); font-size: 8px; letter-spacing: 1px; fill: rgba(254, 238, 207, 0.75); text-anchor: middle; dominant-baseline: middle; }

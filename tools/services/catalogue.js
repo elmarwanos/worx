@@ -126,11 +126,11 @@ module.exports = [
     scene: "platform",
     services: [
       {
-        slug: "erp-crm",
-        page: "erp-crm.html",
+        slug: "cms-crm",
+        page: "cms-crm.html",
         name: "CMS & CRM",
-        short: "One connected system for finance, people, supply and sales.",
-        subs: ["NetSuite", "SAP", "Microsoft Dynamics 365", "Oracle Cloud", "Odoo", "CRM development"]
+        short: "Websites your team runs itself, and every customer in one place.",
+        subs: ["WordPress", "Drupal", "Headless CMS", "HubSpot", "Salesforce", "Zoho CRM"]
       },
       {
         slug: "it-outsourcing",

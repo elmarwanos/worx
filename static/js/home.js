@@ -266,11 +266,11 @@
     };
 
     if (video && !reduced && freeze == null) {
-      // one HQ file for every screen; the per-resolution pick is parked
-      // until the other qualities are re-encoded from the new film
-      // var wpx = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2);
-      // video.src = video.getAttribute(wpx > 2200 ? "data-src-1440" : wpx > 1100 ? "data-src-1080" : "data-src-720");
-      video.src = video.getAttribute("data-src");
+      // the HQ film, the same frames everywhere: portrait screens (which
+      // only ever show its centre, the film covering the screen's height)
+      // get the centre square of it, a fraction of the download
+      var portrait = window.innerWidth < window.innerHeight;
+      video.src = video.getAttribute(portrait && video.hasAttribute("data-src-sq") ? "data-src-sq" : "data-src");
       video.load();
       var state = "wait", stateT0 = 0, inView = true;
       var setState = function (st) { state = st; stateT0 = performance.now(); };
@@ -297,6 +297,14 @@
       video.addEventListener("canplaythrough", begin);
       setTimeout(function () { if (video.readyState >= 3) begin(); }, 2500);
       video.addEventListener("ended", function () { if (state === "film") startCard(); });
+      // sound switched on over the title card (home-audio.js): the film
+      // rolls again from its first frame, this time with its soundtrack
+      hx.worxReplay = function () {
+        if (state !== "card" || !inView) return false;
+        hx.classList.remove("is-card", "is-born", "is-final");
+        playFilm();
+        return true;
+      };
       if ("IntersectionObserver" in window) new IntersectionObserver(function (en) {
         inView = en[0].isIntersecting;
         if (!inView) video.pause(); else if (state === "film") { var p3 = video.play(); if (p3 && p3.catch) p3.catch(function () {}); }
@@ -498,14 +506,14 @@
   rows.forEach(function (row) { row.innerHTML += row.innerHTML; });   // seamless loop
   if (rows.length && !reduced) {
     var mpos = 0;
-    var hovering = false;
     var marquee = q(".hm-marquee");
-    marquee.addEventListener("pointerenter", function () { hovering = true; });
-    marquee.addEventListener("pointerleave", function () { hovering = false; });
-    var mLast = 0, mOn = false, mRaf = 0, speed = 42;
+    var mLast = 0, mOn = false, mRaf = 0, speed = 42, surge = 0, surgeY = window.scrollY;
+    // the stones' motion, as it really is, for the sound (home-audio.js
+    // hears the logos as massive stones sliding): written, never read here
+    var motion = marquee.worxMotion = { on: false, pos: 0, v: 42, cruise: 42, halves: [], rows: rows };
     // each row's loop length, measured on layout changes, not per frame
     var halves = [];
-    var measureRows = function () { halves = rows.map(function (row) { return row.scrollWidth / 2; }); };
+    var measureRows = function () { halves = motion.halves = rows.map(function (row) { return row.scrollWidth / 2; }); };
     measureRows();
     window.addEventListener("resize", measureRows);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureRows);
@@ -514,10 +522,16 @@
       if (!mOn) return;
       var dt = mLast ? Math.min(0.05, (now - mLast) / 1000) : 0.016;
       mLast = now;
-      // the drift eases between its cruising and hovered speeds, so a
-      // pointer arriving slows the logos instead of braking them
-      speed += ((hovering ? 12 : 42) - speed) * Math.min(1, dt * 4);
-      mpos += (speed + Math.min(260, Math.abs(scrollV) * 6)) * dt;
+      // one steady cruise, pointer or not: the stones never pause
+      // the scroll's surge, easing out once the page is at rest (scrollV
+      // itself only changes on scroll events, so it would otherwise hold
+      // its last value and leave the logos racing after the page stops)
+      var sy = window.scrollY, moving = sy !== surgeY;
+      surgeY = sy;
+      surge += ((moving ? Math.min(260, Math.abs(scrollV) * 6) : 0) - surge) * Math.min(1, dt * (moving ? 12 : 2.5));
+      var v = speed + surge;
+      mpos += v * dt;
+      motion.pos = mpos; motion.v = v; motion.speed = speed; motion.surge = surge; motion.scrolling = moving;
       rows.forEach(function (row, i) {
         var half = halves[i];
         if (!half) return;
@@ -529,7 +543,7 @@
       mRaf = requestAnimationFrame(step);
     };
     whileVisible(marquee, function (on) {
-      mOn = on; mLast = 0;
+      mOn = motion.on = on; mLast = 0;
       if (on && !mRaf) { measureRows(); mRaf = requestAnimationFrame(step); }
     }, "100px");
   }
@@ -560,8 +574,14 @@
     pinMQ.addEventListener("change", layout);
     window.addEventListener("load", layout);
 
+    // the archive's state, for its sound (home-audio.js hears these as
+    // missions still transmitting): the mission in the middle, from the
+    // very call that moves the track
+    var arState = archive.worxArchive = { index: 0, count: cases.length, p: 0, changed: 0 };
     var setProgress = function (p) {
       var n = Math.min(cases.length - 1, Math.round(p * (cases.length - 1)));
+      arState.p = p;
+      if (n !== arState.index) { arState.index = n; arState.changed = performance.now(); }
       if (nowEl) nowEl.textContent = (n + 1 < 10 ? "0" : "") + Math.min(8, n + 1);
       if (barEl) barEl.style.setProperty("--p", Math.max(0.04, p).toFixed(3));
     };
@@ -589,7 +609,7 @@
         entries.forEach(function (e) {
           var v = e.target;
           if (e.isIntersecting) {
-            if (!v.src) { v.src = v.dataset.src; v.load(); }
+            if (!v.src) { v.src = (window.innerWidth < 700 && v.dataset.srcSm) || v.dataset.src; v.load(); }   // phones: the films at their card size
             var pr = v.play();
             if (pr && pr.catch) pr.catch(function () {});
           } else if (!v.paused) v.pause();
@@ -633,7 +653,12 @@
     var world = typeof CodeWorlds !== "undefined" ? CodeWorlds.mount(q(".hm-mod-gl", mod), {
       radius: R, offsetX: offX, ports: function (i) { return qa("a", panels[i]).length; },
     }) : null;
-    var current = 0, auto = null, held = false, DUR = 7000, swapT = null;
+    var current = 0, auto = null, held = false, DUR = 7000, swapT = null, autoTick = false;
+    // the modules' switches, for their sound (home-audio.js hears each as
+    // a recompile into the new world): from the very call that swaps the
+    // world, which lands SWAP ms later; onHot: a service's port, hovered;
+    // clock: the world's own time, so its events can be heard as drawn
+    var modState = mod.worxModules = { current: 0, count: tabs.length, onSelect: null, onHot: null, swapMs: 420, clock: world ? world.clock : null };
     mod.style.setProperty("--mod-dur", DUR / 1000 + "s");
     // phones fly through every module instead of tabbing between them
     // (home.css "the flight through the modules"): all divisions are in
@@ -688,7 +713,7 @@
     panels.forEach(function (p) {
       qa("a", p).forEach(function (a, i) {
         // the service lights its part of the world, and its traffic runs
-        var on = function () { if (a.__pin) a.__pin.classList.add("is-hot"); if (world) world.hot(i); };
+        var on = function () { if (a.__pin) a.__pin.classList.add("is-hot"); if (world) world.hot(i); if (modState.onHot) { try { modState.onHot(i); } catch (e) {} } };
         var off = function () { if (a.__pin) a.__pin.classList.remove("is-hot"); if (world) world.hot(-1); };
         a.addEventListener("pointerenter", on); a.addEventListener("focus", on);
         a.addEventListener("pointerleave", off); a.addEventListener("blur", off);
@@ -701,7 +726,10 @@
 
     var select = function (i, focus) {
       if (i === current && !focus) return;
+      var from = current;
       current = (i + tabs.length) % tabs.length;
+      modState.current = current;
+      if (modState.onSelect && current !== from) { try { modState.onSelect({ from: from, to: current, auto: autoTick, swapMs: 420 }); } catch (e) {} }
       tabs.forEach(function (t, j) {
         var on = j === current;
         t.classList.toggle("is-active", on);
@@ -747,7 +775,7 @@
       mod.classList.remove("is-paused");
       if (held || reduced || !modOn || phone.matches) return;
       restartLine();
-      auto = setInterval(function () { select(current + 1); }, DUR);
+      auto = setInterval(function () { autoTick = true; select(current + 1); autoTick = false; }, DUR);
     };
     var hold = function () { held = true; mod.classList.add("is-held"); clearInterval(auto); };
     // only the active tab is in the tab order; arrows move between them
@@ -902,6 +930,12 @@
     var N = cps.length, LAST = N - 1;   // seven stages, the last is liftoff
     var ST = { standby: fp.dataset.stStandby, live: fp.dataset.stLive, done: fp.dataset.stDone, go: fp.dataset.stGo };
     var cur = -1;
+    // the deck's moments, for its sound (home-audio.js, the countdown):
+    // a card arriving (and whether the countdown itself moved it), a
+    // card's fuel starting to burn, the run interrupted, a flip of the board
+    var fpState = fp.worxFlight = { last: N - 1, burnMs: 3200, onGo: null, onBurn: null, onHalt: null, onFlip: null };
+    var autoStep = false;
+    var tell = function (k, e) { if (fpState[k]) { try { fpState[k](e); } catch (err) {} } };
     var two = function (n) { return (n < 10 ? "0" : "") + n; };
     // each card: its patch shows the stages cleared before it; a shade
     // gives it depth when it waits in the deck
@@ -960,6 +994,7 @@
       var str = two(shown);
       flipTo(flaps[0], str.charAt(0), dur);
       flipTo(flaps[1], str.charAt(1), dur);
+      tell("onFlip", { n: shown, dur: dur, fast: shown !== want });
       if (shown !== want) flipT = setTimeout(tick, dur * 2 + 20);
     };
     var board = function (i) {
@@ -1013,6 +1048,7 @@
       }
       board(i);
       if (focus) keys[i].focus({ preventScroll: true });
+      tell("onGo", { to: i, from: was, auto: autoStep });
     };
 
     // ---- the countdown runs itself once, while on screen
@@ -1027,15 +1063,17 @@
       cps[cur].classList.remove("is-burn");
       if (!auto || !onScreen) return;
       if (cur >= LAST) {
-        if (narrow.matches) autoT = setTimeout(function () { autoT = null; go(0); burn(); }, HOLD);
+        if (narrow.matches) autoT = setTimeout(function () { autoT = null; autoStep = true; go(0); autoStep = false; burn(); }, HOLD);
         return;
       }
       void cps[cur].offsetWidth;
       cps[cur].classList.add("is-burn");
-      autoT = setTimeout(function () { autoT = null; go(cur + 1); burn(); }, BURN);
+      tell("onBurn", { i: cur, ms: BURN });
+      autoT = setTimeout(function () { autoT = null; autoStep = true; go(cur + 1); autoStep = false; burn(); }, BURN);
     };
     var takeOver = function () {
       auto = false; clearTimeout(autoT); autoT = null; cps[cur].classList.remove("is-burn");
+      tell("onHalt", {});
       clearTimeout(resumeT);
       if (narrow.matches && !reduced) resumeT = setTimeout(function () { auto = true; burn(); }, IDLE);
     };
@@ -1121,7 +1159,7 @@
       onScreen = v;
       if (v) { if (!autoT) burn(); } else takeOverPause();
     }, "0px 0px -25% 0px");
-    function takeOverPause() { clearTimeout(autoT); autoT = null; if (cur >= 0) cps[cur].classList.remove("is-burn"); }
+    function takeOverPause() { clearTimeout(autoT); autoT = null; if (cur >= 0) cps[cur].classList.remove("is-burn"); tell("onHalt", {}); }
   })();
 
   /* ----------------------------------------------------------
@@ -1133,12 +1171,18 @@
     var dots = qa(".hm-tx-dots i");
     var ti = 0, tTimer = null;
     var SIG = [["98", "HYUNDAI"], ["96", "CHAUMET"], ["99", "MODON"]];
-    var show = function (i) {
+    // the transmissions' sound (home-audio.js): it hears every turn (and
+    // whether the visitor made it), and while it is voicing them it turns
+    // the deck itself, when each message has been read out (advance)
+    var txState = deck.worxTx = { count: cards.length, current: 0, voiced: false, onShow: null, advance: null, setVoiced: null };
+    var show = function (i, byVisitor) {
       ti = (i + cards.length) % cards.length;
+      txState.current = ti;
       cards.forEach(function (c, j) { c.classList.toggle("is-active", j === ti); });
       dots.forEach(function (d, j) { d.classList.toggle("is-active", j === ti); });
       var b = q("[data-decode]", cards[ti]);
       if (b) scramble(b, "SIGNAL " + SIG[ti % SIG.length][0] + "% · " + SIG[ti % SIG.length][1]);
+      if (txState.onShow) { try { txState.onShow({ i: ti, user: !!byVisitor }); } catch (e) {} }
     };
     // it turns by itself only while on screen and not being read (pointer
     // or keyboard focus on the deck); screen readers hear a message when
@@ -1146,10 +1190,13 @@
     var txOn = false, txHold = false;
     var cycle = function () {
       clearInterval(tTimer);
+      if (txState.voiced) return;                 // the voices turn it
       if (!reduced && txOn && !txHold) tTimer = setInterval(function () { deck.setAttribute("aria-live", "off"); show(ti + 1); }, 7000);
     };
     var prev = q("[data-tx-prev]"), next = q("[data-tx-next]");
-    var turn = function (d) { deck.setAttribute("aria-live", "polite"); show(ti + d); cycle(); };
+    var turn = function (d) { deck.setAttribute("aria-live", "polite"); show(ti + d, true); cycle(); };
+    txState.advance = function () { deck.setAttribute("aria-live", "off"); show(ti + 1); };
+    txState.setVoiced = function (v) { txState.voiced = !!v; cycle(); };
     if (prev) prev.addEventListener("click", function () { turn(-1); });
     if (next) next.addEventListener("click", function () { turn(1); });
     var txZone = deck.closest(".hm-tx") || deck;
@@ -1181,6 +1228,9 @@
     var wideB = window.matchMedia("(min-width: 901px)");
     var two = function (n) { return (n < 10 ? "0" : "") + n; };
     var decT = null;
+    // the decoder's sound (home-audio.js) hears every briefing opened, with
+    // the very times the screen uses: the question typing in, the decrypt
+    var brfState = brf.worxBrief = { onOpen: null };
     var open = function (i, user) {
       var it = items[i], wasOpen = it.classList.contains("is-open");
       if (wasOpen && (wideB.matches || !user)) return;
@@ -1201,6 +1251,9 @@
       prog.classList.remove("is-run"); void prog.offsetWidth; prog.classList.add("is-run");
       clearTimeout(decT);
       decT = setTimeout(function () { status.textContent = "DECRYPTED"; }, reduced ? 0 : 640);
+      if (brfState.onOpen) {
+        try { brfState.onOpen({ i: i, user: !!user, typeMs: h && !reduced && wideB.matches ? 520 : 0, decryptMs: reduced ? 0 : 640 }); } catch (e) {}
+      }
     };
     items.forEach(function (it, i) {
       var btn = q(".brf-q", it);
@@ -1229,9 +1282,14 @@
 
     // hover / focus arms the ignition; the poll's last call goes GO
     var btn = q("[data-ignite]", launch), you = q("[data-poll-you]", launch);
+    // the finale's sound (home-audio.js, the final poll) hears the visitor
+    // arm the ignition and lift off
+    var lState = launch.worxLaunch = { onArm: null, onLift: null, liftMs: 760 };
+    var armed = false;
     var arm = function (on) {
       launch.classList.toggle("is-armed", on);
       if (you) you.textContent = on ? "GO" : "AWAITING";
+      if (on !== armed) { armed = on; if (lState.onArm) { try { lState.onArm(on); } catch (e) {} } }
     };
     if (btn) {
       btn.addEventListener("pointerenter", function () { arm(true); });
@@ -1245,6 +1303,7 @@
         arm(true);
         btn.classList.add("is-launch");
         launch.classList.add("is-lift");
+        if (lState.onLift) { try { lState.onLift(); } catch (e2) {} }
         setTimeout(function () { location.href = btn.href; }, 760);
       });
       // coming back from Contact with the browser's back button

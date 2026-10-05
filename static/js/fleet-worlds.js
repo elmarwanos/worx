@@ -19,7 +19,7 @@
                weights arcing back over the tokens, the next-token
                distribution resolving; a LiDAR sweep mapping the room
                below, an anchor placed in it (the violet chapter).
-     platform  the data plane: ERP, CRM and HR topics streaming events
+     platform  the data plane: CMS, CRM and HR topics streaming events
                into the warehouse, a query answering on the far side,
                infrastructure applied in the terminal below.
 
@@ -536,7 +536,7 @@
      platform · the data plane
      ================================================================ */
   var TOPICS = [
-    { name: "erp.invoices", rec: ['{"inv":4821,', '"total":1290}'] },
+    { name: "cms.pages", rec: ['{"page":"/offers",', '"status":"live"}'] },
     { name: "crm.deals", rec: ['{"deal":"D-77",', '"stage":"won"}'] },
     { name: "hr.payroll", rec: ['{"emp":219,', '"net":"AED"}'] },
   ];

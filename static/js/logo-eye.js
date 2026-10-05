@@ -137,8 +137,19 @@
   window.addEventListener("scroll", kick, { passive: true });
   window.addEventListener("resize", kick);
 
+  // a lazy logo (the footer's) is built only as it nears the screen, so its
+  // layers don't compete with the page's first load
+  var near = "IntersectionObserver" in window && new IntersectionObserver(function (en, o) {
+    en.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      o.unobserve(e.target);
+      upgrade(e.target, LOGOS[e.target.getAttribute("src").split("/").pop()]);
+    });
+  }, { rootMargin: "800px 0px" });
   document.querySelectorAll("img").forEach(function (img) {
     var file = (img.getAttribute("src") || "").split("/").pop();
-    if (LOGOS[file]) upgrade(img, LOGOS[file]);
+    if (!LOGOS[file]) return;
+    if (near && img.getAttribute("loading") === "lazy") near.observe(img);
+    else upgrade(img, LOGOS[file]);
   });
 })();

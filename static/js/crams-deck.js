@@ -398,7 +398,111 @@
         items.forEach(function (it, j) { if (it.getAttribute("data-tour-item") === key) { hold = Date.now() + 12000; show(j); } });
       });
     });
+    // stacked (phones): the screen holds at the top, under the header, and
+    // the list slides up behind it, so every tap is seen lighting its part
+    var bar = $(".site-header .nav-bar"), pin = 0, stacked = window.matchMedia("(max-width: 1000px)"), pinTick = false;
+    var stick = function () {
+      pinTick = false;
+      if (!stacked.matches) { dock.classList.remove("is-stuck"); return; }
+      var t = Math.round((bar ? bar.getBoundingClientRect().bottom : 60) + 10);
+      if (Math.abs(t - pin) > 2) { pin = t; dock.style.setProperty("--pin", t + "px"); }
+      var on = Math.abs(dock.getBoundingClientRect().top - pin) < 2;
+      dock.classList.toggle("is-stuck", on);
+      if (main) main.classList.toggle("is-pinned", on);     // the camera's HUD steps aside
+    };
+    window.addEventListener("scroll", function () { if (!pinTick) { pinTick = true; requestAnimationFrame(stick); } }, { passive: true });
+    window.addEventListener("resize", stick);
+    stick();
     read();
+    // phones and tablets: the hologram in the hero as well, carried by the
+    // page (not fixed behind it, so nothing fights a touch scroll): tilted
+    // in its own depth, its panels fly in from deep space, lock together
+    // and the screen powers on; new leads keep landing while it is in view
+    var flat = function (q, k, sc) { return "translate(" + (q.x * k).toFixed(0) + "px," + (q.y * k).toFixed(0) + "px) rotate(" + (q.rz * k * 1.2).toFixed(1) + "deg) scale(" + sc + ")"; };
+    if (heroSec) (function () {
+      var holo = document.createElement("div"), hin = document.createElement("div"), root = document.createElement("div");
+      holo.className = "cr-hero-holo"; holo.setAttribute("aria-hidden", "true");
+      hin.className = "cr-hero-holo-in"; root.className = "cr-deck-dash";
+      var hdash = build(root);
+      hin.appendChild(root); holo.appendChild(hin);
+      heroSec.insertBefore(holo, heroSec.firstChild);
+      var fit = function () { hin.style.setProperty("--k", Math.min(holo.clientWidth * 1.2 / DW, holo.clientHeight * 0.85 / DH).toFixed(4)); };
+      fit();
+      if ("ResizeObserver" in window) new ResizeObserver(fit).observe(holo);
+      var lock = function () { hdash.panels.forEach(function (p) { p.style.transform = "none"; p.style.opacity = 1; }); };
+      var seen = true;
+      if ("IntersectionObserver" in window) new IntersectionObserver(function (en) { seen = en[0].isIntersecting; }).observe(heroSec);
+      if (reduced) { lock(); hdash.boot(); return; }
+      hdash.panels.forEach(function (p, i) { p.style.transform = flat(SCATTER[i], 0.5, 0.7); p.style.opacity = 0; });
+      setTimeout(function () { holo.classList.add("is-flying"); lock(); }, 500);
+      setTimeout(function () { hdash.boot(); }, 2500);
+      stream(hdash, function () { return seen && hdash.root.classList.contains("is-on"); });
+    })();
+    // phones and tablets: between the chapters, where on a desktop the
+    // floating screen tells the story, three interludes tell it in the
+    // page itself (each plays as it comes into view, and again on return):
+    //   after the hero    THE BREAK: the live screen drifts apart, its
+    //                     panels scattering and dimming red (the gap)
+    //   after the gap     THE SYNC: the scattered panels fly back, lock
+    //                     into one screen and pulse as they sync
+    //   after connected   EVERY TEAM: the live screen, leads landing, the
+    //                     panels each department works from lighting in turn
+    var DEPT = $$(".cr-dept b").map(function (e) { return e.textContent; });
+    var LIGHT = [["table", "c-status", "filters"], ["c-source", "c-ratio", "c-product"], ["c-channel", "c-time", "table"], ["filters", "top", "table"],
+      ["c-source", "c-product", "c-channel", "c-branch", "c-ratio", "c-strength", "c-time", "c-status"], null];
+    var inter = function (after, mode) {
+      if (!after) return;
+      var box = document.createElement("div"), hin = document.createElement("div"), root = document.createElement("div");
+      box.className = "cr-inter cr-inter--" + mode; box.setAttribute("aria-hidden", "true");
+      hin.className = "cr-inter-in"; root.className = "cr-deck-dash";
+      var d = build(root);
+      hin.appendChild(root); box.appendChild(hin);
+      var tag = null;
+      if (mode === "teams") { tag = document.createElement("span"); tag.className = "cr-inter-tag"; box.appendChild(tag); }
+      after.parentNode.insertBefore(box, after.nextSibling);
+      var fit = function () { hin.style.setProperty("--k", Math.min(box.clientWidth * 1.08 / DW, box.clientHeight * 1.0 / DH).toFixed(4)); };
+      fit();
+      if ("ResizeObserver" in window) new ResizeObserver(fit).observe(box);
+      var lock = function () { d.panels.forEach(function (p) { p.style.transform = "none"; p.style.opacity = 1; }); };
+      var scatter = function () { d.panels.forEach(function (p, i) { p.style.transform = flat(SCATTER[i], 0.32, 0.92); p.style.opacity = 0.85; }); };
+      var seen = false, timers = [], cycle = null, k = 0;
+      var later = function (fn, ms) { timers.push(setTimeout(fn, reduced ? 0 : ms)); };
+      var rest = function () {                      // as it waits, out of view
+        timers.forEach(clearTimeout); timers = []; clearInterval(cycle); cycle = null;
+        box.classList.remove("is-moving", "is-sync");
+        if (mode === "sync") { scatter(); box.classList.add("is-broken"); } else { lock(); box.classList.remove("is-broken"); }
+        d.panels.forEach(function (p) { p.classList.remove("is-hot"); });
+      };
+      var play = function () {
+        d.boot();
+        if (mode === "break") { later(function () { box.classList.add("is-moving", "is-broken"); scatter(); }, 500); }
+        else if (mode === "sync") { later(function () { box.classList.add("is-moving"); box.classList.remove("is-broken"); lock(); }, 300); later(function () { box.classList.add("is-sync"); }, 2300); }
+        else {
+          var light = function () {
+            var on = LIGHT[k % LIGHT.length];
+            d.panels.forEach(function (p) { p.classList.toggle("is-hot", !on || on.indexOf(p.getAttribute("data-region")) >= 0); });
+            if (tag) tag.textContent = (DEPT[k % LIGHT.length] || "").toUpperCase();
+            k++;
+          };
+          light(); cycle = setInterval(light, reduced ? 4000 : 2200);
+        }
+      };
+      rest();
+      // it plays once, when well in view, and then stays as it ended (no
+      // snapping back while half on screen); only the teams' lights pause
+      // out of view
+      var played = false;
+      if ("IntersectionObserver" in window) new IntersectionObserver(function (en) {
+        seen = en[0].isIntersecting;
+        if (seen && !played) { played = true; play(); }
+        else if (mode === "teams" && played) { clearInterval(cycle); cycle = null; if (seen) play(); }
+      }, { threshold: 0.5 }).observe(box);
+      else play();
+      if (mode === "teams") stream(d, function () { return seen; });
+    };
+    inter(heroSec, "break");
+    inter($(".cr-gap"), "sync");
+    inter($(".cr-orbit"), "teams");
   } else if (reduced) { apply("ignition", true); dash.boot(); read(); }
   else {
     // THE ARRIVAL: the panels are out in deep space when the page opens,
