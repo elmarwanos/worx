@@ -97,6 +97,7 @@
   // tuner is in view and jump to another; while nobody touches it, the
   // row moves on by itself every few seconds (resting off screen)
   var dotsEl = $("[data-gs-dots]"), bankEl = $(".gs-bank");
+  var onUnitShown = null;      // set below: a tuner the phone row brings into view runs its cycle
   if (dotsEl && bankEl) (function () {
     var cells = $$(".gs-unit", bankEl), narrow = window.matchMedia("(max-width: 640px)");
     var cur = 0, idleUntil = 0, seen = false, autoT = null, raf = 0;
@@ -109,7 +110,11 @@
       dotsEl.appendChild(b);
       return b;
     });
+    var shownT = null;
     var mark = function (i) {
+      // the tuner the row comes to REST on runs its cycle (a wrap from the
+      // last back to the first slides past the others: they stay still)
+      if (i !== cur && onUnitShown) { clearTimeout(shownT); shownT = setTimeout(function () { onUnitShown(cur); }, 450); }
       cur = i;
       dots.forEach(function (d, j) {
         d.classList.toggle("is-on", j === i);
@@ -385,13 +390,15 @@
     }, 2600);
   }, { threshold: 0.98 }).observe(boardEl);
 
-  /* then they keep playing, one at a time, never all at once: a tuner
-     eases back down its band (its drums spinning down), holds a beat,
-     and climbs back to its figure with weight, a little past and back;
-     its ring breathes out as it settles, and it rests there at least 20 s
-     before it moves again (one tuner every 9 s at most). Only on screen, and only one
-     moving at any moment, so it reads as a live instrument, not noise. */
-  var turnN = 0, busy = false;
+  /* then they keep playing: every 5 s after a round has settled, the
+     tuners run their cycle again one by one, left to right a second
+     apart, as at the first wake (the user, 2026-10-05): each eases back
+     down its band (its drums spinning down) almost to nothing, holds a
+     beat, and climbs back to its figure with weight, a little past and
+     back, its ring breathing out as it settles. Phones show one tuner at
+     a time (the row moves on every 5 s): each runs its cycle as it slides
+     into view. Only on screen, and only while the console holds the stage. */
+  var ROUND_GAP = 5000, STAGGER = 1000, CYCLE = 3500;
   var visible = function (u) {
     var r = u.el.getBoundingClientRect();
     return r.bottom > 0 && r.top < window.innerHeight;
@@ -405,9 +412,10 @@
     setTimeout(function () { best.classList.remove("is-tuned"); }, 2600);
   };
   var retune = function (u) {
-    busy = true;
+    if (u.rolling) return;
+    u.rolling = true;
     var p = u.to / u.max;
-    var low = p * (0.22 + Math.random() * 0.2), lowN = Math.max(1, Math.round(u.to * low / p));
+    var low = p * (0.04 + Math.random() * 0.1), lowN = Math.max(0, Math.round(u.to * low / p));   // down almost to nothing, so the climb reads
     status(u, "acquire");
     u.el.classList.add("is-rolling");
     turn(u, low, 900); chase(u, p, low, 900); phase(u, "release", p, low, 900);
@@ -420,16 +428,27 @@
     }, 1350);
     setTimeout(function () { near(u, true); }, 1350 + 600);
     setTimeout(function () { u.el.classList.remove("is-rolling"); }, 3200);
-    // settled on its figure, it rests there a good while before it moves again
-    setTimeout(function () { near(u, false); status(u, "lock"); lightTo(u, p); phase(u, "lock", p, p, 0); busy = false; u.restUntil = Date.now() + 20000; }, 3500);
+    setTimeout(function () { near(u, false); status(u, "lock"); lightTo(u, p); phase(u, "lock", p, p, 0); u.rolling = false; }, CYCLE);
   };
-  setInterval(function () {
-    if (busy || document.hidden || !onScreen || bus.owner !== "console") return;
-    var now = Date.now();
-    var ready = units.filter(function (u) { return u.ready && visible(u) && now > (u.restUntil || 0); });
-    if (!ready.length) return;
-    retune(ready[turnN++ % ready.length]);
-  }, 9000);
+  var live = function () { return !document.hidden && onScreen && bus.owner === "console"; };
+  // desktop and tablets: a round, then 5 s of rest, then the next
+  var roundT = null;
+  var round = function () {
+    roundT = null;
+    if (phone.matches) return;
+    if (!live() || units.some(function (u) { return !u.ready; })) { roundT = setTimeout(round, 1000); return; }
+    var order = units.filter(visible);
+    order.forEach(function (u, i) { setTimeout(function () { if (live()) retune(u); }, i * STAGGER); });
+    roundT = setTimeout(round, Math.max(0, order.length - 1) * STAGGER + CYCLE + ROUND_GAP);
+  };
+  // the first round waits for the wake to finish (its last tuner locking)
+  var kickRounds = function () { if (!roundT && !phone.matches) roundT = setTimeout(round, ROUND_GAP); };
+  setInterval(function () { if (!roundT && !phone.matches && units.every(function (u) { return u.ready; })) kickRounds(); }, 1000);
+  // phones: the tuner the row brings into view runs its cycle
+  onUnitShown = function (i) {
+    var u = units[i];
+    if (u && u.ready && phone.matches && live()) retune(u);
+  };
 
   /* the scroll turns the locked knobs a little, with weight */
   var spin = 0, lastY = window.scrollY, raf = 0, onScreen = false;

@@ -257,268 +257,73 @@
     });
   }
 
-  /* ---- MISSION PARTNERS: hauled on chains ------------------------------
+  /* ---- MISSION PARTNERS: hauled on chains, without a break ------------
      The logos glide on, smooth and endless (home.js; its real motion is
-     published on marquee.worxMotion). Each logo is a monolith dragged
-     across the band on chains by something far bigger than the screen.
-     As a logo is hauled toward the middle the drag swells with it, its
-     pitch climbing as the chain takes the strain, travelling across the
-     stereo field with the logo's real position; as it reaches the middle
-     the chain snaps taut on the very frame (the hit, with the weight of
-     the pull an octave under it); then the slack runs out behind it, a
-     few links rattling over the ground in the logo's direction, and the
-     drag eases away. Two rows, two directions, two chains (the second
-     heavier): call and answer, the passes running into one another so
-     the haul never quite stops, with breath between.
-     The sound (static/assets/home/partners-chains.mp3, from a royalty-free
-     chains recording, built by tools/partners-chains/chains.py):
-
-       0 - 8 s  the drag: the recording with its clanks taken out of the
-                top, the heavy haul left
-       then     its chain hits, each on its own between silences, the big
-                ones (taut) before the small ones (links); found here by
-                their silences, so no table of offsets
-     Timing is predicted from the logo's true position and the marquee's
-     true speed every frame, and scheduled on the audio clock (output
-     latency allowed for), so the chain snaps as the logo crosses.
-
-     Only with the band of logos fully on screen: nothing on the way in.
-     A pass still sounding as the visitor leaves recedes with the section
-     (darker, narrower, quieter). The pointer changes nothing: the logos
-     keep their pace and the chains keep hauling. Reduced motion: no
-     motion, no chains.
-     Level: the drag sits at -24.4 LUFS in the file, the hits louder;
-     trimmed so a pass sits where the stones did (the snap at most ~2 dB
-     over their loudest moment): physical, never shrill. */
+     published on marquee.worxMotion), and under them, for as long as they
+     move, the haul never stops: the rumble of stone dragged over stone
+     and the chains running with it, one continuous sound (the user,
+     2026-10-05: "consistent, always there, not breaking up").
+       two chains   the two rows, two passes of the same seamless loop,
+                    one a little slower and lower than the other, set
+                    apart in the stereo field (the rows run opposite ways);
+                    their clanks drift against each other, so the pattern
+                    never audibly repeats
+       the motion   the haul follows the logos' real speed: when the page
+                    is scrolled and they surge, the chains drag faster
+                    (pitch and weight rise a touch), easing back as they
+                    settle to their cruise
+     The sound (static/assets/home/partners-chains-loop.mp3): the whole
+     royalty-free chains recording, rumble and clanks, made a seamless
+     6.5 s loop by tools/partners-chains/chains.py; the file holds it twice
+     and one exact period is looped from inside it (no decoder padding in
+     the loop, no click).
+     It comes and goes with the section (the scene's presence: the band of
+     logos on screen, giving way as the console becomes the subject), never
+     by cutting. Reduced motion: no motion, no haul. */
   var partners = q("#partners"), marqueeEl = q(".hm-marquee");
   var motion = marqueeEl && marqueeEl.worxMotion;
   if (partners && motion && !A.reduced) (function () {   // its own scope: names here are reused by the Hero and the control
-    var CHAINS = "static/assets/home/partners-chains.mp3";
-    var DRAG = 8;                   // seconds of drag at the head of the file
-    // matched to the stones it replaces (simulated offline, BS.1770): the
-    // haul's loudest 400 ms ~2 dB over theirs, the snap carrying it
-    var TRIM = 0.55;
-    var PRE = 1.6;                  // seconds of haul before a logo reaches the middle
-    var POST = 1.3;                 // ...and after
-    A.prefetch(CHAINS, true);
+    var LOOPF = "static/assets/home/partners-chains-loop.mp3";
+    var LOOP = 6.5, L0 = 0.5;       // one exact period inside the file (it holds two)
+    var TRIM = 0.5;                 // the loop is -20 LUFS: the haul steady, under the bed's story, never shrill
+    A.prefetch(LOOPF, true);
 
-    var sc = null, sBuf = null, sLive = false, sOut = null, live = [], sRaf = 0;
-    var frames = null;              // per 20 ms of the drag: its level in dB
-    var big = [], links = [];       // the hits: [start, length] in seconds
-    var K = 64;
-    var curve = function (fn) { var c = new Float32Array(K); for (var i = 0; i < K; i++) c[i] = fn(i / (K - 1)); return c; };
-
-    var analyse = function (b) {
-      var d = b.getChannelData(0), hop = Math.round(b.sampleRate * 0.02), out = [];
-      var end = Math.min(d.length, Math.round(b.sampleRate * DRAG));
-      for (var i = 0; i + hop <= end; i += hop) {
-        var e = 0;
-        for (var j = i; j < i + hop; j += 2) e += d[j] * d[j];
-        out.push(10 * Math.log10(e / (hop / 2) + 1e-12));
-      }
-      // the hits: whatever sounds after the drag, split at its silences
-      var sr = b.sampleRate, w = Math.round(sr * 0.005), hits = [], on = -1, quiet = 0;
-      for (i = Math.round(sr * (DRAG + 0.2)); i + w <= d.length; i += w) {
-        var pk = 0;
-        for (j = i; j < i + w; j++) pk = Math.max(pk, Math.abs(d[j]));
-        if (pk > 0.003) { if (on < 0) on = i; quiet = 0; }
-        else if (on >= 0 && ++quiet > 30) { hits.push([on / sr, (i - on) / sr]); on = -1; }   // 150 ms of silence ends a hit
-      }
-      if (on >= 0) hits.push([on / sr, (d.length - on) / sr]);
-      big = hits.slice(0, 6); links = hits.slice(6);
-      return out;
-    };
-    // a strong stretch of `len` seconds of drag that never drops out, not `avoid`
-    var best = function (len, avoid) {
-      var need = Math.max(1, Math.round(len / 0.02)), top = [], i, j;
-      for (i = 0; i + need <= frames.length; i += 2) {
-        var sum = 0, ok = true;
-        for (j = i; j < i + need; j++) { if (frames[j] < -50) { ok = false; break; } sum += frames[j]; }
-        if (ok) top.push([sum / need, i]);
-      }
-      if (!top.length) return 0.1;
-      top.sort(function (a, b) { return b[0] - a[0]; });
-      var pool = top.slice(0, Math.max(1, Math.ceil(top.length * 0.5)));
-      for (var tries = 0; tries < 6; tries++) {
-        var c = pool[Math.floor(Math.random() * pool.length)][1] * 0.02;
-        if (avoid == null || Math.abs(c - avoid) > 0.8) return c;
-      }
-      return pool[0][1] * 0.02;
-    };
-    var pick = function (list, avoid) {
-      if (!list.length) return null;
-      var i = Math.floor(Math.random() * list.length);
-      if (list.length > 1 && list[i] === avoid) i = (i + 1) % list.length;
-      return list[i];
-    };
-
-    // every pass the same loudness: a passage's mean level (dB, from the
-    // analysis) against the drag's typical one, compensated within
-    // +-6 dB, so no haul arrives louder than the last
-    var REF = null;
-    var match = function (off, len) {
-      var a = Math.floor(off / 0.02), z = Math.min(frames.length, a + Math.max(1, Math.round(len / 0.02))), e = 0, n = 0;
-      for (var i = a; i < z; i++) { e += Math.pow(10, frames[i] / 10); n++; }
-      var db = 10 * Math.log10(e / Math.max(1, n) + 1e-12);
-      if (REF == null) {
-        var all = frames.filter(function (f) { return f > -50; }).sort(function (x, y) { return x - y; });
-        REF = all.length ? all[Math.floor(all.length / 2)] : db;
-      }
-      return Math.pow(10, Math.max(-6, Math.min(6, REF - db)) / 20);
-    };
-    var voice = function (T, dur, off, rate, gain, pan, dest, keep) {
-      if (!keep) { var mg = match(off, dur * 0.8); gain = gain.map(function (g) { return g * mg; }); }
-      var src = sc.createBufferSource(), env = sc.createGain();
-      src.buffer = sBuf;
-      if (rate.length) src.playbackRate.setValueCurveAtTime(rate, T, dur); else src.playbackRate.value = rate;
-      env.gain.value = 0;
-      env.gain.setValueCurveAtTime(gain, T, dur);
-      src.connect(env);
-      var tail = env;
-      if (sc.createStereoPanner) {
-        var pn = sc.createStereoPanner();
-        if (pan.length) pn.pan.setValueCurveAtTime(pan, T, dur); else pn.pan.value = pan;
-        env.connect(pn); tail = pn;
-      }
-      tail.connect(dest);
-      src.start(T, off);
-      src.stop(T + dur + 0.05);
-      var v = { src: src, env: env, tail: tail };
-      live.push(v);
-      src.onended = function () {
-        env.disconnect(); if (tail !== env) tail.disconnect();
-        var k = live.indexOf(v); if (k >= 0) live.splice(k, 1);
-      };
-    };
-    // a hit played whole: [start, length] at `rate`
-    var hit = function (T, h, rate, g, pan, dest) {
-      var dur = h[1] / rate;
-      voice(T, dur, h[0], rate, curve(function (x) { return g * (x > 0.85 ? (1 - x) / 0.15 : 1); }), pan, dest, true);
-    };
-
-    // one logo hauled past: `at` = audio time it crosses the middle;
-    // p0 -> p1 its pan from the start of the haul to its end
-    var lastOff = null;
-    var pass = function (at, row, p0, p1, speedN) {
-      var heavy = row ? 0.86 : 1;                                // the second chain, heavier
-      var T = at - PRE, dur = PRE + POST, k = PRE / dur;
-      var off = best(dur * heavy, lastOff); lastOff = off;
-      var lift = Math.min(1, Math.max(0.35, speedN));            // slower hauls, softer
-      if (narrow) lift *= 0.7;                                   // phones: the logos sit closer, the passes overlap more: -3 dB
-      // the drag: strains toward the middle (its pitch climbing with the
-      // tension), goes slack after and eases away
-      voice(T, dur, off,
-        curve(function (x) { return heavy * (x < k ? 0.9 + 0.12 * Math.pow(x / k, 2) : 0.94 - 0.06 * (x - k) / (1 - k)); }),
-        curve(function (x) { return lift * (x < k ? Math.pow(x / k, 1.6) : 0.55 + 0.45 * Math.pow(1 - (x - k) / (1 - k), 1.3)) * (x > 0.94 ? (1 - x) / 0.06 : 1); }),
-        curve(function (x) { return p0 + (p1 - p0) * x; }),
-        sOut.drag);
-      return { heavy: heavy, lift: lift, pan: p0 + (p1 - p0) * k, dir: p1 >= p0 ? 1 : -1 };
-    };
-    // the snap: the chain taut at the middle, scheduled moments before the
-    // crossing from a fresh prediction, so it lands on the frame; then the
-    // slack running out behind the logo, link by link
-    var lastBig = null;
-    var snap = function (at, s) {
-      var h = pick(big, lastBig); lastBig = h;
-      if (!h) return;
-      var r = s.heavy * (0.94 + Math.random() * 0.1);
-      hit(at - 0.012, h, r, s.lift, s.pan, sOut.snap);
-      hit(at - 0.012, h, r * 0.5, s.lift * 0.9, s.pan, sOut.weight);   // the pull itself, an octave down
-      var t = at + 0.22 + Math.random() * 0.08, l = null;
-      for (var i = 0; i < 3 && links.length; i++) {
-        l = pick(links, l);
-        hit(t, l, s.heavy * (0.9 + Math.random() * 0.15), s.lift * 0.55 * Math.pow(0.62, i),
-          Math.max(-0.35, Math.min(0.35, s.pan + s.dir * 0.07 * (i + 1))), sOut.snap);
-        t += 0.2 + Math.random() * 0.22;
-      }
-    };
-
-    // where each logo is: measured when the scene wakes and on resize;
-    // per frame it is the marquee's own position, nothing read from the page
-    var geo = null, fired = {}, pending = {}, narrow = false;
+    var sc = null, buf = null, sLive = false, sOut = null, chains = null, raf = 0, owned = true;
     // the section's second act (ground-station.js): its focus and owner
     var stage = function () { var g = q("[data-gs]"); return g && g.worxTelemetry; };
-    var owned = true;
-    var measure = function () {
-      var mr = marqueeEl.getBoundingClientRect();
-      narrow = mr.width < 700;
-      geo = motion.rows.map(function (row, i) {
-        var dir = +row.dataset.dir || 1, half = motion.halves[i] || row.scrollWidth / 2;
-        var o = ((motion.pos % half) + half) % half, x = dir > 0 ? -o : o - half;
-        var base = Array.prototype.map.call(row.children, function (el) {
-          var r = el.getBoundingClientRect();
-          return r.left + r.width / 2 - x - mr.left;   // untranslated, in the band
-        });
-        return { dir: dir, half: half, base: base, w: mr.width };
+
+    var run = function () {
+      if (chains || !buf || !sOut) return;
+      var t = sc.currentTime;
+      chains = [[1, -0.26, 0], [0.93, 0.26, LOOP * 0.47]].map(function (cfg) {
+        var s = sc.createBufferSource(), g = sc.createGain(), tail = g;
+        s.buffer = buf; s.loop = true; s.loopStart = L0; s.loopEnd = L0 + LOOP;
+        s.playbackRate.value = cfg[0];
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(cfg[0] < 1 ? 0.8 : 1, t + 1.2);
+        s.connect(g);
+        if (sc.createStereoPanner) { var pn = sc.createStereoPanner(); pn.pan.value = cfg[1]; g.connect(pn); tail = pn; }
+        tail.connect(sOut.tone);
+        s.start(t, L0 + cfg[2]);
+        return { s: s, g: g, tail: tail, rate: cfg[0] };
       });
+      if (!raf) raf = requestAnimationFrame(follow);
     };
-    var mT = null;
-    window.addEventListener("resize", function () { clearTimeout(mT); mT = setTimeout(function () { if (sLive) measure(); }, 200); });
-
-    // gate: the band of logos fully on screen
-    var bandIn = function () {
-      var r = marqueeEl.getBoundingClientRect(), vh = window.innerHeight || 1;
-      return r.top >= -2 && r.bottom <= vh + 2;
-    };
-    var bandOk = false, bandT = 0;
-
-    // seconds until the logos travel `d` px: the cruise/hover speed plus
-    // the scroll's surge, which decays at 2.5/s once the page is at rest
-    var trail = [], vEff = 0;      // the logos' measured speed over the last second (frames drop under load)
-    var timeTo = function (d) {
-      var vs = vEff > 1 && (motion.surge || 0) < 1 ? vEff : (motion.speed || motion.cruise), su = motion.scrolling ? 0 : (motion.surge || 0);
-      var t = d / Math.max(1, vs + su);
-      for (var i = 0; i < 5; i++) {
-        var e = Math.exp(-2.5 * t), f = vs * t + su * (1 - e) / 2.5 - d, df = vs + su * e;
-        t -= f / Math.max(1, df);
-      }
-      return Math.max(0, t);
-    };
-    var watch = function (nowMs) {
-      sRaf = 0;
-      if (!sLive) return;
-      if (nowMs - bandT > 150) { bandT = nowMs; bandOk = bandIn(); }   // a rect read a few times a second, not every frame
-      trail.push([nowMs, motion.pos]);
-      while (trail.length > 2 && nowMs - trail[0][0] > 1000) trail.shift();
-      if (trail.length > 10 && nowMs - trail[0][0] > 500) vEff = (motion.pos - trail[0][1]) / ((nowMs - trail[0][0]) / 1000);
-      // the console has taken the stage: any chain in flight is released
-      // at once, no new one starts; given back, the chains return
+    // every frame: the haul follows the logos, and yields to the console
+    var follow = function () {
+      raf = 0;
+      if (!sLive || !chains) return;
+      var t = sc.currentTime;
+      var k = Math.max(0, Math.min(3, (motion.on ? motion.v : 0) / motion.cruise));   // 1 at cruise, more in a scroll's surge
+      var pace = 0.94 + 0.06 * Math.min(k, 1) + 0.05 * Math.max(0, Math.min(1, (k - 1) / 2));
+      chains.forEach(function (ch) { ch.s.playbackRate.setTargetAtTime(ch.rate * pace, t, 0.25); });
+      sOut.weight.gain.setTargetAtTime(0.82 + 0.18 * Math.min(k, 1) + 0.15 * Math.max(0, Math.min(1, (k - 1) / 2)), t, 0.3);
       var st = stage(), mine = !st || st.owner !== "console";
-      if (mine !== owned && sOut) {
+      if (mine !== owned) {
         owned = mine;
-        sOut.trim.gain.cancelScheduledValues(sc.currentTime);
-        sOut.trim.gain.setTargetAtTime(mine ? TRIM : 0, sc.currentTime, mine ? 0.25 : 0.09);
-        if (!mine) pending = {};
+        sOut.trim.gain.cancelScheduledValues(t);
+        sOut.trim.gain.setTargetAtTime(mine ? TRIM : 0, t, mine ? 0.4 : 0.15);
       }
-      if (mine && geo && sBuf && motion.on && bandOk && A.isOn() && !motion.scrolling && motion.v > 20) {
-        var lat = A.latency(), now = sc.currentTime;
-        var speedN = motion.v / motion.cruise;
-        for (var r = 0; r < geo.length && r < 2; r++) {
-          var g = geo[r], o = ((motion.pos % g.half) + g.half) % g.half, x = g.dir > 0 ? -o : o - g.half;
-          // the row is doubled, its twins one half apart: each logo is
-          // taken at the copy nearest the middle
-          for (var j = 0, n = g.base.length / 2; j < n; j++) {
-            var rel = g.base[j] + x - g.w / 2;
-            rel = ((rel % g.half) + g.half * 1.5) % g.half - g.half / 2;   // px from the middle
-            var ahead = g.dir > 0 ? rel : -rel;                   // > 0: still coming
-            if (ahead <= 0) continue;
-            var tc = timeTo(ahead);                               // seconds to the middle
-            var id = r + ":" + j, cycle = Math.floor(motion.pos / g.half);
-            // phase two: the snap, from a fresh prediction
-            var pend = pending[id];
-            if (pend && pend.cycle === cycle && tc < 0.22) { delete pending[id]; snap(now + tc - lat, pend.s); continue; }
-            if (tc > PRE + 0.12 || tc < PRE - 0.25) continue;
-            if (fired[id] === cycle) continue;
-            fired[id] = cycle;
-            // pan: where the logo is now, to where it will be after
-            var span = g.w / 2 * (narrow ? 1.5 : 1);                // phones: a narrower travel, kept controlled
-            var p0 = Math.max(-0.3, Math.min(0.3, rel / span * 0.3));
-            var p1 = Math.max(-0.3, Math.min(0.3, (rel - (g.dir > 0 ? 1 : -1) * motion.v * (tc + POST)) / span * 0.3));
-            pending[id] = { cycle: cycle, s: pass(now + tc - lat, r, p0, p1, speedN) };
-          }
-        }
-      }
-      sRaf = requestAnimationFrame(watch);
+      raf = requestAnimationFrame(follow);
     };
 
     A.scene("partners", {
@@ -533,45 +338,28 @@
       },
       weight: 3,                   // dB of body as it is fully present
       duckBed: 0.8,                // the bed to 12% while the chains hold the scene
-      // it claims a share of a crossfade only while a chain is sounding
-      sounding: function () { return live.length > 0; },
+      sounding: function () { return !!chains; },
       start: function (c, input) {
         sc = c; sLive = true;
         if (!sOut) {
-          var trim = c.createGain(); trim.gain.value = TRIM;
-          var drag = c.createGain(), snapG = c.createGain(), weight = c.createGain();
-          // the drag: mass under it, the scrape kept, the very top tamed
-          var mass = c.createBiquadFilter(); mass.type = "lowshelf"; mass.frequency.value = 140; mass.gain.value = 3;
-          var tame = c.createBiquadFilter(); tame.type = "highshelf"; tame.frequency.value = 7000; tame.gain.value = -5;
-          drag.connect(mass); mass.connect(tame); tame.connect(trim);
-          // the snap: the steel as recorded, its harshest edge (2.5-4 kHz) eased
-          var edge = c.createBiquadFilter(); edge.type = "peaking"; edge.frequency.value = 3200; edge.Q.value = 0.9; edge.gain.value = -3;
-          snapG.gain.value = 0.9;
-          snapG.connect(edge); edge.connect(trim);
-          // the weight: the same hit an octave down, only its body
-          var dark = c.createBiquadFilter(); dark.type = "lowpass"; dark.frequency.value = 480; dark.Q.value = 0.6;
-          var thump = c.createBiquadFilter(); thump.type = "lowshelf"; thump.frequency.value = 110; thump.gain.value = 5;
-          weight.gain.value = 0.8;
-          weight.connect(dark); dark.connect(thump); thump.connect(trim);
-          sOut = { drag: drag, snap: snapG, weight: weight, trim: trim };
+          var tone = c.createGain(), weight = c.createGain(), trim = c.createGain();
+          // the stone under it: weight in the low end, the top kept from biting
+          var mass = c.createBiquadFilter(); mass.type = "lowshelf"; mass.frequency.value = 140; mass.gain.value = 2;
+          var tame = c.createBiquadFilter(); tame.type = "highshelf"; tame.frequency.value = 6500; tame.gain.value = -4;
+          tone.connect(mass); mass.connect(tame); tame.connect(weight); weight.connect(trim);
+          sOut = { tone: tone, weight: weight, trim: trim };
         }
-        sOut.trim.disconnect();
-        sOut.trim.connect(input);
+        sOut.trim.disconnect(); sOut.trim.connect(input);
         var st0 = stage();
         owned = !st0 || st0.owner !== "console";
         sOut.trim.gain.value = owned ? TRIM : 0;
-        A.load(CHAINS).then(function (b) {
-          if (!sLive) return;
-          if (!sBuf) { sBuf = b; frames = analyse(b); marqueeEl.worxChains = { buf: b, big: big }; }
-          measure();
-          if (!sRaf) sRaf = requestAnimationFrame(watch);
-        }, function () { if (sLive) A.fail(); });
+        A.load(LOOPF).then(function (b) { buf = b; if (sLive) run(); }, function () { if (sLive) A.fail(); });
       },
       stop: function () {
         sLive = false;
-        cancelAnimationFrame(sRaf); sRaf = 0;
-        live.slice().forEach(function (v) { try { v.src.stop(); } catch (e) {} v.env.disconnect(); if (v.tail !== v.env) v.tail.disconnect(); });
-        live = [];
+        cancelAnimationFrame(raf); raf = 0;
+        if (chains) chains.forEach(function (ch) { try { ch.s.stop(); } catch (e) {} ch.s.disconnect(); ch.g.disconnect(); if (ch.tail !== ch.g) ch.tail.disconnect(); });
+        chains = null;
       }
     });
   })();
@@ -778,12 +566,11 @@
     // as the pulse leaves the logos; a thread of static rides down the
     // feed with it, rising as it travels; on arrival the console takes
     // power (onPower, below)
-    var CHAINS = "static/assets/home/partners-chains.mp3";
+    var CHAINS = "static/assets/home/partners-chains-loop.mp3";
     gsBus.onRelay = function () {
       if (!live || !buf || !A.isOn()) return;
       A.load(CHAINS).then(function (chain) {
         if (!live) return;
-        var ch = q(".hm-marquee"), h = ch && ch.worxChains && ch.worxChains.big[0];
         var c = sc, now = c.currentTime + 0.02, fx = A.bus("sfx");
         // the relay is the bridge between the two acts, so it plays on the
         // effects bus: heard while the chains fade out and before the
@@ -794,7 +581,7 @@
         lp.type = "lowpass"; lp.frequency.value = 650; lp.Q.value = 0.6;
         g1.gain.setValueAtTime(0, now); g1.gain.linearRampToValueAtTime(0.45, now + 0.04); g1.gain.setTargetAtTime(0, now + 0.06, 0.22);
         s1.connect(lp); lp.connect(g1); g1.connect(fx);
-        s1.start(now, h ? h[0] : 0.7); s1.stop(now + 1.2);
+        s1.start(now, 0.45); s1.stop(now + 1.2);   // the loop's first chain hit (0.47 s in)
         s1.onended = function () { lp.disconnect(); g1.disconnect(); };
         // the thread of static down the feed
         var s2 = c.createBufferSource(), bp = c.createBiquadFilter(), g2 = c.createGain();
@@ -3092,7 +2879,7 @@
        re-arm within 0.3 s (a flicker, or a phone's tap: enter, leave,
        click) brings the same hit back up instead of starting it twice.
        The lift leaves it ringing under the roar. */
-    var HOVER = 1.0;                       // the hit's first 2 s are -14.6 LUFS: x K = the voices' level
+    var HOVER = 2.0;                       // twice the level it was set at (the user, 2026-10-05; 1.0 = the voices' level)
     var charge = null, last = null;
     var arm = function (t, on) {
       if (on) {
