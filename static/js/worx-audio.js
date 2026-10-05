@@ -486,6 +486,56 @@
     }
   });
 
+  /* ---- the screen stays awake while the sound is on ---------------- */
+  // Sound on is the visitor choosing to watch and listen, so while it
+  // plays and the page is in front we ask the screen not to dim (Screen
+  // Wake Lock: no prompt, the browser may still say no). Three minutes
+  // without a touch, scroll or key and we let go: the phone dims on its
+  // own schedule. Hidden, the browser drops the lock itself; back, we ask
+  // again. No API, no lock: the phone behaves as it always does. Phones
+  // and tablets only (touch is the main input): computers keep their own
+  // screen timing.
+  var IDLE_RELEASE = 180000;   // ms without input before the screen may sleep
+  var canWake = "wakeLock" in navigator && window.isSecureContext &&
+    window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+  var wakeLock = null, wakeAsking = false, lastInput = Date.now(), idleT = null;
+  var wantWake = function () { return state === "on" && !document.hidden && Date.now() - lastInput < IDLE_RELEASE; };
+  var idleCheck = function () {
+    idleT = null;
+    if (!wakeLock) return;
+    var left = IDLE_RELEASE - (Date.now() - lastInput);
+    if (left <= 0) dropWake(); else idleT = setTimeout(idleCheck, left);
+  };
+  var holdWake = function () {
+    if (!canWake || wakeLock || wakeAsking || !wantWake()) return;
+    wakeAsking = true;
+    navigator.wakeLock.request("screen").then(function (lock) {
+      wakeAsking = false;
+      if (!wantWake()) { lock.release().catch(function () {}); return; }
+      wakeLock = lock;
+      // released by us, or by the browser (hidden, battery saver): wait
+      // for the next touch or the page's return, never a retry loop
+      lock.addEventListener("release", function () { if (wakeLock === lock) { wakeLock = null; clearTimeout(idleT); idleT = null; } });
+      clearTimeout(idleT);
+      idleCheck();
+    }, function () { wakeAsking = false; });
+  };
+  var dropWake = function () {
+    clearTimeout(idleT); idleT = null;
+    if (!wakeLock) return;
+    var lock = wakeLock; wakeLock = null;
+    lock.release().catch(function () {});
+  };
+  if (canWake) {
+    var touched = function () { lastInput = Date.now(); if (!wakeLock) holdWake(); };
+    ["pointerdown", "keydown", "wheel"].forEach(function (ev) { document.addEventListener(ev, touched, { passive: true }); });
+    window.addEventListener("scroll", touched, { passive: true });
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) holdWake(); });
+    window.addEventListener("pageshow", function (e) { if (e.persisted) holdWake(); });
+    // on: ask now (inside the press); standby, off, no signal: let go
+    listeners.push(function (st) { if (st === "on") { lastInput = Date.now(); holdWake(); } else dropWake(); });
+  }
+
   function subscribe(fn) { listeners.push(fn); }
 
   /* ---- scenes and effects ------------------------------------------- */
